@@ -96,7 +96,10 @@ async function api(req, res, parts) {
   }
   const session = auth.authenticate(key);
   if (!session && !/^[a-f0-9]{48}$/.test(key)) return send(res, 401, { message: 'Missing or expired player session.' });
-  const id = session ? session.id : idOf(key), w = account(id);
+  const id = session ? session.id : idOf(key);
+  // Once a guest account has been registered, only a valid login session can use it.
+  if (!session && auth.username(id)) return send(res, 401, { message:'This account requires sign-in.' });
+  const w = account(id);
   lastSeen.set(id,now);
   if (parts[0] === 'heartbeat' && req.method === 'POST') return send(res, 200, { ok:true });
   if (parts[0] === 'my-party' && req.method === 'GET') {
@@ -190,7 +193,18 @@ setInterval(async () => {
         catch(e) { console.error('Bot action rejected:',next.id,e.message); }
         continue;
       }
-      const now = Date.now(), index = s.stage === 'auction' && s.auc ? s.auc.who : globalThis.Engine.cur(s);
+      const now = Date.now();
+      /* A disconnected player keeps their seat for two minutes, during which
+         another signed-in device can reclaim exactly the same identity.
+         After the grace period, leave the game to avoid indefinite stalls. */
+      const away = s.players.find(p => !isBot(p) && !p.out &&
+        lastSeen.has(p.id) && now-lastSeen.get(p.id)>=120000);
+      if (away) {
+        try { partyOp(code,'act',{id:away.id},{a:{t:'quit'}}); }
+        catch(e) { console.error('Grace-period removal failed:',e.message); }
+        continue;
+      }
+      const index = s.stage === 'auction' && s.auc ? s.auc.who : globalThis.Engine.cur(s);
       const p = s.players[index], seen = p && lastSeen.get(p.id);
       const offline = p && !isBot(p) && seen && now - seen > 30000;
       if (s.deadline && now >= s.deadline && (!offline || now - seen >= 120000)) {
@@ -216,6 +230,7 @@ async function bootstrap() {
       auth = new AccountAuth(saved.auth, () => {dirty=true;});
       if (!process.env.STAKKZ_SECRET && saved.secret) SECRET = saved.secret;
     }
+    parties.forEach(room => room.players.forEach(p => {if(!isBot(p) && !p.out) lastSeen.set(p.id,Date.now());}));
     console.log('Persistent storage ready:',accounts.size,'accounts,',parties.size,'parties');
   } else {
     console.warn('STAKKZ_STORE_URL / STAKKZ_STORE_KEY missing: free-host restarts can erase player progress. Account registration is disabled.');
