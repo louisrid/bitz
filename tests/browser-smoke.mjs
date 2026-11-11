@@ -36,6 +36,11 @@ server.stdout.on('data',b=>{serverLogs+=b.toString()});
 server.stderr.on('data',b=>{serverLogs+=b.toString()});
 const url='http://127.0.0.1:'+port+'/';
 const errors=[];
+const screenshots=path.join(root,'qa-screenshots');
+fs.mkdirSync(screenshots,{recursive:true});
+async function capture(page,name) {
+  await page.screenshot({path:path.join(screenshots,name+'.png'),animations:'disabled'});
+}
 async function observe(page,name){
   page.on('pageerror',e=>errors.push(name+': '+e.message));
   /* Validate UI and account sync independently of GPU/SwiftShader availability.
@@ -101,6 +106,12 @@ try {
     await stableLayout(pc,width+'x'+height+' desktop');
   }
   await pc.setViewportSize({width:1440,height:900});
+  await capture(pc,'desktop-profile-1440');
+  await pc.locator('#side [data-a=page][data-v=create]').click();
+  await capture(pc,'desktop-create-1440');
+  await pc.locator('#side [data-a=page][data-v=shop]').click();
+  await capture(pc,'desktop-shop-1440');
+  await pc.locator('#side [data-a=page][data-v=me]').click();
   await pc.locator('#side #auth-username').fill('BrowserTester');
   await pc.locator('#side #auth-password').fill('LongTestPassword2026!');
   await pc.locator('#side [data-a=authregister]').click();
@@ -132,6 +143,12 @@ try {
     await stableLayout(phone,width+'x'+height+' mobile');
   }
   await phone.setViewportSize({width:390,height:844});
+  await capture(phone,'mobile-profile-390');
+  await phone.locator('#side [data-a=page][data-v=create]').click();
+  await capture(phone,'mobile-create-390');
+  await phone.locator('#side [data-a=page][data-v=shop]').click();
+  await capture(phone,'mobile-shop-390');
+  await phone.locator('#side [data-a=page][data-v=me]').click();
   await phone.locator('#side #auth-username').fill('BrowserTester');
   await phone.locator('#side #auth-password').fill('LongTestPassword2026!');
   await phone.locator('#side [data-a=authlogin]').click();
