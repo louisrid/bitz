@@ -280,7 +280,41 @@ const wss = new WebSocketServer({ noServer: true, maxPayload: 1024 });
    account, never from the client. Positions are relayed, batched, about ten times a second; nothing is stored. */
 const plaza = new Map();   // ws -> { i, id, n, l, pet, p: [x, y, z, ry, anim], moved }
 let plazaSeq = 0;
-const plazaCard = q => ({ i:q.i, f:q.id.slice(2,12), n:q.n, l:q.l, pet:q.pet, p:q.p });
+const plazaCard = q => ({ i:q.i, f:q.id.slice(2,12), n:q.n, l:q.l, pet:q.pet, p:q.p, hp:q.hp, w:q.w, d:q.dead?1:0, sw:q.sw });
+/* weapons and gold boosts: the server holds health, decides every hit and hands out every boost */
+const WEAPONS = [{ dmg: 18, cd: 300, range: 34, rad: 1.1, all: false }, { dmg: 40, cd: 1100, range: 16, rad: 2.4, all: true }];
+const BOOSTS = [{ x: 2, ms: 60000 }, { x: 3, ms: 30000 }, { x: 5, ms: 15000 }], PAD_REST = 40000;
+const pads = [[-8, -5], [8, -5], [-8, 6], [8, 6], [0, -9], [0, 9], [-20, 0], [20, 0]].map((q, i) => ({ id: i, x: q[0], z: q[1], k: i % 3, at: 0 }));
+const padList = now => pads.map(d => [d.id, d.x, d.z, d.k, d.at <= now ? 1 : 0]);
+const spawnAt = () => [(Math.random() - 0.5) * 10, 0, 16 + Math.random() * 6, Math.PI, 0];
+function plazaShoot(q, m, now) {
+  const W = WEAPONS[q.w | 0]; if (q.dead || !W || now - (q.shotAt || 0) < W.cd * 0.85) return;
+  let dx = Number(m[1]), dz = Number(m[2]); const l = Math.hypot(dx, dz); if (!Number.isFinite(l) || l < 0.01) return; dx /= l; dz /= l; q.shotAt = now; q.safe = 0;
+  const hits = []; let reach = W.range;
+  plaza.forEach(o => { if (!o.i || o === q || o.dead || o.safe > now) return; const rx = o.p[0] - q.p[0], rz = o.p[2] - q.p[2], along = rx * dx + rz * dz; if (along < 0.2 || along > W.range || Math.abs(rx * dz - rz * dx) > W.rad || o.p[1] > 3.2) return; hits.push([along, o]); });
+  hits.sort((a, b) => a[0] - b[0]); const struck = W.all ? hits : hits.slice(0, 1); if (!W.all && struck.length) reach = struck[0][0];
+  plazaAll({ shot: [q.i, q.w | 0, q.p[0], q.p[2], Math.round((q.p[0] + dx * reach) * 100) / 100, Math.round((q.p[2] + dz * reach) * 100) / 100].concat(struck.map(h => h[1].i)) });
+  struck.forEach(h => { const o = h[1]; o.hp = Math.max(0, o.hp - W.dmg);
+    if (o.hp > 0) return plazaAll({ hp: [o.i, o.hp] });
+    o.dead = now + 3000; plazaAll({ ko: [o.i, q.i] });
+    const w = account(q.id); w.kos = (w.kos || 0) + 1; q.paid = q.paid || {};
+    if (now - (q.paid[o.id] || 0) > 60000 && o.id !== q.id) { q.paid[o.id] = now; w.coins += 5000; dirty = true; plazaSend(wsOf(q), { gold: w.coins, bonus: 5000 }); }
+  });
+}
+const wsOf = q => { for (const [ws, v] of plaza) if (v === q) return ws; return null; };
+function plazaPads(q, ws, now, far) {
+  if (q.dead || far) return;
+  for (const d of pads) { if (d.at > now || Math.hypot(q.p[0] - d.x, q.p[2] - d.z) > 2.3 || q.p[1] > 4) continue;
+    const b = BOOSTS[d.k], w = account(q.id), cur = core.boostOf(w, now);
+    if (cur && cur.x > b.x) continue;   // a stronger boost is still running: leave this one for someone else
+    w.boost = { x: b.x, until: now + b.ms }; dirty = true; d.at = now + PAD_REST; d.k = Math.floor(Math.random() * 3);
+    plazaSend(ws, { gold: w.coins, rate: core.GOLD_RATE * b.x, boost: { x: b.x, left: b.ms }, got: b.x }); plazaAll({ pads: padList(now), took: [q.i, b.x] });
+  }
+}
+setInterval(() => { const now = Date.now(); let ch = false;
+  plaza.forEach(q => { if (q.i && q.dead && q.dead <= now) { q.dead = 0; q.hp = 100; q.safe = now + 2500; q.p = spawnAt(); q.lastAt = now; plazaAll({ spawn: [q.i, q.p[0], q.p[2]] }); } });
+  pads.forEach(d => { if (d.at && d.at <= now) { d.at = 0; ch = true; } }); if (ch) plazaAll({ pads: padList(now) });
+}, 250).unref();
 const plazaSend = (ws, m) => { if (ws.readyState === 1) { try { ws.send(typeof m === 'string' ? m : JSON.stringify(m)); } catch (e) {} } };
 const plazaAll = (m, except) => { const s = JSON.stringify(m); plaza.forEach((q, ws) => { if (ws !== except && q.i) plazaSend(ws, s); }); };
 function plazaWho(key) {
@@ -298,16 +332,20 @@ function plazaJoin(ws, raw) {
     if (typeof msg.hello !== 'string') return;
     const who = plazaWho(msg.hello); if (!who) { plazaSend(ws, { error: 'Sign in again to enter the plaza.' }); return ws.close(); }
     if (plaza.size > 80) { plazaSend(ws, { error: 'The plaza is full right now.' }); return ws.close(); }
-    Object.assign(q, who, { i: 'w' + (++plazaSeq), p: [(Math.random() - 0.5) * 6, 0, 17 + Math.random() * 2, Math.PI, 0], moved: false });
-    plazaSend(ws, { you: q.i, all: [...plaza.values()].filter(o => o.i && o !== q).map(plazaCard) });
+    Object.assign(q, who, { i: 'w' + (++plazaSeq), p: spawnAt(), moved: false, hp: 100, w: 0, dead: 0, safe: Date.now() + 2500, sw: core.swag(account(who.id)) });
+    plazaSend(ws, { you: q.i, all: [...plaza.values()].filter(o => o.i && o !== q).map(plazaCard), pads: padList(Date.now()) });
     plazaAll({ join: plazaCard(q) }, ws);
     return;
   }
   if (Array.isArray(msg.p) && msg.p.length === 5 && msg.p.every(Number.isFinite)) {
-    q.p = [Math.max(-30, Math.min(30, msg.p[0])), Math.max(0, Math.min(12, msg.p[1])), Math.max(-30, Math.min(30, msg.p[2])), msg.p[3] % 7, msg.p[4] | 0];
-    q.moved = true;
+    if (q.dead) return;
+    const now = Date.now(), np = [Math.max(-30, Math.min(30, msg.p[0])), Math.max(0, Math.min(12, msg.p[1])), Math.max(-30, Math.min(30, msg.p[2])), msg.p[3] % 7, msg.p[4] | 0];
+    const far = Math.hypot(np[0] - q.p[0], np[2] - q.p[2]) > 16 * Math.min(3, (now - (q.lastAt || now)) / 1000) + 2.5;   // faster than anyone can run: no pick-ups from that step
+    q.p = np; q.lastAt = now; q.moved = true; plazaPads(q, ws, now, far);
+  } else if (Array.isArray(msg.shoot)) { plazaShoot(q, msg.shoot, Date.now());
+  } else if (msg.wpn === 0 || msg.wpn === 1) { q.w = msg.wpn; plazaAll({ wpn: [q.i, q.w] });
   } else if (msg.restyle) {
-    const w = account(q.id); q.n = (w.name || auth.username(q.id) || 'Guest').slice(0, 12); q.l = w.look || {}; q.pet = w.pet || '';
+    const w = account(q.id); q.n = (w.name || auth.username(q.id) || 'Guest').slice(0, 12); q.l = w.look || {}; q.pet = w.pet || ''; q.sw = core.swag(w);
     plazaAll({ look: plazaCard(q) });
   } else if (typeof msg.emote === 'string' && /^(wave|dance|cheer|jump)$/.test(msg.emote)) {
     const now = Date.now(); if (now - (q.em || 0) < 700) return; q.em = now;
