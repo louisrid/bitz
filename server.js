@@ -23,6 +23,11 @@ const pg = PG_URL ? postgres(PG_URL, { max: 2, idle_timeout: 15, connect_timeout
 const persistent = !!(pg || cloud);
 let dirty = false, saved = {}, saveChain = Promise.resolve();
 const lastSeen = new Map();
+// Always two minutes in real deployments. A short test-only interval lets CI
+// verify reconnect and eviction timing without waiting two wall-clock minutes.
+const RECONNECT_GRACE_MS = process.env.NODE_ENV === 'test'
+  ? Math.max(2000, Math.min(120000, Number(process.env.STAKKZ_TEST_GRACE_MS) || 120000))
+  : 120000;
 try { saved = JSON.parse(fs.readFileSync(DATA, 'utf8')); Object.entries(saved.parties || {}).forEach(([k, v]) => parties.set(k, v)); Object.entries(saved.accounts || {}).forEach(([k, v]) => accounts.set(k, v)); console.log('loaded', parties.size, 'parties and', accounts.size, 'accounts'); } catch (e) {}
 /* Accounts are also handed back to each browser sealed with this secret, so if a free host wipes the disk
    a returning player's coins and items can be restored and cannot be forged. Set STAKKZ_SECRET to keep it stable. */
@@ -165,7 +170,7 @@ async function api(req, res, parts) {
           (room.stage === 'auction' && room.auc ? room.auc.who : globalThis.Engine.cur(room)) : -1;
         const target = targetIndex >= 0 && room.players[targetIndex];
         const seen = target && lastSeen.get(target.id);
-        if (target && !isBot(target) && seen && now-seen>30000 && now-seen<120000)
+        if (target && !isBot(target) && seen && now-seen>30000 && now-seen<RECONNECT_GRACE_MS)
           return send(res, 200, { state:room, now, reconnecting:true });
       }
       if (gift > 0) { core.spend(w, gift); touch(); }                       // coins leave the giver first
@@ -228,7 +233,7 @@ setInterval(async () => {
          another signed-in device can reclaim exactly the same identity.
          After the grace period, leave the game to avoid indefinite stalls. */
       const away = s.players.find(p => !isBot(p) && !p.out &&
-        lastSeen.has(p.id) && now-lastSeen.get(p.id)>=120000);
+        lastSeen.has(p.id) && now-lastSeen.get(p.id)>=RECONNECT_GRACE_MS);
       if (away) {
         try { partyOp(code,'act',{id:away.id},{a:{t:'quit'}}); }
         catch(e) { console.error('Grace-period removal failed:',e.message); }
@@ -237,7 +242,7 @@ setInterval(async () => {
       const index = s.stage === 'auction' && s.auc ? s.auc.who : globalThis.Engine.cur(s);
       const p = s.players[index], seen = p && lastSeen.get(p.id);
       const offline = p && !isBot(p) && seen && now - seen > 30000;
-      if (s.deadline && now >= s.deadline && (!offline || now - seen >= 120000)) {
+      if (s.deadline && now >= s.deadline && (!offline || now - seen >= RECONNECT_GRACE_MS)) {
         try { partyOp(code, 'act', {id:p.id}, {a:{t:'auto',force:1}}); }
         catch(e) { console.error('Automatic turn rejected:',e.message); }
       }
