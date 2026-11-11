@@ -89,6 +89,27 @@ try {
   assert.equal(handoff.state.players.filter(p=>p.bot).length,2);
   assert.equal((await request('party/'+transferCode,friend,{op:'start'})).state.phase,'play');
   console.log('Leaving bot-only lobby and human host handoff passed.');
+  // Real HTTP API: a host, four server-controlled bots and one friend must
+  // form six distinct seats with purchased deeds and adaptive 30s turns.
+  const sixHost='f'.repeat(48),sixFriend='1'.repeat(48);
+  const sixRoom=await request('party',sixHost,{mode:35,bots:4,difficulty:'hard'});
+  assert.equal(sixRoom.status,200);
+  assert.equal(sixRoom.state.players.length,5);
+  const sixCode=sixRoom.state.code;
+  const sixJoined=await request('party/'+sixCode,sixFriend,{op:'join'});
+  assert.equal(sixJoined.status,200);
+  assert.equal(sixJoined.state.players.length,6);
+  assert.equal(sixJoined.state.max,6);
+  const sixStarted=await request('party/'+sixCode,sixHost,{op:'start'});
+  assert.equal(sixStarted.status,200,JSON.stringify(sixStarted));
+  assert.equal(sixStarted.state.phase,'play');
+  assert.equal(sixStarted.state.timer,30);
+  assert.equal(Object.keys(sixStarted.state.own).length,12);
+  assert(sixStarted.state.players.every((p,i)=>{
+    const deeds=Object.entries(sixStarted.state.own).filter(([,o])=>o.o===i);
+    return deeds.length===2;
+  }));
+  console.log('Six-player HTTP lobby, live server bots, fair paid opening deeds and adaptive timer passed.');
   const room=await request('party',registered.token,{mode:25,bots:2,difficulty:'hard'});
   assert.equal(room.status,200,JSON.stringify(room));
   assert.equal(room.state.players.length,3);
