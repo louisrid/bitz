@@ -51,6 +51,38 @@ try {
     await page.locator('#side .seg.nav [data-v=me]').click();
     await sleep(700);
     await page.screenshot({path:path.join(output,config.name+'-profile.png'),animations:'disabled'});
+    const visual=await page.evaluate(()=>{
+      let st=Engine.newRoom('VISA',{mode:35,max:6,timer:30});
+      for(let i=0;i<6;i++)st=Engine.join(st,'qa'+i,'Player '+i,{skin:i%5,hair:'short',outfit:'tee'},'');
+      st=Engine.start(st,0,{now:Date.now(),rand:()=>.45,die:()=>3});
+      st.players.forEach(p=>p.pos=5);
+      st.own[1]={o:0,h:5};st.own[3]={o:0,h:3};
+      window.__qaVisualState=st;
+      setScreen('game');
+      B3.sync(st,true);
+      B3.markStations([15,25,35]);B3.setTime(.9);B3.setChaos(true);
+      const angleBefore=B3.dbg().az;
+      B3.resize();B3.resize();
+      return {before:angleBefore,after:B3.dbg().az,stats:B3.visualStats()};
+    });
+    assert.equal(visual.stats.districtCount,8);
+    assert.equal(visual.stats.stations,4);
+    assert.equal(visual.stats.utilities,2);
+    assert.equal(visual.stats.hotels,1);
+    assert.equal(visual.stats.tokens,6);
+    assert.equal(visual.stats.stationHighlights,3);
+    assert.equal(visual.stats.chaos,true);
+    assert(visual.stats.crowdScale.every(n=>n<.75),'Six tokens should stay distinct on a shared station');
+    assert(Math.abs(visual.before-visual.after)<.001,'Resize must not reset the 3D camera');
+    await sleep(800);
+    await page.screenshot({path:path.join(output,config.name+'-six-players-hotel.png'),animations:'disabled'});
+    await page.evaluate(async()=>{
+      await B3.trainTravel(0,5,15);
+      window.__qaVisualState.players[0].pos=15;
+      B3.sync(window.__qaVisualState,true);
+    });
+    assert.equal(await page.evaluate(()=>B3.visualStats().traveling),-1,'Travel animation should release moving state');
+    await page.screenshot({path:path.join(output,config.name+'-station-arrival.png'),animations:'disabled'});
     assert.equal(errors.length,0,config.name+' browser errors: '+errors.join(', '));
     console.log(config.name+' WebGL 3D screenshots captured and UI rendered, stage: '+JSON.stringify(r.stage));
     await context.close();
