@@ -282,18 +282,20 @@ const plaza = new Map();   // ws -> { i, id, n, l, pet, p: [x, y, z, ry, anim], 
 let plazaSeq = 0;
 const plazaCard = q => ({ i:q.i, f:q.id.slice(2,12), n:q.n, l:q.l, pet:q.pet, p:q.p, hp:q.hp, w:q.w, d:q.dead?1:0, sw:q.sw });
 /* weapons and gold boosts: the server holds health, decides every hit and hands out every boost */
-const WEAPONS = [{ dmg: 18, cd: 300, range: 34, rad: 1.1, all: false }, { dmg: 40, cd: 1100, range: 16, rad: 2.4, all: true }];
-const BOOSTS = [{ x: 2, ms: 60000 }, { x: 3, ms: 30000 }, { x: 5, ms: 15000 }], PAD_REST = 40000;
-const pads = [[-8, -5], [8, -5], [-8, 6], [8, 6], [0, -9], [0, 9], [-20, 0], [20, 0]].map((q, i) => ({ id: i, x: q[0], z: q[1], k: i % 3, at: 0 }));
+const WEAPONS = [{ dmg: 18, cd: 300, range: 34, rad: 1.1, all: false }, { dmg: 40, cd: 1100, range: 16, rad: 2.4, all: true }, { dmg: 58, cd: 1900, range: 24, rad: 3.4, all: true }];
+const BOOSTS = [{ x: 2, ms: 60000 }, { x: 3, ms: 30000 }, { x: 5, ms: 15000 }], PAD_REST = 45000;
+/* three boosts only, out on the grass well clear of the fighting circle */
+const pads = [].map((q, i) => ({ id: i, x: q[0], z: q[1], k: i % 3, at: 0 }));
 const padList = now => pads.map(d => [d.id, d.x, d.z, d.k, d.at <= now ? 1 : 0]);
-const spawnAt = () => [(Math.random() - 0.5) * 10, 0, 16 + Math.random() * 6, Math.PI, 0];
+/* everyone arrives inside the circle in the middle of the field */
+const spawnAt = () => { const a = Math.random() * Math.PI * 2, r = Math.random() * 9; return [Math.sin(a) * r, 0, Math.cos(a) * r, Math.atan2(-Math.sin(a), -Math.cos(a)), 0]; };
 function plazaShoot(q, m, now) {
-  const W = WEAPONS[q.w | 0]; if (q.dead || !W || now - (q.shotAt || 0) < W.cd * 0.85) return;
+  const W = WEAPONS[Math.max(0, Math.min(WEAPONS.length - 1, q.w | 0))]; if (q.dead || !W || now - (q.shotAt || 0) < W.cd * 0.85) return;
   let dx = Number(m[1]), dz = Number(m[2]); const l = Math.hypot(dx, dz); if (!Number.isFinite(l) || l < 0.01) return; dx /= l; dz /= l; q.shotAt = now; q.safe = 0;
   const hits = []; let reach = W.range;
   plaza.forEach(o => { if (!o.i || o === q || o.dead || o.safe > now) return; const rx = o.p[0] - q.p[0], rz = o.p[2] - q.p[2], along = rx * dx + rz * dz; if (along < 0.2 || along > W.range || Math.abs(rx * dz - rz * dx) > W.rad || o.p[1] > 3.2) return; hits.push([along, o]); });
   hits.sort((a, b) => a[0] - b[0]); const struck = W.all ? hits : hits.slice(0, 1); if (!W.all && struck.length) reach = struck[0][0];
-  plazaAll({ shot: [q.i, q.w | 0, q.p[0], q.p[2], Math.round((q.p[0] + dx * reach) * 100) / 100, Math.round((q.p[2] + dz * reach) * 100) / 100].concat(struck.map(h => h[1].i)) });
+  plazaAll({ shot: [q.i, Math.max(0, Math.min(WEAPONS.length - 1, q.w | 0)), q.p[0], q.p[2], Math.round((q.p[0] + dx * reach) * 100) / 100, Math.round((q.p[2] + dz * reach) * 100) / 100].concat(struck.map(h => h[1].i)) });
   struck.forEach(h => { const o = h[1]; o.hp = Math.max(0, o.hp - W.dmg);
     if (o.hp > 0) return plazaAll({ hp: [o.i, o.hp] });
     o.dead = now + 3000; plazaAll({ ko: [o.i, q.i] });
@@ -370,12 +372,12 @@ function plazaJoin(ws, raw) {
   }
   if (Array.isArray(msg.p) && msg.p.length === 5 && msg.p.every(Number.isFinite)) {
     if (q.dead) return;
-    const now = Date.now(), np = [Math.max(-30, Math.min(30, msg.p[0])), Math.max(0, Math.min(12, msg.p[1])), Math.max(-30, Math.min(30, msg.p[2])), msg.p[3] % 7, msg.p[4] | 0];
+    const now = Date.now(), np = [Math.max(-100, Math.min(100, msg.p[0])), Math.max(0, Math.min(12, msg.p[1])), Math.max(-100, Math.min(100, msg.p[2])), msg.p[3] % 7, msg.p[4] | 0];
     const far = Math.hypot(np[0] - q.p[0], np[2] - q.p[2]) > 16 * Math.min(3, (now - (q.lastAt || now)) / 1000) + 2.5;   // faster than anyone can run: no pick-ups from that step
     q.p = np; q.lastAt = now; q.moved = true; plazaPads(q, ws, now, far);
   } else if (Array.isArray(msg.shoot)) { plazaShoot(q, msg.shoot, Date.now());
   } else if (msg.trade && typeof msg.trade === 'object') { plazaTrade(q, msg.trade, Date.now());
-  } else if (msg.wpn === 0 || msg.wpn === 1) { q.w = msg.wpn; plazaAll({ wpn: [q.i, q.w] });
+  } else if (msg.wpn === 0 || msg.wpn === 1 || msg.wpn === 2) { q.w = msg.wpn; plazaAll({ wpn: [q.i, q.w] });
   } else if (msg.restyle) {
     const w = account(q.id); q.n = (w.name || auth.username(q.id) || 'Guest').slice(0, 12); q.l = w.look || {}; q.pet = w.pet || ''; q.sw = core.swag(w);
     plazaAll({ look: plazaCard(q) });

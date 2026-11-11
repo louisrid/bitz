@@ -1,5 +1,5 @@
 /* Shared social world is the game. The original board remains dormant for backwards data compatibility. */
-:root{--fw:clamp(134px,14vw,217px)}
+:root{--fw:clamp(96px,10vw,152px)}
 html.fopen #fside{display:flex;background:#fff}
 #fside{background:#fff;box-shadow:2px 0 14px #13292022}
 #flist .fr .ava{width:46px;height:46px;border-radius:10px;background:#ecf8ed}
@@ -40,15 +40,15 @@ html.fopen #app[data-screen="home"]{margin-left:0!important}
 #app[data-screen="home"][data-page="world"] #side,#app[data-screen="home"][data-page="world"] #hud,#app[data-screen="home"][data-page="world"] #dock,#app[data-screen="home"][data-page="world"] #corner,#app[data-screen="home"][data-page="world"] #view,#app[data-screen="home"][data-page="world"] #chaosTag{display:none!important}
 html.fopen #fside{display:flex!important}
 #fside{width:var(--fw)!important}
-#flist .fr{grid-template-columns:40px minmax(0,1fr);gap:7px;padding:5px;min-width:0}
-#flist .fr .ava{width:39px!important;height:39px!important}
-#flist .fr b{font-size:14px;min-width:0}
-#flist .fr small{font-size:11px}
-#fside .fhead{padding:12px 7px 8px;gap:3px}
-#fside .fhead b{font-size:19px}
+#flist .fr{grid-template-columns:32px minmax(0,1fr);gap:6px;padding:4px;min-width:0}
+#flist .fr .ava{width:31px!important;height:31px!important}
+#flist .fr b{font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#flist .fr small{font-size:9px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#fside .fhead{padding:9px 6px 6px;gap:2px}
+#fside .fhead b{font-size:16px}
 #app[data-screen="home"][data-page="world"] #wbar{z-index:30}
 #wbar .wstat:last-of-type{display:none}
-@media(max-width:900px){#fside{width:min(60vw,217px)!important}html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}}
+@media(max-width:900px){#fside{width:min(52vw,170px)!important}html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}}
 
 /* Compact minimal heads-up controls, large clean gold balance on upper right. */
 #app[data-screen="home"] #wui .whelp{display:none!important}
@@ -145,6 +145,25 @@ html:has(#app[data-screen=home]) #toast{bottom:118px!important}
 #flist .fnote.fh{margin:14px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:10px}
 #flist .fr.gone{display:grid;opacity:.75;cursor:default}
 #flist .frest{display:block;margin-top:3px;padding:3px 8px;border:2px solid #000;border-radius:8px;background:#b6f26a;font:700 11px/1 'Space Grotesk',sans-serif;cursor:pointer;color:#000}
+.pill.swagpill{background:#ffd60a;font-weight:700}
+/* Fewer overlays: no online chip, no weapon row on desktop (1 2 3 switch), slim health, plain gold button. */
+#app[data-screen=home] #wui .wtop{display:none!important}
+#app[data-screen=home] #wui .wweap{display:none!important}
+#whp{width:min(200px,44vw)!important;height:16px!important;border-width:2px!important;box-shadow:2px 3px 0 #000!important}
+#whp b{font-size:11px!important}
+#wbar .wstat:has(#wgold){background:#fff!important;color:#000!important;border:2px solid #153629!important;border-radius:10px!important;box-shadow:0 3px 0 #153629!important;padding:8px 13px!important;font:400 19px/1 'Coolvetica','Archivo Black',sans-serif!important;top:12px!important;right:14px!important;flex-direction:row!important;align-items:center!important;gap:8px!important}
+#wbar .wstat:has(#wgold) em{color:#000!important}
+#wbar .wstat:has(#wgold) em::before{width:.75em!important;height:.75em!important;border-width:2px!important}
+#wrate{color:#3a7d4f!important;font:700 12px/1 'Space Grotesk',sans-serif!important}
+#wrate.hot{color:#c47d00!important}
+:root{--fw:clamp(82px,8vw,122px)!important}
+#flist .fr{grid-template-columns:26px minmax(0,1fr)!important;gap:5px!important;padding:3px!important}
+#flist .fr .ava{width:26px!important;height:26px!important}
+#flist .fr b{font-size:11px!important}
+#flist .fr small{font-size:8px!important}
+#fside .fhead b{font-size:13px!important}
+#fside .fhead #fcount{display:none}
+@media(max-width:900px){#fside{width:min(44vw,140px)!important}#wbar .wstat:has(#wgold){font-size:15px!important;padding:6px 9px!important;top:7px!important;right:7px!important}#whud{top:auto!important;bottom:150px!important}}
 /*BG>*/
 .bg-b_cyber{background:repeating-linear-gradient(90deg,#19e3ff33 0 2px,transparent 2px 26px),repeating-linear-gradient(0deg,#ff2bd633 0 2px,transparent 2px 26px),linear-gradient(180deg,#0b1030,#1c375e,#87e9ff)}
 .bg-b_haunt{background:radial-gradient(circle at 72% 22%,#e9e0ff,transparent 14%),linear-gradient(180deg,#17132b,#373052,#b8a3e6)}

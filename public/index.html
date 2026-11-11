@@ -650,7 +650,7 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="shop">Shop</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><span class="wstat"><em id="wgold">...</em><small id="wrate">+1,000/s</small></span><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="whp" aria-label="Health"><i></i><b>100</b></div><div class="wweap"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button><button class="ww" data-a="wpn" data-v="1"><kbd>2</kbd>Pulse</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wjump" aria-label="Jump">Jump</button></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="shop">Shop</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><span class="wstat"><em id="wgold">...</em><small id="wrate">+1,000/s</small></span><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="whp" aria-label="Health"><i></i><b>100</b></div><div class="wweap"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button><button class="ww" data-a="wpn" data-v="1"><kbd>2</kbd>Pulse</button><button class="ww" data-a="wpn" data-v="2"><kbd>3</kbd>Cannon</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wjump" aria-label="Jump">Jump</button></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
 <div id="title" class="bg-paper" hidden></div>
 <div id="veil" hidden><div id="modal" class="card" role="dialog" aria-modal="true"></div></div>
@@ -695,8 +695,8 @@ Object.assign(OUTX, {"n_street":{"deco":[[0.3,0.1,0.02,"#15171c",0,0.74,0.16],[0
 /*<CAT*/
 const SLOTN = { outfit: 'Outfit', hat: 'Hat', acc: 'Extra', pet: 'Pet', dye: 'Hair colour', bg: 'Scene' };
 const FGROUP = { outfit: 'outfit', hat: 'hat', acc: 'acc', dye: 'acc', pet: 'pet', bg: 'bg' };
-const DESC = { overalls: 'Built for hard graft on the building site.', track: 'Go-faster stripes for laps of the board.', rain: 'Stay dry when the rent pours in.', tux: 'For closing deals in style.', astro: 'Property prices are out of this world.', gold: 'Solid gold. Zero subtlety.',
-  beanie: 'Keeps big ideas warm.', cap: 'A classic with a checker front.', party: 'Every purchase is a celebration.', cowboy: 'This board is not big enough for two.', wizard: 'Bent tip, gold buckle, big spells.', crown: 'Heavy is the head that owns Zenith Spire.',
+const DESC = { overalls: 'Built for hard graft.', track: 'Go-faster stripes for sprinting across the world.', rain: 'Stay dry when the gold pours in.', tux: 'For arriving in style.', astro: 'One small step for a collector.', gold: 'Solid gold. Zero subtlety.',
+  beanie: 'Keeps big ideas warm.', cap: 'A classic with a checker front.', party: 'Every loot box is a celebration.', cowboy: 'This world is not big enough for two.', wizard: 'Bent tip, gold buckle, big spells.', crown: 'Heavy is the head that owns everything.',
   dye: 'Three loud colours for your hair: pink, blue and white.', glasses: 'For reading the small print.', scarf: 'A dash of red for cold streets.', cape: 'Sweep onto every square.', wings: 'Float above the competition.',
   sunset: 'Warm pink skies behind your character.', neon: 'A grid that glows behind you.', space: 'Stars as far as you can see.', goldbg: 'Pure shimmer. You earned it.',
   bird: 'Flaps beside you wherever you go.', pig: 'Tiny, pink and always following.', penguin: 'Waddles after you in a suit of its own.', dragon: 'A pocket-sized legend that flies.' };
@@ -772,7 +772,7 @@ const B3 = (function () {
   api.ok = true;
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, 1, 1, 600);
+  const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, 1, 1, 900);
   const ambience = new THREE.HemisphereLight(0xffffff, 0xdde6ff, 0.72); scene.add(ambience);
   const sun = new THREE.DirectionalLight(0xffffff, 0.62);
   sun.position.set(28, 52, 22); sun.castShadow = true;
@@ -1472,7 +1472,7 @@ const B3 = (function () {
   stage.addEventListener('pointerdown', e => { if (WD.on && e.button === 2) { e.preventDefault(); WD.fire(); return; } stage.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]); if (ptr.size === 1) { moved = 0; t0 = performance.now(); } pinch = 0; });
   stage.addEventListener('pointermove', e => {
     const p = ptr.get(e.pointerId); if (!p) return;
-    if (ptr.size === 1) { const dx = e.clientX - p[0], dy = e.clientY - p[1]; moved += Math.abs(dx) + Math.abs(dy); if (moved > 6) took(); az -= dx * 0.006; el = Math.max(0.35, Math.min(1.45, el + dy * 0.005)); }
+    if (ptr.size === 1) { const dx = e.clientX - p[0], dy = e.clientY - p[1]; moved += Math.abs(dx) + Math.abs(dy); if (moved > 6) took(); az -= dx * (WD.on ? 0.0042 : 0.006); el = WD.on ? Math.max(0.44, Math.min(1.15, el + dy * 0.0035)) : Math.max(0.35, Math.min(1.45, el + dy * 0.005)); }
     ptr.set(e.pointerId, [e.clientX, e.clientY]);
     if (ptr.size === 2) { const v = [...ptr.values()], d = Math.hypot(v[0][0] - v[1][0], v[0][1] - v[1][1]); if (pinch) zoom = Math.max(0.35, Math.min(2.6, zoom * pinch / d)); pinch = d; moved = 99; took(); }
   });
@@ -1510,7 +1510,7 @@ const B3 = (function () {
     city.updateMatrixWorld(true);
     city.children.forEach(o => { const b = new THREE.Box3().setFromObject(o), sz = b.getSize(new THREE.Vector3()); if (sz.y > 1.1 && sz.x < 14 && sz.z < 14 && b.max.y > 1.1) colliders.push([b.min.x, b.min.z, b.max.x, b.max.z]); });
   }, 0);
-  const WD = api.world = { on: false, me: null, others: new Map(), joy: { x: 0, y: 0 }, keys: {}, you: null, feed: null };
+  const WD = api.world = { on: false, me: null, others: new Map(), joy: { x: 0, y: 0 }, keys: {}, you: null, feed: null, cAz: 0, cEl: 0.78, cZ: 1 };
   function nameTag(text) {
     const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d');
     g.font = '400 30px Coolvetica, "Archivo Black", sans-serif'; const w = Math.min(244, g.measureText(text).width + 30);
@@ -1525,31 +1525,33 @@ const B3 = (function () {
   }
   function dropBody(g) { if (!g) return; worldG.remove(g); g.traverse(q => { if (q.material && q.material.map) q.material.map.dispose(); }); }
   WD.setMe = (look, col, name) => {
-    const old = WD.me, pos = old ? [old.x, old.y, old.z, old.ry] : [(Math.random() - 0.5) * 8, 0, 19, Math.PI];
+    const sa = Math.random() * Math.PI * 2, sr = Math.random() * 9;
+    const old = WD.me, pos = old ? [old.x, old.y, old.z, old.ry] : [Math.sin(sa) * sr, 0, Math.cos(sa) * sr, Math.atan2(-Math.sin(sa), -Math.cos(sa))];
     if (old) dropBody(old.g);
     WD.me = { g: plazaBody(look, col, name), x: pos[0], y: pos[1], z: pos[2], ry: pos[3], vy: 0, sp: 0, emo: '', emoT: 0 }; setGun(WD.me, WD.weapon); if (WD.dead) WD.me.g.rotation.x = -Math.PI / 2;
   };
-  WD.add = (o, col) => { WD.drop(o.i); const g = plazaBody(o.l, col, o.n), p = o.p || [0, 0, 19, 0, 0]; const q = { g: g, n: o.n, f: o.f, sw: o.sw, l: o.l, pet: o.pet, x: p[0], y: p[1], z: p[2], ry: p[3], t: p.slice(), a: 0, sp: 0, emo: '', emoT: 0 }; WD.others.set(o.i, q); setGun(q, o.w ? 1 : 0); setBar(q, o.hp == null ? 100 : o.hp); if (o.d) { q.dead = true; g.rotation.x = -Math.PI / 2; } };
+  WD.add = (o, col) => { WD.drop(o.i); const g = plazaBody(o.l, col, o.n), p = o.p || [0, 0, 0, 0, 0]; const q = { g: g, n: o.n, f: o.f, sw: o.sw, l: o.l, pet: o.pet, x: p[0], y: p[1], z: p[2], ry: p[3], t: p.slice(), a: 0, sp: 0, emo: '', emoT: 0 }; WD.others.set(o.i, q); setGun(q, o.w ? 1 : 0); setBar(q, o.hp == null ? 100 : o.hp); if (o.d) { q.dead = true; g.rotation.x = -Math.PI / 2; } };
   WD.drop = i => { const o = WD.others.get(i); if (o) { dropBody(o.g); WD.others.delete(i); } };
   WD.clear = () => { WD.others.forEach(o => dropBody(o.g)); WD.others.clear(); };
   WD.snap = rows => rows.forEach(r => { const o = WD.others.get(r[0]); if (o) o.t = r.slice(1); });
   WD.emote = (i, e) => { const o = i === 'me' ? WD.me : WD.others.get(i); if (o) { o.emo = e; o.emoT = performance.now() + (e === 'dance' ? 2600 : 1600); } };
   WD.jump = () => { const m = WD.me; if (m && m.y <= 0.001 && !WD.dead) m.vy = 11.5; };
   /* ---- weapons, health and gold boosts. The server decides hits, health and boosts; this draws them. ---- */
-  const GUNS = [{ n: 'Blaster', cd: 300, col: 0x19e3ff }, { n: 'Pulse', cd: 1100, col: 0xff2bd6 }];
+  const GUNS = [{ n: 'Blaster', cd: 300, col: 0x19e3ff }, { n: 'Pulse', cd: 1100, col: 0xff2bd6 }, { n: 'Cannon', cd: 1900, col: 0xff9f1c }];
   WD.weapon = 0; WD.hp = 100; WD.dead = false; WD.fx = []; WD.fireAt = 0;
   function gunMesh(w) {
     const g = new THREE.Group(), dark = L(0x20242e), glow = () => voxMat(GUNS[w].col, 'g'), put = (bw, bh, bd, m, y, z) => { const o = mesh(BX(bw, bh, bd), m, 0, y, z || 0); g.add(o); };
     if (w === 0) { put(0.1, 0.24, 0.12, dark, -0.08); put(0.06, 0.16, 0.06, L(0x8a93a6), -0.26); put(0.08, 0.05, 0.08, glow(), -0.36); put(0.06, 0.07, 0.14, dark, 0.0, -0.08); }
-    else { put(0.18, 0.3, 0.18, L(0x3a1f66), -0.1); put(0.23, 0.06, 0.23, glow(), -0.18); put(0.23, 0.06, 0.23, glow(), -0.04); put(0.14, 0.12, 0.14, dark, -0.3); put(0.11, 0.05, 0.11, glow(), -0.38); }
+    else if (w === 1) { put(0.18, 0.3, 0.18, L(0x3a1f66), -0.1); put(0.23, 0.06, 0.23, glow(), -0.18); put(0.23, 0.06, 0.23, glow(), -0.04); put(0.14, 0.12, 0.14, dark, -0.3); put(0.11, 0.05, 0.11, glow(), -0.38); }
+    else { put(0.24, 0.42, 0.24, L(0x4a3522), -0.12); put(0.3, 0.1, 0.3, L(0x8a6a3a), -0.3); put(0.3, 0.1, 0.3, L(0x8a6a3a), 0.02); put(0.17, 0.12, 0.17, dark, -0.44); put(0.14, 0.06, 0.14, glow(), -0.52); }
     g.position.set(0, -0.44, 0.07); return g;
   }
-  const setGun = (o, w) => { const u = o.g.userData; if (u.gun) u.arms[1].remove(u.gun); u.gun = gunMesh(w); u.arms[1].add(u.gun); o.w = w; };
+  const setGun = (o, w) => { w = Math.max(0, Math.min(GUNS.length - 1, w | 0)); const u = o.g.userData; if (u.gun) u.arms[1].remove(u.gun); u.gun = gunMesh(w); u.arms[1].add(u.gun); o.w = w; };
   const setBar = (o, hp) => { o.hp = hp; const b = o.g.userData.bar; if (b) { b.visible = o !== WD.me && hp < 100 && hp > 0; b.scale.x = 3 * Math.max(0.04, hp / 100); b.material.color.setHex(hp > 50 ? 0x3ddc84 : hp > 25 ? 0xffd60a : 0xff4b3e); } };
   const who = i => (i === WD.you ? WD.me : WD.others.get(i));
   const hud = k => { if (WD.onHud) WD.onHud(k); };
   function burst(x, y, z, col, now, n) { for (let i = 0; i < (n || 9); i++) { const m = mesh(BX(0.22, 0.22, 0.22), voxMat(col, 'g'), x, y, z); m.castShadow = false; worldG.add(m); WD.fx.push({ m: m, kind: 'spark', t0: now, dur: 380 + Math.random() * 200, x: x, y: y, z: z, vx: (Math.random() - 0.5) * 5, vy: 1.5 + Math.random() * 3, vz: (Math.random() - 0.5) * 5 }); } }
-  WD.setWeapon = w => { w = w ? 1 : 0; WD.weapon = w; if (WD.me) setGun(WD.me, w); if (WD.send) WD.send({ wpn: w }); hud(); };
+  WD.setWeapon = w => { w = Math.max(0, Math.min(GUNS.length - 1, w | 0)); WD.weapon = w; if (WD.me) setGun(WD.me, w); if (WD.send) WD.send({ wpn: w }); hud(); };
   WD.fire = () => {
     const m = WD.me, now = performance.now(); if (!m || WD.dead || !WD.on || now < WD.fireAt) return; WD.fireAt = now + GUNS[WD.weapon].cd;
     const fx = -Math.sin(az), fz = -Math.cos(az); m.ry = Math.atan2(fx, fz); m.g.rotation.y = m.ry; m.aimT = now + 500;
@@ -1560,7 +1562,7 @@ const B3 = (function () {
     const sh = who(d[0]), w = d[1] ? 1 : 0, col = GUNS[w].col, now = performance.now(); if (sh) sh.aimT = now + 500;
     const from = new THREE.Vector3(d[2], 2.1, d[3]), to = new THREE.Vector3(d[4], 2.1, d[5]), len = Math.max(0.5, from.distanceTo(to));
     if (w === 0) { const b = mesh(BX(0.24, 0.24, 1.5), voxMat(col, 'g'), from.x, from.y, from.z); b.lookAt(to); b.castShadow = false; worldG.add(b); WD.fx.push({ m: b, from: from, to: to, t0: now, dur: Math.max(70, len / 85 * 1000), kind: 'bolt', col: col }); }
-    else { const b = mesh(BX(1, 1, 1), voxMat(col, 't'), 0, 0, 0); b.position.copy(from).lerp(to, 0.5); b.lookAt(to); b.scale.set(4.6, 1.5, len); b.castShadow = false; worldG.add(b); WD.fx.push({ m: b, t0: now, dur: 300, kind: 'beam' }); burst(from.x, 2.1, from.z, col, now, 6); }
+    else { const wide = w === 2 ? 7 : 4.6, b = mesh(BX(1, 1, 1), voxMat(col, 't'), 0, 0, 0); b.position.copy(from).lerp(to, 0.5); b.lookAt(to); b.scale.set(wide, w === 2 ? 2.4 : 1.5, len); b.castShadow = false; worldG.add(b); WD.fx.push({ m: b, t0: now, dur: w === 2 ? 420 : 300, kind: 'beam' }); burst(from.x, 2.1, from.z, col, now, w === 2 ? 12 : 6); if (w === 2) burst(to.x, 2.1, to.z, col, now, 14); }
     d.slice(6).forEach(i => { const o = who(i); if (o) { o.hitT = now + 240; burst(o.x, 2.4, o.z, 0xffffff, now, 7); } });
   };
   WD.setHp = (i, hp) => { const o = who(i); if (!o) return; setBar(o, hp); if (o === WD.me) { WD.hp = hp; hud('hit'); } };
@@ -1594,7 +1596,7 @@ const B3 = (function () {
     if (!WD.on || typing(e) || e.metaKey || e.ctrlKey) return;
     const k = e.key.toLowerCase(); WD.keys[k] = true;
     if (k === ' ') { e.preventDefault(); WD.jump(); }
-    if (k === '1' || k === '2') WD.setWeapon(+k - 1);
+    if (k === '1' || k === '2' || k === '3') WD.setWeapon(+k - 1);
     if (k === 'f' && !e.repeat) WD.fire();
     if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].indexOf(k) >= 0) e.preventDefault();
   });
@@ -1620,17 +1622,21 @@ const B3 = (function () {
   }
   function worldFrame(now) {
     const dt = Math.min(0.1, (now - (WD.last || now)) / 1000), t = now / 1000; WD.last = now;socialEnvironment.animate(t);
-    if(!worldG.visible){scene.children.forEach(o=>{if(o!==worldG&&!o.isLight){worldHidden.set(o,o.visible);o.visible=false;}});worldG.visible=true;scene.background=new THREE.Color(0xa7dcf2);}
+    if(!worldG.visible){
+      scene.children.forEach(o=>{if(o!==worldG&&!o.isLight){worldHidden.set(o,o.visible);o.visible=false;}});
+      worldG.visible=true;scene.background=new THREE.Color(0x9fd8f0);scene.fog=new THREE.Fog(0x9fd8f0,90,215);
+      el=0.72;zoom=1;az=WD.me?WD.me.ry+Math.PI:0;WD.cAz=az;WD.cEl=el;WD.cZ=1;cT.set(WD.me?WD.me.x:0,3.1,WD.me?WD.me.z:0);
+    }
     Object.keys(tokens).forEach(k=>{tokens[k].visible=false;});Object.keys(pets).forEach(k=>{pets[k].visible=false;});
     const m = WD.me;
     if (m) {
       const K=WD.keys;
-      if(K.arrowleft)az+=dt*1.9;if(K.arrowright)az-=dt*1.9;if(K.arrowup)el=Math.max(.18,el-dt*.9);if(K.arrowdown)el=Math.min(1.3,el+dt*.9);
+      if(K.arrowleft)az+=dt*2.1;if(K.arrowright)az-=dt*2.1;if(K.arrowup)el=Math.max(.44,el-dt*.7);if(K.arrowdown)el=Math.min(1.15,el+dt*.7);
       const ix=WD.dead?0:Math.max(-1,Math.min(1,WD.joy.x+(K.d?1:0)-(K.a?1:0))),iz=WD.dead?0:Math.max(-1,Math.min(1,WD.joy.y+(K.s?1:0)-(K.w?1:0)));
       const fx = -Math.sin(az), fz = -Math.cos(az), rx = -fz, rz = fx;
       let mx = rx * ix - fx * iz, mz = rz * ix - fz * iz; const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
       const speed = (K.shift || Math.hypot(WD.joy.x, WD.joy.y) > 0.92 ? 11 : 6.5) * Math.min(1, ml);
-      const lim = 29.5; let nx = Math.max(-lim, Math.min(lim, m.x + mx * speed * dt)), nz = Math.max(-lim, Math.min(lim, m.z + mz * speed * dt));
+      const lim = 143; let nx = Math.max(-lim, Math.min(lim, m.x + mx * speed * dt)), nz = Math.max(-lim, Math.min(lim, m.z + mz * speed * dt));
       if (m.y < 2.6) { if (blocked(nx, nz)) { if (!blocked(nx, m.z)) nz = m.z; else if (!blocked(m.x, nz)) nx = m.x; else { nx = m.x; nz = m.z; } } }
       m.sp = Math.hypot(nx - m.x, nz - m.z) / Math.max(dt, 0.001); m.x = nx; m.z = nz;
       m.vy -= 32 * dt; m.y = Math.max(0, m.y + m.vy * dt); if (m.y === 0) m.vy = Math.max(0, m.vy);
@@ -1654,15 +1660,19 @@ const B3 = (function () {
       else { f.m.position.set(f.x + f.vx * k, f.y + f.vy * k - 3 * k * k, f.z + f.vz * k); f.m.scale.setScalar(1 - k); }
     }
     padM.forEach(d => { d.cube.rotation.y = t * 1.3; d.cube.position.y = 1.9 + Math.sin(t * 2.4 + d.g.position.x) * 0.25; });
-    // a third-person camera behind and above you: drag to look around, pinch or scroll to zoom
-    const tx=m?m.x:0,ty=(m?m.y*.6:0)+2.8,tz=m?m.z:0,pitch=Math.max(.12,Math.min(1.2,el-.42)),dist=33*zoom;
-    cT.set(cT.x + (tx - cT.x) * Math.min(1, dt * 10), cT.y + (ty - cT.y) * Math.min(1, dt * 10), cT.z + (tz - cT.z) * Math.min(1, dt * 10));
-    cam.position.set(cT.x + Math.sin(az) * Math.cos(pitch) * dist, cT.y + Math.sin(pitch) * dist, cT.z + Math.cos(az) * Math.cos(pitch) * dist);
+    /* The camera keeps itself behind and above you and never turns on its own. Arrow keys or a drag
+       turn it, the wheel or a pinch zooms, and both ease in so it glides instead of snapping. */
+    el = Math.max(0.44, Math.min(1.15, el)); zoom = Math.max(0.6, Math.min(2.1, zoom));
+    const ease2 = 1 - Math.exp(-dt * 9);
+    WD.cAz += Math.atan2(Math.sin(az - WD.cAz), Math.cos(az - WD.cAz)) * ease2; WD.cEl += (el - WD.cEl) * ease2; WD.cZ += (zoom - WD.cZ) * ease2;
+    const tx=m?m.x:0,ty=(m?m.y*.5:0)+3.4,tz=m?m.z:0,pitch=WD.cEl,dist=44*WD.cZ;
+    cT.set(cT.x + (tx - cT.x) * Math.min(1, dt * 7), cT.y + (ty - cT.y) * Math.min(1, dt * 7), cT.z + (tz - cT.z) * Math.min(1, dt * 7));
+    cam.position.set(cT.x + Math.sin(WD.cAz) * Math.cos(pitch) * dist, Math.max(2.2, cT.y + Math.sin(pitch) * dist), cT.z + Math.cos(WD.cAz) * Math.cos(pitch) * dist);
     cam.lookAt(cT); cam.aspect = rc.width / rc.height; cam.updateProjectionMatrix();
     renderer.render(scene, cam);
   }
   function worldOff() {
-    worldG.visible=false;worldHidden.forEach((v,o)=>{o.visible=v;});worldHidden.clear();scene.background=null;Object.keys(tokens).forEach(k=>{tokens[k].visible=true;});Object.keys(pets).forEach(k=>{pets[k].visible=true;});
+    worldG.visible=false;worldHidden.forEach((v,o)=>{o.visible=v;});worldHidden.clear();scene.background=null;scene.fog=null;Object.keys(tokens).forEach(k=>{tokens[k].visible=true;});Object.keys(pets).forEach(k=>{pets[k].visible=true;});
     cD = 130; pkz = 1;   // the board view eases back in
   }
   function frame(now) {
@@ -1673,7 +1683,7 @@ const B3 = (function () {
     for (let i = tw.length - 1; i >= 0; i--) { const a = tw[i], f = Math.min(1, (now - a.t0) / a.ms); a.fn(f); if (f >= 1) { tw.splice(i, 1); a.res(); } }
     if (api.showing && api.home && showChar && (!api.world?.on || api.world.profileActive)) { drawShow(now); return; }
     const t = now / 1000, mv = still ? 0 : 1;
-    if (api.home && mv && !ptr.size) az += 0.0016;
+    if (api.home && mv && !ptr.size && !WD.on) az += 0.0016;
     cars.forEach(c => { const d = c.userData; d.u = (d.u + d.v * 0.016 * mv) % 4; const s = Math.floor(d.u), f = d.u - s, r = 13 + d.lane, P = [[r, r], [-r, r], [-r, -r], [r, -r], [r, r]], a = P[s], b = P[s + 1]; c.position.set(a[0] + (b[0] - a[0]) * f, 0, a[1] + (b[1] - a[1]) * f); c.rotation.y = [Math.PI, Math.PI / 2, 0, -Math.PI / 2][s]; });
     utilities.forEach((u,i)=>{
       const ring=u.userData.pulse,phase=t*1.6+u.userData.offset;
@@ -1815,11 +1825,13 @@ async function api(path, body) {
   let j = {}; try { j = await r.json(); } catch (e) {}
   if (j.now) skew = j.now - Date.now();
   if (!r.ok) throw { code: r.status >= 500 || r.status === 429 ? 'unavailable' : 'refused', message: j.message || 'That did not work. Try again.', state: j.state };
+  if (typeof j.swag === 'number') MYSWAG = j.swag;
   if (j.wallet) { setWallet(j.wallet); if (j.rate) goldSync({ rate: j.rate, boost: j.boost }); if (j.seal) store.set('stakkz-seal', { wallet: j.wallet, seal: j.seal }); }   // the sealed copy lets the server give the account back if it ever loses it
   return j;
 }
 /* gold: the server owns the balance; between its answers the page counts up at the rate the server gave */
 const Gold = { rate: 1000, at: Date.now(), boost: null, live: false };
+let MYSWAG = -100;
 function goldSync(j) { if (typeof j.gold === 'number' && wallet) wallet.coins = j.gold; if (j.rate) Gold.rate = j.rate; Gold.boost = j.boost ? { x: j.boost.x, until: Date.now() + j.boost.left } : null; Gold.at = Date.now(); Gold.live = true; goldPaint(); }
 function goldPaint() {
   const now = Date.now(); if (Gold.boost && Gold.boost.until <= now) { Gold.boost = null; Gold.rate = 1000; }
@@ -2353,7 +2365,7 @@ function accountHTML() {
   const unavailable = !authInfo.persistent;
   return '<div class="account-box"><h3>Account & sync</h3><p class="fine">' +
     (unavailable ? 'Cross-device accounts need the persistent game database connected by the host. You can still play as a guest on this device.' :
-    'Sign up with a username and password to keep your coins, items and active party in sync across phone and desktop. No email required.') +
+    'Sign up with a username and password so your gold, items and friends follow you between phone and desktop. No email required.') +
     '</p>' + (unavailable ? '' :
     '<div class="account-inputs"><input class="t" id="auth-username" maxlength="20" placeholder="Username" autocomplete="username" aria-label="Account username">' +
     '<input class="t" id="auth-password" type="password" minlength="3" maxlength="128" placeholder="Password (3+ characters)" autocomplete="current-password" aria-label="Account password"></div>' +
@@ -2486,7 +2498,7 @@ function renderHome(soft=false) {
     '<button class="btn go big" data-a="create">Create party</button><p class="fine">' + F.max + ' seats' + (F.bots ? ', ' + Math.min(F.bots, F.max - 1) + ' of them bots' : '') + '. Invite friends with the party code.</p>' + off;
   else if (F.page === 'join') h += nameRow() + row('Party code', '<input class="t" id="f-code" maxlength="4" placeholder="ABCD" value="' + esc(F.code) + '" autocomplete="off" autocapitalize="characters">') + '<button class="btn go big" data-a="join">Join party</button>' + off;
   
-  else if (F.page === 'me') h += accountHTML() + '<div class="mecard"><span class="pv bg-' + bgOf(F.look) + '">' + fig(F.look, PC[0], 104) + petImg(F.pet, 40) + '</span><div class="col">' + nameRow() + '<div class="pillrow"><span class="pill"><i class="coin"></i>' + fmt(wallet.coins) + '</span><span class="pill">' + lootImg(18) + wallet.boxes + '</span></div></div></div>' + styleHTML(PC[0]);
+  else if (F.page === 'me') h += accountHTML() + '<div class="mecard"><span class="pv bg-' + bgOf(F.look) + '">' + fig(F.look, PC[0], 104) + petImg(F.pet, 40) + '</span><div class="col">' + nameRow() + '<div class="pillrow"><span class="pill"><i class="coin"></i>' + fmt(wallet.coins) + '</span><span class="pill">' + lootImg(18) + wallet.boxes + '</span><span class="pill swagpill">Swag ' + fmt(MYSWAG) + '</span><span class="pill">' + wallet.own.filter(id => ITEMS[id]).length + ' collected</span></div></div></div>' + styleHTML(PC[0]);
   else h += shopHTML(PC[0]);
   /* who you are and what you have, always one tap from Me, the shop and your loot boxes */
   if (F.page !== 'me' && F.page !== 'shop') h += '<div class="strip"><button class="sme" data-a="page" data-v="me" aria-label="Your character">' + ava(F.look, PC[0], 40) + '<b id="sname">' + esc(F.name || 'You') + '</b></button><button class="pill" data-a="page" data-v="shop" aria-label="Your coins. Open the shop"><i class="coin"></i>' + fmt(wallet.coins) + '</button>' + (wallet.boxes ? '<button class="pill hot" data-a="loot" data-v="go" aria-label="Spin a loot box">' + lootImg(18) + wallet.boxes + '</button>' : '') + '</div>';
@@ -2982,8 +2994,14 @@ function winnerModal() {
       (mode === 'online' && rematch ? '<p class="fine c">' + (rematch.phase === 'lobby' ? esc(rematch.players[0] ? rematch.players[0].name : 'Someone') + ' is setting up the next game.' : 'The others have started the next game.') + '</p>' : '');
   });
 }
+const WORLD_HELP = [['arrow', 'Getting around', 'WASD or the thumb stick moves you. The arrow keys turn the camera, Space jumps, Shift runs. Drag or pinch to look around.'],
+  ['coins', 'Gold', 'You earn 1,000 gold every second, counted by the server, whether the page is open on your phone or your laptop. Walk into a floating cube to boost it for a while.'],
+  ['gift', 'Collecting', 'Spend gold in the Shop on outfits, hats, extras, pets and scenes. Loot boxes cost 500,000 and only ever hold Legendary or Mythical exclusives you cannot buy.'],
+  ['star', 'Swag Level', 'Everyone starts at -100. Rare things you wear, and everything you collect, push it up towards 9,999.'],
+  ['bolt', 'Blasters', 'Press 1 and 2 to switch weapon, F or right-click to fire. At zero health you respawn a few seconds later. Eliminations pay 5,000 gold.'],
+  ['swap', 'Friends and trading', 'Everyone with an account is in your friends list. Tap a friend, or tap somebody in the world, to open their profile, trade with them, or remove them.']];
 const RULES = [['star', 'Goal', 'Be the last player standing. Everyone else goes bankrupt.'], ['arrow', 'Your turn', 'Roll and move. Buy the street you land on, or pay rent to whoever owns it. Doubles roll again, and three in a row means Jail. On a keyboard, Space does your main move. The camera closes in on whoever is rolling and moving; the Follow cam button switches that off.'], ['coins', 'Auctions', 'Pass on a street and it goes to auction. Everyone bids in turn, and the last bidder left wins it.'], ['home', 'Build', 'Own every street in a colour to double rent. Build evenly: three houses per street, then one hotel.'], ['cash', 'Short on cash', 'Sell houses and streets back to the bank for half price, or strike a trade. If you still cannot pay, you are out.'], ['bars', 'Jail', 'Roll doubles, pay £50 or play a card to get out. After three tries you pay and move.'], ['swap', 'Trades', 'Offer only cash and streets you own, for immediate acceptance or rejection. Trading closes in Final Chaos.'], ['arrow', 'Station travel', 'Land on a station you own and you can take the train, free, to any other station you own. You need to own both stations. Travelling ends your turn, with no Start bonus.'], ['bars', 'Setting up', 'The host picks the number of players (2 to 6, bots included), the bots and the turn timer. Everyone starts with £2,500 and no streets. Passing Start pays £200 and a loot box.'], ['arrow', 'Turn timer', 'Off, or 20, 30, 45 or 60 seconds, as the host chose. With it off, anyone can skip a player who has been away for 90 seconds.'], ['cash', 'Mortgages', 'Short of cash? Mortgage a street for half its price. It collects no rent until you pay back 55% of its price. You cannot build on a colour set with a mortgaged street.'], ['gift', 'Coins and loot boxes', 'Coins come from playing: buying, rent, sets, cards and Coin Rush. Spend them in the shop. You get a loot box every time you pass Start, and one for every game you finish.']];
-function rulesModal() { openModal('rules', () => '<div class="mhead">' + logo('sm') + xBtn() + '</div><h2>How to play</h2>' + RULES.map(r => '<div class="rule">' + ico(r[0], 24) + '<b>' + r[1] + '</b><p>' + r[2] + '</p></div>').join('') + '<button class="btn go" data-a="close">Got it</button>'); }
+function rulesModal() { const home = $('#app').dataset.screen === 'home'; openModal('rules', () => '<div class="mhead">' + logo('sm') + xBtn() + '</div><h2>How to play</h2>' + (home ? WORLD_HELP : RULES).map(r => '<div class="rule">' + ico(r[0], 24) + '<b>' + r[1] + '</b><p>' + r[2] + '</p></div>').join('') + '<button class="btn go" data-a="close">Got it</button>'); }
 function settingsModal() {
   F.reset = false;
   openModal('settings', () => '<div class="mhead">' + logo('sm') + xBtn() + '</div><h2>Settings</h2>' +
