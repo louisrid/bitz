@@ -54,6 +54,29 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save playwright@1.56.1
+      - name: Render the real WebGL board and Profile on desktop and iPhone-sized Chrome
+        run: node tests/visual-stage.mjs
+        continue-on-error: true
+      - name: Upload actual 3D scene screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stakkz-webgl-visual-check
+          path: qa-3d-screenshots/*.png
+          if-no-files-found: ignore
+          retention-days: 7
+
   staging:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
