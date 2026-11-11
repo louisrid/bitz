@@ -2678,7 +2678,7 @@ function renderFriends() {
 }
 let HIDDEN = [];
 async function loadFriends() { if (!Net.ready || !Net.db) return; try { const r = await api('friends'); FRIENDS = r.friends || []; HIDDEN = r.hidden || []; renderFriends(); if (PROF) profilePaint(); } catch (e) {} }
-setInterval(loadFriends, 10000); setTimeout(loadFriends, 1500);
+setInterval(loadFriends, 8000); [1500, 3500, 6000].forEach(t => setTimeout(loadFriends, t));
 function friendModal(i) {
   const f = FRIENDS[i]; if (!f) return; const L2 = f.l || {};
   const worn = [['outfit', L2.outfit], ['hat', L2.hat], ['acc', L2.acc], ['pet', f.pet], ['bg', L2.bg]].filter(x => x[1] && ITEMS[x[1]] && ITEMS[x[1]][2] > 0);
