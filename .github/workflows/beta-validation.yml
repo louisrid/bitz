@@ -27,6 +27,10 @@ jobs:
           node --check src/bots.js
           node --check src/auth.js
           node --check public/engine.js
+          node --check src/world.js
+          node --check src/shop.js
+          node --check public/stakkz-catalog.js
+          node --check public/world-client.js
       - name: Beta smoke tests
         run: node tests/beta-smoke.mjs
       - name: Six-player game modes, station travel, hotels and final chaos
