@@ -49,3 +49,13 @@ html.fopen #fside{display:flex!important}
 #app[data-screen="home"][data-page="world"] #wbar{z-index:30}
 #wbar .wstat:last-of-type{display:none}
 @media(max-width:900px){#fside{width:min(60vw,217px)!important}html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}}
+
+/* Compact minimal heads-up controls, large clean gold balance on upper right. */
+#app[data-screen="home"] #wui .whelp{display:none!important}
+#app[data-screen="home"] #wui .wemo{display:none!important}
+#wbar{right:12px;justify-content:flex-start;gap:7px}
+#wbar .wstat:has(#wgold){position:fixed;right:20px;top:14px;margin:0;z-index:35;font:700 28px/1.05 'Archivo Black',sans-serif;padding:13px 17px;background:#183d2c;border:2px solid #73d68e;border-radius:13px;box-shadow:0 4px 0 #071c14;color:#f9ffdf;white-space:nowrap}
+#wbar .wstat:has(#wgold) em{color:#f3ed94}
+#wbar .wstat:last-of-type{display:none}
+#app[data-screen="home"] #wui .wtop{top:73px}
+@media(max-width:900px){#wbar{padding-right:0;top:53px}#wbar .wstat:has(#wgold){font-size:17px;top:7px;right:7px;padding:8px 9px}#app[data-screen="home"] #wui .wtop{top:103px}}
