@@ -451,6 +451,10 @@ button.chip.on{background:var(--ink);color:var(--paper)}
   #app[data-screen="home"][data-page="shop"] .item{flex-basis:calc((100% - calc(var(--k)*36px)) / 4)}
   #app[data-screen="home"][data-page="shop"] .items.two .item{flex-basis:calc((100% - calc(var(--k)*36px)) / 4)}
 }
+/* targeted control feedback: no full-panel white re-entry on selections */
+#side:not(.enter) > * { animation:none; }
+.seg button:focus-visible,.btn:focus-visible,.ib:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+@media (max-width:600px){.seg button{min-height:38px}.seg.nav button{min-height:42px}}
 /* final polish */
 .pp{flex:1 0 auto}
 @media (min-width:901px) and (min-height:521px){
@@ -1139,7 +1143,7 @@ let myId = '', Net = { db: null, user: null, ref: null, unsub: null, canWrite: t
 const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }, del(k) { try { localStorage.removeItem(k); } catch (e) {} } };
 const ctx = () => ({ now: Date.now(), rand: Math.random, die: () => { try { return 1 + crypto.getRandomValues(new Uint32Array(1))[0] % 6; } catch (e) { return 1 + Math.floor(Math.random() * 6); } } });
 const LOOK0 = () => ({ skin: 0, hair: 'short', hc: 0, outfit: 'tee', hat: '', acc: '', bg: 'paper' });
-const F = { page: 'create', wtab: 'style', cat: 'body', filt: 'outfit', sel: null, reset: false, leave: false, name: '', look: LOOK0(), pet: '', mode: 25, code: '', ln: 2, cpu: 1, lc: 2 };
+const F = { page: 'create', wtab: 'style', cat: 'body', filt: 'outfit', sel: null, reset: false, leave: false, name: '', look: LOOK0(), pet: '', mode: 25, bots: 0, difficulty: 'medium', code: '', ln: 2, cpu: 1, lc: 2 };
 let settings = Object.assign({ sound: true, music: true, calm: false, admin: false, follow: true }, store.get('stakkz-settings') || {});
 /* the account: coins, loot boxes, items and stats. The server keeps it; this is the page's copy of it. */
 const freshWallet = () => ({ v: 3, t: 0, coins: 10000, boxes: 1, own: [], claimed: [], grants: [], games: {}, gb: {}, played: 0, wins: 0, stats: { earned: 0, rent: 0, bought: 0, kos: 0, best: 0, opened: 0 } });
@@ -1336,7 +1340,7 @@ async function online(quiet) {
 }
 async function createRoom() {
   if (!(await online())) return;
-  try { await syncAcct(); const r = await api('party', { mode: F.mode }); cpu = false; mode = 'online'; G = V = null; rematch = null; subscribe(r.state.code); adopt(r.state); }
+  try { await syncAcct(); const r = await api('party', { mode: F.mode, bots: F.bots, difficulty: F.difficulty }); cpu = false; mode = 'online'; G = V = null; rematch = null; subscribe(r.state.code); adopt(r.state); }
   catch (e) { toast(e.message); }
 }
 async function joinRoom(code, quiet) {
@@ -1582,7 +1586,7 @@ const pick = (a, k, list, cur, cls) => '<div class="seg ' + (cls || '') + '" rol
 const seg = (k, opts, cls) => pick('seg', k, opts, F[k], cls);
 const row = (label, html) => '<div class="fld"><span class="lbl">' + label + '</span>' + html + '</div>';
 const xBtn = () => '<button class="ib" data-a="close" aria-label="Close">' + ico('x', 16) + '</button>';
-const PAGES = [['create', 'Create party'], ['join', 'Join party'], ['play', 'Play'], ['me', 'Me'], ['shop', 'Shop']];
+const PAGES = [['create', 'Create party'], ['join', 'Join party'], ['me', 'Profile'], ['shop', 'Shop']];
 const CATS = [['body', 'Body'], ['outfit', 'Outfit'], ['hat', 'Hat'], ['acc', 'Extra'], ['pet', 'Pet'], ['bg', 'Scene']];
 const FILTS = [['outfit', 'Outfits'], ['hat', 'Hats'], ['acc', 'Extras'], ['pet', 'Pets'], ['bg', 'Scenes']];
 const lengthRow = () => row('Game length', seg('mode', [[25, '25 min'], [45, '45 min'], ['classic', 'Classic']]));
@@ -1628,7 +1632,7 @@ function shopHTML(col) {
 const wardrobeHTML = col => F.wtab === 'shop' ? shopHTML(col) : styleHTML(col);
 function wardrobeModal() {
   F.sel = null; F.wtab = 'style';
-  openModal('wardrobe', () => { const col = PC[Math.max(0, mine0())], t = tryLook(); return '<div class="whead"><span class="pv bg-' + bgOf(t.look) + '">' + fig(t.look, col, 104) + petImg(t.pet, 40) + '</span><div class="wside">' + logo('sm') + pick('wtab', '', [['style', 'Me'], ['shop', 'Shop']], F.wtab) + '<button class="btn go" data-a="close">Done</button></div></div>' + wardrobeHTML(col); });
+  openModal('wardrobe', () => { const col = PC[Math.max(0, mine0())], t = tryLook(); return '<div class="whead"><span class="pv bg-' + bgOf(t.look) + '">' + fig(t.look, col, 104) + petImg(t.pet, 40) + '</span><div class="wside">' + logo('sm') + pick('wtab', '', [['style', 'Profile'], ['shop', 'Shop']], F.wtab) + '<button class="btn go" data-a="close">Done</button></div></div>' + wardrobeHTML(col); });
 }
 /* loot boxes open on a prize wheel. The prize is decided first; the wheel is the reveal. */
 const WCOL = ['var(--mist)', '#8FDBFF', '#B6F26A', '#FF8AD8'];
@@ -1678,7 +1682,7 @@ async function spinLoot() {
 /* behind the menu the stage shows the city; on Me and Shop it shows your character, live, on its scene */
 /* sound and music switches, the same wherever they appear */
 const muteBtns = () => [['sound', 'Sound effects'], ['music', 'Music']].map(q => '<button class="ib' + (settings[q[0]] ? '' : ' off') + '" data-a="mute" data-k="' + q[0] + '" aria-label="' + q[1] + '" aria-pressed="' + !!settings[q[0]] + '">' + ico(q[0], 20) + '</button>').join('');
-const PH = { create: 'Create a party', join: 'Join a party', play: 'Play solo', me: 'Me', shop: 'Shop' };
+const PH = { create: 'Create a party', join: 'Join a party', me: 'Profile', shop: 'Shop' };
 /* The title screen: the logo drops onto the grid, then the two ways into a game with friends, and the rest underneath. */
 function titleFoot() {
   const f = $('#tfoot'); if (!f) return;
@@ -1689,7 +1693,7 @@ function showTitle(back) {
   const t = $('#title'); t.hidden = false; t.className = 'bg-paper' + (back ? ' in' : '');
   t.innerHTML = '<div class="tbox">' + logo('hero') + '<p class="ttag">Buy the city. Bankrupt your friends.</p>' +
     '<div class="tgo"><button class="btn go" data-a="go" data-v="create">Create party</button><button class="btn go" data-a="go" data-v="join">Join party</button></div>' +
-    '<div class="tmore"><button class="btn" data-a="go" data-v="play">Play solo</button><button class="btn" data-a="go" data-v="me">Me</button><button class="btn hotb" data-a="go" data-v="shop">Shop</button></div>' +
+    '<div class="tmore"><button class="btn" data-a="go" data-v="me">Profile</button><button class="btn hotb" data-a="go" data-v="shop">Shop</button></div>' +
     '<div class="tfoot" id="tfoot"></div></div>';
   titleFoot();
 }
@@ -1709,9 +1713,9 @@ function renderHome() {
   const off = Net.ready && !Net.db ? '<p class="note">Parties need a connection to the game server. Play works without one.</p>' : Net.ready && !Net.canWrite ? '<p class="note">Your access is view-only. Ask the owner of this page to make you a Contributor.</p>' : '';
   let h = '<header class="hd"><button class="logob" data-a="title" aria-label="Back to the start">' + logo('xl') + '</button><div class="tools">' + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button><button class="ib" data-a="settings" aria-label="Settings">' + ico('gear', 20) + '</button></div></header>' +
     '<div class="seg nav" role="tablist">' + PAGES.map(p => '<button data-a="page" data-v="' + p[0] + '" role="tab" aria-selected="' + (F.page === p[0]) + '" class="' + (F.page === p[0] ? 'on' : '') + (p[0] === 'shop' ? ' hot' : '') + '">' + p[1] + '</button>').join('') + '</div><h1 class="ph">' + PH[F.page] + '</h1>';
-  if (F.page === 'create') h += nameRow() + lengthRow() + '<button class="btn go big" data-a="create">Create party</button><p class="fine">You get a code to share. Up to 5 can play.</p>' + off;
+  if (F.page === 'create') h += nameRow() + lengthRow() + row('Computer opponents', seg('bots', [[0,'None'],[1,'1 bot'],[2,'2 bots'],[3,'3 bots'],[4,'4 bots']])) + (F.bots ? row('Bot difficulty', seg('difficulty', [['easy','Easy'],['medium','Medium'],['hard','Hard']])) + '<p class="fine">Easy makes mistakes, Medium plays cautiously, Hard plans ahead. Bots take real turns on the server.</p>' : '') + '<button class="btn go big" data-a="create">Create party</button><p class="fine">You get a code to share. Up to 5 can play, including bots.</p>' + off;
   else if (F.page === 'join') h += nameRow() + row('Party code', '<input class="t" id="f-code" maxlength="4" placeholder="ABCD" value="' + esc(F.code) + '" autocomplete="off" autocapitalize="characters">') + '<button class="btn go big" data-a="join">Join party</button>' + off;
-  else if (F.page === 'play') h += row('Play against', seg('cpu', [[1, 'Computer'], [0, 'Friends here']])) + (F.cpu ? row('Computer players', seg('lc', [[1, '1'], [2, '2'], [3, '3'], [4, '4']])) : row('Players on this device', seg('ln', [[2, '2'], [3, '3'], [4, '4'], [5, '5']]))) + lengthRow() + '<button class="btn go big" data-a="local">Start game</button><p class="fine">' + (F.cpu ? 'No party needed. The computer plays the other pieces. Coins are worth half here, and full in a party.' : 'Take turns on this screen. Player 1 keeps the coins.') + '</p>';
+  
   else if (F.page === 'me') h += '<div class="mecard"><span class="pv bg-' + bgOf(F.look) + '">' + fig(F.look, PC[0], 104) + petImg(F.pet, 40) + '</span><div class="col">' + nameRow() + '<div class="pillrow"><span class="pill"><i class="coin"></i>' + fmt(wallet.coins) + '</span><span class="pill">' + lootImg(18) + wallet.boxes + '</span></div></div></div>' + styleHTML(PC[0]);
   else h += shopHTML(PC[0]);
   /* who you are and what you have, always one tap from Me, the shop and your loot boxes */
@@ -1977,9 +1981,20 @@ document.addEventListener('click', async e => {
   Snd('tap'); Snd.music(!!settings.music);
   switch (a) {
     case 'page': F.page = el.dataset.v; F.sel = null; renderHome(); enter(); break;
-    case 'seg': { const v = el.dataset.v, k = el.dataset.k; F[k] = /^\d+$/.test(v) ? +v : v; renderHome(); break; }
+    case 'seg': { const v = el.dataset.v, k = el.dataset.k; F[k] = /^\d+$/.test(v) ? +v : v;
+      const group = el.closest('.seg');
+      if (group) group.querySelectorAll('button').forEach(b => {
+        const on = b.dataset.v === v; b.classList.toggle('on',on); b.setAttribute('aria-pressed',String(on));
+      });
+      /* Bot count changes whether difficulty selection is visible. Re-render only then. */
+      if(k === 'bots') renderHome();
+      break;
+    }
     case 'wtab': F.wtab = el.dataset.v; F.sel = null; rerender(); break;
-    case 'cat': F.cat = el.dataset.v; rerender(); break;
+    case 'cat': F.cat = el.dataset.v;
+      if(!modal && F.page === 'me') { const body=$('.catbody'); if(body) { const next=document.createElement('div'); next.innerHTML=styleHTML(PC[0]); const n=next.querySelector('.catbody'); if(n) body.innerHTML=n.innerHTML; const bar=el.closest('.seg'); if(bar) bar.querySelectorAll('button').forEach(b => { const on=b.dataset.v===F.cat; b.classList.toggle('on',on); b.setAttribute('aria-pressed',String(on)); }); } }
+      else rerender();
+      break;
     case 'filt': F.filt = el.dataset.v; F.sel = null; rerender(); break;
     case 'more': F.filt = FGROUP[el.dataset.v] || 'outfit'; F.sel = null; F.wtab = 'shop'; if (!modal) F.page = 'shop'; rerender(); break;
     case 'look': { const k = el.dataset.k; F.look[k] = k === 'hair' ? el.dataset.v : +el.dataset.v; styleChanged(); break; }
@@ -2001,7 +2016,18 @@ document.addEventListener('click', async e => {
     case 'rules': rulesModal(); break;
     case 'settings': settingsModal(); break;
     case 'menu': menuModal(); break;
-    case 'set': settings[el.dataset.k] = el.dataset.v === '1'; applySettings(); Snd.music(!!settings.music); refreshModal(); Snd('tap'); break;
+    case 'set': {
+      const k = el.dataset.k, v = el.dataset.v;
+      settings[k] = v === '1'; applySettings(); Snd.music(!!settings.music);
+      /* Change only the selected control, not the entire settings dialog.
+         Replacing modal innerHTML caused the distracting all-white blink. */
+      const group = el.closest('.seg');
+      if (group) group.querySelectorAll('button').forEach(b => {
+        const on = b.dataset.v === v;
+        b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+      });
+      break;
+    }
     case 'mute': { const k = el.dataset.k; settings[k] = !settings[k]; applySettings(); Snd.music(!!settings.music); Snd('tap'); document.querySelectorAll('[data-a=mute][data-k=' + k + ']').forEach(b => { b.classList.toggle('off', !settings[k]); b.setAttribute('aria-pressed', String(!!settings[k])); }); break; }
     case 'go': F.page = el.dataset.v; F.sel = null; renderHome(); hideTitle(); enter(); break;
     case 'title': showTitle(true); break;
