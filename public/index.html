@@ -907,6 +907,20 @@ const B3 = (function () {
     const r = mesh(new THREE.TorusGeometry(1.6, 0.28, 8, 28), L(col)); r.castShadow = false; r.rotation.x = Math.PI / 2; r.position.copy(loc(tile, 0, 0)); r.position.y = 0.4; scene.add(r);
     tween(650, f => { r.scale.setScalar(0.3 + back(f) * 1.1); r.position.y = 0.4 + f * 2.5; }).then(() => scene.remove(r));
   };
+  // Persistent destination markers for the duration of a station choice,
+  // without restarting the camera or rebuilding the board.
+  let stationKey = '', stationMarks = [];
+  api.markStations = function (tiles) {
+    const key = (tiles || []).join(',');
+    if (key === stationKey) return;
+    stationMarks.forEach(o => { scene.remove(o); o.geometry.dispose(); if(o.material) o.material.dispose(); });
+    stationMarks = []; stationKey = key;
+    (tiles || []).forEach(tile => {
+      const ring = mesh(new THREE.TorusGeometry(1.75,.24,8,32), L(0x3FA9FF));
+      ring.rotation.x = Math.PI/2; ring.castShadow=false; ring.position.copy(loc(tile,0,0)); ring.position.y=.34;
+      scene.add(ring); stationMarks.push(ring);
+    });
+  };
   const houses = {}, flags = {};
   api.sync = function (st, snap) {
     const s2 = JSON.stringify(st ? st.own : {}); if (s2 !== sig) { sig = s2; paint(st); }
@@ -1419,7 +1433,7 @@ function goHome() {
   if (Net.unsub) Net.unsub(); Net.unsub = null; Net.ref = null; store.del('bigrent-room');
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
   G = V = null; me = -1; cpu = false; rematch = null; pendingStyle = null; busy = false; F.sel = null; closeModal(); $('#confetti').hidden = true; $('#ghead').dataset.k = '';
-  if (B3.ok) { B3.sync(null, true); B3.setTime(0); } $('#aucbar').hidden = true; setScreen('home'); renderHome(); showTitle(true);
+  if (B3.ok) { B3.markStations([]); B3.sync(null, true); B3.setTime(0); } $('#aucbar').hidden = true; setScreen('home'); renderHome(); showTitle(true);
 }
 
 /* ================= sound + settings ================= */
@@ -1844,7 +1858,8 @@ function renderGame(prev, fast) {
   if (B3.ok && s.startedAt) B3.setTime(s.phase === 'over' ? 1 : s.endAt ? (Date.now() - s.startedAt) / (s.endAt - s.startedAt) : Math.min(1, (Date.now() - s.startedAt) / 24e5));
   const top = Math.max.apply(null, s.players.map(p => p.cash).concat([1500]));
   const gh = $('#ghead'), gk = mode + s.code;
-  if (gh.dataset.k !== gk) { gh.dataset.k = gk; gh.innerHTML = logo('sm') + (mode === 'online' ? '<span class="codechip" aria-label="Party code">' + s.code + '</span>' : '') + '<span id="clock" hidden></span><button class="ib" data-a="menu" aria-label="Menu">' + ico('menu', 16) + '</button>'; }
+  if (gh.dataset.k !== gk) { gh.dataset.k = gk; gh.innerHTML = logo('sm') + (mode === 'online' ? '<span class="codechip" aria-label="Party code">' + s.code + '</span>' : '') + '<span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><span id="clock" hidden></span><button class="ib" data-a="menu" aria-label="Menu">' + ico('menu', 16) + '</button>'; }
+  if (B3.ok) B3.markStations(s.stage==='travel' && me===c ? E.RAILS.filter(i=>i!==s.station) : []);
   const playersHTML = s.players.map((p, i) => {
     if (i === me) return '';
     return '<button class="pp' + (i === c ? ' on' : '') + (p.out ? ' out' : '') + '" data-a="player" data-i="' + i + '" data-pp="' + i + '" style="--c:' + PC[i] + '">' + ava(p.look, PC[i]) + '<span class="nm">' + esc(p.name) + '</span><span class="cash">' + money(p.cash) + '</span>' +
@@ -1924,8 +1939,17 @@ function renderActions() {
 let autoV = -1, nudgeV = -1;
 function tick() {
   const s = V; if (!s || s.phase !== 'play') return;
-  const now = Date.now() + skew, tb = $('#tmbar'), ck = $('#clock');
-  if (tb && s.deadline && s.timer) tb.style.width = Math.max(0, Math.min(100, (s.deadline - now) / ((s.stage === 'auction' ? 15 : s.timer) * 10))) + '%';
+  const now = Date.now() + skew, tb = $('#tmbar'), ck = $('#clock'), chaosTag=$('#chaosTag');
+  const chaos = !!(s.endAt && now >= s.endAt-300000);
+  if (chaosTag) chaosTag.hidden = !chaos;
+  if (chaos && !tick.chaosSeen) {
+    tick.chaosSeen = true; renderActions();
+    if (modal && modal.kind === 'trade') { closeModal(); toast('FINAL CHAOS: trading has closed.'); }
+  }
+  if (!chaos) tick.chaosSeen = false;
+  const bidcount=$('#bidcount');
+  if (bidcount && s.stage==='auction' && s.deadline) bidcount.textContent=Math.max(0,Math.ceil((s.deadline-now)/1000))+'s to bid';
+  if (tb && s.deadline && s.timer) tb.style.width = Math.max(0, Math.min(100, (s.deadline - now) / ((s.stage === 'auction' ? 10 : s.timer) * 10))) + '%';
   if (ck) { if (s.endAt) { const left = Math.max(0, s.endAt - now); ck.hidden = false; ck.textContent = left ? Math.floor(left / 60000) + ':' + String(Math.floor(left / 1000) % 60).padStart(2, '0') : 'Last lap'; } else ck.hidden = true; }
   flushStyle();
   if (cpu && mode === 'local' && G && G.phase === 'play' && !busy && pending === 0) botStep();
@@ -1984,7 +2008,7 @@ function auctionModal() {
     const s = V, a = s && s.auc; if (!a) return '';
     const p = s.players[a.who], min = Math.max(10, a.bid + 10), bids = [min, a.bid + 50, a.bid + 100].filter((x, k, arr) => arr.indexOf(x) === k);
     return head(a.tile, 'Auction') + '<dl class="kv"><dt>Top bid</dt><dd>' + (a.by >= 0 ? money(a.bid) + ' by ' + esc(s.players[a.by].name) : 'None yet') + '</dd><dt>' + (solo() ? 'Your cash' : esc(p.name) + '’s cash') + '</dt><dd>' + money(p.cash) + '</dd><dt>Usual price</dt><dd>' + money(T[a.tile].p) + '</dd></dl>' +
-      '<div class="row">' + bids.map(x => '<button class="btn go" data-a="bid" data-n="' + x + '"' + (x > p.cash ? ' disabled' : '') + '>' + money(x) + '</button>').join('') + '</div><button class="btn big" data-a="pass">Pass</button>';
+      '<p class="fine c" id="bidcount">10s to bid</p><div class="row">' + bids.map(x => '<button class="btn go" data-a="bid" data-n="' + x + '"' + (x > p.cash ? ' disabled' : '') + '>' + money(x) + '</button>').join('') + '</div><button class="btn big" data-a="pass">Pass</button>';
   });
 }
 function tileModal(i) {
@@ -2023,11 +2047,12 @@ function playerModal(i) {
 }
 function logModal() { openModal('log', () => '<div class="mhead"><h2>What just happened</h2>' + xBtn() + '</div>' + V.log.slice().reverse().map(e => '<div class="prow" style="--g:' + (e.p >= 0 ? PC[e.p] : '#000') + '"><i style="border-radius:50%"></i><span class="fine">' + esc(e.m) + '</span></div>').join('')); }
 function tradeModal() {
+  if (V && E.chaos(V,Date.now()+skew)) { toast('Trading closes during FINAL CHAOS.'); return; }
   const s = V, others = s.order.filter(i => i !== me); TB = { to: others[0], gc: 0, tc: 0, gp: [], tp: [] };
   openModal('trade', () => {
     const s = V, A = s.players[me], Z = s.players[TB.to], mine = E.props(s, me).filter(i => E.tradeable(s, me, i)), theirs = E.props(s, TB.to).filter(i => E.tradeable(s, TB.to, i));
     const cash = (k, max) => '<div class="cashrow"><button class="btn" data-a="tcash" data-k="' + k + '" data-d="-50" aria-label="Less cash">−</button><input class="t" id="tb-' + k + '" data-tb="' + k + '" inputmode="numeric" value="' + TB[k] + '" aria-label="Cash in pounds, up to ' + max + '"><button class="btn" data-a="tcash" data-k="' + k + '" data-d="50" aria-label="More cash">+</button></div>';
-    return '<div class="mhead"><h2>Offer a trade</h2>' + xBtn() + '</div>' + (s.order.length > 2 ? '<div class="seg">' + s.order.filter(i => i !== me).map(i => '<button data-a="tto" data-i="' + i + '" class="' + (i === TB.to ? 'on' : '') + '">' + esc(s.players[i].name) + '</button>').join('') + '</div>' : '') +
+    return '<div class="mhead"><h2>Offer a trade</h2>' + xBtn() + '</div>' + (s.order.length > 2 ? '<div class="seg tradepeople">' + s.order.filter(i => i !== me).map(i => '<button data-a="tto" data-i="' + i + '" class="' + (i === TB.to ? 'on' : '') + '">' + esc(s.players[i].name) + '</button>').join('') + '</div>' : '') +
       '<h3>You give ' + esc(Z.name) + '</h3>' + cash('gc', A.cash) + '<div class="chips">' + (mine.map(i => chip(i, 'tgp', TB.gp.indexOf(i) >= 0)).join('') || '<span class="fine">No streets you can trade. Sell the buildings on a set first.</span>') + '</div>' +
       '<h3>You get from ' + esc(Z.name) + '</h3>' + cash('tc', Z.cash) + '<div class="chips">' + (theirs.map(i => chip(i, 'ttp', TB.tp.indexOf(i) >= 0)).join('') || '<span class="fine">' + esc(Z.name) + ' has no streets to trade.</span>') + '</div>' +
       '<button class="btn go big" data-a="propose">Send offer</button>';
@@ -2252,7 +2277,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal && F
   if ((e.key === ' ' || e.key === 'Enter') && !modal && $('#app').dataset.screen === 'game' && !/^(INPUT|BUTTON|TEXTAREA)$/.test(e.target.tagName)) { const b = document.querySelector('#actions .btns .btn.go'); if (b && !b.disabled) { e.preventDefault(); b.click(); } } });
 $('#view').addEventListener('pointerdown', e => e.stopPropagation());
 B3.onStep = k => Snd('hop', k); B3.onPoke = k => Snd('hop', 4 + k * 2);
-B3.onPick = i => { if ($('#veil').hidden && $('#app').dataset.screen === 'game' && V && !busy) tileModal(i); };
+B3.onPick = i => {
+  if (!$('#veil').hidden || $('#app').dataset.screen !== 'game' || !V || busy) return;
+  if (V.stage==='travel' && E.cur(V)===me && E.RAILS.includes(i) && i!==V.station) {
+    act({t:'travel',tile:i}); return;
+  }
+  tileModal(i);
+};
 
 /* ================= boot ================= */
 (function () {
