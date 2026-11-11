@@ -62,6 +62,19 @@ export function shop(w, what, item) {
   if (what === 'reset') { const f = freshWallet(); Object.keys(w).forEach(k => delete w[k]); Object.assign(w, f); return {}; }
   refuse('Unknown request.');
 }
+/* Social prestige: display only, derived from owned and equipped cosmetics. */
+export function swag(w) {
+  const owned=new Set(Array.isArray(w.own)?w.own:[]);
+  const score=id=>{
+    const it=ITEMS[id];if(!it||!id||(!owned.has(id)&&it[2]!==0))return 0;
+    if(it[3]||it[2]<0)return it[4]==='Mythical'?3100:1350;
+    const p=it[2];
+    return p<=0?0:p<=35000?28:p<=100000?95:p<=300000?190:p<=700000?385:p<=1200000?655:950;
+  };
+  const l=w.look||{};
+  const use=[l.outfit,l.hat,l.acc,l.bg,w.pet];
+  return Math.max(-100,Math.min(9999,-100+use.reduce((a,id)=>a+score(id),0)+Math.min(1750,owned.size*17)));
+}
 /* coins and loot boxes won in a game. `c` comes from the party's own state, so it can be trusted;
    a game played on one device (against the computer, or passed around) is reported by the page, so it is capped. */
 export function credit(w, c, solo, now) {
