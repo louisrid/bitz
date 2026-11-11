@@ -72,6 +72,8 @@ assert.equal(E.cur(rail),1,'travel immediately ends turn');
 assert.throws(()=>E.act(rail,0,{t:'travel',tile:25},ctx(now+3)));
 rail=railRoll(0,1);
 assert.equal(rail.stage,'travel');
+const viaServer=core.partyOp(rail,'act',player(0),{a:{t:'travel',tile:15}},now+2,'ABCD');
+assert.equal(viaServer.state.players[0].pos,15,'server action sanitiser must allow travel');
 rail=E.act(rail,0,{t:'travel',tile:15},ctx(now+2));
 assert.equal(rail.players[0].cash,1000,'own station is free and destination rent not charged');
 let unowned=railRoll(-1,-1);
