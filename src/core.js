@@ -139,6 +139,7 @@ export function partyOp(s, op, user, body, now, code) {
         n.made = now; }
       else if (s.phase === 'lobby' && me < 0) n = E.join(s, user.id, name, user.look, user.pet);
     }
+    else if (op === 'chaos') { n = E.chaosStep(s, ctx(now)); }
     else if (op === 'expire') { n = E.expire(s, ctx(now)); }
     else if (op === 'act') { if (me < 0) refuse('You are not playing in this game.'); n = E.act(s, me, cleanAct(body.a), ctx(now)); }
     else refuse('Unknown request.');
