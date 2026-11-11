@@ -624,7 +624,7 @@ const B3 = (function () {
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, 1, 1, 600);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xdde6ff, 0.72));
+  const ambience = new THREE.HemisphereLight(0xffffff, 0xdde6ff, 0.72); scene.add(ambience);
   const sun = new THREE.DirectionalLight(0xffffff, 0.62);
   sun.position.set(28, 52, 22); sun.castShadow = true;
   sun.shadow.mapSize.set(Math.min(innerWidth, innerHeight) < 700 ? 1024 : 2048, Math.min(innerWidth, innerHeight) < 700 ? 1024 : 2048);
@@ -960,8 +960,7 @@ const B3 = (function () {
   api.trainTravel=async function(pi,from,to){
     const token=tokens[pi];if(!token)return;
     if(api.fast||still||document.hidden){
-      token.position.copy(slot({players:Object.keys(tokens).map((_,j)=>({pos:j===pi?to:-1,out:false}))},pi));
-      return;
+      token.position.copy(loc(to,0,.9));return;
     }
     const a=loc(from,0,-C/2+.7),b=loc(to,0,-C/2+.7);
     a.y=b.y=1.0;
@@ -1038,7 +1037,22 @@ const B3 = (function () {
     if (kind === 'sad') { if (u.cheer > t0) return; u.sad = t0 + 1100; if (api.moving !== pi) tween(900, f => { tk.scale.y = 1 - 0.2 * Math.sin(f * Math.PI); }).then(() => tk.scale.setScalar(1)); }
     else { const win = kind === 'win'; u.sad = 0; u.cheer = t0 + (win ? 6000 : 1000); if (api.moving !== pi) tween(win ? 2700 : 800, f => { tk.position.y = Math.abs(Math.sin(f * Math.PI * (win ? 6 : 2))) * 1.5; }); }
   };
-  api.setTime = function (p) { const q = Math.max(0, Math.min(1, (p - 0.45) / 0.55)); sun.color.setRGB(1, 1 - 0.15 * q, 1 - 0.4 * q); sun.position.set(28 + 16 * q, 52 - 26 * q, 22 - 8 * q); };
+  let daylight=0, chaosLighting=false;
+  api.setTime=function(p){
+    daylight=Math.max(0,Math.min(1,(p-.30)/.70));
+    const q=daylight;
+    sun.color.setRGB(1,1-.12*q,1-.32*q);
+    sun.position.set(28+16*q,52-25*q,22-8*q);
+    sun.intensity=Math.max(.42,.64-.11*q-(chaosLighting?.08:0));
+    ambience.intensity=Math.max(.48,.72-.07*q-(chaosLighting?.06:0));
+    windowMaterials.forEach(m=>m.opacity=Math.min(.95,.56+.26*q+(chaosLighting?.08:0)));
+  };
+  api.setChaos=function(on){
+    const next=!!on;if(next===chaosLighting)return;
+    chaosLighting=next;
+    halo.material.color.setHex(next?0xff3b30:0xff4b3e);
+    api.setTime(daylight*.7+.3);
+  };
   api.flash = function (tile, col) {
     const r = mesh(new THREE.TorusGeometry(1.6, 0.28, 8, 28), L(col)); r.castShadow = false; r.rotation.x = Math.PI / 2; r.position.copy(loc(tile, 0, 0)); r.position.y = 0.4; scene.add(r);
     tween(650, f => { r.scale.setScalar(0.3 + back(f) * 1.1); r.position.y = 0.4 + f * 2.5; }).then(() => scene.remove(r));
@@ -1211,16 +1225,29 @@ const B3 = (function () {
   api.spot = (pi, ms) => { fWho = pi; fSpot = false; fUntil = Math.max(fUntil, performance.now() + ms); };
   api.look = (tile, ms) => { fpos.copy(loc(tile, 0, 0)); fSpot = true; fUntil = performance.now() + ms; };
   const cvEl = $('#gl');
-  function size() {
-    // the stage has a frame, so the picture sits inside its border
-    const r = stage.getBoundingClientRect(); rc = { left: r.left + stage.clientLeft, top: r.top + stage.clientTop, width: Math.max(1, stage.clientWidth), height: Math.max(1, stage.clientHeight) };
-    [cvEl, $('#bd')].forEach(q => { q.style.left = rc.left + 'px'; q.style.top = rc.top + 'px'; q.style.width = rc.width + 'px'; q.style.height = rc.height + 'px'; });
-    renderer.setSize(rc.width, rc.height, false); rest();
+  let renderW=0,renderH=0;
+  function size(){
+    const r=stage.getBoundingClientRect();
+    const next={left:r.left+stage.clientLeft,top:r.top+stage.clientTop,
+      width:Math.max(1,stage.clientWidth),height:Math.max(1,stage.clientHeight)};
+    const changed=Math.abs(renderW-next.width)>.5||Math.abs(renderH-next.height)>.5;
+    if(!changed&&Math.abs(rc.left-next.left)<.5&&Math.abs(rc.top-next.top)<.5)return;
+    rc=next;
+    [cvEl,$('#bd')].forEach(q=>{
+      q.style.left=rc.left+'px';q.style.top=rc.top+'px';
+      q.style.width=rc.width+'px';q.style.height=rc.height+'px';
+    });
+    if(changed){renderW=rc.width;renderH=rc.height;renderer.setSize(rc.width,rc.height,false);rest();}
   }
   let restKey = '';
-  function rest() {
-    const tall = rc.width / rc.height < 1.1, key = api.home ? 'h' : tall ? 't' : 'w'; if (key === restKey) return; restKey = key; if (api.home) return;
-    const a = tall ? 0 : 0.5; az = a + Math.round((az - a) / (Math.PI * 2)) * Math.PI * 2; el = tall ? 1.04 : 0.86; zoom = 1;
+  function rest(){
+    const tall=rc.width/rc.height<1.1,key=api.home?'h':tall?'t':'w';
+    if(key===restKey)return;
+    const entering=restKey==='h'||!restKey;
+    restKey=key;
+    // Only on first entering gameplay. Tab switches, device rotation and
+    // opening a modal never reset the player's chosen orbit or zoom.
+    if(!api.home&&entering){el=tall?1.04:.86;zoom=1;}
   }
   api.resize = size; addEventListener('resize', size); new ResizeObserver(size).observe(stage);
   api.auto = true;
@@ -1263,6 +1290,15 @@ const B3 = (function () {
     const t = now / 1000, mv = still ? 0 : 1;
     if (api.home && mv && !ptr.size) az += 0.0016;
     cars.forEach(c => { const d = c.userData; d.u = (d.u + d.v * 0.016 * mv) % 4; const s = Math.floor(d.u), f = d.u - s, r = 13 + d.lane, P = [[r, r], [-r, r], [-r, -r], [r, -r], [r, r]], a = P[s], b = P[s + 1]; c.position.set(a[0] + (b[0] - a[0]) * f, 0, a[1] + (b[1] - a[1]) * f); c.rotation.y = [Math.PI, Math.PI / 2, 0, -Math.PI / 2][s]; });
+    utilities.forEach((u,i)=>{
+      const ring=u.userData.pulse,phase=t*1.6+u.userData.offset;
+      const k=1+.15*Math.sin(phase)*mv;
+      ring.scale.setScalar(k);ring.material.opacity=.57+.23*Math.sin(phase)*mv;
+      ring.rotation.z=t*(i?-.55:.72)*mv;
+    });
+    if((fN2&3)===0) movingCityLights.forEach((lamp,i)=>{
+      lamp.material.color.setHex(Math.sin(t*1.5+i*2.1)>.25?0xffe9a3:0x75d3fa);
+    });
     halo.rotation.z = t * 0.6 * mv; halo.position.y = 11 + Math.sin(t * 1.3) * 0.25 * mv;
     balloon.position.set(Math.cos(t * 0.12) * 10, 17 + Math.sin(t * 0.7) * 0.8 * mv, Math.sin(t * 0.12) * 10);
     Object.keys(tokens).forEach(k => {
@@ -2039,7 +2075,10 @@ function renderGame(prev, fast) {
   const c = s.phase === 'play' ? E.cur(s) : -1; B3.cur = c;
   { const ab = $('#aucbar'), a = s.stage === 'auction' ? s.auc : null; ab.hidden = !a; if (a) patchHTML(ab,'<b>Auction</b><span>' + esc(T[a.tile].n) + '</span><b>' + (a.by >= 0 ? money(a.bid) : 'No bids') + '</b>' + (a.by >= 0 ? ava(s.players[a.by].look, PC[a.by], 30) : '')); }
   // the light warms and the shadows lengthen as the match goes on
-  if (B3.ok && s.startedAt) B3.setTime(s.phase === 'over' ? 1 : s.endAt ? (Date.now() - s.startedAt) / (s.endAt - s.startedAt) : Math.min(1, (Date.now() - s.startedAt) / 24e5));
+  if(B3.ok&&s.startedAt){
+    B3.setTime(s.phase==='over'?1:s.endAt?(Date.now()-s.startedAt)/(s.endAt-s.startedAt):Math.min(1,(Date.now()-s.startedAt)/24e5));
+    B3.setChaos(s.phase==='play'&&E.chaos(s,Date.now()+skew));
+  }
   const top = Math.max.apply(null, s.players.map(p => p.cash).concat([1500]));
   const gh = $('#ghead'), gk = mode + s.code;
   if (gh.dataset.k !== gk) { gh.dataset.k = gk; gh.innerHTML = logo('sm') + (mode === 'online' ? '<span class="codechip" aria-label="Party code">' + s.code + '</span>' : '') + '<span id="clock" hidden></span><button class="ib" data-a="menu" aria-label="Menu">' + ico('menu', 16) + '</button>'; }
@@ -2124,8 +2163,9 @@ let autoV = -1, nudgeV = -1;
 function tick() {
   const s = V; if (!s || s.phase !== 'play') return;
   const now = Date.now() + skew, tb = $('#tmbar'), ck = $('#clock'), chaosTag=$('#chaosTag');
-  const chaos = !!(s.endAt && now >= s.endAt-300000);
-  if (chaosTag) chaosTag.hidden = !chaos;
+  const chaos=!!(s.endAt&&now>=s.endAt-300000);
+  if(chaosTag)chaosTag.hidden=!chaos;
+  if(B3.ok)B3.setChaos(chaos);
   if (chaos && !tick.chaosSeen) {
     tick.chaosSeen = true; renderActions();
     if (modal && modal.kind === 'trade') { closeModal(); toast('FINAL CHAOS: trading has closed.'); }
