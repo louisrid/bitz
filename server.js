@@ -7,18 +7,45 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
 import * as core from './src/core.js';
+import { AccountAuth } from './src/auth.js';
+import { nextBotAction, isBot } from './src/bots.js';
 
 const DIR = path.dirname(fileURLToPath(import.meta.url)), PUB = path.join(DIR, 'public');
 const PORT = Number(process.env.PORT) || 3000, DATA = process.env.DATA_FILE || path.join(DIR, 'data.json');
 const AB = 'ABCDEFGHJKLMNPQRSTUVWXYZ', IDLE = 48 * 3600 * 1000;
 const parties = new Map(), accounts = new Map(), watchers = new Map();   // code -> game, id -> account, code -> sockets
-let dirty = false, saved = {};
+const CLOUD_URL = (process.env.STAKKZ_STORE_URL || '').replace(/\/$/, '');
+const CLOUD_KEY = process.env.STAKKZ_STORE_KEY || '';
+const cloud = !!(CLOUD_URL && CLOUD_KEY);
+let dirty = false, saved = {}, saving = false;
+const lastSeen = new Map();
 try { saved = JSON.parse(fs.readFileSync(DATA, 'utf8')); Object.entries(saved.parties || {}).forEach(([k, v]) => parties.set(k, v)); Object.entries(saved.accounts || {}).forEach(([k, v]) => accounts.set(k, v)); console.log('loaded', parties.size, 'parties and', accounts.size, 'accounts'); } catch (e) {}
 /* Accounts are also handed back to each browser sealed with this secret, so if a free host wipes the disk
    a returning player's coins and items can be restored and cannot be forged. Set STAKKZ_SECRET to keep it stable. */
-const SECRET = process.env.STAKKZ_SECRET || saved.secret || crypto.randomBytes(32).toString('hex');
+let SECRET = process.env.STAKKZ_SECRET || saved.secret || crypto.randomBytes(32).toString('hex');
+let auth = new AccountAuth(saved.auth, () => { dirty = true; });
 const seal = (id, w) => crypto.createHmac('sha256', SECRET).update(id + ':' + JSON.stringify(w)).digest('base64url');
-function save() { if (!dirty) return; dirty = false; fs.writeFile(DATA + '.tmp', JSON.stringify({ secret: SECRET, parties: Object.fromEntries(parties), accounts: Object.fromEntries(accounts) }), e => { if (!e) fs.rename(DATA + '.tmp', DATA, () => {}); }); }
+async function save(force = false) {
+  if (!dirty && !force) return;
+  if (saving) { dirty = true; return; }
+  saving = true; dirty = false;
+  const state = { secret: SECRET, parties: Object.fromEntries(parties), accounts: Object.fromEntries(accounts), auth: auth.export() };
+  try {
+    if (cloud) {
+      const res = await fetch(CLOUD_URL + '?on_conflict=id', {
+        method: 'POST',
+        headers: { apikey: CLOUD_KEY, Authorization: 'Bearer ' + CLOUD_KEY, 'Content-Type':'application/json', Prefer:'resolution=merge-duplicates' },
+        body: JSON.stringify([{ id:'main', state }]),
+        signal: AbortSignal.timeout(12000)
+      });
+      if (!res.ok) throw Error('Persistent store save: HTTP ' + res.status + ' ' + (await res.text()).slice(0,120));
+    } else {
+      await fs.promises.writeFile(DATA + '.tmp', JSON.stringify(state));
+      await fs.promises.rename(DATA + '.tmp', DATA);
+    }
+  } catch (e) { dirty = true; console.error('Stakkz save failed:', e.message); }
+  finally { saving = false; }
+}
 setInterval(save, 4000).unref();
 setInterval(() => { const now = Date.now(); parties.forEach((s, code) => { if (now - (s.touched || s.made || 0) > IDLE) { parties.delete(code); dirty = true; tell(code, null); } }); }, 600000).unref();
 
@@ -44,12 +71,41 @@ const read = req => new Promise((ok, no) => { let n = 0; const parts = []; req.o
 
 async function api(req, res, parts) {
   const now = Date.now();
-  if (parts[0] === 'ping') return send(res, 200, { ok: true, now, parties: parties.size });
+  if (parts[0] === 'ping') return send(res, 200, { ok: true, now, parties: parties.size, persistent: cloud });
   if (!allowed(String(req.headers['x-forwarded-for'] || req.socket.remoteAddress).split(',')[0].trim())) return send(res, 429, { message: 'Slow down a little.' });
   if (parts[0] === 'party' && parts[1] && req.method === 'GET') return send(res, 200, { state: parties.get(parts[1]) || null, now });
   const key = String(req.headers.authorization || '').replace(/^Bearer /, '');
-  if (!/^[A-Za-z0-9]{32,128}$/.test(key)) return send(res, 401, { message: 'Missing player key.' });
-  const id = idOf(key), w = account(id);
+  if (parts[0] === 'auth' && req.method === 'POST' && ['register','login','logout'].includes(parts[1])) {
+    let b; try { b = await read(req); } catch (e) { return send(res, 400, { message:'Invalid request.' }); }
+    try {
+      if (parts[1] === 'register') {
+        if (!cloud) return send(res, 503, { message:'Account creation requires persistent storage. The host has not configured it yet.' });
+        if (!/^[a-f0-9]{48}$/.test(key)) return send(res, 401, { message:'A guest player key is required to register.' });
+        const id = idOf(key), old = account(id);
+        const result = auth.register(b.username, b.password, id);
+        core.setProfile(old, { name: result.username.slice(0,12) });
+        dirty = true;
+        return send(res, 200, { token:result.token, username:result.username, id, registered:true });
+      }
+      if (parts[1] === 'login') {
+        const result = auth.login(b.username,b.password);
+        return send(res, 200, { token:result.token, username:result.username, id:result.id });
+      }
+      auth.logout(key); return send(res, 200, {ok:true});
+    } catch (e) { return send(res, 400, { message:e.message }); }
+  }
+  const session = auth.authenticate(key);
+  if (!session && !/^[a-f0-9]{48}$/.test(key)) return send(res, 401, { message: 'Missing or expired player session.' });
+  const id = session ? session.id : idOf(key), w = account(id);
+  lastSeen.set(id,now);
+  if (parts[0] === 'heartbeat' && req.method === 'POST') return send(res, 200, { ok:true });
+  if (parts[0] === 'my-party' && req.method === 'GET') {
+    const found = [...parties.values()].find(s => s.phase !== 'over' && s.players.some(p => p.id === id && !p.out));
+    return send(res, 200, { code:found ? found.code:null });
+  }
+  if (parts[0] === 'auth' && parts[1] === 'me' && req.method === 'GET')
+    return send(res, 200, { username:auth.username(id), registered:!!auth.username(id), persistent:cloud, id });
+
   let b = {}; if (req.method === 'POST') { try { b = await read(req); } catch (e) { return send(res, 400, { message: 'Bad request.' }); } }
   const mine = extra => { const fresh = !!w.fresh, out = Object.assign({}, w); delete out.fresh; return Object.assign({ wallet: out, seal: seal(id, out), fresh: fresh, id: id, now: now }, extra); };
   const touch = () => { w.t = now; delete w.fresh; dirty = true; };
@@ -69,6 +125,16 @@ async function api(req, res, parts) {
       }
       if (!/^[A-Z]{4}$/.test(parts[1])) return send(res, 400, { message: 'Party codes are 4 letters.' });
       const gift = b.op === 'act' && b.a && b.a.t === 'gift' ? Math.floor(Number(b.a.n) || 0) : 0;
+      /* Give a disconnected player a two-minute reconnect window before their
+         expired turn can be automatically played. Never remove their seat. */
+      if (b.op === 'act' && b.a && b.a.t === 'auto') {
+        const room = parties.get(parts[1]), targetIndex = room && room.phase === 'play' ?
+          (room.stage === 'auction' && room.auc ? room.auc.who : globalThis.Engine.cur(room)) : -1;
+        const target = targetIndex >= 0 && room.players[targetIndex];
+        const seen = target && lastSeen.get(target.id);
+        if (target && !isBot(target) && seen && now-seen>30000 && now-seen<120000)
+          return send(res, 200, { state:room, now, reconnecting:true });
+      }
       if (gift > 0) { core.spend(w, gift); touch(); }                       // coins leave the giver first
       try { return send(res, 200, { state: partyOp(parts[1], String(b.op), user, b), now }); }
       catch (e) { if (gift > 0) w.coins += gift; throw e; }
@@ -109,5 +175,52 @@ server.on('upgrade', (req, socket, head) => {
     ws.on('error', () => {});
   });
 });
-server.listen(PORT, () => console.log('Stakkz is running on port ' + PORT));
-process.on('SIGTERM', () => { dirty = true; save(); setTimeout(() => process.exit(0), 400); });
+/* Bots and idle-turn recovery execute on the server, so gameplay does not stop
+   just because the host closes their browser. */
+let botBusy = false;
+setInterval(async () => {
+  if (botBusy) return;
+  botBusy = true;
+  try {
+    for (const [code,s] of parties) {
+      if (s.phase !== 'play') continue;
+      const next = nextBotAction(s);
+      if (next) {
+        try { partyOp(code, 'act', {id:next.id}, {a:next.a}); }
+        catch(e) { console.error('Bot action rejected:',next.id,e.message); }
+        continue;
+      }
+      const now = Date.now(), index = s.stage === 'auction' && s.auc ? s.auc.who : globalThis.Engine.cur(s);
+      const p = s.players[index], seen = p && lastSeen.get(p.id);
+      const offline = p && !isBot(p) && seen && now - seen > 30000;
+      if (s.deadline && now >= s.deadline && (!offline || now - seen >= 120000)) {
+        try { partyOp(code, 'act', {id:p.id}, {a:{t:'auto',force:1}}); }
+        catch(e) { console.error('Automatic turn rejected:',e.message); }
+      }
+    }
+  } finally { botBusy = false; }
+}, 1350).unref();
+async function bootstrap() {
+  if (cloud) {
+    const res = await fetch(CLOUD_URL + '?id=eq.main&select=state', {
+      headers: { apikey:CLOUD_KEY, Authorization:'Bearer '+CLOUD_KEY },
+      signal: AbortSignal.timeout(12000)
+    });
+    if (!res.ok) throw Error('Persistent store unavailable (HTTP '+res.status+')');
+    const rows = await res.json(); const remote = rows[0]?.state;
+    if (remote && typeof remote === 'object') {
+      saved = remote;
+      parties.clear(); accounts.clear();
+      Object.entries(saved.parties || {}).forEach(([k,v])=>parties.set(k,v));
+      Object.entries(saved.accounts || {}).forEach(([k,v])=>accounts.set(k,v));
+      auth = new AccountAuth(saved.auth, () => {dirty=true;});
+      if (!process.env.STAKKZ_SECRET && saved.secret) SECRET = saved.secret;
+    }
+    console.log('Persistent storage ready:',accounts.size,'accounts,',parties.size,'parties');
+  } else {
+    console.warn('STAKKZ_STORE_URL / STAKKZ_STORE_KEY missing: free-host restarts can erase player progress. Account registration is disabled.');
+  }
+  server.listen(PORT, () => console.log('Stakkz is running on port ' + PORT));
+}
+bootstrap().catch(e => { console.error('Startup aborted to protect accounts:',e.message); process.exitCode=1; });
+process.on('SIGTERM', () => { dirty = true; void save(true); setTimeout(() => process.exit(0), 1800); });
