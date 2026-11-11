@@ -17,7 +17,7 @@ export function setupWorld({ auth, account, accounts, getSwag, onChange }) {
     return {
       id, name: (w.name || auth().username(id) || 'Player').slice(0, 20),
       look: w.look || {}, pet: w.pet || '', swag: getSwag(w),
-      x: info?.x || 0, z: info?.z || 0, y: info?.y || 0, yaw: info?.yaw || 0
+      x: info?.x || 0, z: info?.z || 0, y: info?.y || 0, yaw: info?.yaw || 0, hp:info?.hp ?? 100, knockouts:info?.knockouts || 0, weapon:info?.weapon || 'blaster'
     };
   };
   const friends = id => {
@@ -56,7 +56,7 @@ export function setupWorld({ auth, account, accounts, getSwag, onChange }) {
         let player = live.get(id);
         if (!player) {
           const angle = Math.random() * Math.PI * 2;
-          player = { x: Math.cos(angle)*2.8, z: Math.sin(angle)*2.8, y:0, yaw:0, last:Date.now(), sockets:new Set() };
+          player = { x: Math.cos(angle)*2.8, z: Math.sin(angle)*2.8, y:0, yaw:0, last:Date.now(), sockets:new Set(), hp:100, knockouts:0, weapon:'blaster', lastShot:0, respawnAt:0 };
           live.set(id, player);
         }
         player.sockets.add(ws);
@@ -66,11 +66,58 @@ export function setupWorld({ auth, account, accounts, getSwag, onChange }) {
         return;
       }
       if (msg.type === 'ping') return send(ws, {type:'pong',now:Date.now()});
+      if (msg.type === 'weapon') {
+        const p = live.get(ws.worldId);
+        if (!p || !['blaster','pulse'].includes(msg.weapon)) return;
+        p.weapon = msg.weapon;
+        broadcast({ type:'combat', event:'equip', id:ws.worldId, weapon:p.weapon });
+        return;
+      }
+      if (msg.type === 'shoot') {
+        const shooter = live.get(ws.worldId), now = Date.now();
+        if (!shooter || now < shooter.respawnAt) return;
+        const weapon = shooter.weapon === 'pulse' ? 'pulse' : 'blaster';
+        if (now - shooter.lastShot < (weapon === 'pulse' ? 220 : 520)) return;
+        shooter.lastShot = now;
+        // Hits are chosen by the server, not by the shooting browser.
+        let best = null, bestDist = Infinity;
+        const heading = Number.isFinite(shooter.yaw) ? shooter.yaw : 0;
+        const dx = Math.sin(heading), dz = Math.cos(heading);
+        const reach = weapon === 'pulse' ? 19 : 28;
+        for (const [id, q] of live) {
+          if (id === ws.worldId || now < q.respawnAt) continue;
+          const vx = q.x - shooter.x, vz = q.z - shooter.z;
+          const forward = vx * dx + vz * dz;
+          const lateral = Math.abs(vx * dz - vz * dx);
+          if (forward <= 0 || forward >= reach || lateral > .85 + forward * .07) continue;
+          if (Math.abs(q.y - shooter.y) > 4) continue;
+          if (forward < bestDist) { best = [id, q]; bestDist = forward; }
+        }
+        let hit = null;
+        if (best) {
+          const [targetId,target] = best;
+          target.hp = Math.max(0, target.hp - (weapon === 'pulse' ? 13 : 28));
+          hit = targetId;
+          if (!target.hp) {
+            target.respawnAt = now + 3000;
+            shooter.knockouts++;
+            broadcast({type:'combat',event:'ko',id:targetId,by:ws.worldId,respawnAt:target.respawnAt,knockouts:shooter.knockouts});
+          }
+          broadcast({type:'combat',event:'health',id:targetId,hp:target.hp});
+        }
+        broadcast({type:'combat',event:'shot',id:ws.worldId,weapon,x:shooter.x,y:shooter.y,z:shooter.z,yaw:heading,hit});
+        return;
+      }
       if (msg.type !== 'move') return;
       const p=live.get(ws.worldId);
       if (!p) return;
       const now=Date.now();
-      if (now-p.last < 45) return;
+      if (p.respawnAt && now >= p.respawnAt) {
+        p.respawnAt = 0; p.hp = 100;
+        p.x = (Math.random()-.5)*7; p.z = (Math.random()-.5)*7; p.y = 0;
+        broadcast({type:'combat',event:'respawn',id:ws.worldId,x:p.x,z:p.z,hp:100});
+      }
+      if (now < p.respawnAt || now-p.last < 45) return;
       const x=Number(msg.x),z=Number(msg.z),y=Number(msg.y),yaw=Number(msg.yaw);
       if (![x,z,y,yaw].every(Number.isFinite)) return;
       if (Math.max(Math.abs(x),Math.abs(z))>75 || y < -0.01 || y>4.5 || Math.abs(yaw)>10000) return;
