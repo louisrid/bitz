@@ -235,6 +235,13 @@ setInterval(async () => {
   try {
     for (const [code,s] of parties) {
       if (s.phase !== 'play') continue;
+      // Enforce the match deadline on the authoritative clock, regardless of
+      // who is online, whose turn it is or whether an auction is running.
+      if (s.endAt && Date.now() >= s.endAt) {
+        try { partyOp(code, 'expire', {id:'server'}, {}); }
+        catch(e) { console.error('Match deadline settlement failed:',e.message); }
+        continue;
+      }
       const next = nextBotAction(s);
       if (next) {
         try { partyOp(code, 'act', {id:next.id}, {a:next.a}); }
