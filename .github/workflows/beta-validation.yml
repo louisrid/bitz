@@ -101,9 +101,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm install --no-save playwright@1.56.1
-      - name: Render the real WebGL board and Profile on desktop and iPhone-sized Chrome
+      - name: Render the real WebGL board, hotel, six players and train on desktop and phone
         run: node tests/visual-stage.mjs
-        continue-on-error: true
       - name: Upload actual 3D scene screenshots
         if: always()
         uses: actions/upload-artifact@v4
