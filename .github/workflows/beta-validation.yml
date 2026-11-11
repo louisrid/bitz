@@ -45,6 +45,14 @@ jobs:
         run: google-chrome --version
       - name: Test desktop UI and iPhone account-to-game handoff
         run: node tests/browser-smoke.mjs
+      - name: Save screenshot evidence for visual QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stakkz-beta-layout-screenshots
+          path: qa-screenshots/*.png
+          if-no-files-found: ignore
+          retention-days: 7
 
   staging:
     if: github.event_name == 'push'
