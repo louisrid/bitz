@@ -6,6 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
+import postgres from 'postgres';
 import * as core from './src/core.js';
 import { AccountAuth } from './src/auth.js';
 import { nextBotAction, isBot } from './src/bots.js';
@@ -17,6 +18,9 @@ const parties = new Map(), accounts = new Map(), watchers = new Map();   // code
 const CLOUD_URL = (process.env.STAKKZ_STORE_URL || '').replace(/\/$/, '');
 const CLOUD_KEY = process.env.STAKKZ_STORE_KEY || '';
 const cloud = !!(CLOUD_URL && CLOUD_KEY);
+const PG_URL = process.env.STAKKZ_DATABASE_URL || '';
+const pg = PG_URL ? postgres(PG_URL, { max: 2, idle_timeout: 15, connect_timeout: 12, prepare: false }) : null;
+const persistent = !!(pg || cloud);
 let dirty = false, saved = {}, saveChain = Promise.resolve();
 const lastSeen = new Map();
 try { saved = JSON.parse(fs.readFileSync(DATA, 'utf8')); Object.entries(saved.parties || {}).forEach(([k, v]) => parties.set(k, v)); Object.entries(saved.accounts || {}).forEach(([k, v]) => accounts.set(k, v)); console.log('loaded', parties.size, 'parties and', accounts.size, 'accounts'); } catch (e) {}
@@ -32,7 +36,10 @@ async function save(force = false) {
   dirty = false;
   const state = { secret: SECRET, parties: Object.fromEntries(parties), accounts: Object.fromEntries(accounts), auth: auth.export() };
   const write = async () => {
-    if (cloud) {
+    if (pg) {
+      await pg`insert into stakkz_state (id, state) values ('main', ${JSON.stringify(state)}::jsonb)
+        on conflict (id) do update set state = excluded.state`;
+    } else if (cloud) {
       const res = await fetch(CLOUD_URL + '?on_conflict=id', {
         method: 'POST',
         headers: { apikey: CLOUD_KEY, Authorization: 'Bearer ' + CLOUD_KEY, 'Content-Type':'application/json', Prefer:'resolution=merge-duplicates' },
@@ -88,7 +95,7 @@ const read = req => new Promise((ok, no) => { let n = 0; const parts = []; req.o
 
 async function api(req, res, parts) {
   const now = Date.now();
-  if (parts[0] === 'ping') return send(res, 200, { ok: true, now, parties: parties.size, persistent: cloud });
+  if (parts[0] === 'ping') return send(res, 200, { ok: true, now, parties: parties.size, persistent });
   if (!allowed(String(req.headers['x-forwarded-for'] || req.socket.remoteAddress).split(',')[0].trim())) return send(res, 429, { message: 'Slow down a little.' });
   if (parts[0] === 'party' && parts[1] && req.method === 'GET') return send(res, 200, { state: parties.get(parts[1]) || null, now });
   const key = String(req.headers.authorization || '').replace(/^Bearer /, '');
@@ -98,7 +105,7 @@ async function api(req, res, parts) {
     if(guard.blocked) return send(res,429,{message:parts[1]==='login'?'Too many incorrect passwords. Try again in ten minutes.':'Too many sign-up attempts. Try again later.'});
     try {
       if (parts[1] === 'register') {
-        if (!cloud) return send(res, 503, { message:'Account creation requires persistent storage. The host has not configured it yet.' });
+        if (!persistent) return send(res, 503, { message:'Account creation requires persistent storage. The host has not configured it yet.' });
         if (!/^[a-f0-9]{48}$/.test(key)) return send(res, 401, { message:'A guest player key is required to register.' });
         const id = idOf(key), old = account(id);
         const result = auth.register(b.username, b.password, id);
@@ -130,7 +137,7 @@ async function api(req, res, parts) {
     return send(res, 200, { code:found ? found.code:null });
   }
   if (parts[0] === 'auth' && parts[1] === 'me' && req.method === 'GET')
-    return send(res, 200, { username:auth.username(id), registered:!!auth.username(id), persistent:cloud, id });
+    return send(res, 200, { username:auth.username(id), registered:!!auth.username(id), persistent, id });
 
   let b = {}; if (req.method === 'POST') { try { b = await read(req); } catch (e) { return send(res, 400, { message: 'Bad request.' }); } }
   const mine = extra => { const fresh = !!w.fresh, out = Object.assign({}, w); delete out.fresh; return Object.assign({ wallet: out, seal: seal(id, out), fresh: fresh, id: id, now: now }, extra); };
@@ -238,13 +245,20 @@ setInterval(async () => {
   } finally { botBusy = false; }
 }, 1350).unref();
 async function bootstrap() {
-  if (cloud) {
-    const res = await fetch(CLOUD_URL + '?id=eq.main&select=state', {
+  if (persistent) {
+    let remote;
+    if (pg) {
+      await pg`create table if not exists stakkz_state (id text primary key, state jsonb not null)`;
+      const rows = await pg`select state from stakkz_state where id = 'main' limit 1`;
+      remote = rows[0]?.state;
+    } else {
+      const res = await fetch(CLOUD_URL + '?id=eq.main&select=state', {
       headers: { apikey:CLOUD_KEY, Authorization:'Bearer '+CLOUD_KEY },
       signal: AbortSignal.timeout(12000)
     });
     if (!res.ok) throw Error('Persistent store unavailable (HTTP '+res.status+')');
-    const rows = await res.json(); const remote = rows[0]?.state;
+      const rows = await res.json(); remote = rows[0]?.state;
+    }
     if (remote && typeof remote === 'object') {
       saved = remote;
       parties.clear(); accounts.clear();
@@ -256,9 +270,13 @@ async function bootstrap() {
     parties.forEach(room => room.players.forEach(p => {if(!isBot(p) && !p.out) lastSeen.set(p.id,Date.now());}));
     console.log('Persistent storage ready:',accounts.size,'accounts,',parties.size,'parties');
   } else {
-    console.warn('STAKKZ_STORE_URL / STAKKZ_STORE_KEY missing: free-host restarts can erase player progress. Account registration is disabled.');
+    console.warn('No persistent database configured: free-host restarts can erase player progress. Account registration is disabled.');
   }
   server.listen(PORT, () => console.log('Stakkz is running on port ' + PORT));
 }
 bootstrap().catch(e => { console.error('Startup aborted to protect accounts:',e.message); process.exitCode=1; });
-process.on('SIGTERM', () => { dirty = true; void save(true); setTimeout(() => process.exit(0), 1800); });
+process.on('SIGTERM', () => {
+  dirty = true;
+  void save(true).then(() => pg?.end({ timeout: 1 })).finally(() => process.exit(0));
+  setTimeout(() => process.exit(0), 2500).unref();
+});
