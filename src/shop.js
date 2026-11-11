@@ -1,3 +1,5 @@
-/* generated from the page: what exists, which slot it goes in, and what it costs */
-export const ITEMS = {"tee":["outfit","Team tee",0],"hoodie":["outfit","Hoodie",0],"overalls":["outfit","Overalls",2000],"track":["outfit","Track suit",3000],"rain":["outfit","Raincoat",5000],"tux":["outfit","Tuxedo",12000],"astro":["outfit","Space suit",40000],"gold":["outfit","Gold suit",80000],"beanie":["hat","Beanie",2200],"cap":["hat","Baseball cap",2500],"party":["hat","Party hat",4000],"cowboy":["hat","Cowboy hat",8000],"wizard":["hat","Witch hat",20000],"crown":["hat","Crown",75000],"dye":["dye","Hair dye kit",1500],"glasses":["acc","Glasses",3500],"scarf":["acc","Scarf",6000],"cape":["acc","Cape",15000],"wings":["acc","Wings",50000],"bird":["pet","Bluebird",10000],"pig":["pet","Tiny pig",25000],"penguin":["pet","Penguin",35000],"dragon":["pet","Dragon",100000],"paper":["bg","Paper",0],"sky":["bg","Blue sky",0],"sunset":["bg","Sunset",3000],"neon":["bg","Neon grid",9000],"space":["bg","Deep space",30000],"goldbg":["bg","Gold rush",90000]};
-export const HAIRS = ["short","bob","spiky","bun","none"];
+/* Shared server/browser catalogue, including exclusive-only rewards. */
+import '../public/stakkz-catalog.js';
+const catalog = globalThis.STAKKZ_CATALOG;
+export const { ITEMS, EXCLUSIVES, BOX_PRICE, GOLD_RATE, ECONOMY_VERSION, OFFLINE_CAP_MS } = catalog;
+export const HAIRS = ['short','bob','spiky','bun','none'];
