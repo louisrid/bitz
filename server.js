@@ -242,6 +242,11 @@ setInterval(async () => {
         catch(e) { console.error('Match deadline settlement failed:',e.message); }
         continue;
       }
+      if (s.endAt && Date.now() >= s.endAt-300000 && !s.chaosStarted) {
+        try { partyOp(code, 'chaos', {id:'server'}, {}); }
+        catch(e) { console.error('Final Chaos activation failed:',e.message); }
+        continue;
+      }
       const next = nextBotAction(s);
       if (next) {
         try { partyOp(code, 'act', {id:next.id}, {a:next.a}); }
