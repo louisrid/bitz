@@ -256,6 +256,7 @@
     // they could not finish liquidating before the deadline.
     var owing = s.debts.length ? debtTotal(s) : 0, debtor = s.order[s.turn];
     var score = function (i) { return worth(s,i) - (i === debtor ? owing : 0); };
+    s.finalScores = s.players.map(function (_,i) { return score(i); });
     var best = Math.max.apply(null, s.order.map(score));
     var top = s.order.filter(function (i) { return score(i) === best; });
     var bc = Math.max.apply(null, top.map(function (i) { return s.players[i].cash; }));
