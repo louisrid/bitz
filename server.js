@@ -146,12 +146,14 @@ function authLimit(req, type, username) {
 function authFailed(key) { const rec=authAttempts.get(key); if(rec)rec.count++; }
 function authSucceeded(key) { authAttempts.delete(key); }
 function allowed(ip) { const now = Date.now(), b = buckets.get(ip) || { n: 80, t: now }; b.n = Math.min(80, b.n + (now - b.t) / 1000 * 20); b.t = now; buckets.set(ip, b); if (buckets.size > 5000) buckets.clear(); if (b.n < 1) return false; b.n--; return true; }
+/* which release this server is running; open pages reload themselves when it changes */
+const BUILD = String(process.env.RENDER_GIT_COMMIT || Date.now()).slice(0, 12);
 const send = (res, code, o) => { const buf = Buffer.from(JSON.stringify(o)); res.writeHead(code, { 'Content-Type': 'application/json', 'Content-Length': buf.length, 'Cache-Control': 'no-store' }); res.end(buf); };
 const read = req => new Promise((ok, no) => { let n = 0; const parts = []; req.on('data', c => { n += c.length; if (n > 20000) { no(new Error('big')); req.destroy(); } else parts.push(c); }); req.on('end', () => { try { ok(JSON.parse(Buffer.concat(parts).toString('utf8') || '{}')); } catch (e) { no(e); } }); req.on('error', no); });
 
 async function api(req, res, parts) {
   const now = Date.now();
-  if (parts[0] === 'ping') return send(res, 200, { ok: true, now, parties: parties.size, persistent });
+  if (parts[0] === 'ping') return send(res, 200, { ok: true, now, parties: parties.size, persistent, build: BUILD });
   if (!allowed(String(req.headers['x-forwarded-for'] || req.socket.remoteAddress).split(',')[0].trim())) return send(res, 429, { message: 'Slow down a little.' });
   if (parts[0] === 'party' && parts[1] && req.method === 'GET') return send(res, 200, { state: parties.get(parts[1]) || null, now });
   const key = String(req.headers.authorization || '').replace(/^Bearer /, '');

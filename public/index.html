@@ -638,7 +638,7 @@ html.fopen #ftab{display:none}
 </style>
 
 <div id="bd" class="bg-paper"></div>
-<link rel="stylesheet" href="open-world.css">
+<link rel="stylesheet" href="open-world.css?v=807d">
 <canvas id="gl" aria-hidden="true"></canvas>
 <aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
 <div id="app" data-screen="home">
@@ -658,7 +658,7 @@ html.fopen #ftab{display:none}
 
 <script src="three.min.js"></script>
 <script src="engine.js"></script>
-<script src="voxel-world.js"></script>
+<script src="voxel-world.js?v=807d"></script>
 <script>
 'use strict';
 const E = Engine, T = E.T;
@@ -1841,6 +1841,12 @@ function goldPaint() {
   const r = document.getElementById('wrate'); if (r) { r.textContent = '+' + Gold.rate.toLocaleString('en-GB') + '/s' + (Gold.boost ? ' · ' + Math.ceil((Gold.boost.until - now) / 1000) + 's' : ''); r.classList.toggle('hot', !!Gold.boost); }
 }
 setInterval(goldPaint, 200);
+/* a new release went live: reload so nobody keeps playing an old version in an open tab */
+(function watchBuild() {
+  let first = null;
+  const check = () => fetch('api/ping', { cache: 'no-store' }).then(r => r.json()).then(j => { if (!j.build) return; if (first === null) first = j.build; else if (j.build !== first && !(typeof Trade !== 'undefined' && Trade)) location.reload(); }).catch(() => {});
+  check(); setInterval(check, 20000); document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+})();
 function setWallet(w) { wallet = newWallet(Object.assign({}, w, { v: 3 })); store.set('bigrent-wallet', Object.assign({}, wallet, { name: F.name, look: F.look, pet: F.pet })); }
 const refreshAcct = () => api('me').then(rerender, () => {});
 /* name and look are sent to the server a moment after they change; a game played on this device reports what it earned */
