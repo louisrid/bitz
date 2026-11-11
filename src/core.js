@@ -79,12 +79,12 @@ export function credit(w, c, solo, now) {
 export function spend(w, n) { n = int(n, 0, 1e7); if (w.coins < n) refuse('You only have ' + w.coins.toLocaleString('en-GB') + ' coins.'); w.coins -= n; }
 
 /* ---------- parties ---------- */
-const ACTS = ['roll', 'payJail', 'useCard', 'buy', 'skip', 'end', 'build', 'sellHouse', 'sellProp', 'propose', 'accept', 'reject', 'cancel', 'rush', 'gift', 'quit', 'bankrupt', 'auto', 'bid', 'pass'];
+const ACTS = ['roll', 'payJail', 'useCard', 'buy', 'skip', 'end', 'build', 'sellHouse', 'sellProp', 'propose', 'accept', 'reject', 'cancel', 'rush', 'gift', 'quit', 'bankrupt', 'auto', 'bid', 'pass', 'stay', 'travel'];
 /* only the fields an action can have, with the types the rules expect */
 function cleanAct(a) {
   if (!a || ACTS.indexOf(a.t) < 0) refuse('Unknown move.');
   const tiles = v => (Array.isArray(v) ? v.slice(0, 28).map(x => int(x, 0, 39)) : []);
-  return { t: a.t, tile: int(a.tile, 0, 39), to: int(a.to, 0, 4), n: int(a.n, 0, 20000), amt: int(a.amt, 0, 1e6), gc: int(a.gc, 0, 1e6), tc: int(a.tc, 0, 1e6), gp: tiles(a.gp), tp: tiles(a.tp) };
+  return { t: a.t, tile: int(a.tile, 0, 39), to: int(a.to, 0, 5), n: int(a.n, 0, 20000), amt: int(a.amt, 0, 1e6), gc: int(a.gc, 0, 1e6), tc: int(a.tc, 0, 1e6), gp: tiles(a.gp), tp: tiles(a.tp) };
 }
 const seat = (s, id) => s.players.findIndex(p => p.id === id);
 /* Bots are explicitly tagged on the server's player state, never identified by a client claim. */
@@ -107,8 +107,9 @@ export function partyOp(s, op, user, body, now, code) {
   try {
     if (op === 'create') {
       if (s) refuse('taken');
-      const mode = body.mode === 'classic' ? 'classic' : Number(body.mode) === 45 ? 45 : 25;
-      n = E.join(E.newRoom(code, { mode: mode, max: 5, timer: 45 }), user.id, user.name || 'Host', user.look, user.pet);
+      const mode = body.mode === 'classic' ? 'classic' : [25,35,45].includes(Number(body.mode)) ? Number(body.mode) : 35;
+      const timer = [20,25,30,35,45,50,60].includes(Number(body.turnTimer)) ? Number(body.turnTimer) : 0;
+      n = E.join(E.newRoom(code, { mode: mode, max: 6, timer: timer }), user.id, user.name || 'Host', user.look, user.pet);
       n = addBots(n, body.bots, body.difficulty, code); n.made = now;
     } else if (!s) refuse('No party with the code ' + code + '.');
     else if (op === 'join') { if (s.phase === 'lobby' && me < 0) n = E.join(s, user.id, name, user.look, user.pet); }
@@ -138,6 +139,7 @@ export function partyOp(s, op, user, body, now, code) {
         n.made = now; }
       else if (s.phase === 'lobby' && me < 0) n = E.join(s, user.id, name, user.look, user.pet);
     }
+    else if (op === 'expire') { n = E.expire(s, ctx(now)); }
     else if (op === 'act') { if (me < 0) refuse('You are not playing in this game.'); n = E.act(s, me, cleanAct(body.a), ctx(now)); }
     else refuse('Unknown request.');
   } catch (e) {
