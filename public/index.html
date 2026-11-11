@@ -650,7 +650,7 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="shop">Shop</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><span class="wstat">Gold <em id="wgold">...</em> · +1,000/s</span><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD to walk · Space to jump · Shift to run · drag to look</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="wstick"><i></i></div><button id="wjump" aria-label="Jump">Jump</button></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="shop">Shop</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><span class="wstat">Gold <em id="wgold">...</em> · +1,000/s</span><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="wstick"><i></i></div><button id="wjump" aria-label="Jump">Jump</button></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
 <div id="title" class="bg-paper" hidden></div>
 <div id="veil" hidden><div id="modal" class="card" role="dialog" aria-modal="true"></div></div>
@@ -658,6 +658,7 @@ html.fopen #ftab{display:none}
 
 <script src="three.min.js"></script>
 <script src="engine.js"></script>
+<script src="voxel-world.js"></script>
 <script>
 'use strict';
 const E = Engine, T = E.T;
@@ -1477,15 +1478,7 @@ const B3 = (function () {
      buildings. Everyone else outside a match is drawn from what the server relays, eased between updates. */
   const worldG = new THREE.Group(); worldG.visible = false; scene.add(worldG);
   const worldHidden=new Map();
-  const grass=new THREE.Mesh(new THREE.PlaneGeometry(130,130),new THREE.MeshLambertMaterial({color:0x61be6b,side:THREE.DoubleSide}));
-  grass.rotation.x=-Math.PI/2;grass.position.y=-.06;worldG.add(grass);
-  const blades=new THREE.Group();worldG.add(blades);
-  for(let i=0;i<100;i++){const angle=i*2.399963, radius=26+(i*17%38), x=Math.sin(angle)*radius,z=Math.cos(angle)*radius;
-    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.15,.22,1.6,6),new THREE.MeshLambertMaterial({color:0x8f6849}));
-    trunk.position.set(x,.8,z);
-    const leaf=new THREE.Mesh(new THREE.IcosahedronGeometry(1.1+(i%5)*.12,0),new THREE.MeshLambertMaterial({color:i%3?0x469f58:0x7ac668,flatShading:true}));
-    leaf.position.set(x,2.05,z);blades.add(trunk,leaf);
-  }
+  const socialEnvironment=STAKKZ_BUILD_WORLD(THREE,worldG);
   const colliders = [];
   setTimeout(() => {   // solid things in the city: anything taller than a person with a modest footprint
     city.updateMatrixWorld(true);
@@ -1543,7 +1536,7 @@ const B3 = (function () {
     return false;
   }
   function worldFrame(now) {
-    const dt = Math.min(0.1, (now - (WD.last || now)) / 1000), t = now / 1000; WD.last = now;
+    const dt = Math.min(0.1, (now - (WD.last || now)) / 1000), t = now / 1000; WD.last = now;socialEnvironment.animate(t);
     if(!worldG.visible){scene.children.forEach(o=>{if(o!==worldG&&!o.isLight){worldHidden.set(o,o.visible);o.visible=false;}});worldG.visible=true;scene.background=new THREE.Color(0xa7dcf2);}
     Object.keys(tokens).forEach(k=>{tokens[k].visible=false;});Object.keys(pets).forEach(k=>{pets[k].visible=false;});
     const m = WD.me;
