@@ -106,7 +106,7 @@ async function save(force = false) {
   const op = saveChain.then(write,write);
   saveChain = op.catch(()=>{});
   try { await op; return true; }
-  catch (e) { dirty = true; console.error('Stakkz save failed:',e.message); return false; }
+  catch (e) { dirty = true; console.error('BITZ save failed:',e.message); return false; }
 }
 setInterval(save, 4000).unref();
 setInterval(() => { const now = Date.now(); parties.forEach((s, code) => { if (now - (s.touched || s.made || 0) > IDLE) { parties.delete(code); dirty = true; tell(code, null); } }); }, 600000).unref();
@@ -514,7 +514,7 @@ async function bootstrap() {
   } else {
     console.warn('No persistent database configured: free-host restarts can erase player progress. Account registration is disabled.');
   }
-  server.listen(PORT, () => console.log('Stakkz is running on port ' + PORT));
+  server.listen(PORT, () => console.log('BITZ is running on port ' + PORT));
 }
 bootstrap().catch(e => { console.error('Startup aborted to protect accounts:',e.message); process.exitCode=1; });
 let shutdownStarted = false;
@@ -527,7 +527,7 @@ process.on('SIGTERM', () => {
     if (dirty) await save();
     await saveChain;
     if (pg) await pg.end({ timeout: 1 });
-  })().catch(e => console.error('Stakkz shutdown flush failed:', e.message))
+  })().catch(e => console.error('BITZ shutdown flush failed:', e.message))
     .finally(() => process.exit(0));
   setTimeout(() => process.exit(0), 2500).unref();
 });

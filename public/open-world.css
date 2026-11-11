@@ -167,6 +167,30 @@ html:has(#app[data-screen=home]) #toast{bottom:118px!important}
 .whoami{display:flex;align-items:center;gap:10px;min-width:0}
 .whoami b{display:block;font:400 24px/1 'Coolvetica','Arial Black',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 .whoami small{display:flex;align-items:center;gap:5px;font:700 14px/1.2 'Space Grotesk',sans-serif;margin-top:4px}
+/* BITZ loading screen: sky, rolling hills, bouncing letters and a spinning coin. */
+#bload{position:fixed;inset:0;z-index:100;background:linear-gradient(#7fd0f2,#c8f0ff 62%,#9fd8f0);display:grid;place-items:center;overflow:hidden;transition:opacity .5s ease,transform .5s ease}
+#bload.out{opacity:0;transform:scale(1.04);pointer-events:none}
+.bl-sun{position:absolute;right:12%;top:12%;width:110px;height:110px;background:#ffd60a;border:4px solid #000;box-shadow:6px 7px 0 #000;animation:blspin 9s linear infinite}
+.bl-hills{position:absolute;left:0;right:0;bottom:0;height:34%}
+.bl-hills i{position:absolute;bottom:0;width:70%;height:100%;background:#3f8a4d;border-top:4px solid #000;border-radius:50% 50% 0 0/40% 40% 0 0;animation:blhill 6s ease-in-out infinite}
+.bl-hills i:nth-child(1){left:-15%;background:#2e6f3a;height:86%}
+.bl-hills i:nth-child(2){left:40%;background:#47994f;animation-delay:-2s}
+.bl-hills i:nth-child(3){left:15%;background:#357f45;height:62%;animation-delay:-4s}
+.bl-mid{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:18px;padding:0 16px}
+.bl-logo{display:flex;gap:.04em;font:400 clamp(72px,16vw,168px)/1 'Coolvetica','Archivo Black','Arial Black',sans-serif}
+.bl-logo span{display:inline-block;color:#ffd60a;text-shadow:-4px -4px 0 #000,4px -4px 0 #000,-4px 4px 0 #000,4px 4px 0 #000,0 -4px 0 #000,0 4px 0 #000,-4px 0 0 #000,4px 0 0 #000,9px 11px 0 #000;animation:blbounce 1.1s cubic-bezier(.3,1.6,.5,1) infinite}
+.bl-logo span:nth-child(2){animation-delay:.1s;color:#ff8ad8}.bl-logo span:nth-child(3){animation-delay:.2s;color:#8fdbff}.bl-logo span:nth-child(4){animation-delay:.3s;color:#b6f26a}
+.bl-coin{width:54px;height:54px;perspective:200px}
+.bl-coin i{display:block;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff7b0,#ffd60a 45%,#e0a800);border:4px solid #000;box-shadow:4px 5px 0 #000;animation:blcoin 1.2s linear infinite}
+.bl-bar{width:min(280px,70vw);height:22px;border:4px solid #000;border-radius:14px;background:#fff;overflow:hidden;box-shadow:5px 6px 0 #000}
+.bl-bar i{display:block;height:100%;width:40%;background:repeating-linear-gradient(45deg,#ffd60a 0 12px,#ffbf00 12px 24px);border-right:4px solid #000;animation:blbar 1.4s ease-in-out infinite}
+#bload p{margin:0;font:700 15px/1 'Space Grotesk',sans-serif;color:#0b1f15;letter-spacing:.08em;text-transform:uppercase}
+@keyframes blbounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-22px) rotate(-4deg)}60%{transform:translateY(0) scale(1.06,.94)}}
+@keyframes blcoin{to{transform:rotateY(360deg)}}
+@keyframes blbar{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
+@keyframes blspin{to{transform:rotate(360deg)}}
+@keyframes blhill{50%{transform:translateY(6px)}}
+@media (prefers-reduced-motion:reduce){#bload *{animation:none!important}}
 /*BG>*/
 .bg-b_cyber{background:repeating-linear-gradient(90deg,#19e3ff33 0 2px,transparent 2px 26px),repeating-linear-gradient(0deg,#ff2bd633 0 2px,transparent 2px 26px),linear-gradient(180deg,#0b1030,#1c375e,#87e9ff)}
 .bg-b_haunt{background:radial-gradient(circle at 72% 22%,#e9e0ff,transparent 14%),linear-gradient(180deg,#17132b,#373052,#b8a3e6)}
