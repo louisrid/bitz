@@ -1767,6 +1767,7 @@ function patchHTML(root, html) {
   };
   patchChildren(root,next.content);
 }
+let lastHomeSceneKey = '';
 function renderHome(soft=false) {
   F.wtab = F.page === 'shop' ? 'shop' : 'style';
   $('#app').dataset.page = F.page;
@@ -1780,11 +1781,17 @@ function renderHome(soft=false) {
   else h += shopHTML(PC[0]);
   /* who you are and what you have, always one tap from Me, the shop and your loot boxes */
   if (F.page !== 'me' && F.page !== 'shop') h += '<div class="strip"><button class="sme" data-a="page" data-v="me" aria-label="Your character">' + ava(F.look, PC[0], 40) + '<b id="sname">' + esc(F.name || 'You') + '</b></button><button class="pill" data-a="page" data-v="shop" aria-label="Your coins. Open the shop"><i class="coin"></i>' + fmt(wallet.coins) + '</button>' + (wallet.boxes ? '<button class="pill hot" data-a="loot" data-v="go" aria-label="Spin a loot box">' + lootImg(18) + wallet.boxes + '</button>' : '') + '</div>';
-  if (soft) patchHTML($('#side'),h); else $('#side').innerHTML = h; homeScene(); titleFoot();
+    /* Preserve existing DOM nodes on option/filter changes. Rebuild the 3D scene
+     only when the displayed subject changes, not whenever a button is pressed. */
+  if (soft) patchHTML($('#side'),h); else $('#side').innerHTML = h;
+  const sceneKey = JSON.stringify([F.page, F.look, F.pet, F.sel]);
+  if (sceneKey !== lastHomeSceneKey) homeScene();
+  lastHomeSceneKey = sceneKey;
+  titleFoot();
 }
 function renderLobby() {
   const s = V, host = me === 0, open = Math.max(0, s.max - s.players.length);
-  $('#side').innerHTML = '<header class="hd">' + logo('xl') + '<div class="tools"><button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button></div></header>' +
+  const lobbyHTML = '<header class="hd">' + logo('xl') + '<div class="tools"><button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button></div></header>' +
     row('Party code. Share it with your friends.', '<div class="code">' + s.code.split('').map(c => '<b>' + c + '</b>').join('') + '<button class="btn" data-a="copy">Copy invite</button></div>') +
     row('In the party: ' + s.players.length + ' of ' + s.max, bar('lob', s.players.length / s.max * 100)) +
     s.players.map((p, i) => '<div class="who" style="--c:' + PC[i] + '">' + ava(p.look, PC[i]) + '<span>' + esc(p.name) + '</span>' + petImg(p.pet, 30) + (i === me ? '<em>You</em>' : i === 0 ? '<em>Host</em>' : '') + '</div>').join('') +
@@ -1792,6 +1799,7 @@ function renderLobby() {
     '<p class="fine">' + (s.mode === 'classic' ? 'Classic: the last player standing wins.' : s.mode + ' minutes, then the richest player wins.') + '</p>' +
     (host ? (s.players.length >= 2 ? '<button class="btn go big" data-a="start">Start game</button>' : '<p class="tag dots">Waiting for friends to join</p>') : me >= 0 ? '<p class="tag dots">Waiting for the host to start</p>' : '') +
     '<div class="row">' + (me >= 0 ? '<button class="btn" data-a="wardrobe">Change look</button>' : '') + '<button class="btn" data-a="leave">Leave</button></div>';
+  patchHTML($('#side'),lobbyHTML);
   growBars();
 }
 
