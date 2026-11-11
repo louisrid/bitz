@@ -18,7 +18,10 @@ const parties = new Map(), accounts = new Map(), watchers = new Map();   // code
 const CLOUD_URL = (process.env.STAKKZ_STORE_URL || '').replace(/\/$/, '');
 const CLOUD_KEY = process.env.STAKKZ_STORE_KEY || '';
 const cloud = !!(CLOUD_URL && CLOUD_KEY);
-const PG_URL = process.env.STAKKZ_DATABASE_URL || '';
+/* Tolerate a connection string pasted straight from a provider's dashboard or .env file: drop surrounding
+   quotes, and drop channel_binding, which the driver would otherwise send to the server as a setting. */
+const PG_URL = (process.env.STAKKZ_DATABASE_URL || '').trim().replace(/^["']+|["']+$/g, '')
+  .replace(/([?&])channel_binding=[^&]*(&|$)/, (m, a, b) => (b ? a : '')).replace(/[?&]$/, '');
 const pg = PG_URL ? postgres(PG_URL, { max: 2, idle_timeout: 15, connect_timeout: 12, prepare: false }) : null;
 const persistent = !!(pg || cloud);
 let dirty = false, saved = {}, saveChain = Promise.resolve(), dbVersion = 0;
