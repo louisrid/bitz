@@ -26,6 +26,8 @@ jobs:
           node --check public/engine.js
       - name: Beta smoke tests
         run: node tests/beta-smoke.mjs
+      - name: Six-player game modes, station travel, hotels and final chaos
+        run: node tests/gameplay-finalisation.mjs
       - name: Server, persistent storage and cross-device integration
         run: node tests/integration.mjs
       - name: Long-running bot gameplay simulations
