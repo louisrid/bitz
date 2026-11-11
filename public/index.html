@@ -638,6 +638,7 @@ html.fopen #ftab{display:none}
 </style>
 
 <div id="bd" class="bg-paper"></div>
+<link rel="stylesheet" href="open-world.css">
 <canvas id="gl" aria-hidden="true"></canvas>
 <aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
 <div id="app" data-screen="home">
@@ -649,7 +650,7 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD to walk · Space to jump · Shift to run · drag to look</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="wstick"><i></i></div><button id="wjump" aria-label="Jump">Jump</button></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="shop">Shop</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><span class="wstat">Gold <em id="wgold">...</em> · +1,000/s</span><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD to walk · Space to jump · Shift to run · drag to look</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="wstick"><i></i></div><button id="wjump" aria-label="Jump">Jump</button></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
 <div id="title" class="bg-paper" hidden></div>
 <div id="veil" hidden><div id="modal" class="card" role="dialog" aria-modal="true"></div></div>
@@ -974,7 +975,7 @@ const B3 = (function () {
     G.add(base); G.add(M); M.add(body); M.add(bacc); M.add(head); head.add(core); head.add(hatG); head.add(hacc);
     M.scale.setScalar(2); M.position.y = 0.23; head.position.set(0, 0.94, 0);
     const add = (par, w, h, d, c, x, y, z) => { const o = mesh(BX(w, h, d), typeof c === 'object' ? c : L(c), x, y, z); par.add(o); return o; };
-    add(base, 1.2, 0.14, 1.2, 0x111111, 0, 0.07, 0); add(base, 1.04, 0.1, 1.04, col, 0, 0.18, 0);
+    /* Avatars stand directly on the floor without a pedestal. */
     const sk = SKIN[look.skin | 0] || SKIN[0], hc = HAIRC[look.hc | 0] || HAIRC[0], o = OUTC[look.outfit] ? look.outfit : 'tee', oc = OUTC[o];
     const gold = new THREE.MeshPhongMaterial({ color: 0xffd60a, shininess: 90, specular: 0xffffff });
     const OX = OUTX[o] || {}, omat = c => OX.m ? voxMat(c, OX.m) : L(c), cOf = c => c === 'hc' ? hc : c === 'sk' ? sk : c === 'col' ? col : c, vox = (par, spec) => voxBuild(par, spec, cOf);
@@ -1372,7 +1373,7 @@ const B3 = (function () {
 
   const showScene = new THREE.Scene(); let showKey = '', showChar = null, showPet = null;
   showScene.add(new THREE.HemisphereLight(0xffffff, 0xcfd8f0, 0.78)); { const dl = new THREE.DirectionalLight(0xffffff, 0.62); dl.position.set(-5, 9, 8); showScene.add(dl); }
-  showScene.add(mesh(BX(2.5, 0.36, 2.5), L(0xffffff), 0, -0.18, 0)); showScene.add(mesh(BX(2.9, 0.3, 2.9), L(0x111111), 0, -0.51, 0)); let showAz = 0;
+  /* No white or black baseplate in the 3D preview either. */ let showAz = 0;
   api.show = function (look, pet, col) {
     if (!look) { api.showing = false; return; }
     const k = JSON.stringify([look, pet, col]);
@@ -1475,6 +1476,16 @@ const B3 = (function () {
      Your character walks the board (WASD / arrows or the touch stick), jumps (Space), runs (Shift) and bumps into
      buildings. Everyone else outside a match is drawn from what the server relays, eased between updates. */
   const worldG = new THREE.Group(); worldG.visible = false; scene.add(worldG);
+  const worldHidden=new Map();
+  const grass=new THREE.Mesh(new THREE.PlaneGeometry(130,130),new THREE.MeshLambertMaterial({color:0x61be6b,side:THREE.DoubleSide}));
+  grass.rotation.x=-Math.PI/2;grass.position.y=-.06;worldG.add(grass);
+  const blades=new THREE.Group();worldG.add(blades);
+  for(let i=0;i<100;i++){const angle=i*2.399963, radius=26+(i*17%38), x=Math.sin(angle)*radius,z=Math.cos(angle)*radius;
+    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.15,.22,1.6,6),new THREE.MeshLambertMaterial({color:0x8f6849}));
+    trunk.position.set(x,.8,z);
+    const leaf=new THREE.Mesh(new THREE.IcosahedronGeometry(1.1+(i%5)*.12,0),new THREE.MeshLambertMaterial({color:i%3?0x469f58:0x7ac668,flatShading:true}));
+    leaf.position.set(x,2.05,z);blades.add(trunk,leaf);
+  }
   const colliders = [];
   setTimeout(() => {   // solid things in the city: anything taller than a person with a modest footprint
     city.updateMatrixWorld(true);
@@ -1528,19 +1539,22 @@ const B3 = (function () {
     u.arms[0].rotation.x = a0; u.arms[1].rotation.x = a1; u.arms[0].rotation.z = z0; u.arms[1].rotation.z = z1;
   }
   function blocked(x, z) {
-    for (let i = 0; i < colliders.length; i++) { const b = colliders[i]; if (x > b[0] - 0.45 && x < b[2] + 0.45 && z > b[1] - 0.45 && z < b[3] + 0.45) return true; }
+    /* The social field is open grass with no city collision volumes. */
     return false;
   }
   function worldFrame(now) {
     const dt = Math.min(0.1, (now - (WD.last || now)) / 1000), t = now / 1000; WD.last = now;
-    if (!worldG.visible) { worldG.visible = true; Object.keys(tokens).forEach(k => { tokens[k].visible = false; }); Object.keys(pets).forEach(k => { pets[k].visible = false; }); }
+    if(!worldG.visible){scene.children.forEach(o=>{if(o!==worldG&&!o.isLight){worldHidden.set(o,o.visible);o.visible=false;}});worldG.visible=true;scene.background=new THREE.Color(0xa7dcf2);}
+    Object.keys(tokens).forEach(k=>{tokens[k].visible=false;});Object.keys(pets).forEach(k=>{pets[k].visible=false;});
     const m = WD.me;
     if (m) {
-      const K = WD.keys, ix = Math.max(-1, Math.min(1, WD.joy.x + (K.d || K.arrowright ? 1 : 0) - (K.a || K.arrowleft ? 1 : 0))), iz = Math.max(-1, Math.min(1, WD.joy.y + (K.s || K.arrowdown ? 1 : 0) - (K.w || K.arrowup ? 1 : 0)));
+      const K=WD.keys;
+      if(K.arrowleft)az+=dt*1.9;if(K.arrowright)az-=dt*1.9;if(K.arrowup)el=Math.max(.18,el-dt*.9);if(K.arrowdown)el=Math.min(1.3,el+dt*.9);
+      const ix=Math.max(-1,Math.min(1,WD.joy.x+(K.d?1:0)-(K.a?1:0))),iz=Math.max(-1,Math.min(1,WD.joy.y+(K.s?1:0)-(K.w?1:0)));
       const fx = -Math.sin(az), fz = -Math.cos(az), rx = -fz, rz = fx;
       let mx = rx * ix - fx * iz, mz = rz * ix - fz * iz; const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
       const speed = (K.shift || Math.hypot(WD.joy.x, WD.joy.y) > 0.92 ? 11 : 6.5) * Math.min(1, ml);
-      const lim = H - 0.7; let nx = Math.max(-lim, Math.min(lim, m.x + mx * speed * dt)), nz = Math.max(-lim, Math.min(lim, m.z + mz * speed * dt));
+      const lim = 29.5; let nx = Math.max(-lim, Math.min(lim, m.x + mx * speed * dt)), nz = Math.max(-lim, Math.min(lim, m.z + mz * speed * dt));
       if (m.y < 2.6) { if (blocked(nx, nz)) { if (!blocked(nx, m.z)) nz = m.z; else if (!blocked(m.x, nz)) nx = m.x; else { nx = m.x; nz = m.z; } } }
       m.sp = Math.hypot(nx - m.x, nz - m.z) / Math.max(dt, 0.001); m.x = nx; m.z = nz;
       m.vy -= 32 * dt; m.y = Math.max(0, m.y + m.vy * dt); if (m.y === 0) m.vy = Math.max(0, m.vy);
@@ -1557,14 +1571,14 @@ const B3 = (function () {
       animate(o, o.g.userData, o.sp, o.y > 0.05, now, t);
     });
     // a third-person camera behind and above you: drag to look around, pinch or scroll to zoom
-    const tx = m ? m.x : 0, ty = (m ? m.y * 0.6 : 0) + 2.4, tz = m ? m.z : 0, pitch = Math.max(0.15, Math.min(1.35, el - 0.3)), dist = 21 * zoom;
+    const tx=m?m.x:0,ty=(m?m.y*.6:0)+2.8,tz=m?m.z:0,pitch=Math.max(.12,Math.min(1.2,el-.3)),dist=24*zoom;
     cT.set(cT.x + (tx - cT.x) * Math.min(1, dt * 10), cT.y + (ty - cT.y) * Math.min(1, dt * 10), cT.z + (tz - cT.z) * Math.min(1, dt * 10));
     cam.position.set(cT.x + Math.sin(az) * Math.cos(pitch) * dist, cT.y + Math.sin(pitch) * dist, cT.z + Math.cos(az) * Math.cos(pitch) * dist);
     cam.lookAt(cT); cam.aspect = rc.width / rc.height; cam.updateProjectionMatrix();
     renderer.render(scene, cam);
   }
   function worldOff() {
-    worldG.visible = false; Object.keys(tokens).forEach(k => { tokens[k].visible = true; }); Object.keys(pets).forEach(k => { pets[k].visible = true; });
+    worldG.visible=false;worldHidden.forEach((v,o)=>{o.visible=v;});worldHidden.clear();scene.background=null;Object.keys(tokens).forEach(k=>{tokens[k].visible=true;});Object.keys(pets).forEach(k=>{pets[k].visible=true;});
     cD = 130; pkz = 1;   // the board view eases back in
   }
   function frame(now) {
@@ -1573,7 +1587,7 @@ const B3 = (function () {
     if (api.auto && !api.low) { const dt = now - fL; if (fL && dt < 400) { fN++; if (fN > 40) fT += dt; if (fN === 140) { if (fT / 100 > 40) api.quality('low'); api.auto = false; } } }
     fL = now;
     for (let i = tw.length - 1; i >= 0; i--) { const a = tw[i], f = Math.min(1, (now - a.t0) / a.ms); a.fn(f); if (f >= 1) { tw.splice(i, 1); a.res(); } }
-    if (api.showing && api.home && showChar) { drawShow(now); return; }
+    if (api.showing && api.home && showChar && (!api.world?.on || api.world.profileActive)) { drawShow(now); return; }
     const t = now / 1000, mv = still ? 0 : 1;
     if (api.home && mv && !ptr.size) az += 0.0016;
     cars.forEach(c => { const d = c.userData; d.u = (d.u + d.v * 0.016 * mv) % 4; const s = Math.floor(d.u), f = d.u - s, r = 13 + d.lane, P = [[r, r], [-r, r], [-r, -r], [r, -r], [r, r]], a = P[s], b = P[s + 1]; c.position.set(a[0] + (b[0] - a[0]) * f, 0, a[1] + (b[1] - a[1]) * f); c.rotation.y = [Math.PI, Math.PI / 2, 0, -Math.PI / 2][s]; });
@@ -1676,7 +1690,7 @@ let myId = '', Net = { db: null, user: null, ref: null, unsub: null, canWrite: t
 const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }, del(k) { try { localStorage.removeItem(k); } catch (e) {} } };
 const ctx = () => ({ now: Date.now(), rand: Math.random, die: () => { try { return 1 + crypto.getRandomValues(new Uint32Array(1))[0] % 6; } catch (e) { return 1 + Math.floor(Math.random() * 6); } } });
 const LOOK0 = () => ({ skin: 0, hair: 'short', hc: 0, outfit: 'tee', hat: '', acc: '', bg: 'paper' });
-const F = { page: 'create', wtab: 'style', cat: 'body', filt: 'outfit', sel: null, reset: false, leave: false, name: '', look: LOOK0(), pet: '', mode: 'classic', turnTimer: 0, max: 4, bots: 0, difficulty: 'medium', code: '', ln: 2, cpu: 1, lc: 2 };
+const F = { page: 'world', wtab: 'style', cat: 'body', filt: 'outfit', sel: null, reset: false, leave: false, name: '', look: LOOK0(), pet: '', mode: 'classic', turnTimer: 0, max: 4, bots: 0, difficulty: 'medium', code: '', ln: 2, cpu: 1, lc: 2 };
 let settings = Object.assign({ sound: true, music: true, calm: false, admin: false, follow: true }, store.get('stakkz-settings') || {});
 /* the account: coins, loot boxes, items and stats. The server keeps it; this is the page's copy of it. */
 const freshWallet = () => ({ v: 3, t: 0, coins: 10000, boxes: 1, own: [], claimed: [], grants: [], games: {}, gb: {}, played: 0, wins: 0, stats: { earned: 0, rent: 0, bought: 0, kos: 0, best: 0, opened: 0 } });
@@ -2193,7 +2207,7 @@ const pick = (a, k, list, cur, cls) => '<div class="seg ' + (cls || '') + '" rol
 const seg = (k, opts, cls) => pick('seg', k, opts, F[k], cls);
 const row = (label, html) => '<div class="fld"><span class="lbl">' + label + '</span>' + html + '</div>';
 const xBtn = () => '<button class="ib" data-a="close" aria-label="Close">' + ico('x', 16) + '</button>';
-const PAGES = [['create', 'Create party'], ['join', 'Join party'], ['me', 'Profile'], ['shop', 'Shop']];
+const PAGES = [['world','World'],['me','Profile'],['shop','Shop']];
 const CATS = [['body', 'Body'], ['outfit', 'Outfit'], ['hat', 'Hat'], ['acc', 'Extra'], ['pet', 'Pet'], ['bg', 'Scene']];
 const FILTS = [['outfit', 'Outfits'], ['hat', 'Hats'], ['acc', 'Extras'], ['pet', 'Pets'], ['bg', 'Scenes']];
 const lengthRow = () => row('Choose a mode', seg('mode', [[25, 'QUICK · 25m'], [35, 'FAST FUN · 35m'], [45, 'LONG · 45m'], ['classic', 'Classic']], 'modes') +
@@ -2304,7 +2318,7 @@ async function spinLoot() {
 /* behind the menu the stage shows the city; on Me and Shop it shows your character, live, on its scene */
 /* sound and music switches, the same wherever they appear */
 const muteBtns = () => [['sound', 'Sound effects'], ['music', 'Music']].map(q => '<button class="ib' + (settings[q[0]] ? '' : ' off') + '" data-a="mute" data-k="' + q[0] + '" aria-label="' + q[1] + '" aria-pressed="' + !!settings[q[0]] + '">' + ico(q[0], 20) + '</button>').join('');
-const PH = { create: 'Create a party', join: 'Join a party', me: 'Profile', shop: 'Shop' };
+const PH = { world:'The world', me:'Profile',shop:'Shop' };
 /* The title screen: the logo drops onto the grid, then the two ways into a game with friends, and the rest underneath. */
 /* Guests play straight away; signing up keeps the same coins and items and syncs them to every device. */
 const acctLabel = () => !authInfo.persistent ? '' : authInfo.registered ? 'Signed in: ' + esc(authInfo.username) : 'Sign up / Log in';
@@ -2315,14 +2329,7 @@ function titleFoot() {
     (wallet.boxes ? '<button class="pill hot" data-a="loot" data-v="go" aria-label="Spin a loot box">' + lootImg(18) + wallet.boxes + '</button>' : '') + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button>';
   patchHTML(f, html);
 }
-function showTitle(back) {
-  const t = $('#title'); t.hidden = false; t.className = 'bg-paper' + (back ? ' settled' : '');
-  t.innerHTML = '<div class="tbox">' + logo('hero') + '<p class="ttag">Buy the city. Bankrupt your friends.</p>' +
-    '<div class="tgo"><button class="btn go" data-a="go" data-v="create">Create party</button><button class="btn go" data-a="go" data-v="join">Join party</button></div>' +
-    '<div class="tmore"><button class="btn acct" id="tacct" data-a="acct" hidden></button><button class="btn" data-a="go" data-v="me">Profile</button><button class="btn hotb" data-a="go" data-v="shop">Shop</button></div>' +
-    '<div class="tfoot" id="tfoot"></div></div>';
-  titleFoot();
-}
+function showTitle(){F.page='world';hideTitle();renderHome(true);}
 function hideTitle() {
   const t = $('#title'); if (t.hidden) return;
   t.hidden = true; t.className = 'bg-paper'; t.replaceChildren();
@@ -2370,8 +2377,12 @@ function patchHTML(root, html) {
 }
 let lastHomeSceneKey = '';
 function renderHome(soft=false) {
-  F.wtab = F.page === 'shop' ? 'shop' : 'style';
-  $('#app').dataset.page = F.page;
+  F.wtab=F.page==='shop'?'shop':'style';
+  $('#app').dataset.page=F.page;
+  if(F.page==='world'){
+    $('#side').replaceChildren();
+    B3.show(null);plazaSync();return;
+  }
   const off = Net.ready && !Net.db ? '<p class="note">Parties need a connection to the game server. Play works without one.</p>' : Net.ready && !Net.canWrite ? '<p class="note">Your access is view-only. Ask the owner of this page to make you a Contributor.</p>' : '';
   let h = '<header class="hd"><button class="logob" data-a="title" aria-label="Back to the start">' + logo('xl') + '</button><div class="tools">' + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button><button class="ib" data-a="settings" aria-label="Settings">' + ico('gear', 20) + '</button></div></header>' +
     '<div class="seg nav" role="tablist">' + PAGES.map(p => '<button data-a="page" data-v="' + p[0] + '" role="tab" aria-selected="' + (F.page === p[0]) + '" class="' + (F.page === p[0] ? 'on' : '') + (p[0] === 'shop' ? ' hot' : '') + '">' + p[1] + '</button>').join('') + '</div><h1 class="ph">' + PH[F.page] + '</h1>' +
@@ -2575,7 +2586,7 @@ const Plaza = { ws: null, you: null, tries: 0, timer: 0, sent: null, sentAt: 0, 
 const plazaCol = n => PC[[...String(n || '')].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) % PC.length];
 const PLAZA_ON = true;    // the shared world ships switched off until it is tested live
 function plazaWanted() { return PLAZA_ON && !!(Net.ready && Net.db && B3.ok) && $('#app').dataset.screen !== 'game'; }
-function plazaShown() { const s = $('#app').dataset.screen; return plazaWanted() && (s === 'lobby' || (s === 'home' && F.page !== 'me' && F.page !== 'shop')); }
+function plazaShown() { const s=$('#app').dataset.screen;return plazaWanted()&&(s==='home'||s==='lobby'); }
 function plazaSync() {
   if (!B3.ok || !B3.world) return;
   const want = plazaWanted();
@@ -2583,7 +2594,7 @@ function plazaSync() {
   if (!want && Plaza.ws) plazaClose();
   const show = plazaShown(), sig = JSON.stringify([F.look, F.name]);
   if (show && (!B3.world.me || sig !== Plaza.sig)) { const changed = !!B3.world.me; Plaza.sig = sig; B3.world.setMe(F.look, plazaCol(F.name || 'You'), F.name || 'You'); if (changed) { clearTimeout(Plaza.restyleT); Plaza.restyleT = setTimeout(() => plazaSend({ restyle: 1 }), 2000); } }
-  B3.world.on = show; $('#wui').hidden = !show;
+  B3.world.on=show;$('#wui').hidden=!show;if(show&&!B3.world.profileActive)B3.show(null);
   if (show) plazaCount();
 }
 function plazaSend(m) { const ws = Plaza.ws; if (ws && ws.readyState === 1 && Plaza.you) { try { ws.send(JSON.stringify(m)); } catch (e) {} } }
@@ -3023,8 +3034,8 @@ B3.onPick = i => {
 /* ================= boot ================= */
 (function () {
   const h = (location.hash || '').slice(1).toUpperCase();
-  if (/^[A-Z]{4}$/.test(h)) { F.page = 'join'; F.code = h; }
-  applySettings(); renderHome();   // everyone arrives straight in the plaza; the logo still opens the title screen
+  /* Old Monopoly invite links no longer change the social-world landing screen. */
+  applySettings(); renderHome();   // everyone enters the shared grassy world.
   if (!B3.ok) toast('3D graphics are switched off in this browser, so the board cannot be drawn.');
   let lastU = U();
   addEventListener('resize', () => { if (U() === lastU) return; lastU = U(); if (!G) renderHome(); else if (V && V.phase === 'lobby') renderLobby(); else if (V) renderGame(null, true); });
