@@ -30,3 +30,18 @@ jobs:
         run: node tests/integration.mjs
       - name: Long-running bot gameplay simulations
         run: node tests/bot-simulation.mjs
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save playwright@1.56.1
+      - name: Confirm headless Chrome is installed
+        run: google-chrome --version
+      - name: Test desktop UI and iPhone account-to-game handoff
+        run: node tests/browser-smoke.mjs
