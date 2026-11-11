@@ -38,6 +38,15 @@ const url='http://127.0.0.1:'+port+'/';
 const errors=[];
 async function observe(page,name){
   page.on('pageerror',e=>errors.push(name+': '+e.message));
+  /* Validate UI and account sync independently of GPU/SwiftShader availability.
+     Real-device 3D performance still requires separate manual QA. */
+  await page.addInitScript(() => {
+    const original=HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext=function(type,...args){
+      if(['webgl','webgl2','experimental-webgl'].includes(String(type)))return null;
+      return original.call(this,type,...args);
+    };
+  });
   await page.goto(url,{waitUntil:'domcontentloaded'});
   await page.waitForSelector('#title [data-a=go]');
 }
