@@ -2125,11 +2125,15 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'signout': {
-      try {if(sessionToken)await api('auth/logout',{});}catch(e){}
+      if (G) { toast('Leave the current game before signing out.'); break; }
+      try { if(sessionToken) await api('auth/logout',{}); }
+      catch(e) { toast(e.message || 'Could not sign out. Try again.'); break; }
       sessionToken=null;store.del('stakkz-session');activeKey=KEY;store.del('bigrent-room');store.del('stakkz-seal');
-      try {const r=await api('me');myId=r.id;Net.uid=myId;loadProfile(r.wallet);authInfo=await api('auth/me');}
-      catch(e){Net.db=null;}
-      renderHome();toast('Signed out on this device.');break;
+      try {
+        const r=await api('me'); myId=r.id;Net.uid=myId;loadProfile(r.wallet);
+        authInfo=await api('auth/me');
+      } catch(e){Net.db=null;}
+      renderHome(true);toast('Signed out on this device.');break;
     }
     case 'set': {
       const k = el.dataset.k, v = el.dataset.v;
@@ -2154,10 +2158,24 @@ document.addEventListener('click', async e => {
     case 'reset': try { await api('shop', { op: 'reset' }); } catch (er) { toast(er.message); break; } F.look = LOOK0(); F.pet = ''; F.reset = false; fixLook(); saveWallet(); closeModal(); if (!G) renderHome(); toast('Your progress is back to the start.'); break;
     case 'askleave': F.leave = !!el.dataset.v; refreshModal(); break;
     case 'quit': {
-      if (mode === 'online' && G && G.phase === 'play' && me >= 0 && G.players[me] && !G.players[me].out) { el.disabled = true; try { await api('party/' + G.code, { op: 'act', a: { t: 'quit' } }); } catch (er) {} }
+      if (mode === 'online' && G && G.phase === 'play' && me >= 0 && G.players[me] && !G.players[me].out) {
+        el.disabled = true;
+        try { await api('party/' + G.code, { op: 'act', a: { t: 'quit' } }); }
+        catch (er) { el.disabled = false; toast(er.message || 'Could not leave the game.'); break; }
+      }
       goHome(); break; }
     case 'leave': {
-      if (mode === 'online' && G && G.phase === 'lobby' && me >= 0) { el.disabled = true; const code = G.code; if (Net.unsub) { Net.unsub(); Net.unsub = null; } try { await lobbyJob; await api('party/' + code, { op: 'leave' }); } catch (er) {} }
+      if (mode === 'online' && G && G.phase === 'lobby' && me >= 0) {
+        el.disabled = true; const code = G.code;
+        try {
+          await lobbyJob;
+          await api('party/' + code, { op: 'leave' });
+        } catch (er) {
+          el.disabled = false;
+          toast(er.message || 'Could not leave the party. Check your connection.');
+          break;
+        }
+      }
       goHome(); break; }
     case 'again': {
       if (mode === 'local') { closeModal(); $('#confetti').hidden = true; startLocal(); break; }
@@ -2222,9 +2240,19 @@ B3.onPick = i => { if ($('#veil').hidden && $('#app').dataset.screen === 'game' 
   capsReady.then(() => {
     if (!G) { const a = document.activeElement, id = a && a.id, pos = a && a.selectionStart; renderHome(); if (id) { const n = document.getElementById(id); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } } }
     if (Net.grant) toast(fmt(Net.grant.coins) + ' coins' + (Net.grant.boxes ? ' and ' + Net.grant.boxes + ' loot boxes' : '') + ' were added to your account.');
-    const saved = store.get('bigrent-room');
-    if (saved && !G && Net.db) joinRoom(saved, true);
-    else if (!saved && !G && Net.db && authInfo.registered) api('my-party').then(r=>{ if(r.code && !G) joinRoom(r.code,true); }).catch(()=>{});
+    /* A saved local code may be stale (especially after signing in on another
+       device). Try it first, then ask the server for this account's live party. */
+    (async () => {
+      if (!Net.db || G) return;
+      const saved = store.get('bigrent-room');
+      if (saved) await joinRoom(saved, true);
+      if (!G && authInfo.registered) {
+        try {
+          const r = await api('my-party');
+          if (r.code && r.code !== saved && !G) await joinRoom(r.code,true);
+        } catch (e) {}
+      }
+    })();
   });
 })();
 </script>
