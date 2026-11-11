@@ -65,6 +65,19 @@ function partyOp(code, op, user, body) {
 }
 
 const buckets = new Map();
+const authAttempts = new Map();
+function authLimit(req, type, username) {
+  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress).split(',')[0].trim();
+  const key = type + ':' + ip + ':' + (type === 'login' ? String(username||'').toLowerCase() : '');
+  const now=Date.now(), windowMs=type==='login'?600000:3600000, max=type==='login'?5:6;
+  const rec=authAttempts.get(key);
+  if (rec && now-rec.since < windowMs && rec.count >= max) return {blocked:true,key};
+  if (!rec || now-rec.since >= windowMs) authAttempts.set(key,{since:now,count:0});
+  if (authAttempts.size>5000) authAttempts.clear();
+  return {blocked:false,key};
+}
+function authFailed(key) { const rec=authAttempts.get(key); if(rec)rec.count++; }
+function authSucceeded(key) { authAttempts.delete(key); }
 function allowed(ip) { const now = Date.now(), b = buckets.get(ip) || { n: 80, t: now }; b.n = Math.min(80, b.n + (now - b.t) / 1000 * 20); b.t = now; buckets.set(ip, b); if (buckets.size > 5000) buckets.clear(); if (b.n < 1) return false; b.n--; return true; }
 const send = (res, code, o) => { const buf = Buffer.from(JSON.stringify(o)); res.writeHead(code, { 'Content-Type': 'application/json', 'Content-Length': buf.length, 'Cache-Control': 'no-store' }); res.end(buf); };
 const read = req => new Promise((ok, no) => { let n = 0; const parts = []; req.on('data', c => { n += c.length; if (n > 20000) { no(new Error('big')); req.destroy(); } else parts.push(c); }); req.on('end', () => { try { ok(JSON.parse(Buffer.concat(parts).toString('utf8') || '{}')); } catch (e) { no(e); } }); req.on('error', no); });
@@ -77,22 +90,26 @@ async function api(req, res, parts) {
   const key = String(req.headers.authorization || '').replace(/^Bearer /, '');
   if (parts[0] === 'auth' && req.method === 'POST' && ['register','login','logout'].includes(parts[1])) {
     let b; try { b = await read(req); } catch (e) { return send(res, 400, { message:'Invalid request.' }); }
+    const guard=authLimit(req,parts[1],b.username);
+    if(guard.blocked) return send(res,429,{message:parts[1]==='login'?'Too many incorrect passwords. Try again in ten minutes.':'Too many sign-up attempts. Try again later.'});
     try {
       if (parts[1] === 'register') {
         if (!cloud) return send(res, 503, { message:'Account creation requires persistent storage. The host has not configured it yet.' });
         if (!/^[a-f0-9]{48}$/.test(key)) return send(res, 401, { message:'A guest player key is required to register.' });
         const id = idOf(key), old = account(id);
         const result = auth.register(b.username, b.password, id);
+        authSucceeded(guard.key);
         core.setProfile(old, { name: result.username.slice(0,12) });
         dirty = true;
         return send(res, 200, { token:result.token, username:result.username, id, registered:true });
       }
       if (parts[1] === 'login') {
         const result = auth.login(b.username,b.password);
+        authSucceeded(guard.key);
         return send(res, 200, { token:result.token, username:result.username, id:result.id });
       }
       auth.logout(key); return send(res, 200, {ok:true});
-    } catch (e) { return send(res, 400, { message:e.message }); }
+    } catch (e) { if(parts[1]==='login'||parts[1]==='register') authFailed(guard.key); return send(res, 400, { message:e.message }); }
   }
   const session = auth.authenticate(key);
   if (!session && !/^[a-f0-9]{48}$/.test(key)) return send(res, 401, { message: 'Missing or expired player session.' });
