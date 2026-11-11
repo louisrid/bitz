@@ -78,7 +78,8 @@ try {
   await pc.waitForSelector('#app[data-screen=game]',{timeout:20000});
   console.log('Desktop modal, party, AI opponents and start-game UI passed.');
 
-  const phoneContext=await browser.newContext({...devices['iPhone 13'],browserName:undefined});
+  const {defaultBrowserType, ...iphone} = devices['iPhone 13'];
+  const phoneContext=await browser.newContext(iphone);
   const phone=await phoneContext.newPage();
   await observe(phone,'iPhone');
   await phone.locator('#title [data-a=go][data-v=me]').click();
