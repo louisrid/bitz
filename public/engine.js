@@ -239,6 +239,14 @@
     s.fx.push({ t: 'win' });
     log(s, list[0], list.map(function (i) { return nm(s, i); }).join(' and ') + ' won the game!');
   }
+  function chaosStep(s0, ctx) {
+    if (!s0 || s0.phase !== 'play' || !s0.endAt || ctx.now < s0.endAt-300000 || s0.chaosStarted) return s0;
+    var s=clone(s0);
+    s.chaosStarted=true; s.trade=null; s.fx=[];
+    s.v++; s.w='chaos:'+ctx.now;
+    log(s,-1,'FINAL CHAOS! Rents are doubled. Trading has closed.');
+    return s;
+  }
   function expire(s0, ctx) {
     if (!s0 || s0.phase !== 'play' || !s0.endAt || ctx.now < s0.endAt) return s0;
     var s = clone(s0);
@@ -609,7 +617,7 @@
     return s;
   }
 
-  var E = { T: T, HC: HC, GN: GN, GROUPS: GROUPS, RAILS:RAILS, DECKN: DECKN, newRoom: newRoom, join: join, leave: leave, restyle: restyle, again: again, start: start, expire: expire, chaos:chaos, act: act, cur: cur, owner: owner, lvl: lvl, rent: rent,
+  var E = { T: T, HC: HC, GN: GN, GROUPS: GROUPS, RAILS:RAILS, DECKN: DECKN, newRoom: newRoom, join: join, leave: leave, restyle: restyle, again: again, start: start, expire: expire, chaosStep:chaosStep, chaos:chaos, act: act, cur: cur, owner: owner, lvl: lvl, rent: rent,
     props: props, worth: worth, ownsGroup: ownsGroup, canBuild: canBuild, canSellHouse: canSellHouse, canSellProp: canSellProp, tradeable: tradeable, isProp: isProp, debtTotal: debtTotal, setOf: setOf };
   root.Engine = E;
   if (typeof module !== 'undefined' && module.exports) module.exports = E;
