@@ -1,5 +1,21 @@
 # Stakkz beta handoff for Claude — 11 November 2026
 
+## LATEST: PART 2 — 3D VISUALS AND POLISH
+
+Work is committed on **`beta-ui-bots-account-sync-20261111`** and deploys ONLY to the isolated Render beta service. **Do not replace the Three.js scene, do not modify production `main`, and do not overwrite the Part 1 engine changes below.**
+
+- Enhanced the original `public/index.html` Three.js scene in place. The 8 district identities use subtle building colour, roof-height, storefront and illuminated-window variations: brick, suburb, entertainment, shopping, centre, commercial, modern residential and luxury skyline. Retains all 40 board tiles, original geometry, names and controls.
+- Added 4 small station canopies, signal lamps and a miniature bench; added low-cost glowing utility pulses to the existing Fusion Plant and Hydro Core. Original moving cars, ferris wheel, balloon, shops and city remain.
+- Upgraded property builds with more detailed miniature houses and a landmark hotel with lit windows, roof beacon and gold trim. Hotels still use the Part 1 3-house upgrade and original hotel rent. Brief construction particles, smoothly growing building meshes, property rings and completed-colour-set celebrations. Removed obsolete geometry/materials on house replacement.
+- Six tokens standing on the same tile now use adaptive spacing **and scaling**, restoring their normal size when they separate.
+- Part 1 station `travel` action emits dedicated visual FX. `B3.trainTravel` draws an ephemeral glowing 3D route and animates a tiny train alongside the current player's token in about 820 ms. It cleans up GPU resources and avoids camera chase/snaps. Fast/reduced-motion paths remain instant. No additional game action or destination rent.
+- Improved cash and rent: flying coins reused, big rent highlights, Start cash celebration, a brief City Fund chest opening, existing Lucky Dip card flip retained. Shortened unnecessary auction camera close-ups and removed 30-second forced camera hold.
+- Dynamic evening ambience and illuminated windows. Final Chaos dims the city very slightly, changes accent lighting and announces doubled rent with a short banner, without replacing the canvas or resizing panels.
+- Fixed camera/layout glitches by only resizing the WebGL renderer if stage dimensions actually changed; keeping user orbit and zoom across tabs, orientation changes and repeated resizes. Preserved existing Profile-width desktop split and original compact mobile layout.
+- Added read-only `B3.visualStats()` for QA and expanded `tests/visual-stage.mjs` to capture desktop and iPhone-sized Chrome screenshots of the city, a six-person shared station, upgraded hotel and station arrival. Validates 8 districts, 4 stations, 2 utilities, 1 hotel, 6 tokens, three destination highlights, Final Chaos lighting, camera stability on repeated resize, and animation cleanup.
+- **Direct executed checks in this session:** complete Part 1 rule regression suite, Easy/Medium/Hard long-running bot simulations, and V8 parsing of the latest browser script passed. GitHub Actions for the latest Part 2 commit were queued due to the earlier commit backlog at last check; do **not claim** that the latest browser/WebGL and hosted DB jobs have all passed until they complete.
+- Do not change `STAKKZ_DATABASE_URL` or `STAKKZ_SECRET`. The free test PostgreSQL expires **11 December 2026**. No real iPhone Safari test has been performed.
+
 ## LATEST: GAMEPLAY FINALISATION PART 1, IMPLEMENTED ON BETA
 
 This section supersedes earlier gameplay mode and player-count descriptions. **Keep this implementation when doing Part 2, which is focused on polish of the existing 3D world. Do not rebuild.**
