@@ -576,6 +576,27 @@ button.chip.on{background:var(--ink);color:var(--paper)}
 #dock .btns .btn{height:clamp(46px,6vh,54px);padding:0 22px;font-size:clamp(17px,1.8vw,20px);border-width:2.5px;border-radius:14px;box-shadow:0 4px 0 var(--ink)}
 #dock .btns .btn.go{height:clamp(58px,8vh,72px);min-width:min(240px,70%);padding:0 34px;font-size:clamp(22px,2.6vw,28px);border-width:3px;border-radius:18px;box-shadow:0 6px 0 var(--ink);order:-1;flex-basis:100%;max-width:340px}
 #dock .btns .btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+:root{--fw:clamp(200px,20vw,320px)}
+#fside{position:fixed;left:0;top:0;bottom:0;width:var(--fw);z-index:15;background:#fff;border-right:3px solid var(--ink);display:none;flex-direction:column;font-family:var(--ui)}
+html.fopen #fside{display:flex}
+html.fopen #app{margin-left:var(--fw)}
+.fhead{display:flex;align-items:center;gap:8px;padding:14px 12px 10px;border-bottom:3px solid var(--ink)}
+.fhead b{font-size:22px;font-weight:400}.fhead #fcount{flex:1;font-size:14px}
+#flist{flex:1;overflow-y:auto;padding:8px;display:grid;gap:8px;align-content:start}
+.fr{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px;width:100%;text-align:left;background:#fff;border:2.5px solid var(--ink);border-radius:14px;padding:6px 8px;box-shadow:3px 4px 0 var(--ink);font:400 16px/1.15 var(--ui);cursor:pointer}
+.fr:active{transform:translate(2px,3px);box-shadow:1px 1px 0 var(--ink)}
+.fr .ava{width:46px;height:46px}
+.fr b{display:block;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr small{display:flex;align-items:center;gap:5px;font-size:13px}
+.fr small i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ink);background:#fff}
+.fr small i.plaza{background:#3DDC84}.fr small i.game{background:var(--sun)}
+.fnote{font-size:13px;padding:6px 4px}
+#ftab{position:fixed;left:0;top:50%;z-index:15;transform:translateY(-50%);writing-mode:vertical-rl;padding:16px 8px;background:var(--sun);border:3px solid var(--ink);border-left:0;border-radius:0 14px 14px 0;box-shadow:3px 4px 0 var(--ink);font:400 17px/1 var(--ui)}
+html.fopen #ftab{display:none}
+@media (max-width:900px){html.fopen #app{margin-left:0}#fside{width:min(78vw,300px);box-shadow:6px 0 0 rgba(0,0,0,.15)}#ftab{top:auto;bottom:120px;transform:none}}
+.fprof{display:grid;justify-items:center;gap:8px}
+.fprof .pv{display:grid;place-items:center;width:100%;border:2.5px solid var(--ink);border-radius:16px;padding:10px}
+.wear{display:grid;gap:6px}.wrow{display:flex;justify-content:space-between;align-items:center;gap:10px;border:2.5px solid var(--ink);border-radius:12px;padding:8px 12px;font-family:var(--ui)}.wrow b{font-weight:400;font-size:17px}.wrow small{font-size:13px}
 .tmore .btn.acct{background:var(--ink);color:var(--paper)}
 .tmore .btn.acct.in{background:var(--paper);color:var(--ink)}
 .guestbar{display:flex;flex-wrap:wrap;align-items:baseline;gap:calc(var(--k)*4px) calc(var(--k)*10px);width:100%;text-align:left;border:var(--bw) solid var(--ink);border-radius:var(--r);padding:calc(var(--k)*9px) calc(var(--k)*13px);background:var(--sun);color:var(--ink);font:inherit;cursor:pointer;margin-bottom:calc(var(--k)*10px)}
@@ -618,6 +639,7 @@ button.chip.on{background:var(--ink);color:var(--paper)}
 
 <div id="bd" class="bg-paper"></div>
 <canvas id="gl" aria-hidden="true"></canvas>
+<aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
 <div id="app" data-screen="home">
   <aside id="side" class="panel"></aside>
   <aside id="hud" class="panel" hidden>
@@ -2520,6 +2542,32 @@ function renderActions() {
   growBars();
 }
 let autoV = -1, nudgeV = -1, autoEndV = -1;
+/* ================= friends: everyone with an account, always on the left ================= */
+let FRIENDS = [];
+(function () { let min = null; try { min = localStorage.getItem('stakkz-fmin'); } catch (e) {} document.documentElement.classList.toggle('fopen', min === null ? innerWidth > 900 : min !== '1'); })();
+function friendsToggle() {
+  const open = !document.documentElement.classList.contains('fopen'); document.documentElement.classList.toggle('fopen', open);
+  try { localStorage.setItem('stakkz-fmin', open ? '0' : '1'); } catch (e) {}
+  if (B3.ok) setTimeout(() => B3.resize(), 30);
+}
+const fStatus = f => f.at === 'plaza' ? '<i class="plaza"></i>In the plaza' : f.at === 'game' ? '<i class="game"></i>In a game' : '<i></i>' + (f.seen ? ago(f.seen) : 'Offline');
+function ago(t) { const m = Math.max(0, Math.round((Date.now() + skew - t) / 60000)); return m < 2 ? 'Just now' : m < 60 ? m + 'm ago' : m < 1440 ? Math.round(m / 60) + 'h ago' : Math.round(m / 1440) + 'd ago'; }
+function renderFriends() {
+  const on = FRIENDS.filter(f => f.at).length;
+  $('#fcount').textContent = on + ' online'; $('#fon').textContent = on ? '· ' + on : '';
+  patchHTML($('#flist'), (FRIENDS.length ? FRIENDS.map((f, i) => '<button class="fr" data-a="friend" data-i="' + i + '">' + ava(f.l, plazaCol(f.n), 46) + '<span><b>' + esc(f.n) + '</b><small>' + fStatus(f) + '</small></span></button>').join('') : '<p class="fnote">No friends yet. Everyone who signs up shows up here.</p>') +
+    (authInfo.registered ? '' : '<p class="fnote">Sign up in Profile so your friends can see you here.</p>'));
+}
+async function loadFriends() { if (!Net.ready || !Net.db) return; try { const r = await api('friends'); FRIENDS = r.friends || []; renderFriends(); } catch (e) {} }
+setInterval(loadFriends, 10000); setTimeout(loadFriends, 1500);
+function friendModal(i) {
+  const f = FRIENDS[i]; if (!f) return; const L2 = f.l || {};
+  const worn = [['outfit', L2.outfit], ['hat', L2.hat], ['acc', L2.acc], ['pet', f.pet], ['bg', L2.bg]].filter(x => x[1] && ITEMS[x[1]] && ITEMS[x[1]][2] > 0);
+  openModal('friend', () => '<div class="mhead"><h2>' + esc(f.n) + '</h2>' + xBtn() + '</div><div class="fprof"><span class="pv bg-' + bgOf(L2) + '">' + fig(L2, plazaCol(f.n), 190) + petImg(f.pet, 56) + '</span>' +
+    '<p class="fine">@' + esc(f.u || f.n) + ' · ' + fStatus(f).replace(/<i[^>]*><\/i>/, '') + ' · ' + (f.wins || 0) + ' wins in ' + (f.played || 0) + ' games</p></div>' +
+    '<h3>Wearing</h3><div class="wear">' + (worn.length ? worn.map(x => { const it = ITEMS[x[1]], ra = rarity(it[2]); return '<div class="wrow r' + ra[0] + '"><b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + ' · ' + ra[1] + '</small></div>'; }).join('') : '<p class="fine">The starter look.</p>') + '</div>' +
+    '<button class="btn" data-a="close">Close</button>');
+}
 /* ================= the plaza connection =================
    Everyone outside a match is in one shared world. The page joins it on arrival and in lobbies, leaves it when a
    match starts (so players in a game disappear from the plaza) and rejoins when they come home. */
@@ -2870,6 +2918,8 @@ document.addEventListener('click', async e => {
       else { wardrobeModal(); if (tab === 'shop') { F.wtab = 'shop'; refreshModal(); } }
       renderActions(); break; }
     case 'tile': tileModal(i); break;
+    case 'fmin': friendsToggle(); break;
+    case 'friend': friendModal(+el.dataset.i); break;
     case 'emote': plazaEmote(el.dataset.v); break;
     case 'acct': F.page = 'me'; F.sel = null; renderHome(true); hideTitle(); $('#side').scrollTop = 0; if (!authInfo.registered) setTimeout(() => { const u = $('#auth-username'); if (u) u.focus(); }, 80); break;
     case 'title': showTitle(true); break;
