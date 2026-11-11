@@ -68,13 +68,26 @@ function setup(){
  const lt=new THREE.DirectionalLight(0xffe8ca,1.5);lt.position.set(5,8,6);profScene.add(lt);
  profCam=new THREE.PerspectiveCamera(34,1,.1,60);
 }
+function addWeaponVisual(q){
+ if(!q.obj)return;
+ const old=q.obj.getObjectByName('stakkz-weapon');if(old)q.obj.remove(old);
+ const holder=new THREE.Group();holder.name='stakkz-weapon';
+ // Parent geometry lives on the character group, visible to every player.
+ const pulse=q.weapon==='pulse';
+ const body=new THREE.Mesh(new THREE.BoxGeometry(pulse?.27:.2,pulse?.2:.18,pulse?1.02:.7),new THREE.MeshLambertMaterial({color:pulse?0x35cdea:0x404855}));
+ body.position.set(.8,1.55,.42);holder.add(body);
+ const barrel=new THREE.Mesh(new THREE.CylinderGeometry(pulse?.11:.075,pulse?.11:.075,pulse?.4:.28,8),new THREE.MeshBasicMaterial({color:pulse?0x7ffff0:0xffd977}));
+ barrel.rotation.x=Math.PI/2;barrel.position.set(.8,1.55,pulse?1.02:.87);holder.add(barrel);
+ const grip=new THREE.Mesh(new THREE.BoxGeometry(.13,.36,.16),new THREE.MeshLambertMaterial({color:0x20242c}));grip.position.set(.8,1.34,.35);holder.add(grip);
+ q.obj.add(holder);
+}
 function avatar(q){
  if(q.obj)modelScene.remove(q.obj);
  q.obj=B3.createAvatar(q.look||{},q.id===self?'#f9d34a':'#87dded');
  q.obj.position.set(q.x||0,q.y||0,q.z||0);
  q.obj.rotation.y=q.yaw||0;
  q.obj.traverse(node=>node.userData.swid=q.id);
- modelScene.add(q.obj);
+ modelScene.add(q.obj);addWeaponVisual(q);
 }
 function upsert(q){
  if(!q?.id)return;
@@ -111,7 +124,7 @@ function connect(){
 }
 function combatEvent(m){
  const p=players.get(m.id);
- if(m.event==='equip'){if(p)p.weapon=m.weapon;return;}
+ if(m.event==='equip'){if(p){p.weapon=m.weapon;addWeaponVisual(p);}return;}
  if(m.event==='health'){if(p)p.hp=m.hp;if(m.id===self)$w('sw-hp').textContent='Health '+m.hp+'/100';return;}
  if(m.event==='ko'){
    if(p){p.hp=0;p.respawnAt=m.respawnAt;}
@@ -138,7 +151,7 @@ function combatEvent(m){
  }
 }
 function shoot(){if(profileId)return;const p=players.get(self);if(!p||p.hp===0)return;request('shoot');}
-function equipWeapon(w){if(!['blaster','pulse'].includes(w))return;selectedWeapon=w;request('weapon',{weapon:w});document.querySelectorAll('[data-sw="weapon"]').forEach(b=>b.classList.toggle('active',b.dataset.id===w));}
+function equipWeapon(w){if(!['blaster','pulse'].includes(w))return;selectedWeapon=w;const me=players.get(self);if(me){me.weapon=w;addWeaponVisual(me);}request('weapon',{weapon:w});document.querySelectorAll('[data-sw="weapon"]').forEach(b=>b.classList.toggle('active',b.dataset.id===w));}
 function equip(id){if(!ITEMS[id]||!wallet.own.includes(id)&&ITEMS[id][2]!==0)return;
  let slot=ITEMS[id][0];if(slot==='pet')F.pet=id;else if(slot==='dye'){F.look.hc=4;}else F.look[slot]=id;
  styleChanged();api('me',acctBody()).then(()=>{if(players.has(self)){let p=players.get(self);p.look={...F.look};p.pet=F.pet;avatar(p);}}).catch(()=>{});}
