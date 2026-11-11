@@ -460,16 +460,19 @@ button.chip.on{background:var(--ink);color:var(--paper)}
 /* gameplay: compact, consistent controls with no panel-width changes */
 .seg.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(var(--k)*7px)}
 .seg.modes button{min-width:0;min-height:42px;white-space:normal}
+.seg.modes button:nth-child(n+3){border-top:var(--bw) solid var(--ink)}
+.seg.modes button:nth-child(3){border-left:0}
 .advanced{border:var(--bw) solid var(--ink);border-radius:var(--r);padding:calc(var(--k)*10px);background:var(--mist)}
 .advanced summary{cursor:pointer;font:400 max(14px,calc(var(--kf)*16px))/1.2 var(--ui)}
 .advanced[open]{display:grid;gap:var(--gap)}
 .station-choices{display:grid;grid-template-columns:1fr;gap:calc(var(--k)*9px)}
 .station-choices .btn{text-align:center;min-height:44px;white-space:normal}
-.chaos-tag{background:var(--hot);border:2px solid var(--ink);border-radius:10px;padding:5px 7px;font:700 12px/1.1 var(--text);white-space:nowrap}
+#stage .chaos-tag{position:absolute;top:calc(var(--k)*14px);left:50%;transform:translateX(-50%);z-index:5;pointer-events:none;background:var(--hot);border:2px solid var(--ink);border-radius:10px;padding:7px 10px;font:700 13px/1.1 var(--text);white-space:nowrap;box-shadow:2px 3px 0 var(--ink)}
 .chaos-tag[hidden]{display:none!important}
 .seg.tradepeople{display:flex;flex-wrap:wrap}
 .seg.tradepeople button{flex:1 1 28%;min-width:90px}
-@media (max-width:600px){.chaos-tag{font-size:10px;padding:4px}.seg.modes button{min-height:44px}}
+@media (max-width:900px){#stage .chaos-tag{top:calc(var(--k)*53px);font-size:11px;padding:5px 8px}}
+@media (max-width:600px){.seg.modes button{min-height:44px}}
 /* account & sync controls */
 .account-box{display:grid;gap:calc(var(--k)*10px);border:var(--bw) solid var(--ink);border-radius:var(--r);padding:calc(var(--k)*13px);background:var(--mist)}
 .account-box h3{font-size:max(14px,calc(var(--kf)*20px))}
@@ -518,7 +521,7 @@ button.chip.on{background:var(--ink);color:var(--paper)}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
 <div id="title" class="bg-paper" hidden></div>
 <div id="veil" hidden><div id="modal" class="card" role="dialog" aria-modal="true"></div></div>
@@ -1524,6 +1527,7 @@ function setScreen(s) {
   const app = $('#app'); if (app.dataset.screen === s) return; app.dataset.screen = s;
   const game = s === 'game';
   $('#side').hidden = game; $('#hud').hidden = !game; $('#view').hidden = !game;
+  if (!game) $('#chaosTag').hidden = true;
   document.documentElement.classList.toggle('roomy', !game); if (s !== 'home') { const t = $('#title'); t.hidden = true; t.innerHTML = ''; }
   if (s !== 'home') { B3.ok && B3.show(null); $('#bd').className = 'bg-paper'; }
   B3.home = !game; B3.ok && B3.resize();
@@ -1865,13 +1869,14 @@ function floatAt(el, html, cls) {
 }
 function renderGame(prev, fast) {
   const s = viewState(V); if (!s) return; const got = bank();
+  $('#chaosTag').hidden = s.phase !== 'play' || !E.chaos(s,Date.now()+skew);
   const c = s.phase === 'play' ? E.cur(s) : -1; B3.cur = c;
   { const ab = $('#aucbar'), a = s.stage === 'auction' ? s.auc : null; ab.hidden = !a; if (a) patchHTML(ab,'<b>Auction</b><span>' + esc(T[a.tile].n) + '</span><b>' + (a.by >= 0 ? money(a.bid) : 'No bids') + '</b>' + (a.by >= 0 ? ava(s.players[a.by].look, PC[a.by], 30) : '')); }
   // the light warms and the shadows lengthen as the match goes on
   if (B3.ok && s.startedAt) B3.setTime(s.phase === 'over' ? 1 : s.endAt ? (Date.now() - s.startedAt) / (s.endAt - s.startedAt) : Math.min(1, (Date.now() - s.startedAt) / 24e5));
   const top = Math.max.apply(null, s.players.map(p => p.cash).concat([1500]));
   const gh = $('#ghead'), gk = mode + s.code;
-  if (gh.dataset.k !== gk) { gh.dataset.k = gk; gh.innerHTML = logo('sm') + (mode === 'online' ? '<span class="codechip" aria-label="Party code">' + s.code + '</span>' : '') + '<span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><span id="clock" hidden></span><button class="ib" data-a="menu" aria-label="Menu">' + ico('menu', 16) + '</button>'; }
+  if (gh.dataset.k !== gk) { gh.dataset.k = gk; gh.innerHTML = logo('sm') + (mode === 'online' ? '<span class="codechip" aria-label="Party code">' + s.code + '</span>' : '') + '<span id="clock" hidden></span><button class="ib" data-a="menu" aria-label="Menu">' + ico('menu', 16) + '</button>'; }
   if (B3.ok) B3.markStations(s.stage==='travel' && me===c ? E.RAILS.filter(i=>i!==s.station) : []);
   const playersHTML = s.players.map((p, i) => {
     if (i === me) return '';
