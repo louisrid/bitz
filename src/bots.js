@@ -72,15 +72,14 @@ export function nextBotAction(s) {
     a=min<=cap && (skill>0 || Math.random()>.16) ? {t:'bid',amt:Math.min(cap,Math.max(min,s.auc.bid+noise(12,skill===2?75:40)|0))} : {t:'pass'};
   } else if(E.cur(s)===pi) {
     if(s.stage==='travel') {
-      const fee=E.owner(s,s.station)===pi?0:50;
-      const opts=E.RAILS.filter(i=>i!==s.station);
+      const fee=0, opts=E.railDest(s,pi);
       // Assess the next roll: move near affordable vacant properties, while
       // keeping more cash in Hard mode. No destination rent or Start bonus.
       const score=i=>[2,3,4,5,6,7,8,9,10,11,12].reduce((v,step)=>{
         const t=(i+step)%40;return v+(E.isProp(t)&&E.owner(s,t)<0&&T[t].p<p.cash-fee?Math.max(0,12-step):0);
       },0);
       opts.sort((a,b)=>score(b)-score(a));
-      const go=p.cash>=fee+([40,140,280][skill]) && Math.random()<[.37,.62,.82][skill];
+      const go=opts.length>0 && Math.random()<[.37,.62,.82][skill];
       a=go?{t:'travel',tile:skill===0?opts[Math.floor(Math.random()*opts.length)]:opts[0]}:{t:'stay'};
     }
     else if(s.stage==='debt') a=handleDebt(s,pi);

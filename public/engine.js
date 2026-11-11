@@ -469,11 +469,13 @@
     need(!chaos(s), 'Trading closes for the final five minutes');
     need(tr.gc + tr.tc + tr.gp.length + tr.tp.length > 0, 'Add something to the trade');
   }
+  // Trains run only between stations you own: you must own the station you are on and the one you go to.
+  function railDest(s, pi) { return s.station >= 0 && owner(s, s.station) === pi ? RAILS.filter(function (j) { return j !== s.station && owner(s, j) === pi; }) : []; }
   function finish(s) {
     if (s.phase === 'play' && s.stage === 'res') {
       if (s.players[cur(s)].jail) s.again = false;
-      if (s.station >= 0 && s.players[cur(s)].pos === s.station) s.stage = 'travel';
-      else s.stage = s.again ? 'roll' : 'act';
+      if (s.station >= 0 && s.players[cur(s)].pos === s.station && railDest(s, cur(s)).length) s.stage = 'travel';
+      else { s.station = -1; s.stage = s.again ? 'roll' : 'act'; }
     }
   }
 
@@ -521,13 +523,9 @@
         s.station = -1; s.stage = 'res'; break;
       case 'travel':
         need(pi === c && s.stage === 'travel' && s.station >= 0, 'No station travel is available');
-        need(RAILS.indexOf(i) >= 0 && i !== s.station, 'Choose a different station');
-        var departureOwner = owner(s, s.station);
-        var fee = departureOwner === pi ? 0 : 50;
-        need(p.cash >= fee, 'You need £50 to travel');
-        if (fee) xfer(s, pi, departureOwner >= 0 ? departureOwner : -1, fee);
-        s.fx.push({t:'travel',p:pi,from:p.pos,to:i,fee:fee});
-        log(s,pi,p.name+' travelled to '+T[i].n+(fee?' for £50.':' for free.'));
+        need(railDest(s, pi).indexOf(i) >= 0, 'You can only travel between stations you own');
+        s.fx.push({t:'travel',p:pi,from:p.pos,to:i,fee:0});
+        log(s,pi,p.name+' took the train to '+T[i].n+'.');
         p.pos = i; s.station = -1; s.again = false;
         endTurn(s,ctx); break;
       case 'end':
@@ -618,7 +616,7 @@
     return s;
   }
 
-  var E = { T: T, HC: HC, GN: GN, GROUPS: GROUPS, RAILS:RAILS, DECKN: DECKN, newRoom: newRoom, join: join, leave: leave, restyle: restyle, again: again, start: start, expire: expire, chaosStep:chaosStep, chaos:chaos, act: act, cur: cur, owner: owner, lvl: lvl, rent: rent,
+  var E = { T: T, HC: HC, GN: GN, GROUPS: GROUPS, RAILS:RAILS, railDest: railDest, DECKN: DECKN, newRoom: newRoom, join: join, leave: leave, restyle: restyle, again: again, start: start, expire: expire, chaosStep:chaosStep, chaos:chaos, act: act, cur: cur, owner: owner, lvl: lvl, rent: rent,
     props: props, worth: worth, ownsGroup: ownsGroup, canBuild: canBuild, canSellHouse: canSellHouse, canSellProp: canSellProp, tradeable: tradeable, isProp: isProp, debtTotal: debtTotal, setOf: setOf };
   root.Engine = E;
   if (typeof module !== 'undefined' && module.exports) module.exports = E;
