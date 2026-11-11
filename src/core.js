@@ -112,7 +112,19 @@ export function partyOp(s, op, user, body, now, code) {
       n = addBots(n, body.bots, body.difficulty, code); n.made = now;
     } else if (!s) refuse('No party with the code ' + code + '.');
     else if (op === 'join') { if (s.phase === 'lobby' && me < 0) n = E.join(s, user.id, name, user.look, user.pet); }
-    else if (op === 'leave') { if (s.phase === 'lobby' && me >= 0) { n = E.leave(s, user.id); if (!n.players.length) return { state: null, gone: true, credits: [] }; } }
+    else if (op === 'leave') {
+      if (s.phase === 'lobby' && me >= 0) {
+        n = E.leave(s, user.id);
+        /* Server-owned AI seats cannot host a party. Remove an empty bot-only
+           lobby, or promote the next human while preserving all bot seats. */
+        const humans = n.players.filter(p => !isBot(p));
+        if (!humans.length) return { state: null, gone: true, credits: [] };
+        if (isBot(n.players[0])) {
+          n.players = humans.concat(n.players.filter(isBot));
+          n.v++; n.w = 'host' + n.v;
+        }
+      }
+    }
     else if (op === 'style') {
       if (me < 0) refuse('You are not in this party.');
       if (s.phase === 'lobby') n = E.restyle(s, user.id, user.look, user.pet);
