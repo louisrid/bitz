@@ -17,7 +17,7 @@ const parties = new Map(), accounts = new Map(), watchers = new Map();   // code
 const CLOUD_URL = (process.env.STAKKZ_STORE_URL || '').replace(/\/$/, '');
 const CLOUD_KEY = process.env.STAKKZ_STORE_KEY || '';
 const cloud = !!(CLOUD_URL && CLOUD_KEY);
-let dirty = false, saved = {}, saving = false;
+let dirty = false, saved = {}, saveChain = Promise.resolve();
 const lastSeen = new Map();
 try { saved = JSON.parse(fs.readFileSync(DATA, 'utf8')); Object.entries(saved.parties || {}).forEach(([k, v]) => parties.set(k, v)); Object.entries(saved.accounts || {}).forEach(([k, v]) => accounts.set(k, v)); console.log('loaded', parties.size, 'parties and', accounts.size, 'accounts'); } catch (e) {}
 /* Accounts are also handed back to each browser sealed with this secret, so if a free host wipes the disk
@@ -25,12 +25,13 @@ try { saved = JSON.parse(fs.readFileSync(DATA, 'utf8')); Object.entries(saved.pa
 let SECRET = process.env.STAKKZ_SECRET || saved.secret || crypto.randomBytes(32).toString('hex');
 let auth = new AccountAuth(saved.auth, () => { dirty = true; });
 const seal = (id, w) => crypto.createHmac('sha256', SECRET).update(id + ':' + JSON.stringify(w)).digest('base64url');
+/* Serialise every snapshot in write order. A slow older save cannot overwrite a
+   newer one, and login/registration can explicitly await a durable write. */
 async function save(force = false) {
-  if (!dirty && !force) return;
-  if (saving) { dirty = true; return; }
-  saving = true; dirty = false;
+  if (!dirty && !force) return true;
+  dirty = false;
   const state = { secret: SECRET, parties: Object.fromEntries(parties), accounts: Object.fromEntries(accounts), auth: auth.export() };
-  try {
+  const write = async () => {
     if (cloud) {
       const res = await fetch(CLOUD_URL + '?on_conflict=id', {
         method: 'POST',
@@ -43,8 +44,11 @@ async function save(force = false) {
       await fs.promises.writeFile(DATA + '.tmp', JSON.stringify(state));
       await fs.promises.rename(DATA + '.tmp', DATA);
     }
-  } catch (e) { dirty = true; console.error('Stakkz save failed:', e.message); }
-  finally { saving = false; }
+  };
+  const op = saveChain.then(write,write);
+  saveChain = op.catch(()=>{});
+  try { await op; return true; }
+  catch (e) { dirty = true; console.error('Stakkz save failed:',e.message); return false; }
 }
 setInterval(save, 4000).unref();
 setInterval(() => { const now = Date.now(); parties.forEach((s, code) => { if (now - (s.touched || s.made || 0) > IDLE) { parties.delete(code); dirty = true; tell(code, null); } }); }, 600000).unref();
@@ -101,14 +105,16 @@ async function api(req, res, parts) {
         authSucceeded(guard.key);
         core.setProfile(old, { name: result.username.slice(0,12) });
         dirty = true;
+        if (!(await save(true))) return send(res, 503, { message:'Could not save the account. Please try signing in later.' });
         return send(res, 200, { token:result.token, username:result.username, id, registered:true });
       }
       if (parts[1] === 'login') {
         const result = auth.login(b.username,b.password);
         authSucceeded(guard.key);
+        if (!(await save(true))) return send(res, 503, { message:'Could not save the session. Please try again.' });
         return send(res, 200, { token:result.token, username:result.username, id:result.id });
       }
-      auth.logout(key); return send(res, 200, {ok:true});
+      auth.logout(key); if (!(await save(true))) return send(res,503,{message:'Could not safely complete sign-out.'}); return send(res, 200, {ok:true});
     } catch (e) { if(parts[1]==='login'||parts[1]==='register') authFailed(guard.key); return send(res, 400, { message:e.message }); }
   }
   const session = auth.authenticate(key);
