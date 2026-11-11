@@ -650,7 +650,7 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="shop">Shop</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><span class="wstat">Gold <em id="wgold">...</em> · +1,000/s</span><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="wstick"><i></i></div><button id="wjump" aria-label="Jump">Jump</button></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="shop">Shop</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><span class="wstat"><em id="wgold">...</em><small id="wrate">+1,000/s</small></span><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="wstick"><i></i></div><button id="wjump" aria-label="Jump">Jump</button></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
 <div id="title" class="bg-paper" hidden></div>
 <div id="veil" hidden><div id="modal" class="card" role="dialog" aria-modal="true"></div></div>
@@ -692,7 +692,7 @@ const DESC = { overalls: 'Built for hard graft on the building site.', track: 'G
   dye: 'Three loud colours for your hair: pink, blue and white.', glasses: 'For reading the small print.', scarf: 'A dash of red for cold streets.', cape: 'Sweep onto every square.', wings: 'Float above the competition.',
   sunset: 'Warm pink skies behind your character.', neon: 'A grid that glows behind you.', space: 'Stars as far as you can see.', goldbg: 'Pure shimmer. You earned it.',
   bird: 'Flaps beside you wherever you go.', pig: 'Tiny, pink and always following.', penguin: 'Waddles after you in a suit of its own.', dragon: 'A pocket-sized legend that flies.' };
-const BOX_PRICE = 8000; // a 25-minute game pays roughly three of these
+const BOX_PRICE = 500000;
 const fmt = n => Math.round(n).toLocaleString('en-GB');
 const rarity = p => p <= 5000 ? [0, 'Common'] : p <= 15000 ? [1, 'Rare'] : p <= 50000 ? [2, 'Epic'] : p <= 200000 ? [3, 'Legendary'] : [4, 'Mythical'];
 /* icon system: 24-unit grid, colour fill, 2-unit black outline. Used as inline SVG and painted onto the board. */
@@ -1725,11 +1725,20 @@ async function api(path, body) {
   let j = {}; try { j = await r.json(); } catch (e) {}
   if (j.now) skew = j.now - Date.now();
   if (!r.ok) throw { code: r.status >= 500 || r.status === 429 ? 'unavailable' : 'refused', message: j.message || 'That did not work. Try again.', state: j.state };
-  if (j.wallet) { setWallet(j.wallet); if (j.seal) store.set('stakkz-seal', { wallet: j.wallet, seal: j.seal }); }   // the sealed copy lets the server give the account back if it ever loses it
+  if (j.wallet) { setWallet(j.wallet); if (j.rate) goldSync({ rate: j.rate, boost: j.boost }); if (j.seal) store.set('stakkz-seal', { wallet: j.wallet, seal: j.seal }); }   // the sealed copy lets the server give the account back if it ever loses it
   return j;
 }
-function goldPaint() { const e = document.getElementById('wgold'); if (e && wallet) e.textContent = Math.floor(wallet.coins || 0).toLocaleString('en-GB'); }
-setInterval(goldPaint, 500);
+/* gold: the server owns the balance; between its answers the page counts up at the rate the server gave */
+const Gold = { rate: 1000, at: Date.now(), boost: null, live: false };
+function goldSync(j) { if (typeof j.gold === 'number' && wallet) wallet.coins = j.gold; if (j.rate) Gold.rate = j.rate; Gold.boost = j.boost ? { x: j.boost.x, until: Date.now() + j.boost.left } : null; Gold.at = Date.now(); Gold.live = true; goldPaint(); }
+function goldPaint() {
+  const now = Date.now(); if (Gold.boost && Gold.boost.until <= now) { Gold.boost = null; Gold.rate = 1000; }
+  if (wallet && Gold.live && typeof Plaza !== 'undefined' && Plaza.you) { const dt = Math.min(6000, now - Gold.at); wallet.coins = Math.floor(wallet.coins || 0) + Math.floor(dt * Gold.rate / 1000); }
+  Gold.at = now;
+  const e = document.getElementById('wgold'); if (e && wallet) e.textContent = Math.floor(wallet.coins || 0).toLocaleString('en-GB');
+  const r = document.getElementById('wrate'); if (r) { r.textContent = '+' + Gold.rate.toLocaleString('en-GB') + '/s' + (Gold.boost ? ' · ' + Math.ceil((Gold.boost.until - now) / 1000) + 's' : ''); r.classList.toggle('hot', !!Gold.boost); }
+}
+setInterval(goldPaint, 200);
 function setWallet(w) { wallet = newWallet(Object.assign({}, w, { v: 3 })); store.set('bigrent-wallet', Object.assign({}, wallet, { name: F.name, look: F.look, pet: F.pet })); }
 const refreshAcct = () => api('me').then(rerender, () => {});
 /* name and look are sent to the server a moment after they change; a game played on this device reports what it earned */
@@ -2611,6 +2620,7 @@ function plazaFeed(text) {
 }
 function plazaGot(d) {
   const W = B3.world;
+  if (typeof d.gold === 'number') return goldSync(d);
   if (d.you) { Plaza.you = d.you; W.clear(); (d.all || []).forEach(o => W.add(o, plazaCol(o.n))); plazaCount(); if (d.all && d.all.length) plazaFeed(d.all.length === 1 ? d.all[0].n + ' is here' : d.all.length + ' people are here'); return; }
   if (d.join) { W.add(d.join, plazaCol(d.join.n)); plazaFeed(d.join.n + ' joined'); plazaCount(); Snd('hop', 9); }
   if (d.leave) { const o = W.others.get(d.leave); if (o) plazaFeed(o.n + ' left'); W.drop(d.leave); plazaCount(); }

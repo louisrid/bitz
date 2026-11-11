@@ -6,7 +6,7 @@ import { ITEMS, HAIRS } from './shop.js';
 import { BOT_NAMES, BOT_LOOKS, isBot } from './bots.js';
 
 const E = globalThis.Engine;
-export const BOX_PRICE = 8000;
+export const BOX_PRICE = 500000, GOLD_RATE = 1000, AWAY_MS = 45000;
 const LOOT = [['coins', 8], [0, 30], [1, 28], [2, 18], [3, 11], [4, 5]];   // mostly items; coins are rare
 const rarity = p => (p <= 5000 ? 0 : p <= 15000 ? 1 : p <= 50000 ? 2 : p <= 200000 ? 3 : 4);
 const int = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.floor(Number(v) || 0)));
@@ -18,8 +18,19 @@ const refuse = m => { throw new Refused(m); };
 
 /* ---------- accounts ---------- */
 export function freshWallet() {
-  return { v: 3, t: 0, coins: 10000000, m1: 1, m10: 1, boxes: 1, own: [], claimed: [], games: {}, gb: {}, played: 0, wins: 0, soloAt: 0,
+  return { v: 3, t: 0, coins: 1000000, m1: 1, m10: 1, e7: 1, gt: 0, boxes: 1, own: [], claimed: [], games: {}, gb: {}, played: 0, wins: 0, soloAt: 0,
     stats: { earned: 0, rent: 0, bought: 0, kos: 0, best: 0, opened: 0 }, name: '', look: { skin: 0, hair: 'short', hc: 0, outfit: 'tee', hat: '', acc: '', bg: 'paper' }, pet: '' };
+}
+/* Passive gold: 1,000 a second while the server can hear the player (any request or an open world connection).
+   The server's own clock decides; the page only animates the number between answers. */
+export function boostOf(w, now) { const b = w.boost; return b && b.until > now ? b : null; }
+export function earn(w, now) {
+  const from = w.gt || 0; w.gt = now;
+  if (!from || now <= from || now - from > AWAY_MS) return 0;
+  const b = w.boost, boosted = b && b.until > from ? Math.min(now, b.until) - from : 0;
+  const gain = Math.floor(((now - from) + boosted * ((b ? b.x : 1) - 1)) * GOLD_RATE / 1000);
+  w.coins = Math.floor(w.coins || 0) + gain; if (b && b.until <= now) delete w.boost;
+  return gain;
 }
 const owns = (w, id) => !!ITEMS[id] && (ITEMS[id][2] === 0 || w.own.indexOf(id) >= 0);
 /* a look may only use what the account owns; anything else falls back to the free starter look */
@@ -59,7 +70,7 @@ export function shop(w, what, item) {
     if (pz.item) w.own.push(pz.item); else w.coins += pz.coins;
     return { prize: pz };
   }
-  if (what === 'reset') { const f = freshWallet(); Object.keys(w).forEach(k => delete w[k]); Object.assign(w, f); return {}; }
+  if (what === 'reset') refuse('Accounts can no longer be reset.');
   refuse('Unknown request.');
 }
 /* Social prestige: display only, derived from owned and equipped cosmetics. */

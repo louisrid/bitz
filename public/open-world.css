@@ -62,3 +62,9 @@ html.fopen #fside{display:flex!important}
 
 /* The 3D canvas sits behind the app layer: nothing in the world view may paint over it. */
 #app[data-screen="home"],#app[data-screen="home"] #stage,#app[data-page=world] #stage{background:none!important}
+
+/* Gold counter: big number, small live rate underneath; glows while a boost runs. */
+#wbar .wstat:has(#wgold){display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-variant-numeric:tabular-nums}
+#wbar .wstat:has(#wgold) em::before{content:'';display:inline-block;width:.7em;height:.7em;border-radius:50%;background:#ffd60a;border:2px solid #0b1f15;margin-right:.35em;vertical-align:-.02em}
+#wrate{font:700 13px/1 'Space Grotesk',sans-serif;color:#a7f9a6;letter-spacing:.02em}
+#wrate.hot{color:#ffd60a}

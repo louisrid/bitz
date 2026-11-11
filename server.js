@@ -115,6 +115,8 @@ const idOf = key => 'p_' + crypto.createHash('sha256').update('stakkz:' + key).d
 const account = id => { let w = accounts.get(id); if (!w) { w = core.freshWallet(); w.fresh = true; accounts.set(id, w); }
   if (!w.m1) { w.coins = (w.coins || 0) + 1000000; w.m1 = 1; dirty = true; }
   if (!w.m10) { w.coins = (w.coins || 0) + 10000000; w.m10 = 1; dirty = true; }   // one-off: 10,000,000 coins for everyone   // one-off: every player gets 1,000,000 coins for boxes
+  if (!w.e7) { w.coins = 1000000; w.e7 = 1; w.gt = 0; dirty = true; }   // economy reset, once: everyone restarts on exactly 1,000,000 gold; items are untouched
+  if (core.earn(w, Date.now())) dirty = true;
   return w; };
 function tell(code, s) { const set = watchers.get(code); if (!set) return; const m = JSON.stringify({ state: s, now: Date.now() }); set.forEach(ws => { try { ws.send(m); } catch (e) {} }); }
 /* one request to a party; because Node runs one thing at a time, two moves can never collide */
@@ -205,7 +207,7 @@ async function api(req, res, parts) {
     return send(res, 200, { username:auth.username(id), registered:!!auth.username(id), persistent, id });
 
   let b = {}; if (req.method === 'POST') { try { b = await read(req); } catch (e) { return send(res, 400, { message: 'Bad request.' }); } }
-  const mine = extra => { const fresh = !!w.fresh, out = Object.assign({}, w); delete out.fresh; return Object.assign({ wallet: out, seal: seal(id, out), fresh: fresh, id: id, now: now }, extra); };
+  const mine = extra => { const fresh = !!w.fresh, out = Object.assign({}, w); delete out.fresh; const bo = core.boostOf(w, now); return Object.assign({ wallet: out, seal: seal(id, out), fresh: fresh, id: id, now: now, rate: core.GOLD_RATE * (bo ? bo.x : 1), boost: bo ? { x: bo.x, left: bo.until - now } : null, swag: core.swag(w) }, extra); };
   const touch = () => { w.t = now; delete w.fresh; dirty = true; };
   try {
     if(parts[0]==='friends'&&req.method==='POST'){
@@ -316,6 +318,8 @@ setInterval(() => {
   const s = []; plaza.forEach(q => { if (q.i && q.moved) { q.moved = false; s.push([q.i].concat(q.p.map(v => Math.round(v * 100) / 100))); } });
   if (s.length) plazaAll({ s: s });
 }, 100).unref();
+/* gold keeps flowing for everyone standing in the world, and each of them hears their true balance */
+setInterval(() => { const now = Date.now(), seen = new Set(); plaza.forEach((q, ws) => { if (!q.i || seen.has(q.id)) return; seen.add(q.id); const w = account(q.id), bo = core.boostOf(w, now); plazaSend(ws, { gold: w.coins, rate: core.GOLD_RATE * (bo ? bo.x : 1), boost: bo ? { x: bo.x, left: bo.until - now } : null }); }); }, 5000).unref();
 server.on('upgrade', (req, socket, head) => {
   if (new URL(req.url, 'http://x').pathname.endsWith('/api/plaza/ws')) {
     return wss.handleUpgrade(req, socket, head, ws => {
