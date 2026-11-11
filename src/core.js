@@ -7,8 +7,9 @@ import { BOT_NAMES, BOT_LOOKS, isBot } from './bots.js';
 
 const E = globalThis.Engine;
 export const BOX_PRICE = 500000, GOLD_RATE = 1000, AWAY_MS = 45000;
-const LOOT = [['coins', 8], [0, 30], [1, 28], [2, 18], [3, 11], [4, 5]];   // mostly items; coins are rare
-const rarity = p => (p <= 5000 ? 0 : p <= 15000 ? 1 : p <= 50000 ? 2 : p <= 200000 ? 3 : 4);
+const MYTHIC_ODDS = 0.15;   // every box holds an exclusive: Legendary usually, Mythical about one box in seven
+const rarity = p => (p <= 40000 ? 0 : p <= 100000 ? 1 : p <= 300000 ? 2 : p <= 3000000 ? 3 : 4);
+const exclusive = id => !!(ITEMS[id] && ITEMS[id][3]);
 const int = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.floor(Number(v) || 0)));
 const rnd = () => { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; };
 const ctx = now => ({ now: now, rand: rnd, die: () => 1 + Math.floor(rnd() * 6) });
@@ -44,16 +45,13 @@ export function setProfile(w, b) {
   const pet = typeof b.pet === 'string' ? b.pet : w.pet;
   w.pet = pet && owns(w, pet) && ITEMS[pet][0] === 'pet' ? pet : '';
 }
+/* loot boxes hold only exclusives, and never one you already own */
+const missing = w => Object.keys(ITEMS).filter(id => exclusive(id) && !owns(w, id));
 function rollLoot(w) {
-  let r = rnd() * 100, tier = 'coins';
-  for (const q of LOOT) { if (r < q[1]) { tier = q[0]; break; } r -= q[1]; }
-  if (tier === 'coins') return { coins: [5000, 10000, 20000, 50000][Math.floor(rnd() * 4)] };
-  /* never a duplicate: if everything in the rolled tier is owned, look in the tiers above it, then below */
-  const fresh = t => Object.keys(ITEMS).filter(id => ITEMS[id][2] > 0 && rarity(ITEMS[id][2]) === t && !owns(w, id));
-  for (const t of [0, 1, 2, 3, 4].filter(t => t >= tier).concat([3, 2, 1, 0].filter(t => t < tier))) {
-    const pool = fresh(t); if (pool.length) return { item: pool[Math.floor(rnd() * pool.length)] };
-  }
-  return { coins: 100000 };   // owns every item in the game
+  const pool = missing(w); if (!pool.length) return { coins: BOX_PRICE };   // nothing left to win: the box is refunded
+  const myth = pool.filter(id => rarity(ITEMS[id][2]) === 4), leg = pool.filter(id => rarity(ITEMS[id][2]) !== 4);
+  const from = myth.length && (!leg.length || rnd() < MYTHIC_ODDS) ? myth : leg;
+  return { item: from[Math.floor(rnd() * from.length)] };
 }
 export function shop(w, what, item) {
   if (what === 'buy') {
@@ -63,7 +61,7 @@ export function shop(w, what, item) {
     if (w.coins < it[2]) refuse('You need ' + (it[2] - w.coins).toLocaleString('en-GB') + ' more coins.');
     w.coins -= it[2]; w.own.push(item); return {};
   }
-  if (what === 'box') { if (w.coins < BOX_PRICE) refuse('You need ' + (BOX_PRICE - w.coins).toLocaleString('en-GB') + ' more coins for a loot box.'); w.coins -= BOX_PRICE; w.boxes++; return {}; }
+  if (what === 'box') { if (!missing(w).length) refuse('You have collected every exclusive.'); if (w.coins < BOX_PRICE) refuse('You need ' + (BOX_PRICE - w.coins).toLocaleString('en-GB') + ' more coins for a loot box.'); w.coins -= BOX_PRICE; w.boxes++; return {}; }
   if (what === 'open') {
     if (w.boxes < 1) refuse('No loot boxes left.');
     const pz = rollLoot(w); w.boxes--; w.stats.opened++;
@@ -73,18 +71,13 @@ export function shop(w, what, item) {
   if (what === 'reset') refuse('Accounts can no longer be reset.');
   refuse('Unknown request.');
 }
-/* Social prestige: display only, derived from owned and equipped cosmetics. */
+/* Swag Level: starts at -100, tops out at 9,999. What you are wearing counts most; the whole collection adds to it. */
+const WORN = [20, 70, 180, 520, 1500], KEPT = [3, 8, 20, 60, 150];
 export function swag(w) {
-  const owned=new Set(Array.isArray(w.own)?w.own:[]);
-  const score=id=>{
-    const it=ITEMS[id];if(!it||!id||(!owned.has(id)&&it[2]!==0))return 0;
-    if(it[3]||it[2]<0)return it[4]==='Mythical'?3100:1350;
-    const p=it[2];
-    return p<=0?0:p<=35000?28:p<=100000?95:p<=300000?190:p<=700000?385:p<=1200000?655:950;
-  };
-  const l=w.look||{};
-  const use=[l.outfit,l.hat,l.acc,l.bg,w.pet];
-  return Math.max(-100,Math.min(9999,-100+use.reduce((a,id)=>a+score(id),0)+Math.min(1750,owned.size*17)));
+  const own = Array.isArray(w.own) ? w.own.filter(id => ITEMS[id]) : [], has = new Set(own), l = w.look || {};
+  const worn = [l.outfit, l.hat, l.acc, l.bg, w.pet].reduce((a, id) => { const it = ITEMS[id]; if (!it || it[2] <= 0 || !has.has(id)) return a; const r = rarity(it[2]); return a + WORN[r] * (it[3] ? 2 : 1); }, 0);
+  const kept = [...has].reduce((a, id) => { const it = ITEMS[id]; return a + KEPT[rarity(it[2])] * (it[3] ? 3 : 1); }, 0);
+  return Math.max(-100, Math.min(9999, -100 + worn + kept));
 }
 /* coins and loot boxes won in a game. `c` comes from the party's own state, so it can be trusted;
    a game played on one device (against the computer, or passed around) is reported by the page, so it is capped. */

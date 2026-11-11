@@ -68,3 +68,41 @@ html.fopen #fside{display:flex!important}
 #wbar .wstat:has(#wgold) em::before{content:'';display:inline-block;width:.7em;height:.7em;border-radius:50%;background:#ffd60a;border:2px solid #0b1f15;margin-right:.35em;vertical-align:-.02em}
 #wrate{font:700 13px/1 'Space Grotesk',sans-serif;color:#a7f9a6;letter-spacing:.02em}
 #wrate.hot{color:#ffd60a}
+/*BG>*/
+.bg-b_cyber{background:repeating-linear-gradient(90deg,#19e3ff33 0 2px,transparent 2px 26px),repeating-linear-gradient(0deg,#ff2bd633 0 2px,transparent 2px 26px),linear-gradient(180deg,#0b1030,#1c375e,#87e9ff)}
+.bg-b_haunt{background:radial-gradient(circle at 72% 22%,#e9e0ff,transparent 14%),linear-gradient(180deg,#17132b,#373052,#b8a3e6)}
+.bg-b_rainbow{background:linear-gradient(120deg,#ff7ad9,#ffd60a,#7ef9ff,#b388ff,#ff7ad9);background-size:300% 300%;animation:hue 5s ease-in-out infinite}
+.bg-b_temple{background:repeating-linear-gradient(90deg,#ffffff22 0 10px,transparent 10px 40px),linear-gradient(180deg,#ffdd83,#e0a244,#ad7136)}
+.bg-b_stargarden{background:radial-gradient(#ffffff 1px,transparent 2px) 0 0/34px 34px,radial-gradient(#caabfc 2px,transparent 3px) 0 0/58px 58px,linear-gradient(180deg,#120f3a,#2d266a,#caabfc)}
+.bg-b_snow{background:radial-gradient(#ffffff 2px,transparent 3px) 0 0/30px 30px,linear-gradient(180deg,#e2f5fa,#a9d5da,#579ba0)}
+.bg-b_desert{background:radial-gradient(circle at 76% 24%,#fff3c9,transparent 9%),linear-gradient(180deg,#221a4d,#382d6b 45%,#f6bc93)}
+.bg-b_funfair{background:radial-gradient(#ffe14d 3px,transparent 4px) 0 0/28px 28px,linear-gradient(160deg,#3a1466,#9b3ea4,#ffcd9c)}
+.bg-b_casino{background:repeating-linear-gradient(45deg,#f6dba822 0 6px,transparent 6px 22px),repeating-linear-gradient(-45deg,#f6dba822 0 6px,transparent 6px 22px),linear-gradient(180deg,#3a1424,#77415a)}
+.bg-b_falls{background:repeating-linear-gradient(90deg,#ffffff33 0 5px,transparent 5px 17px),linear-gradient(180deg,#b4eeef,#5fa9c9,#427eac)}
+.bg-b_autumn{background:radial-gradient(#a74e33 3px,transparent 4px) 0 0/40px 40px,linear-gradient(180deg,#ffdd99,#f0a45a,#a74e33)}
+.bg-b_sunrise{background:radial-gradient(circle at 50% 78%,#fff6c9,transparent 22%),linear-gradient(180deg,#6a79c9,#e98f8b 55%,#ffe2ad)}
+.bg-b_orbit{background:radial-gradient(#ffffff 1px,transparent 2px) 0 0/26px 26px,radial-gradient(circle at 20% 30%,#91ddff,transparent 16%),linear-gradient(180deg,#0d1326,#34456c)}
+.bg-b_cavern{background:repeating-linear-gradient(60deg,#ffffff26 0 8px,transparent 8px 34px),linear-gradient(200deg,#2b2a66,#5d57b4,#a6f7ff)}
+.bg-b_gardens{background:radial-gradient(#ffffff 2px,transparent 3px) 0 0/36px 36px,radial-gradient(#ff8ad8 3px,transparent 4px) 0 0/54px 54px,linear-gradient(180deg,#daf0a5,#7fb86a,#45774d)}
+.bg-b_dream{background:linear-gradient(130deg,#ffd5f1,#b9b6ff,#777abf,#ffd5f1);background-size:300% 300%;animation:hue 5s ease-in-out infinite}
+.bg-b_holo{background:repeating-linear-gradient(90deg,#9efaff55 0 1px,transparent 1px 22px),repeating-linear-gradient(0deg,#9efaff55 0 1px,transparent 1px 22px),linear-gradient(180deg,#061a22,#164c61)}
+.bg-b_lava{background:linear-gradient(140deg,#2a0505,#b01212,#ff7a1a,#ffd60a,#b01212,#2a0505);background-size:300% 300%;animation:hue 5s ease-in-out infinite}
+.bg-b_ocean{background:radial-gradient(#bfeaff66 3px,transparent 4px) 0 0/46px 46px,linear-gradient(180deg,#3fa9ff,#12408a,#060f2e)}
+.bg-b_candy{background:radial-gradient(#ffffff 9px,transparent 10px) 0 0/44px 44px,linear-gradient(180deg,#ffc6e6,#ffe9f6)}
+.bg-b_tokyo{background:repeating-linear-gradient(90deg,#ffe14d44 0 3px,transparent 3px 19px),linear-gradient(180deg,#0a0a1e,#27134a 60%,#ff2bd6)}
+.bg-b_emerald{background:repeating-linear-gradient(90deg,#0b3d2466 0 9px,transparent 9px 31px),linear-gradient(180deg,#bff5c5,#3ddc84,#0f6b3c)}
+.bg-b_thunder{background:repeating-linear-gradient(100deg,#ffe14d55 0 2px,transparent 2px 90px),linear-gradient(180deg,#1a1f33,#3b4666,#8a96b8)}
+.bg-b_blossom{background:radial-gradient(#ffffff 3px,transparent 4px) 0 0/38px 38px,radial-gradient(#ff8ad8 4px,transparent 5px) 0 0/62px 62px,linear-gradient(180deg,#ffe3ef,#ffb3d1)}
+.bg-b_arctic{background:linear-gradient(180deg,#b388ff,#8fdbff 45%,#ffffff)}
+.bg-b_volcano{background:radial-gradient(circle at 50% 92%,#ffd60a,transparent 30%),linear-gradient(180deg,#3a0a2a,#b01212 60%,#ff9f1c)}
+.bg-b_matrix{background:repeating-linear-gradient(90deg,#39ff1455 0 2px,transparent 2px 13px),linear-gradient(180deg,#020a04,#0a2e12)}
+.bg-b_vapor{background:repeating-linear-gradient(0deg,#ffffff44 0 2px,transparent 2px 24px),linear-gradient(180deg,#ff7ad9,#b388ff 50%,#7ef9ff)}
+.bg-b_velvet{background:repeating-linear-gradient(90deg,#00000022 0 14px,transparent 14px 28px),linear-gradient(180deg,#7b2cbf,#3a0f66)}
+.bg-b_swamp{background:radial-gradient(#c6ff3d 4px,transparent 5px) 0 0/50px 50px,linear-gradient(180deg,#1c2a10,#3d5a1a,#c6ff3d)}
+.bg-b_flare{background:linear-gradient(120deg,#fff6b0,#ffd60a,#ff5a1f,#ffd60a,#fff6b0);background-size:300% 300%;animation:hue 5s ease-in-out infinite}
+.bg-b_moon{background:radial-gradient(circle at 70% 24%,#ffffff,transparent 8%),repeating-linear-gradient(0deg,#ffffff1f 0 2px,transparent 2px 14px),linear-gradient(180deg,#0d1a3a,#27447a,#8fb3e6)}
+.bg-b_gum{background:radial-gradient(#ffffff 6px,transparent 7px) 0 0/30px 30px,linear-gradient(135deg,#ff8ad8,#ffd60a)}
+.bg-b_blackgold{background:repeating-linear-gradient(45deg,#ffd60a55 0 3px,transparent 3px 26px),linear-gradient(180deg,#0a0a0a,#2a2208)}
+/*<BG*/
+#app[data-screen=home] #side{top:92px!important}
+@media(max-width:900px){#app[data-screen=home] #side{top:104px!important}}
