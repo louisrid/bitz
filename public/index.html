@@ -315,7 +315,7 @@ button.pill.hot{background:var(--sun);animation:nudge 2.4s ease-in-out infinite}
 .whub .mk{margin:0}
 
 /* modal */
-#veil{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding-block:calc(var(--k)*14px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:radial-gradient(#000 1.4px,transparent 1.5px) 0 0/calc(var(--k)*14px) calc(var(--k)*14px),rgba(255,255,255,.86);animation:fade .2s}
+#veil{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding-block:calc(var(--k)*14px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:rgba(0,0,0,.20);animation:none}
 @keyframes fade{from{opacity:0}}
 #modal{display:grid;grid-template-columns:minmax(0,1fr);gap:calc(var(--k)*12px);align-content:start;width:min(calc(var(--kf)*400px),100%);max-height:100%;overflow-y:auto;padding:calc(var(--k)*16px);animation:up .28s cubic-bezier(.3,1.5,.5,1)}
 @keyframes up{from{transform:translateY(calc(var(--k)*30px)) scale(.92) rotate(1.5deg);opacity:0}}
@@ -1727,7 +1727,11 @@ function showTitle(back) {
 }
 function hideTitle() { const t = $('#title'); if (t.hidden) return; t.classList.remove('in'); t.classList.add('out'); setTimeout(() => { if (t.classList.contains('out')) { t.hidden = true; t.innerHTML = ''; } }, still ? 0 : 430); }
 /* the page's parts slide in one after another when you arrive on it */
-function enter() { const s = $('#side'); s.classList.remove('enter'); void s.offsetWidth; s.classList.add('enter'); }
+function enter() {
+  /* Do not fade/reanimate every existing button on a page change.
+     The content updates directly; its selected navigation control supplies feedback. */
+  $('#side').classList.remove('enter');
+}
 function homeScene() {
   if (!B3.ok || G) return;
   const card = F.page === 'me' || F.page === 'shop', sel = F.page === 'shop' && F.sel && ITEMS[F.sel] ? F.sel : null, t = card ? tryLook() : { look: F.look, pet: F.pet };
