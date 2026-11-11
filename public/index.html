@@ -284,6 +284,7 @@ button.pill.hot{background:var(--sun);animation:nudge 2.4s ease-in-out infinite}
 .btns .btn{flex:1 1 auto}
 .btns .btn.go{animation:nudge 2.4s ease-in-out infinite}
 @keyframes nudge{0%,82%,100%{transform:none}88%{transform:translateY(-3px) rotate(-1.5deg)}94%{transform:translateY(0) rotate(1.5deg)}}
+#shout.chaos{background:var(--hot);font-size:clamp(17px,2.2vw,27px);box-shadow:3px 5px 0 var(--ink)}
 #shout{position:absolute;left:50%;top:var(--ot);z-index:4;transform:translateX(-50%);pointer-events:none;max-width:96%;font:400 clamp(16px,2vw,23px)/1.05 var(--ui);letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--sun);border:var(--bw) solid var(--ink);border-radius:calc(var(--k)*13px);padding:calc(var(--k)*10px) calc(var(--k)*15px);box-shadow:var(--drop);animation:shout 1.9s cubic-bezier(.3,1.5,.5,1) forwards}
 @keyframes shout{0%{transform:translate(-50%,calc(var(--k)*-80px)) rotate(-5deg)}14%{transform:translate(-50%,0) rotate(-1.5deg)}80%{transform:translate(-50%,0) rotate(-1.5deg);opacity:1}100%{transform:translate(-50%,calc(var(--k)*-80px));opacity:0}}
 #toast{position:fixed;left:50%;bottom:calc(calc(var(--k)*20px) + env(safe-area-inset-bottom,0px));z-index:30;transform:translateX(-50%);max-width:min(92vw,calc(var(--k)*460px));background:var(--ink);color:var(--paper);border-radius:calc(var(--k)*12px);padding:calc(var(--k)*11px) calc(var(--k)*15px);font-size:max(12px,calc(var(--kf)*14.5px));text-align:center;animation:pop .25s cubic-bezier(.3,1.6,.5,1)}
@@ -1775,6 +1776,10 @@ async function present(n) {
   const prev = V, fast = pending > 2 || !prev || prev.phase !== n.phase;
   if (n.phase === 'lobby') { V = n; $('#confetti').hidden = true; if (modal && (modal.kind === 'winner' || modal.kind === 'menu')) closeModal(); setScreen('lobby'); if (B3.ok) { B3.focus = 'start'; B3.sync(n, false); } renderLobby(); if (modal && modal.kind === 'wardrobe') refreshModal(); return; }
   setScreen('game');
+  if(n.phase==='play'&&n.chaosStarted&&(!prev||!prev.chaosStarted)){
+    shout('FINAL CHAOS · DOUBLE RENT!','chaos');
+    Snd('card');
+  }
   if (!prev || prev.phase === 'lobby') { V = n; if (modal && modal.kind === 'wardrobe') closeModal(); B3.ok && B3.sync(viewState(n), true); renderGame(prev, true); if (n.phase === 'play' && prev) { shout(n.players[E.cur(n)].name + ' goes first'); Snd('turn'); } return; }
   B3.fast = fast; busy = true; renderActions();
   if (!fast) for (const f of n.fx) {
@@ -1876,7 +1881,13 @@ function countUp(el, from, to) {
   if (!el || still || from === to) return; const t0 = performance.now();
   (function step(now) { const f = Math.min(1, (now - t0) / 700), e = 1 - Math.pow(1 - f, 3); if (!el.isConnected) return; el.textContent = money(from + (to - from) * e); if (f < 1) requestAnimationFrame(step); })(t0);
 }
-function shout(t) { const o = $('#shout'); if (o) o.remove(); const d = document.createElement('div'); d.id = 'shout'; d.textContent = t; $('#stage').appendChild(d); setTimeout(() => d.remove(), 1900); }
+function shout(t,kind='') {
+  const o=$('#shout');if(o)o.remove();
+  const d=document.createElement('div');d.id='shout';
+  if(kind==='chaos')d.classList.add('chaos');
+  d.textContent=t;$('#stage').appendChild(d);
+  setTimeout(()=>d.remove(),kind==='chaos'?2500:1900);
+}
 let toastT; function toast(t) { const o = $('#toast'); if (o) o.remove(); const d = document.createElement('div'); d.id = 'toast'; d.setAttribute('role', 'status'); d.textContent = t; document.body.appendChild(d); clearTimeout(toastT); toastT = setTimeout(() => d.remove(), 3600); }
 const PIPS = [[], [4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]];
 const dieHTML = n => '<div class="die" aria-label="' + n + '">' + Array.from({ length: 9 }, (x, i) => '<span' + (PIPS[n].indexOf(i) >= 0 ? ' class="p"' : '') + '></span>').join('') + '</div>';
