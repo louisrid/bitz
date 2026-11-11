@@ -1,99 +1,71 @@
-# Stakkz hosted beta update — 11 November 2026 (IMPORTANT: supersedes earlier setup notes)
+# Stakkz beta handoff for Claude — 11 November 2026
 
-**Real beta storage is NOW CONFIGURED and LIVE; do not repeat the old Supabase setup instructions.**
+## Critical status
 
-- Attempted to create a dedicated Supabase project in louisrid's Org at quoted $0/month. Supabase rejected it due to the organisation owner already having two active free projects. NO existing Supabase projects were changed and no Supabase Stakkz project was created.
-- Created a new **free Render Postgres** database named `stakkz-beta-store` (ID `dpg-dbqcd3m1egvs73bp9h6g-a`, Frankfurt), available over Render's private network. **It expires 11 December 2026** and has no backups: use only for beta tests, never real long-term users.
-- Added Render Postgres support to the Node server via pinned `postgres@3.4.9`; the original Supabase REST code remains as an optional future alternative. The server auto-creates `stakkz_state` and persists the entire app-state snapshot.
-- Created and applied a **beta-only** Render Blueprint at `render-stakkz-beta.yaml` (ID `exs-dbqceam7bikc73ani6h0`), adopting ONLY existing staging service `stakkz-beta-test-20261111` and free beta database. The Blueprint safely supplies the private DB connection via `STAKKZ_DATABASE_URL` fromDatabase:connectionString. No database credential was put in GitHub, and no other Render resources were modified. Blueprint autoSync is OFF by design; staging web-service autoDeploy is ON.
-- Hosted beta URL: https://stakkz-beta-test-20261111.onrender.com
-- Production URL: https://stakkz.onrender.com ; production service `stakkz` (ID `srv-dbq9106gekts73epirig`) remains on branch `main`, unchanged.
-- Verified staging logs: "Persistent storage ready" and web server started. GitHub Actions run 43091267131 (push) completed **smoke/browser/staging ALL SUCCESS**. The real-hosted integration test `tests/staging-live-smoke.mjs` confirmed Render database-backed signup, login as same account, creating a party with two Medium bots, game start and party rejoin.
-- Earlier tests cover simulated server restart recovery with a mock database, and emulated iPhone/browser UI without WebGL. **Not verified yet:** literal 120-second offline grace on real devices, genuine iPhone Safari/WebGL performance, real-hosted persistence after a Render restart and long-term storage.
-- CRITICAL: Before any production rollout choose a **permanent** database, migrate test data if needed, and set robust backups. Render free Postgres expires on 11 Dec 2026; do not imply it is permanent. Supabase would require freeing a project slot or a plan change and the user explicitly prohibited altering other projects.
-- Do not merge PR #1 until production storage, device QA and user approval; do not rotate the production `STAKKZ_SECRET`.
+**Preserve this work. DO NOT overwrite files from an older Claude Artifact or merge the branch without the user's approval.**
 
----
+- Repository: `louisrid/stakkz`
+- Development branch: `beta-ui-bots-account-sync-20261111`
+- Draft PR: https://github.com/louisrid/stakkz/pull/1
+- Beta site: https://stakkz-beta-test-20261111.onrender.com
+- Production: https://stakkz.onrender.com (Render service `stakkz`, `main` branch)
+- **Only the beta branch/service has been modified. Production `main` has not been edited.** GitHub comparison verified `main` is the ancestor of this branch.
+- Dedicated staging database: Render PostgreSQL 18, `stakkz-beta-store`, Frankfurt. Private `STAKKZ_DATABASE_URL` supplied by Render Blueprint `exs-dbqceam7bikc73ani6h0`, `render-stakkz-beta.yaml`. No DB credentials committed to Git.
+- **IMPORTANT: Free Render database expires 11 December 2026, has no backups and MUST NOT be treated as production-grade player persistence.**
 
-# STAKKZ — Claude handoff (11 November 2026)
+## Product requirements preserved
 
-## Read this first
-Changes are committed to development branch `beta-ui-bots-account-sync-20261111`. Production branch `main` is deliberately untouched. The live game at `https://stakkz.onrender.com` has NOT been changed by this work. Review the development branch and its PR before merging or deploying. Do not overwrite the branch with an older Claude-generated index.html.
+1. Compact bold Stakkz original identity: Coolvetica-style lowercase logo, black outlines, pixel-art cash, animated prize wheel and shop, white background and colourful 3D city. No gratuitous redesign.
+2. Four top-level tabs: Create Party, Join Party, **Profile**, Shop. Original "Play"/"Play solo" removed from navigation.
+3. **Desktop menu width always equals Profile's original width**: `--sw: clamp(390px,35vw,560px)` in `public/index.html`; no more tab-specific 330/410px widths or grid-column animation. Lobby stable rather than moving the stage when seats fill.
+4. Mobile keeps one stable board/stage width and height through tab switches, portrait and landscape; sensible scrollable controls and no horizontal clipping.
+5. Replace unnecessary whole-panel DOM re-creation with `patchHTML` for Settings, profile selection, menu/navigation, lobby, player cards, dice/action dock, game logs and auction banner. Remove white full-panel flashes and title overlay wipe. Preserve button identities and focus.
+6. Add 0–4 server-authoritative AI bots in Create Party, with Easy, Medium and Hard modes. Realistic casual strategic mistakes, property-set valuation, ROI building, bid/reserve behaviour, jail, trades and debt choices. Bots remain in rematches.
+7. Username/password accounts (email not required) with password-hashed auth and multi-device session identity. Coins, outfits, loot and active rooms backed by server database.
+8. An active game can be rejoined as the same user on another device, with **120 seconds** disconnect grace in production; then disconnected active player is removed. Closing/backgrounding is not equivalent to actively pressing Leave.
 
-## User requirements
-1. Eliminate white-screen/whole-panel blinks when tapping Settings buttons, selecting cosmetics, filters, navigation or other controls. Only the affected element should visibly update.
-2. Remove the entire top-level Play page and Play solo button.
-3. Rename visible Me navigation to Profile, retaining its internal `me` page identifier.
-4. Create party: choose 0–4 server-run AI opponents with Easy, Medium, Hard difficulty, designed as believable casual Monopoly players; human friends can still join if seats remain.
-5. Username/password login without mandatory email, device-independent accounts, coins, shop inventory, live party resume and two-minute temporary-disconnection grace.
-6. Desktop + mobile, no broad redesign or regressions.
+## Accounts: precise operation
 
-## Implemented in the development branch
-- `public/index.html`: removed top-level Play and Play solo navigation; visible Me -> Profile; Create party adds bot count/difficulty; settings selection updates individual buttons instead of rebuilding the whole modal; `patchHTML` diffs dynamic panels and modal markup in place, preserving focus/scroll and avoiding broad flashing; Profile includes an Account & sync section with signup/login/logout when persistent storage is available; guest sessions remain supported; signed-in sessions persisted locally on each device, and active-party lookup enables cross-device rejoin.
-- `src/bots.js`: server-side bot decisions (buy, auction, cash reserves, jail, building ROI, trade evaluation, debt), different risk/mistake rates by level.
-- `src/core.js`: bot seats added during party creation, retained for rematches and excluded from human wallet rewards.
-- `src/auth.js`: usernames, salted scrypt password hashes, revocable per-device random sessions stored as token hashes, session expiry.
-- `server.js`: auth register/login/logout, auth identity lookup, active-party lookup, heartbeat, 120-second disconnect grace then removal from active game, server-driven bot turns, optional external persistent store via backend-only Supabase REST.
-- `tests/beta-smoke.mjs` and `.github/workflows/beta-validation.yml`: syntax plus smoke checks.
+- Unregistered guests have a randomly generated browser-local key `stakkz-key`. It is **not based on IP** and is **not shared across devices**.
+- A guest registers in Profile with a unique username (3–20 ASCII letters/digits/underscores) and password (10–128 characters), no email confirmation. The server associates the guest's current account with those credentials.
+- Passwords use per-user salted scrypt. Each device gets its own random login bearer token, stored locally as `stakkz-session`; the server holds only token hashes. Sessions expire after 60 days and multiple devices are supported. There is **no password-reset recovery flow yet**.
+- Login on phone and laptop maps to the same persistent user ID, account inventory and stored game progress. `GET /api/my-party` finds that account's active match, and WebSocket sends latest server state. The app tries the remembered local room code and then the server-side active match lookup.
+- Presence heartbeat runs when an online game is actively viewed; if connection closes, the server allows two minutes for reconnect. After that period, the server forfeits that player; you can still sign into the account, but not reclaim the forfeited active seat.
+- Clicking **Leave party** in a lobby removes the player immediately. A bot-only lobby closes; if the host leaves and another human remains, that human is promoted to host. Leaving a running game via **Menu > Leave game** forfeits that seat immediately. Explicit leave has no two-minute grace.
+- Sign-out revokes that device's session; other devices remain signed in. The UI clears previous account character/identity from guest view. Cannot sign out while inside an active match.
+- Do not publish tokens, service keys, DB URLs or `STAKKZ_SECRET`; preserve existing signing secret to keep sealed wallet restores valid.
 
-## Crucial configuration dependency — do not merge and claim finished without it
-Render Free storage is ephemeral. Without external persistent storage, usernames and party state would be lost at service restart. For safety the new UI disables account registration unless cloud storage is configured. The code supports a dedicated Supabase PostgREST table with these **Render-only** environment variables:
-- `STAKKZ_STORE_URL`: `https://<dedicated-project-ref>.supabase.co/rest/v1/stakkz_state`
-- `STAKKZ_STORE_KEY`: the **secret/service-role** API key for that dedicated project. Never expose to browser, client code or Git.
-- `STAKKZ_SECRET`: existing signing key; retain its current value, do not rotate.
+## Database and durability
 
-In a **new dedicated Supabase project** (do not reuse unrelated existing projects), set up the schema:
+- The approved $0 Supabase Stakkz project was **not** created: Supabase blocked it due to the owner's existing limit of two active free projects (ZEUS and Football Card Battles). Other projects were not touched. Do not pause/delete/repurpose/upgrade these without specific user permission.
+- Instead the user now has a free isolated **Render PostgreSQL** beta database, private network access, linked only to `stakkz-beta-test-20261111`.
+- `server.js` supports `STAKKZ_DATABASE_URL` with pinned `postgres@3.4.9` and optional older Supabase REST storage; it persists room/account/session snapshots in `stakkz_state`.
+- **Bugs found and fixed during real testing:** PostgreSQL JSONB was read back as a JSON *string*, so restarted servers originally ignored saved data. Boot now parses the string into the saved object. Rolling deploys originally wrote stale empty snapshots on SIGTERM; shutdown now flushes only actual dirty changes. DB snapshot updates use an optimistic revision number so an outgoing instance cannot overwrite the newer instance's state.
+- Real Render logs after the fix showed `Persistent storage ready: 1 accounts, 1 parties` after a redeploy, confirming actual account and game recovery.
+- The simple whole-state snapshot remains beta architecture, not a high-scale transactional multi-instance backend. Upgrade to durable backed-up storage and design transactional or ownership-locked state management before a public launch.
 
-```sql
-create table if not exists public.stakkz_state (
-  id text primary key,
-  state jsonb not null
-);
-alter table public.stakkz_state enable row level security;
-revoke all on public.stakkz_state from anon, authenticated;
--- No permissive public RLS policy. Only the backend service role accesses data.
-```
+## Automated testing (all passed)
 
-The server expects GET `?id=eq.main&select=state` and POST upsert `?on_conflict=id`, with `apikey` and Bearer headers, to this endpoint. It refuses startup if configured cloud storage is inaccessible.
+- GitHub Actions `43093900737`: all five jobs **SUCCESS** (`smoke`, `browser`, `postgres`, `visual`, `staging`).
+- `tests/beta-smoke.mjs`: JS parsing, basic bots and password/token tests.
+- `tests/integration.mjs`: registration, wrong password, independent device sessions, bot parties, host leave/handoff, wallet and match restoration after a simulated restart.
+- `tests/bot-simulation.mjs`: long-running game simulations for Easy/Medium/Hard bots.
+- `tests/reconnect-grace.mjs`: a new device resumes before timeout, and an offline player is correctly removed afterwards. Uses test-only accelerated 4-second grace; production is hardcoded to 120 seconds.
+- `tests/browser-smoke.mjs`: real Chrome login, settings toggle DOM identity, creating bot parties, starting a game, emulated iPhone signing in and resuming that same live game, consistent UI dimensions across Create/Join/Profile/Shop. Layouts tested desktop 1440x900, 1280x800, 1024x768, 901x640; mobile 390x844, 375x667, 430x932, 844x390. No horizontal overflow or broad tab-width shifts.
+- `tests/visual-stage.mjs`: **real WebGL** city and character rendered on desktop Chrome 1440 and emulated iPhone-sized Chrome 390. Screenshots in CI artifact `stakkz-webgl-visual-check`. These are Chrome WebGL simulations, not physical Safari tests.
+- `tests/postgres-rollover.mjs`: runs two independent servers against a real disposable PostgreSQL 18, proves newer accounts survive rolling deployments, rejects stale writes and restores accounts after a restart.
+- `tests/staging-live-smoke.mjs`: real hosted beta + private Render Postgres registration, login, bot party creation, game start and rejoin.
 
-**Do not start a new Supabase project or incur charges silently.** Explain the required project setup to the user and ask which organisation/project to use if necessary.
+## Still required before merging/deploying to production
 
-## Important behavioural details
-- Existing guest accounts derive identity from a random 48-character browser-local key, NOT IP. Username signup associates the old guest identity with login credentials, then replaces the local guest key. Login on a second device maps to the same server-side player id.
-- A signed-in device discovers an active party via `/api/my-party` and subscribes again; the WebSocket stream synchronises game state. At 120 seconds without an authenticated gameplay heartbeat, server removes the disconnected player's seat by the existing quit rules.
-- Bots are authoritative server actors, never fake browser clients; a human cannot claim a bot's id through the guest bearer key.
-- Session tokens are sensitive; display no secrets in user-facing docs.
-- Bot difficulty is intentionally fallible/casual. Hard bot evaluates full colour-set value and building ROI; Easy makes more impulsive decisions.
-- The external storage implementation currently snapshots the entire game state under one row and saves about every 4 seconds. Appropriate for a private 3-friend beta only, **not a scale-out production backend**, and should be scrutinised for concurrency/restore edge cases.
+1. Acquire **permanent, backed-up database** before 11 December 2026. Do not ship production accounts on expiring Render Free Postgres. Any paid service/upgrade requires user cost approval.
+2. Manual QA on **actual iPhone Safari** (3D performance, scroll/touch, app switching, background, screen rotation), and actual desktop browser. Automated iPhone viewport simulations are not equivalent to real Safari.
+3. Verify real wall-clock 120-second disconnect on a physical device, including deliberate Leave and session switching.
+4. Decide account recovery if passwords are forgotten (currently none) and whether guest progress from production main needs migration. Beta database is separate from live production guest wallets.
+5. Review snapshot/transactional durability and prevent multi-device simultaneous action conflicts at scale.
+6. Preserve all existing game mechanics, aesthetics, prize wheel, in-game progression and previously implemented functionality.
+7. Only then consider PR #1 merge into `main` with user's explicit sign-off.
 
-## Validate before merge
-1. GitHub Actions syntax and smoke tests pass on the development branch.
-2. Launch local/staging Node server, test signup/login, wrong password and signout, session persistence after a restart with real database.
-3. Create room with 0,1,4 bots at all difficulties; test humans joining, turn timers, bidding, purchasing, bankruptcies, winner, rematch, coin awards.
-4. Confirm iPhone portrait/landscape, desktop narrow/wide and browser audio toggles do not blink the whole screen on interaction.
-5. Sign in on iPhone, start game, close app, sign in on laptop within 120 seconds; recover same identity and exact live party state; after two minutes verify session removal and game continuity.
-6. Verify bot ticks and persistence after Render Free spin-down/deploy; no duplicate payments, coins, account changes or false resume.
-7. Review privacy/security, denial-of-service, rate-limits on auth endpoints, stale-session behaviour and client-side XSS safety.
-8. Keep live `main` unchanged until all critical checks pass.
+## Design/UI follow-up
 
-## Known unfinished items to prioritise
-- Database project/table/Render variables have NOT been configured.
-- Actual browser-device and hosted integration QA NOT verified yet.
-- Auth rate limiting currently shares a general IP bucket; add username/password login abuse protection.
-- Snapshots can lose up to a few seconds of changes on unexpected shutdown and need robust durable transaction semantics if expanding beyond private beta.
-- `STAKKZ_SECRET` must not be changed; previously signed wallet backups depend on it.
-
-
-## Additional verification completed in this session
-- Added `tests/integration.mjs`: end-to-end HTTP server with simulated durable database, registration/login, another-device identity, server restart and party recovery.
-- Added `tests/bot-simulation.mjs`: 1,800-step game simulations at each difficulty and multiple server bot actions.
-- Added `tests/browser-smoke.mjs`: actual headless desktop Chrome account signup; Settings music toggle retains the same button DOM node (no whole-dialog rebuild); party creation with two hard bots; starting the game; emulated iPhone logs into the same username and resumes the active game; no horizontal overflow.
-- GitHub Actions run 43088555201: **both smoke and browser jobs passed**. The browser smoke test deliberately disables WebGL to test the browser interactions independently of GPU availability, so real 3D rendering and performance on actual iPhones are not yet verified.
-- Further reduced flashing in `public/index.html` by updating lobby nodes in place and avoiding unnecessary 3D scene rebuilds for unchanged player scene data.
-- Rate limiting added to auth endpoint; durable writes serialised, successful signup/login/logout now await storage acknowledgement.
-
-## Costs/decisions requiring user input
-Supabase projects list (11 Nov 2026) showed two active projects (ZEUS; Football Card Battles), and three inactive projects. Supabase Free allows two active projects; additional dedicated Stakkz project may require a plan change or changes to active projects. **Do not create, pause, repurpose, delete or upgrade another project without the user's explicit permission and a verified quote.** Dedicated isolated project preferred. User has exactly one visible organisation: `louisrid's Org`. The required project-specific service role key cannot be retrieved from our existing project list; use Render server-only env var once authorised. Render connector was newly linked during this work; verify capabilities before acting.
-
-## Updated completion definition
-All of the above branch tests passed, but deployment is **not finished** until an isolated persistent database is configured, Render env vars set, independent staging verified with real Supabase, and a safe merge/deploy is authorised. The 2-minute disconnect-to-removal timing remains unverified with an actual 120-second wall-clock device test.
+The user specifically dislikes menu panels resizing as tabs change, large white flashes and the whole 3D scene sliding. Keep the fixed Profile-width desktop split. When refining, use targeted element changes rather than rebuilding the whole DOM or animating main grid dimensions. Visually compare actual WebGL screenshots, then retest at multiple viewport widths. Do not recreate the game or replace the whole index file with an older Artifact.
