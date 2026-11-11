@@ -1,4 +1,7 @@
 name: Stakkz beta validation
+concurrency:
+  group: beta-validate-${{ github.ref }}
+  cancel-in-progress: true
 on:
   push:
     branches:
