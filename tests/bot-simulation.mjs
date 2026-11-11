@@ -27,6 +27,8 @@ for (const [j,difficulty] of levels.entries()) {
         const who=s.players[s.rush]; user={id:who.id};action={t:'rush',n:3};
       } else if(s.trade) {
         const who=s.players[s.trade.to]; user={id:who.id};action={t:'reject'};
+      } else if(s.stage==='travel') {
+        action={t:'stay'};
       } else if(s.stage==='buy') {
         action={t:s.players[E.cur(s)].cash>=E.T[s.players[E.cur(s)].pos].p+150?'buy':'skip'};
       } else if(s.stage==='roll') action={t:'roll'};
