@@ -1286,6 +1286,16 @@ const B3 = (function () {
   api.quality = function (q) { const low = q === 'low'; renderer.setPixelRatio(low ? 1 : Math.min(devicePixelRatio || 1, 2)); sun.castShadow = !low; api.low = low; size(); };
   let fN = 0, fT = 0, fL = 0, fN2 = 0;
   api.dbg = () => ({ cD: cD, cE: cE, cT: cT.toArray(), pos: cam.position.toArray(), rc: rc, zoom: zoom, az: az, el: el });
+  // Read-only QA counters. No gameplay or render mutations.
+  api.visualStats=()=>({
+    districtCount:DIST.length,cityObjects:city.children.length,
+    stations:stations.length,utilities:utilities.length,
+    houses:Object.keys(houses).length,
+    hotels:Object.values(houses).filter(h=>h.userData.h===5).length,
+    tokens:Object.keys(tokens).length,stationHighlights:stationMarks.length,
+    crowdScale:Object.values(tokens).map(t=>t.userData.crowdScale||1),
+    chaos:chaosLighting,traveling:api.traveling
+  });
   const ptr = new Map(); let moved = 0, t0 = 0, pinch = 0;
   stage.addEventListener('pointerdown', e => { stage.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]); if (ptr.size === 1) { moved = 0; t0 = performance.now(); } pinch = 0; });
   stage.addEventListener('pointermove', e => {
