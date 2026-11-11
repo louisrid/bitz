@@ -27,8 +27,8 @@ for(let n=2;n<=6;n++){
     assert.equal(deeds.length,per);
     const price=deeds.reduce((v,j)=>v+E.T[j].p,0);
     spent.push(price);
-    assert.equal(s.players[i].cash,1500-price);
-    assert.equal(E.worth(s,i),1500);
+    assert.equal(s.players[i].cash,E.START_CASH-price);
+    assert.equal(E.worth(s,i),E.START_CASH);
     assert(s.players[i].cash>=0);
   }
   assert(Math.max(...spent)-Math.min(...spent)<=240,'Fair starter deed price allocation '+JSON.stringify(spent));
@@ -127,3 +127,21 @@ bot.order=[0,1,2,3,4,5];bot.turn=1;bot.stage='travel';bot.station=5;bot.players[
 const choice=nextBotAction(bot);
 assert(['travel','stay'].includes(choice?.a?.t),'Bot must resolve station choice');
 console.log('Bot station decisions passed');
+{ // mortgages: half the price now, no rent, no building on the set, 55% to pay off
+  let m=game(2); m.phase='play'; m.order=[0,1]; m.turn=0; m.stage='act'; m.trade=null; m.own={}; m.own[1]={o:0,h:0}; m.own[3]={o:0,h:0}; m.players[0].cash=1000;
+  m=E.act(m,0,{t:'mortgage',tile:1},ctx(now+1));
+  assert.equal(m.players[0].cash,1000+E.T[1].p/2); assert.equal(m.own[1].m,true);
+  assert.equal(E.rent(m,1,7),0,'a mortgaged street collects no rent');
+  assert.equal(E.canBuild(m,0,3),false,'no building on a set with a mortgaged street');
+  const before=m.players[0].cash; m=E.act(m,0,{t:'unmortgage',tile:1},ctx(now+2));
+  assert.equal(m.players[0].cash,before-E.unmortgageCost(1)); assert(!m.own[1].m);
+  const viaServer=core.partyOp(Object.assign(E.act(m,0,{t:'mortgage',tile:3},ctx(now+3)),{}),'act',player(0),{a:{t:'unmortgage',tile:3}},now+4,'ABCD');
+  assert(!viaServer.state.own[3].m,'server accepts mortgage moves');
+  console.log('Mortgage, no rent while mortgaged, no building, pay-off at 55% passed');
+}
+{ // one loot box per lap, none at random
+  let l=game(2); l.phase='play'; l.order=[0,1]; l.turn=0; l.stage='roll'; l.players[0].pos=38; const b0=l.players[0].boxes;
+  for (let k=0;k<6 && l.players[0].pos>=30 && E.cur(l)===0;k++) { l.stage='roll'; l.again=false; l=E.act(l,0,{t:'roll'},ctx(now+10+k)); }
+  if (l.players[0].pos<30) assert.equal(l.players[0].boxes,b0+1,'passing Start gives a loot box');
+  console.log('Loot box for each lap passed');
+}

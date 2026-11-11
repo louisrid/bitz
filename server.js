@@ -112,7 +112,9 @@ setInterval(save, 4000).unref();
 setInterval(() => { const now = Date.now(); parties.forEach((s, code) => { if (now - (s.touched || s.made || 0) > IDLE) { parties.delete(code); dirty = true; tell(code, null); } }); }, 600000).unref();
 
 const idOf = key => 'p_' + crypto.createHash('sha256').update('stakkz:' + key).digest('hex').slice(0, 24);
-const account = id => { let w = accounts.get(id); if (!w) { w = core.freshWallet(); w.fresh = true; accounts.set(id, w); } return w; };
+const account = id => { let w = accounts.get(id); if (!w) { w = core.freshWallet(); w.fresh = true; accounts.set(id, w); }
+  if (!w.m1) { w.coins = (w.coins || 0) + 1000000; w.m1 = 1; dirty = true; }   // one-off: every player gets 1,000,000 coins for boxes
+  return w; };
 function tell(code, s) { const set = watchers.get(code); if (!set) return; const m = JSON.stringify({ state: s, now: Date.now() }); set.forEach(ws => { try { ws.send(m); } catch (e) {} }); }
 /* one request to a party; because Node runs one thing at a time, two moves can never collide */
 function partyOp(code, op, user, body) {
@@ -254,7 +256,19 @@ server.on('upgrade', (req, socket, head) => {
     const code = m[1]; let set = watchers.get(code); if (!set) watchers.set(code, set = new Set());
     if (set.size >= 40) return ws.close(1013, 'full');
     set.add(ws); ws.send(JSON.stringify({ state: parties.get(code) || null, now: Date.now() }));
-    ws.on('message', d => { if (String(d) === 'ping') { try { ws.send('pong'); } catch (e) {} } });
+    let lastLook = 0;
+    ws.on('message', d => {
+      const m = String(d);
+      if (m === 'ping') { try { ws.send('pong'); } catch (e) {} return; }
+      /* where a player is looking: relayed to the rest of the party, never stored */
+      if (m.length > 200 || m[0] !== '{') return;
+      const now = Date.now(); if (now - lastLook < 200) return; lastLook = now;
+      let j; try { j = JSON.parse(m); } catch (e) { return; }
+      if (!Array.isArray(j.look) || typeof j.id !== 'string' || j.id.length > 40) return;
+      const a = Number(j.look[0]), el = Number(j.look[1]); if (!Number.isFinite(a) || !Number.isFinite(el)) return;
+      const out = JSON.stringify({ look: { id: j.id, a: Math.round(a * 100) / 100, e: Math.round(el * 100) / 100 } });
+      set.forEach(o => { if (o !== ws && o.readyState === 1) { try { o.send(out); } catch (e) {} } });
+    });
     ws.on('close', () => { set.delete(ws); if (!set.size) watchers.delete(code); });
     ws.on('error', () => {});
   });

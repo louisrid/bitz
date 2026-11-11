@@ -42,8 +42,9 @@ function handleDebt(s,pi) {
   const mine=E.props(s,pi);
   const houses=mine.filter(i=>E.canSellHouse(s,pi,i)).sort((a,b)=>E.lvl(s,a)-E.lvl(s,b));
   if(houses.length) return {t:'sellHouse',tile:houses[0]};
-  const own=mine.filter(i=>E.canSellProp(s,pi,i)).sort((a,b)=>groupValue(s,pi,a)-groupValue(s,pi,b) || T[a].p-T[b].p);
-  return own.length?{t:'sellProp',tile:own[0]}:{t:'bankrupt'};
+  // mortgage before giving anything up: it raises the same half price and keeps the street
+  const own=mine.filter(i=>E.canMortgage(s,pi,i)).sort((a,b)=>groupValue(s,pi,a)-groupValue(s,pi,b) || T[a].p-T[b].p);
+  return own.length?{t:'mortgage',tile:own[0]}:{t:'bankrupt'};
 }
 function tradeDecision(s,pi,skill) {
   const q=s.trade;

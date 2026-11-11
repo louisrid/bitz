@@ -7,8 +7,8 @@ import { BOT_NAMES, BOT_LOOKS, isBot } from './bots.js';
 
 const E = globalThis.Engine;
 export const BOX_PRICE = 8000;
-const LOOT = [['coins', 40], [0, 32], [1, 18], [2, 8], [3, 2]];
-const rarity = p => (p <= 5000 ? 0 : p <= 15000 ? 1 : p <= 50000 ? 2 : 3);
+const LOOT = [['coins', 40], [0, 32], [1, 18], [2, 8], [3, 1.75], [4, 0.25]];   // Mythical: 1 box in 400
+const rarity = p => (p <= 5000 ? 0 : p <= 15000 ? 1 : p <= 50000 ? 2 : p <= 200000 ? 3 : 4);
 const int = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.floor(Number(v) || 0)));
 const rnd = () => { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; };
 const ctx = now => ({ now: now, rand: rnd, die: () => 1 + Math.floor(rnd() * 6) });
@@ -18,7 +18,7 @@ const refuse = m => { throw new Refused(m); };
 
 /* ---------- accounts ---------- */
 export function freshWallet() {
-  return { v: 3, t: 0, coins: 10000, boxes: 1, own: [], claimed: [], games: {}, gb: {}, played: 0, wins: 0, soloAt: 0,
+  return { v: 3, t: 0, coins: 1000000, m1: 1, boxes: 1, own: [], claimed: [], games: {}, gb: {}, played: 0, wins: 0, soloAt: 0,
     stats: { earned: 0, rent: 0, bought: 0, kos: 0, best: 0, opened: 0 }, name: '', look: { skin: 0, hair: 'short', hc: 0, outfit: 'tee', hat: '', acc: '', bg: 'paper' }, pet: '' };
 }
 const owns = (w, id) => !!ITEMS[id] && (ITEMS[id][2] === 0 || w.own.indexOf(id) >= 0);
@@ -79,7 +79,7 @@ export function credit(w, c, solo, now) {
 export function spend(w, n) { n = int(n, 0, 1e7); if (w.coins < n) refuse('You only have ' + w.coins.toLocaleString('en-GB') + ' coins.'); w.coins -= n; }
 
 /* ---------- parties ---------- */
-const ACTS = ['roll', 'payJail', 'useCard', 'buy', 'skip', 'end', 'build', 'sellHouse', 'sellProp', 'propose', 'accept', 'reject', 'cancel', 'rush', 'gift', 'quit', 'bankrupt', 'auto', 'bid', 'pass', 'stay', 'travel'];
+const ACTS = ['roll', 'payJail', 'useCard', 'buy', 'skip', 'end', 'build', 'sellHouse', 'sellProp', 'mortgage', 'unmortgage', 'propose', 'accept', 'reject', 'cancel', 'rush', 'gift', 'quit', 'bankrupt', 'auto', 'bid', 'pass', 'stay', 'travel'];
 /* only the fields an action can have, with the types the rules expect */
 function cleanAct(a) {
   if (!a || ACTS.indexOf(a.t) < 0) refuse('Unknown move.');

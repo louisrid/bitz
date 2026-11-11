@@ -79,9 +79,7 @@ async function stableLayout(page, label) {
         navSame:document.querySelector('#side .seg.nav')===window.__stableTabs};
     });
     if(tab==='create'){
-      assert.equal(await page.locator('#side .seg.modes button').count(),4,label+' mode choices');
-      assert.equal(await page.locator('#side .seg.modes button[data-v="35"]').getAttribute('aria-pressed'),'true',
-        label+' must recommend Fast Fun by default');
+      assert.equal(await page.locator('#side .seg.modes button').count(),0,label+' Classic is the only mode');
       const first=await page.evaluate(()=>document.querySelector('#stage').getBoundingClientRect().toJSON());
       await page.locator('#side [data-a=seg][data-k=turnTimer][data-v="30"]').click();
       const after=await page.evaluate(()=>document.querySelector('#stage').getBoundingClientRect().toJSON());
