@@ -31,6 +31,8 @@ jobs:
           node --check src/shop.js
           node --check public/stakkz-catalog.js
           node --check public/world-client.js
+      - name: Shared world, loot progression and browser script QA
+        run: node tests/world-economy.mjs
       - name: Beta smoke tests
         run: node tests/beta-smoke.mjs
       - name: Six-player game modes, station travel, hotels and final chaos
