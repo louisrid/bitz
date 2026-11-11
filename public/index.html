@@ -1409,7 +1409,7 @@ const B3 = (function () {
   }
   function drawShow(now) {
     const t = now / 1000, mv = still ? 0 : 1, u = showChar.userData; flameTick(t, mv);
-    showChar.rotation.y = Math.sin(t * 0.6) * 0.45 * mv; showChar.position.y = Math.abs(Math.sin(t * 2.2)) * 0.12 * mv;
+    showChar.rotation.y = WD.profileActive ? t * 0.45 * mv : Math.sin(t * 0.6) * 0.45 * mv; showChar.position.y = Math.abs(Math.sin(t * 2.2)) * 0.12 * mv;
     u.arms[1].rotation.z = 2.5 + Math.sin(t * 7) * 0.4 * mv; u.arms[1].rotation.x = 0; u.arms[0].rotation.x = Math.sin(t * 2) * 0.15 * mv; u.head.rotation.z = Math.sin(t * 1.4) * 0.07 * mv; u.legs[0].rotation.x = u.legs[1].rotation.x = 0;
     if (showPet) { const ud = showPet.userData; showPet.position.y = ud.fly ? 1.5 + Math.sin(t * 2.4) * 0.3 * mv : Math.abs(Math.sin(t * 3.2)) * 0.22 * mv; showPet.rotation.y = -0.5 + Math.sin(t * 0.8) * 0.3 * mv; ud.wings.forEach(w => { w.rotation.z = w.userData.sg * (0.2 + Math.sin(t * 16) * 0.7 * mv); }); }
     const asp = rc.width / rc.height, tv = Math.tan(cam.fov * Math.PI / 360), d = (WD.profileActive ? 3.1 : 4.2) / tv / Math.min(1, asp * 0.8), a = az - showAz, e = 0.1;
@@ -1554,7 +1554,7 @@ const B3 = (function () {
   WD.setWeapon = w => { w = Math.max(0, Math.min(GUNS.length - 1, w | 0)); WD.weapon = w; if (WD.me) setGun(WD.me, w); if (WD.send) WD.send({ wpn: w }); hud(); };
   WD.fire = () => {
     const m = WD.me, now = performance.now(); if (!m || WD.dead || !WD.on || now < WD.fireAt) return; WD.fireAt = now + GUNS[WD.weapon].cd;
-    const fx = -Math.sin(az), fz = -Math.cos(az); m.ry = Math.atan2(fx, fz); m.g.rotation.y = m.ry; m.aimT = now + 500;
+    const fx = Math.sin(m.ry), fz = Math.cos(m.ry); m.g.rotation.y = m.ry; m.aimT = now + 500;
     if (WD.send) { WD.send({ p: WD.pose().map(v => Math.round(v * 100) / 100) }); WD.send({ shoot: [WD.weapon, Math.round(fx * 1000) / 1000, Math.round(fz * 1000) / 1000] }); }
     if (WD.onFire) WD.onFire(WD.weapon);
   };
@@ -1631,16 +1631,23 @@ const B3 = (function () {
     const m = WD.me;
     if (m) {
       const K=WD.keys;
-      if(K.arrowleft)az+=dt*2.1;if(K.arrowright)az-=dt*2.1;if(K.arrowup)el=Math.max(.44,el-dt*.7);if(K.arrowdown)el=Math.min(1.15,el+dt*.7);
-      const ix=WD.dead?0:Math.max(-1,Math.min(1,WD.joy.x+(K.d?1:0)-(K.a?1:0))),iz=WD.dead?0:Math.max(-1,Math.min(1,WD.joy.y+(K.s?1:0)-(K.w?1:0)));
-      const fx = -Math.sin(az), fz = -Math.cos(az), rx = -fz, rz = fx;
-      let mx = rx * ix - fx * iz, mz = rz * ix - fz * iz; const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
+      /* keyboard: forward and back walk the way you face, left and right turn you (arrows or WASD).
+         thumb stick: push the way you want to go. */
+      const turn = WD.dead ? 0 : ((K.a || K.arrowleft) ? 1 : 0) - ((K.d || K.arrowright) ? 1 : 0), fwd = WD.dead ? 0 : ((K.w || K.arrowup) ? 1 : 0) - ((K.s || K.arrowdown) ? 1 : 0);
+      if (turn) m.ry += turn * dt * 2.7;
+      let mx = 0, mz = 0, stick = false;
+      if (fwd) { mx = Math.sin(m.ry) * fwd; mz = Math.cos(m.ry) * fwd; }
+      const jl = WD.dead ? 0 : Math.hypot(WD.joy.x, WD.joy.y);
+      if (jl > 0.08) { const fx = -Math.sin(az), fz = -Math.cos(az), rx = -fz, rz = fx; mx = rx * WD.joy.x - fx * WD.joy.y; mz = rz * WD.joy.x - fz * WD.joy.y; stick = true; }
+      const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
       const speed = (K.shift || Math.hypot(WD.joy.x, WD.joy.y) > 0.92 ? 11 : 6.5) * Math.min(1, ml);
       const lim = 143; let nx = Math.max(-lim, Math.min(lim, m.x + mx * speed * dt)), nz = Math.max(-lim, Math.min(lim, m.z + mz * speed * dt));
       if (m.y < 2.6) { if (blocked(nx, nz)) { if (!blocked(nx, m.z)) nz = m.z; else if (!blocked(m.x, nz)) nx = m.x; else { nx = m.x; nz = m.z; } } }
       m.sp = Math.hypot(nx - m.x, nz - m.z) / Math.max(dt, 0.001); m.x = nx; m.z = nz;
       m.vy -= 32 * dt; m.y = Math.max(0, m.y + m.vy * dt); if (m.y === 0) m.vy = Math.max(0, m.vy);
-      if (ml > 0.08) { let d = Math.atan2(mx, mz) - m.ry; d = Math.atan2(Math.sin(d), Math.cos(d)); m.ry += d * Math.min(1, dt * 14); }
+      if (stick && ml > 0.08) { let d = Math.atan2(mx, mz) - m.ry; d = Math.atan2(Math.sin(d), Math.cos(d)); m.ry += d * Math.min(1, dt * 10); }
+      /* the camera puts itself behind you whenever you move or turn; drag to look around, and a moment after you let go it settles back */
+      if ((ml > 0.08 || turn) && performance.now() > userHold) { const back = m.ry + Math.PI; az += Math.atan2(Math.sin(back - az), Math.cos(back - az)) * Math.min(1, dt * (turn ? 6 : 2.4)); }
       m.g.position.set(m.x, m.y + (WD.dead ? 0.5 : 0), m.z); if (!(m.emoT > now && m.emo === 'dance')) m.g.rotation.y = m.ry; m.g.scale.setScalar(m.hitT > now ? 1.14 : 1);
       animate(m, m.g.userData, m.sp, m.y > 0.05, now, t);
     }
@@ -2496,7 +2503,7 @@ function renderHome(soft=false) {
     B3.show(null);plazaSync();return;
   }
   const off = Net.ready && !Net.db ? '<p class="note">Parties need a connection to the game server. Play works without one.</p>' : Net.ready && !Net.canWrite ? '<p class="note">Your access is view-only. Ask the owner of this page to make you a Contributor.</p>' : '';
-  let h = '<header class="hd"><button class="logob" data-a="title" aria-label="Back to the start">' + logo('xl') + '</button><div class="tools">' + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button><button class="ib" data-a="settings" aria-label="Settings">' + ico('gear', 20) + '</button></div></header>' +
+  let h = '<header class="hd"><span class="whoami">' + ava(F.look, PC[0], 40) + '<span><b>' + esc(F.name || 'You') + '</b><small><i class="coin"></i>' + fmt(wallet.coins) + '</small></span></span><div class="tools">' + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button><button class="ib" data-a="settings" aria-label="Settings">' + ico('gear', 20) + '</button></div></header>' +
     '<div class="seg nav" role="tablist">' + PAGES.map(p => '<button data-a="page" data-v="' + p[0] + '" role="tab" aria-selected="' + (F.page === p[0]) + '" class="' + (F.page === p[0] ? 'on' : '') + (p[0] === 'shop' ? ' hot' : '') + '">' + p[1] + '</button>').join('') + '</div><h1 class="ph">' + PH[F.page] + '</h1>' +
     ((F.page === 'create' || F.page === 'join') && authInfo.persistent && !authInfo.registered ? '<button class="guestbar" data-a="acct"><b>Playing as a guest</b><span>Sign up / Log in to keep your coins on every device</span></button>' : '');
   if (F.page === 'create') h += nameRow() + '<p class="fine"><b>Classic.</b> Everyone starts with £2,500. Buy streets, collect rent, last player standing wins.</p>' + row('Players in the party', seg('max', [[2,'2'],[3,'3'],[4,'4'],[5,'5'],[6,'6']])) + row('Computer opponents', seg('bots', [[0,'None'],[1,'1 bot'],[2,'2 bots'],[3,'3 bots'],[4,'4 bots']].slice(0, Math.min(4, F.max - 1) + 1))) + (F.bots ? row('Bot difficulty', seg('difficulty', [['easy','Easy'],['medium','Medium'],['hard','Hard']])) + '<p class="fine">Easy makes mistakes, Medium plays cautiously, Hard plans ahead. Bots take real turns on the server.</p>' : '') + row('Turn timer', seg('turnTimer', [[0,'Off'],[20,'20s'],[30,'30s'],[45,'45s'],[60,'60s']], 'dense')) +
@@ -2683,7 +2690,8 @@ function renderFriends() {
     (authInfo.registered ? '' : '<p class="fnote">Sign up in Profile so your friends can see you here.</p>'));
 }
 let HIDDEN = [];
-async function loadFriends() { if (!Net.ready || !Net.db) return; try { const r = await api('friends'); FRIENDS = r.friends || []; HIDDEN = r.hidden || []; renderFriends(); if (PROF) profilePaint(); } catch (e) {} }
+let fSeq = 0;
+async function loadFriends() { if (!Net.ready || !Net.db) return; const my = ++fSeq; try { const r = await api('friends'); if (my !== fSeq) return; FRIENDS = r.friends || []; HIDDEN = r.hidden || []; renderFriends(); if (PROF) profilePaint(); } catch (e) {} }
 setInterval(loadFriends, 8000); [1500, 3500, 6000].forEach(t => setTimeout(loadFriends, t));
 function friendModal(i) {
   const f = FRIENDS[i]; if (!f) return; const L2 = f.l || {};
@@ -3000,7 +3008,7 @@ function winnerModal() {
       (mode === 'online' && rematch ? '<p class="fine c">' + (rematch.phase === 'lobby' ? esc(rematch.players[0] ? rematch.players[0].name : 'Someone') + ' is setting up the next game.' : 'The others have started the next game.') + '</p>' : '');
   });
 }
-const WORLD_HELP = [['arrow', 'Getting around', 'WASD or the thumb stick moves you. The arrow keys turn the camera, Space jumps, Shift runs. Drag or pinch to look around.'],
+const WORLD_HELP = [['arrow', 'Getting around', 'Arrow keys or WASD: up and down walk, left and right turn. The camera follows behind you; drag to look around and it settles back. Space jumps, Shift runs, scroll or pinch zooms.'],
   ['coins', 'Gold', 'You earn 1,000 gold every second, counted by the server, whether the page is open on your phone or your laptop. Walk into a floating cube to boost it for a while.'],
   ['gift', 'Collecting', 'Spend gold in the Shop on outfits, hats, extras, pets and scenes. Loot boxes cost 500,000 and only ever hold Legendary or Mythical exclusives you cannot buy.'],
   ['star', 'Swag Level', 'Everyone starts at -100. Rare things you wear, and everything you collect, push it up towards 9,999.'],
@@ -3087,8 +3095,7 @@ document.addEventListener('click', async e => {
         authInfo=await api('auth/me');
         const meData=await api('me');loadProfile(meData.wallet);fixLook();
         toast('Signed in as '+result.username+'.');
-        const found=await api('my-party');
-        if(found.code) await joinRoom(found.code,true);else renderHome();
+        store.set('bigrent-room', null); renderHome();
       } catch(err) {toast(err.message||'Could not sign in.');}
       finally {el.disabled=false;}
       break;
@@ -3246,7 +3253,7 @@ B3.onPick = i => {
   const h = (location.hash || '').slice(1).toUpperCase();
   /* Old Monopoly invite links no longer change the social-world landing screen. */
   applySettings(); renderHome();   // everyone enters the shared grassy world.
-  if (!B3.ok) toast('3D graphics are switched off in this browser, so the board cannot be drawn.');
+  if (!B3.ok) toast('3D graphics are switched off in this browser, so the world cannot be drawn.');
   let lastU = U();
   addEventListener('resize', () => { if (U() === lastU) return; lastU = U(); if (!G) renderHome(); else if (V && V.phase === 'lobby') renderLobby(); else if (V) renderGame(null, true); });
   capsReady.then(() => {
@@ -3256,14 +3263,7 @@ B3.onPick = i => {
        device). Try it first, then ask the server for this account's live party. */
     (async () => {
       if (!Net.db || G) return;
-      const saved = store.get('bigrent-room');
-      if (saved) await joinRoom(saved, true);
-      if (!G && authInfo.registered) {
-        try {
-          const r = await api('my-party');
-          if (r.code && r.code !== saved && !G) await joinRoom(r.code,true);
-        } catch (e) {}
-      }
+      store.set('bigrent-room', null);   // the board game is gone: everyone stays in the world
     })();
   });
 })();

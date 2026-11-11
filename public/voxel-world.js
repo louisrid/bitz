@@ -104,7 +104,7 @@
     instanced(box(1, 1, 1), leaves, LEAFC, true);
     instanced(box(1, 1, 1), bushes, BUSHC, true);
     instanced(box(1, 1, 1), rocks, ROCKC, true);
-    /* flowers removed: from above they read as floating bits */
+    instanced(box(1, 1, 1), flowers, FLOWERC);   // flowers sit on the ground: a stem and a small head
     instanced(box(1, 1, 1), logs, TRUNKC, true);
 
     /* ---- animals. They wander the field on their own and keep out of the fighting circle. ---- */

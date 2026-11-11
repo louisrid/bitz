@@ -284,7 +284,7 @@ const plaza = new Map();   // ws -> { i, id, n, l, pet, p: [x, y, z, ry, anim], 
 let plazaSeq = 0;
 const plazaCard = q => ({ i:q.i, f:q.id.slice(2,12), n:q.n, l:q.l, pet:q.pet, p:q.p, hp:q.hp, w:q.w, d:q.dead?1:0, sw:q.sw });
 /* weapons and gold boosts: the server holds health, decides every hit and hands out every boost */
-const WEAPONS = [{ dmg: 18, cd: 300, range: 34, rad: 1.1, all: false }, { dmg: 40, cd: 1100, range: 16, rad: 2.4, all: true }, { dmg: 58, cd: 1900, range: 24, rad: 3.4, all: true }];
+const WEAPONS = [{ dmg: 18, cd: 300, range: 34, rad: 1.1, all: false }, { dmg: 40, cd: 1100, range: 24, rad: 2.4, all: true }, { dmg: 58, cd: 1900, range: 24, rad: 3.4, all: true }];
 const BOOSTS = [{ x: 2, ms: 60000 }, { x: 3, ms: 30000 }, { x: 5, ms: 15000 }], PAD_REST = 45000;
 /* three boosts only, out on the grass well clear of the fighting circle */
 const pads = [].map((q, i) => ({ id: i, x: q[0], z: q[1], k: i % 3, at: 0 }));
@@ -375,7 +375,10 @@ function plazaJoin(ws, raw) {
   if (Array.isArray(msg.p) && msg.p.length === 5 && msg.p.every(Number.isFinite)) {
     if (q.dead) return;
     const now = Date.now(), np = [Math.max(-100, Math.min(100, msg.p[0])), Math.max(0, Math.min(12, msg.p[1])), Math.max(-100, Math.min(100, msg.p[2])), msg.p[3] % 7, msg.p[4] | 0];
-    const far = Math.hypot(np[0] - q.p[0], np[2] - q.p[2]) > 16 * Math.min(3, (now - (q.lastAt || now)) / 1000) + 2.5;   // faster than anyone can run: no pick-ups from that step
+    /* nobody runs faster than 11 a second: a longer step is cut short, so nobody can teleport into range to shoot */
+    const step = Math.hypot(np[0] - q.p[0], np[2] - q.p[2]), most = 13 * Math.min(2, Math.max(0.1, (now - (q.lastAt || now)) / 1000)) + 3;
+    if (q.lastAt && step > most) { const k = most / step; np[0] = q.p[0] + (np[0] - q.p[0]) * k; np[2] = q.p[2] + (np[2] - q.p[2]) * k; }
+    const far = false;
     q.p = np; q.lastAt = now; q.moved = true; plazaPads(q, ws, now, far);
   } else if (Array.isArray(msg.shoot)) { plazaShoot(q, msg.shoot, Date.now());
   } else if (msg.trade && typeof msg.trade === 'object') { plazaTrade(q, msg.trade, Date.now());
