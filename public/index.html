@@ -1024,14 +1024,45 @@ const B3 = (function () {
       if (T[i].t !== 'st') continue;
       const want = st && st.own[i] ? st.own[i].h + ':' + st.own[i].o : '0', h = houses[i];
       if ((h ? h.userData.key : '0') === want) continue;
-      const grew = st && st.own[i] && (!h || st.own[i].h > h.userData.h);
-      if (h) scene.remove(h); delete houses[i];
-      if (want === '0' || !st.own[i].h) continue;
-      const n = st.own[i].h, col = PC[st.own[i].o], G = new THREE.Group(); G.userData = { key: want, h: n };
-      if (n === 5) { G.add(mesh(new THREE.BoxGeometry(2.2, 1.5, 0.95), L(col), 0, 0.75, 0)); G.add(mesh(new THREE.BoxGeometry(2.4, 0.22, 1.1), L(0x111111), 0, 1.6, 0)); G.add(mesh(new THREE.BoxGeometry(0.7, 0.5, 0.5), L(0xffd60a), 0, 1.95, 0)); }
-      else for (let k = 0; k < n; k++) { const x = (k - (n - 1) / 2) * 0.82; G.add(mesh(new THREE.BoxGeometry(0.62, 0.55, 0.7), L(col), x, 0.28, 0)); const r = mesh(new THREE.ConeGeometry(0.58, 0.45, 4), L(0x111111), x, 0.78, 0); r.rotation.y = Math.PI / 4; G.add(r); }
-      G.position.copy(loc(i, 0, -C / 2 + 0.72)); G.rotation.y = -TH[rect(i).side]; scene.add(G); houses[i] = G;
-      if (grew && !snap) tween(480, f => G.scale.setScalar(Math.max(0.01, back(f))));
+      const grew=st&&st.own[i]&&(!h||st.own[i].h>h.userData.h);
+      if(h){
+        scene.remove(h);
+        h.traverse(q=>{if(q.geometry)q.geometry.dispose();if(q.material)q.material.dispose();});
+      }
+      delete houses[i];
+      if(want==='0'||!st.own[i].h)continue;
+      const n=st.own[i].h,col=PC[st.own[i].o],G=new THREE.Group();
+      G.userData={key:want,h:n};
+      if(n===5){
+        // Fourth upgrade becomes an illuminated landmark hotel. Original
+        // rent index 5 and footprint stay intact.
+        G.add(mesh(new THREE.BoxGeometry(2.24,2.55,1.02),L(col),0,1.28,0));
+        G.add(mesh(new THREE.BoxGeometry(2.39,.22,1.18),L(0x151515),0,2.64,0));
+        G.add(mesh(new THREE.BoxGeometry(1.62,.16,1.03),L(0xffd60a),0,2.33,.05));
+        G.add(mesh(new THREE.BoxGeometry(.8,.52,.5),L(0xffd60a),0,2.98,0));
+        G.add(mesh(new THREE.BoxGeometry(.84,.09,.54),L(0x111111),0,3.3,0));
+        const glass=new THREE.MeshBasicMaterial({color:0xffe7a3});
+        for(let row=0;row<3;row++)for(let k=-1;k<=1;k++){
+          const window=mesh(new THREE.BoxGeometry(.28,.34,.05),glass,k*.59,.58+row*.7,.545);
+          window.castShadow=false;G.add(window);
+        }
+      }else for(let k=0;k<Math.min(n,4);k++){
+        const x=(k-(Math.min(n,4)-1)/2)*.74;
+        G.add(mesh(new THREE.BoxGeometry(.57,.59,.68),L(col),x,.30,0));
+        const roof=mesh(new THREE.ConeGeometry(.53,.43,4),L(0x111111),x,.81,0);
+        roof.rotation.y=Math.PI/4;G.add(roof);
+        const door=mesh(new THREE.BoxGeometry(.18,.29,.035),L(0xffe4aa),x,.21,.36);
+        door.castShadow=false;G.add(door);
+      }
+      G.position.copy(loc(i,0,-C/2+.72));G.rotation.y=-TH[rect(i).side];
+      scene.add(G);houses[i]=G;
+      if(grew&&!snap){
+        G.scale.set(.5,.01,.5);
+        tween(n===5?660:430,f=>{
+          const v=Math.max(.01,back(f)),xz=.5+.5*Math.min(1,v);
+          G.scale.set(xz,v,xz);
+        });
+      }
     }
   };
   api.repaint = () => { sig = '~'; };
