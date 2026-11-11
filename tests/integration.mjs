@@ -71,6 +71,24 @@ try {
   assert.equal(laptop.id,registered.id,'phone and laptop must reference the same account');
   const me=await request('me',laptop.token);
   assert.equal(me.status,200);assert.equal(me.id,registered.id);
+  // Leaving a bot-only lobby must delete it, not leave an AI as host.
+  const botOnly=await request('party',other,{mode:25,bots:2,difficulty:'easy'});
+  assert.equal(botOnly.status,200);
+  const botOnlyCode=botOnly.state.code;
+  assert.equal((await request('party/'+botOnlyCode,other,{op:'leave'})).status,200);
+  assert.equal((await request('party/'+botOnlyCode,other)).state,null,'bot-only abandoned lobby must close');
+  // If the human host leaves but another human stays, give that human the seat
+  // at index 0. Keep AI players after humans so only a human can start.
+  const host='d'.repeat(48),friend='e'.repeat(48);
+  const transfer=await request('party',host,{mode:25,bots:2,difficulty:'medium'});
+  const transferCode=transfer.state.code;
+  assert.equal((await request('party/'+transferCode,friend,{op:'join'})).status,200);
+  const handoff=await request('party/'+transferCode,host,{op:'leave'});
+  assert.equal(handoff.status,200);
+  assert.equal(handoff.state.players[0].id,(await request('me',friend)).id,'host should transfer to remaining human');
+  assert.equal(handoff.state.players.filter(p=>p.bot).length,2);
+  assert.equal((await request('party/'+transferCode,friend,{op:'start'})).state.phase,'play');
+  console.log('Leaving bot-only lobby and human host handoff passed.');
   const room=await request('party',registered.token,{mode:25,bots:2,difficulty:'hard'});
   assert.equal(room.status,200,JSON.stringify(room));
   assert.equal(room.state.players.length,3);
