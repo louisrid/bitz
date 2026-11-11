@@ -271,6 +271,9 @@ async function bootstrap() {
       const rows = await pg`select state, version from stakkz_state where id = 'main' limit 1`;
       dbVersion = Number(rows[0]?.version) || 0;
       remote = rows[0]?.state;
+      /* postgres.js returns JSONB as a string with some driver settings.
+         Always hydrate the actual object before restoring accounts/sessions. */
+      if (typeof remote === 'string') remote = JSON.parse(remote);
     } else {
       const res = await fetch(CLOUD_URL + '?id=eq.main&select=state', {
       headers: { apikey:CLOUD_KEY, Authorization:'Bearer '+CLOUD_KEY },
