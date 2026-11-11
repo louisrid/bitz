@@ -1557,7 +1557,7 @@ const B3 = (function () {
       animate(o, o.g.userData, o.sp, o.y > 0.05, now, t);
     });
     // a third-person camera behind and above you: drag to look around, pinch or scroll to zoom
-    const tx = m ? m.x : 0, ty = (m ? m.y * 0.6 : 0) + 2.4, tz = m ? m.z : 0, pitch = Math.max(0.12, Math.min(1.35, el - 0.42)), dist = 12.5 * zoom;
+    const tx = m ? m.x : 0, ty = (m ? m.y * 0.6 : 0) + 2.4, tz = m ? m.z : 0, pitch = Math.max(0.15, Math.min(1.35, el - 0.3)), dist = 21 * zoom;
     cT.set(cT.x + (tx - cT.x) * Math.min(1, dt * 10), cT.y + (ty - cT.y) * Math.min(1, dt * 10), cT.z + (tz - cT.z) * Math.min(1, dt * 10));
     cam.position.set(cT.x + Math.sin(az) * Math.cos(pitch) * dist, cT.y + Math.sin(pitch) * dist, cT.z + Math.cos(az) * Math.cos(pitch) * dist);
     cam.lookAt(cT); cam.aspect = rc.width / rc.height; cam.updateProjectionMatrix();
@@ -2573,7 +2573,7 @@ function friendModal(i) {
    match starts (so players in a game disappear from the plaza) and rejoins when they come home. */
 const Plaza = { ws: null, you: null, tries: 0, timer: 0, sent: null, sentAt: 0, sig: '', restyleT: 0 };
 const plazaCol = n => PC[[...String(n || '')].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) % PC.length];
-const PLAZA_ON = false;   // the shared world ships switched off until it is tested live
+const PLAZA_ON = true;    // the shared world ships switched off until it is tested live
 function plazaWanted() { return PLAZA_ON && !!(Net.ready && Net.db && B3.ok) && $('#app').dataset.screen !== 'game'; }
 function plazaShown() { const s = $('#app').dataset.screen; return plazaWanted() && (s === 'lobby' || (s === 'home' && F.page !== 'me' && F.page !== 'shop')); }
 function plazaSync() {
