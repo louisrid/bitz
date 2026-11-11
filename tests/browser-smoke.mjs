@@ -68,7 +68,7 @@ async function stableLayout(page, label) {
     window.__stableTabs=document.querySelector('#side .seg.nav');
   });
   for(const tab of tabs) {
-    await page.locator('#side [data-a=page][data-v="'+tab+'"]').click();
+    await page.locator('#side .seg.nav [data-a=page][data-v="'+tab+'"]').click();
     const m=await page.evaluate(()=>{
       const a=document.querySelector('#side').getBoundingClientRect();
       const b=document.querySelector('#stage').getBoundingClientRect();
@@ -87,7 +87,7 @@ async function stableLayout(page, label) {
         assert(Math.abs(m[key]-baseline[key])<=2,label+' '+tab+' changed '+key+': '+JSON.stringify({baseline,m}));
     } else baseline=m;
   }
-  await page.locator('#side [data-a=page][data-v=me]').click();
+  await page.locator('#side .seg.nav [data-a=page][data-v=me]').click();
   console.log(label+': stable panel and board dimensions across all 4 tabs, no horizontal overflow.');
 }
 try {
@@ -107,17 +107,17 @@ try {
   }
   await pc.setViewportSize({width:1440,height:900});
   await capture(pc,'desktop-profile-1440');
-  await pc.locator('#side [data-a=page][data-v=create]').click();
+  await pc.locator('#side .seg.nav [data-a=page][data-v=create]').click();
   await capture(pc,'desktop-create-1440');
-  await pc.locator('#side [data-a=page][data-v=shop]').click();
+  await pc.locator('#side .seg.nav [data-a=page][data-v=shop]').click();
   await capture(pc,'desktop-shop-1440');
-  await pc.locator('#side [data-a=page][data-v=me]').click();
+  await pc.locator('#side .seg.nav [data-a=page][data-v=me]').click();
   await pc.locator('#side #auth-username').fill('BrowserTester');
   await pc.locator('#side #auth-password').fill('LongTestPassword2026!');
   await pc.locator('#side [data-a=authregister]').click();
   await pc.waitForFunction(()=>document.querySelector('#side .account-box')?.textContent.includes('Signed in'));
   console.log('Desktop user account created.');
-  await pc.locator('#side [data-a=page][data-v=create]').click();
+  await pc.locator('#side .seg.nav [data-a=page][data-v=create]').click();
   await pc.locator('#side [data-a=settings]').click();
   await pc.evaluate(()=>{window.__oldControl=document.querySelector('#modal [data-a=set][data-k=music][data-v="0"]')});
   await pc.locator('#modal [data-a=set][data-k=music][data-v="0"]').click();
@@ -144,11 +144,11 @@ try {
   }
   await phone.setViewportSize({width:390,height:844});
   await capture(phone,'mobile-profile-390');
-  await phone.locator('#side [data-a=page][data-v=create]').click();
+  await phone.locator('#side .seg.nav [data-a=page][data-v=create]').click();
   await capture(phone,'mobile-create-390');
-  await phone.locator('#side [data-a=page][data-v=shop]').click();
+  await phone.locator('#side .seg.nav [data-a=page][data-v=shop]').click();
   await capture(phone,'mobile-shop-390');
-  await phone.locator('#side [data-a=page][data-v=me]').click();
+  await phone.locator('#side .seg.nav [data-a=page][data-v=me]').click();
   await phone.locator('#side #auth-username').fill('BrowserTester');
   await phone.locator('#side #auth-password').fill('LongTestPassword2026!');
   await phone.locator('#side [data-a=authlogin]').click();
