@@ -7,7 +7,7 @@ const SESSION_LIFE = 60 * 24 * 60 * 60 * 1000;
 const hashToken = t => crypto.createHash('sha256').update(t).digest('hex');
 const passwordHash = (pass, salt) => crypto.scryptSync(pass, salt, 64, { N: 16384, r: 8, p: 1 }).toString('hex');
 function checkPassword(pass) {
-  return typeof pass === 'string' && pass.length >= 10 && pass.length <= 128;
+  return typeof pass === 'string' && pass.length >= 3 && pass.length <= 128;
 }
 export class AccountAuth {
   constructor(saved, changed) {
@@ -42,7 +42,7 @@ export class AccountAuth {
   register(username, password, guestId) {
     username = String(username || '').trim();
     if (!USERNAME.test(username)) throw new Error('Use 3–20 letters, numbers or underscores for your username.');
-    if (!checkPassword(password)) throw new Error('Use a password of 10–128 characters.');
+    if (!checkPassword(password)) throw new Error('Use a password of at least 3 characters.');
     const key = username.toLowerCase();
     if (this.users.has(key)) throw new Error('That username is already taken.');
     if (this.username(guestId)) throw new Error('This player already has an account. Sign in instead.');

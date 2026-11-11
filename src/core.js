@@ -109,7 +109,8 @@ export function partyOp(s, op, user, body, now, code) {
       if (s) refuse('taken');
       const mode = body.mode === 'classic' ? 'classic' : [25,35,45].includes(Number(body.mode)) ? Number(body.mode) : 35;
       const timer = [20,25,30,35,45,50,60].includes(Number(body.turnTimer)) ? Number(body.turnTimer) : 0;
-      n = E.join(E.newRoom(code, { mode: mode, max: 6, timer: timer }), user.id, user.name || 'Host', user.look, user.pet);
+      const max = [2,3,4,5,6].includes(Number(body.max)) ? Number(body.max) : 6;
+      n = E.join(E.newRoom(code, { mode: mode, max: max, timer: timer }), user.id, user.name || 'Host', user.look, user.pet);
       n = addBots(n, body.bots, body.difficulty, code); n.made = now;
     } else if (!s) refuse('No party with the code ' + code + '.');
     else if (op === 'join') { if (s.phase === 'lobby' && me < 0) n = E.join(s, user.id, name, user.look, user.pet); }

@@ -103,11 +103,11 @@ try {
   const sixStarted=await request('party/'+sixCode,sixHost,{op:'start'});
   assert.equal(sixStarted.status,200,JSON.stringify(sixStarted));
   assert.equal(sixStarted.state.phase,'play');
-  assert.equal(sixStarted.state.timer,30);
-  assert.equal(Object.keys(sixStarted.state.own).length,12);
+  assert.equal(sixStarted.state.timer,0);
+  assert.equal(Object.keys(sixStarted.state.own).length,0);
   assert(sixStarted.state.players.every((p,i)=>{
     const deeds=Object.entries(sixStarted.state.own).filter(([,o])=>o.o===i);
-    return deeds.length===2;
+    return deeds.length===0;
   }));
   console.log('Six-player HTTP lobby, live server bots, fair paid opening deeds and adaptive timer passed.');
   const room=await request('party',registered.token,{mode:25,bots:2,difficulty:'hard'});

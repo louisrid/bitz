@@ -204,12 +204,12 @@
     need(s.players.length >= 2 && s.players.length <= 6, 'A match needs 2–6 players');
     s.order = shuffle(s.players.map(function (p, i) { return i; }), ctx);
     s.phase = 'play'; s.turn = 0; s.startedAt = ctx.now;
-    s.timer = s.turnTimer || Math.max(25, 50 - (s.players.length - 2) * 5);
+    s.timer = s.turnTimer || 0;   // the host's choice: 0 means no turn timer
     s.endAt = s.mode === 'classic' ? 0 : ctx.now + Number(s.mode) * 60000;
     s.players.forEach(function (p) { p.nb = ctx.now + (0.15 + ctx.rand() * 0.3) * gameLen(s); p.cash = 1500; });
     // Buy an equal number of affordable, randomly selected deeds for each
     // player. Every player starts at equal net worth; no free property gifts.
-    var per = s.players.length >= 5 ? 2 : 3;
+    var per = 0;   // nobody is handed streets: everyone starts with £1,500 and buys as they play
     var pool = shuffle(T.map(function (t,i) { return isProp(i) ? i : -1; }).filter(function (i) { return i >= 0 && T[i].p <= 300; }),ctx);
     var chosen = pool.slice(0, per * s.players.length).sort(function (a,b) { return T[b].p - T[a].p; });
     var picked = s.players.map(function () { return { sum:0, count:0, random:ctx.rand() }; });
@@ -223,7 +223,7 @@
       s.players[target.i].bought++;
     });
     s.v++; s.w = 'start' + ctx.rand(); s.fx = [];
-    log(s, -1, 'Everybody starts with £1,500 less the price of ' + per + ' random streets and stations.');
+    log(s, -1, 'Everybody starts with £1,500.');
     log(s, -1, nm(s, cur(s)) + ' goes first.');
     beginTurn(s, ctx);
     return s;

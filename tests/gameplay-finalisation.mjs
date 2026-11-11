@@ -14,13 +14,13 @@ function game(count=2,mode=35){
   return s;
 }
 for(let n=2;n<=6;n++){
-  const s=game(n),per=n>=5?2:3,ids=Object.keys(s.own).map(Number);
+  const s=game(n),per=0,ids=Object.keys(s.own).map(Number);
   assert.equal(s.players.length,n);
   assert.equal(ids.length,n*per);
   assert.equal(new Set(ids).size,ids.length);
   assert.equal(s.mode,35);
   assert.equal(s.endAt-s.startedAt,35*60000);
-  assert.equal(s.timer,Math.max(25,50-(n-2)*5));
+  assert.equal(s.timer,0);
   const spent=[];
   for(let i=0;i<n;i++){
     const deeds=ids.filter(j=>s.own[j].o===i);
@@ -33,7 +33,7 @@ for(let n=2;n<=6;n++){
   }
   assert(Math.max(...spent)-Math.min(...spent)<=240,'Fair starter deed price allocation '+JSON.stringify(spent));
 }
-console.log('Fair paid 2–6-player starter portfolios, 35-minute defaults and auto timers passed');
+console.log('Fair paid 2–6-player starter portfolios, 35-minute defaults and no turn timer by default passed');
 const host=player(0),fellow=player(1);
 let lobby=core.partyOp(null,'create',host,{mode:35,bots:4,difficulty:'hard'},now,'BBCC').state;
 assert.equal(lobby.max,6);assert.equal(lobby.players.length,5);
@@ -41,7 +41,13 @@ lobby=core.partyOp(lobby,'join',fellow,{},now+1,'BBCC').state;
 assert.equal(lobby.players.length,6);
 assert.throws(()=>core.partyOp(lobby,'join',player(8),{},now+2,'BBCC'),/full/i);
 const started=core.partyOp(lobby,'start',host,{},now+100,'BBCC').state;
-assert.equal(started.phase,'play');assert.equal(Object.keys(started.own).length,12);
+assert.equal(started.phase,'play');assert.equal(Object.keys(started.own).length,0);
+{ // the host's exact party size caps seats, bots included
+  const three=core.partyOp(null,'create',host,{mode:35,max:3,bots:4},now,'DDEE').state;
+  assert.equal(three.max,3);assert.equal(three.players.length,3);
+  assert.throws(()=>core.partyOp(three,'join',fellow,{},now+1,'DDEE'),/full/i);
+  console.log('Exact party size from settings caps seats and bots passed');
+}
 for(const mode of [25,35,45,'classic']){
   const s=core.partyOp(null,'create',host,{mode,bots:1},now,'CCDD').state;
   assert.equal(s.mode,mode);

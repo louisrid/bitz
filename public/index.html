@@ -392,7 +392,7 @@ button.chip.on{background:var(--ink);color:var(--paper)}
   .item b{min-height:0}
   .item .pic{aspect-ratio:1.3}
   .hd + .tag{display:none}
-  #app[data-screen="game"]{grid-template:"players" auto "stage" minmax(0,1fr) "log" auto "actions" auto / minmax(0,1fr);gap:8px;padding-block:10px}
+  #app[data-screen="game"]{grid-template:"players" auto "stage" minmax(0,1fr) "log" auto "actions" auto / minmax(0,1fr);gap:6px;padding-block:6px;--gut:6px}
   #hud{display:contents}
   #ghead{grid-area:stage;align-self:start;z-index:3;pointer-events:none;min-width:0;margin:9px 9px 0}
   #ghead > *{pointer-events:auto}
@@ -403,6 +403,11 @@ button.chip.on{background:var(--ink);color:var(--paper)}
   #players::-webkit-scrollbar{display:none}
   .pp{flex:0 0 auto;min-width:calc(var(--k)*158px)}
   #log{display:none}
+#log{flex:0 0 auto!important;min-height:0!important;max-height:calc(var(--k)*150px);gap:calc(var(--k)*5px)!important;padding:calc(var(--k)*8px) 0!important}
+#log h3{font-size:max(12px,calc(var(--kf)*13px));letter-spacing:.04em;text-transform:uppercase}
+#log ul{gap:calc(var(--k)*4px)!important}
+#log li{font-size:max(12px,calc(var(--kf)*13px))!important;line-height:1.25!important}
+#log li:nth-child(n+6){display:none}
   #ticker{display:flex;grid-area:log;align-items:center;gap:calc(var(--k)*9px);min-width:0;height:calc(var(--k)*36px);text-align:left;border:var(--bw) solid var(--ink);border-radius:var(--r);padding:0 calc(var(--k)*11px);background:var(--paper);font-size:max(12px,calc(var(--kf)*14px));line-height:1.2}
   #ticker i{margin-top:0}
   #ticker span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -455,6 +460,7 @@ button.chip.on{background:var(--ink);color:var(--paper)}
 @media (min-width:901px) and (min-height:521px){
   /* Profile-width controls and stable split layout across all desktop screens. */
   #app{--sw:clamp(390px,35vw,560px);transition:none}
+  #app[data-screen="game"]{--sw:clamp(250px,20vw,310px);--gut:12px;gap:12px;padding-block:12px}
   .roomy #side,#veil,#toast{--k:.74;--kf:.92;--r:calc(var(--k)*12px);--h:calc(var(--k)*38px);--fs:max(12px,calc(var(--kf)*15px));--fb:max(12px,calc(var(--kf)*17px));--fl:max(12px,calc(var(--kf)*13px));--gap:calc(var(--k)*13px)}
   #app[data-screen="home"][data-page="shop"] .item{flex-basis:calc((100% - calc(var(--k)*36px)) / 4)}
   #app[data-screen="home"][data-page="shop"] .items.two .item{flex-basis:calc((100% - calc(var(--k)*36px)) / 4)}
@@ -483,6 +489,12 @@ button.chip.on{background:var(--ink);color:var(--paper)}
 @media (max-width:600px){.seg.modes button{min-height:44px}}
 /* account & sync controls */
 .account-box{display:grid;gap:calc(var(--k)*10px);border:var(--bw) solid var(--ink);border-radius:var(--r);padding:calc(var(--k)*13px);background:var(--mist)}
+.wside .logo b{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tmore .btn.acct{background:var(--ink);color:var(--paper)}
+.tmore .btn.acct.in{background:var(--paper);color:var(--ink)}
+.guestbar{display:flex;flex-wrap:wrap;align-items:baseline;gap:calc(var(--k)*4px) calc(var(--k)*10px);width:100%;text-align:left;border:var(--bw) solid var(--ink);border-radius:var(--r);padding:calc(var(--k)*9px) calc(var(--k)*13px);background:var(--sun);color:var(--ink);font:inherit;cursor:pointer;margin-bottom:calc(var(--k)*10px)}
+.guestbar b{font-size:max(13px,calc(var(--kf)*16px))}
+.guestbar span{font-size:max(12px,calc(var(--kf)*14px));text-decoration:underline}
 .account-box h3{font-size:max(14px,calc(var(--kf)*20px))}
 .account-inputs{display:grid;gap:calc(var(--k)*8px)}
 @media (min-width:560px){.account-inputs{grid-template-columns:1fr 1fr}}
@@ -525,7 +537,7 @@ button.chip.on{background:var(--ink);color:var(--paper)}
   <aside id="hud" class="panel" hidden>
     <header id="ghead"></header>
     <div id="players"></div>
-    <section id="log"><h3>What just happened</h3><ul id="loglist"></ul></section>
+    <section id="log"><h3>Latest</h3><ul id="loglist"></ul></section>
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
@@ -1137,9 +1149,8 @@ const B3 = (function () {
     // a flag in the owner's colour stands on every owned space, so the board fills with colour as empires grow
     for (let i = 0; i < 40; i++) {
       const o = st && st.own[i] ? st.own[i].o : -1, fl = flags[i];
-      if ((fl ? fl.userData.o : -1) === o) continue;
       if (fl) { scene.remove(fl); delete flags[i]; }
-      if (o < 0) continue;
+      continue;   // ownership flags removed: owned spaces are shown by the board's own highlights
       const F2 = new THREE.Group(), bn = mesh(new THREE.BoxGeometry(1.05, 0.7, 0.1), L(PC[o]), 0.6, 2.0, 0); F2.userData = { o: o, bn: bn };
       F2.add(mesh(new THREE.BoxGeometry(0.15, 2.45, 0.15), L(0x111111), 0, 1.22, 0)); F2.add(bn);
       F2.position.copy(loc(i, W / 2 - 0.55, C / 2 - 0.6)); F2.rotation.y = -TH[rect(i).side]; scene.add(F2); flags[i] = F2;
@@ -1303,7 +1314,7 @@ const B3 = (function () {
     const p = ptr.get(e.pointerId); if (!p) return;
     if (ptr.size === 1) { const dx = e.clientX - p[0], dy = e.clientY - p[1]; moved += Math.abs(dx) + Math.abs(dy); if (chasing) fOff -= dx * 0.006; else az -= dx * 0.006; el = Math.max(0.35, Math.min(1.45, el + dy * 0.005)); }
     ptr.set(e.pointerId, [e.clientX, e.clientY]);
-    if (ptr.size === 2) { const v = [...ptr.values()], d = Math.hypot(v[0][0] - v[1][0], v[0][1] - v[1][1]); if (pinch) zoom = Math.max(0.5, Math.min(1.5, zoom * pinch / d)); pinch = d; moved = 99; }
+    if (ptr.size === 2) { const v = [...ptr.values()], d = Math.hypot(v[0][0] - v[1][0], v[0][1] - v[1][1]); if (pinch) zoom = Math.max(0.35, Math.min(2.6, zoom * pinch / d)); pinch = d; moved = 99; }
   });
   const up = e => {
     if (!ptr.delete(e.pointerId)) return; pinch = 0;
@@ -1321,7 +1332,7 @@ const B3 = (function () {
     }
   };
   stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
-  stage.addEventListener('wheel', e => { e.preventDefault(); zoom = Math.max(0.5, Math.min(1.5, zoom * (e.deltaY > 0 ? 1.08 : 0.93))); }, { passive: false });
+  stage.addEventListener('wheel', e => { e.preventDefault(); zoom = Math.max(0.35, Math.min(2.6, zoom * (e.deltaY > 0 ? 1.08 : 0.93))); }, { passive: false });
 
   function frame(now) {
     requestAnimationFrame(frame);
@@ -1378,7 +1389,7 @@ const B3 = (function () {
     // the whole board is the resting view. The camera closes in on a player when their turn starts, while the dice
     // roll and the piece moves, and for a moment after it lands; then it eases back out.
     const actor = api.traveling >= 0 ? -1 : api.moving >= 0 ? api.moving : api.rolling;
-    if (api.cur !== fCur) { fCur = api.cur; fOff = 0; if (api.cur >= 0) { fWho = api.cur; fSpot = false; fUntil = Math.max(fUntil, now + 2400); } }
+    if (api.cur !== fCur) { fCur = api.cur; if (api.cur >= 0) { fWho = api.cur; fSpot = false; fUntil = Math.max(fUntil, now + 2400); } }
     if (actor >= 0) { fWho = actor; fSpot = false; fUntil = Math.max(fUntil, now + 2000); }
     if (now > fUntil) fSpot = false;
     if (!fSpot && tokens[fWho]) fpos.copy(tokens[fWho].position);
@@ -1386,8 +1397,8 @@ const B3 = (function () {
     const foc = api.home ? (api.focus ? (api.focus === 'start' ? fv2.copy(loc(0, 0, 0)) : tokens[0] ? tokens[0].position : null) : null) : chasing ? fpos : null, near = foc && api.home && api.focus !== 'start';
     // in a close-up the camera stands outside the board looking in, so the city is behind the player
     { let d = (chasing ? Math.atan2(fpos.x, fpos.z) + fOff : az) - cA; if (chasing) d = Math.atan2(Math.sin(d), Math.cos(d)); cA += d * Math.min(1, kk * (chasing ? 0.55 : 4)); if (!chasing && Math.abs(az - cA) > Math.PI * 2) cA = az; }
-    const a2 = cA + Math.sin(t * 0.3) * (restKey === 't' ? 0.018 : 0.07) * mv, e3 = (foc ? (near ? 0.3 : chasing ? 0.44 : 0.5) : el) + Math.sin(t * 0.21) * 0.02 * mv, ty = api.home ? 1 : 0.5;
-    let dist = foc ? (near ? 12.5 : chasing ? 21 * zoom * Math.max(1, 0.85 / asp) : 26) : 0;
+    const a2 = cA + Math.sin(t * 0.3) * (restKey === 't' ? 0.018 : 0.07) * mv, e3 = (foc ? Math.max(0.1, Math.min(1.45, (near ? 0.3 : chasing ? 0.44 : 0.5) + el - (restKey === 't' ? 1.04 : 0.86))) : el) + Math.sin(t * 0.21) * 0.02 * mv, ty = api.home ? 1 : 0.5;
+    let dist = foc ? (near ? 12.5 * zoom : chasing ? 21 * zoom * Math.max(1, 0.85 / asp) : 26 * zoom) : 0;
     if (!foc) {
       const sa = Math.sin(a2), ca = Math.cos(a2), se = Math.sin(e3), ce = Math.cos(e3), m = 0.93;
       if (api.home) FITC.forEach(q => { const py = q[1] - ty, R = q[0]; dist = Math.max(dist, R / (m * th) + Math.abs(py) * se, (R * se - py * ce) / (m * tv) + R * ce + py * se, (R * se + py * ce) / (m * tv) - R * ce + py * se); });
@@ -1421,7 +1432,7 @@ let myId = '', Net = { db: null, user: null, ref: null, unsub: null, canWrite: t
 const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }, del(k) { try { localStorage.removeItem(k); } catch (e) {} } };
 const ctx = () => ({ now: Date.now(), rand: Math.random, die: () => { try { return 1 + crypto.getRandomValues(new Uint32Array(1))[0] % 6; } catch (e) { return 1 + Math.floor(Math.random() * 6); } } });
 const LOOK0 = () => ({ skin: 0, hair: 'short', hc: 0, outfit: 'tee', hat: '', acc: '', bg: 'paper' });
-const F = { page: 'create', wtab: 'style', cat: 'body', filt: 'outfit', sel: null, reset: false, leave: false, name: '', look: LOOK0(), pet: '', mode: 35, turnTimer: 0, bots: 0, difficulty: 'medium', code: '', ln: 2, cpu: 1, lc: 2 };
+const F = { page: 'create', wtab: 'style', cat: 'body', filt: 'outfit', sel: null, reset: false, leave: false, name: '', look: LOOK0(), pet: '', mode: 35, turnTimer: 0, max: 4, bots: 0, difficulty: 'medium', code: '', ln: 2, cpu: 1, lc: 2 };
 let settings = Object.assign({ sound: true, music: true, calm: false, admin: false, follow: true }, store.get('stakkz-settings') || {});
 /* the account: coins, loot boxes, items and stats. The server keeps it; this is the page's copy of it. */
 const freshWallet = () => ({ v: 3, t: 0, coins: 10000, boxes: 1, own: [], claimed: [], grants: [], games: {}, gb: {}, played: 0, wins: 0, stats: { earned: 0, rent: 0, bought: 0, kos: 0, best: 0, opened: 0 } });
@@ -1528,6 +1539,7 @@ let styleQ = false, lobbyJob = Promise.resolve();
 function syncLook() { const p = G && G.phase === 'lobby' && mode === 'online' && me >= 0 ? G.players[me] : null; if (p && (p.pet !== F.pet || ['skin', 'hc', 'hair', 'outfit', 'hat', 'acc'].some(k => String(p.look[k] || '') !== String(F.look[k] || '')))) styleChanged(); }
 function styleChanged() {
   fixLook(); saveWallet();
+  if (G) $('#bd').className = 'bg-' + bgOf(F.look);   // a new Scene shows behind the board straight away
   if (G && mode === 'online' && me >= 0 && (G.phase === 'lobby' || (G.phase === 'play' && !G.players[me].out))) {
     // the server checks the look against what this account owns, then shows it to the party
     if (!styleQ) { styleQ = true; const code = G.code; lobbyJob = lobbyJob.then(() => { styleQ = false; return syncAcct(); }).then(() => api('party/' + code, { op: 'style' })).then(r => { if (r.state && G && G.code === code) take(r.state); }).catch(() => {}); }
@@ -1547,6 +1559,7 @@ const capsReady = (async function () {
     catch (err) { if(!sessionToken) throw err; sessionToken=null;store.del('stakkz-session');activeKey=KEY;r=await api('me'); }
  if (r.fresh && kept && kept.seal) { try { r = await api('restore', kept); } catch (e) {} } myId = r.id; Net.uid = r.id; Net.db = true; Net.acct = true; loadProfile(r.wallet); fixLook();
     authInfo = await api('auth/me');
+    try { titleFoot(); if (!G) renderHome(true); } catch (e) {}
   }
   catch (e) { Net.db = null; myId = 'offline'; }   // no server: games on this device still work
   Net.ready = true;
@@ -1628,7 +1641,7 @@ async function online(quiet) {
 }
 async function createRoom() {
   if (!(await online())) return;
-  try { await syncAcct(); const r = await api('party', { mode: F.mode, turnTimer:F.turnTimer, bots: F.bots, difficulty: F.difficulty }); cpu = false; mode = 'online'; G = V = null; rematch = null; subscribe(r.state.code); adopt(r.state); }
+  try { await syncAcct(); const r = await api('party', { mode: F.mode, turnTimer:F.turnTimer, max: F.max, bots: Math.min(F.bots, F.max - 1), difficulty: F.difficulty }); cpu = false; mode = 'online'; G = V = null; rematch = null; subscribe(r.state.code); adopt(r.state); }
   catch (e) { toast(e.message); }
 }
 async function joinRoom(code, quiet) {
@@ -1758,7 +1771,7 @@ const adminOk = () => false;   // on the website nobody can hand themselves coin
 function applySettings() {
   still = mqStill.matches || !!settings.calm; document.documentElement.classList.toggle('calm', still);
   if (B3.ok && !B3.setup) { B3.setup = true; B3.auto = true; B3.quality('high'); }
-  B3.follow = settings.follow !== false; $('#view').textContent = B3.follow ? 'Follow cam on' : 'Follow cam off';
+  B3.follow = true;
   store.set('stakkz-settings', settings);
 }
 
@@ -1766,10 +1779,10 @@ function applySettings() {
 function setScreen(s) {
   const app = $('#app'); if (app.dataset.screen === s) return; app.dataset.screen = s;
   const game = s === 'game';
-  $('#side').hidden = game; $('#hud').hidden = !game; $('#view').hidden = !game;
+  $('#side').hidden = game; $('#hud').hidden = !game; $('#view').hidden = true;
   if (!game) $('#chaosTag').hidden = true;
   document.documentElement.classList.toggle('roomy', !game); if (s !== 'home') { const t = $('#title'); t.hidden = true; t.innerHTML = ''; }
-  if (s !== 'home') { B3.ok && B3.show(null); $('#bd').className = 'bg-paper'; }
+  if (s !== 'home') { B3.ok && B3.show(null); $('#bd').className = 'bg-' + bgOf(F.look); }
   B3.home = !game; B3.ok && B3.resize();
 }
 async function present(n) {
@@ -1928,7 +1941,7 @@ const PAGES = [['create', 'Create party'], ['join', 'Join party'], ['me', 'Profi
 const CATS = [['body', 'Body'], ['outfit', 'Outfit'], ['hat', 'Hat'], ['acc', 'Extra'], ['pet', 'Pet'], ['bg', 'Scene']];
 const FILTS = [['outfit', 'Outfits'], ['hat', 'Hats'], ['acc', 'Extras'], ['pet', 'Pets'], ['bg', 'Scenes']];
 const lengthRow = () => row('Choose a mode', seg('mode', [[25, 'QUICK · 25m'], [35, 'FAST FUN · 35m'], [45, 'LONG · 45m'], ['classic', 'Classic']], 'modes') +
-  '<p class="fine"><b>FAST FUN recommended.</b> Start with £1,500, paid-for random properties and automatic pacing for 2–6 players.</p>');
+  '<p class="fine"><b>FAST FUN recommended.</b> Everyone starts with £1,500. Buy streets as you land on them.</p>');
 const nameRow = () => row('Your name', '<input class="t" id="f-name" maxlength="12" placeholder="Type a name" value="' + esc(F.name) + '" autocomplete="off">');
 const withItem = id => { const l = Object.assign({}, F.look), it = ITEMS[id]; if (!it) return l; if (it[0] === 'dye') { if (l.hc < 4) l.hc = 4; if (l.hair === 'none') l.hair = 'short'; } else if (it[0] !== 'pet') l[it[0]] = id; return l; };
 const tryLook = () => F.wtab === 'shop' && F.sel && ITEMS[F.sel] ? { look: withItem(F.sel), pet: ITEMS[F.sel][0] === 'pet' ? F.sel : F.pet } : { look: F.look, pet: F.pet };
@@ -1978,13 +1991,13 @@ function accountHTML() {
     'Sign up with a username and password to keep your coins, items and active party in sync across phone and desktop. No email required.') +
     '</p>' + (unavailable ? '' :
     '<div class="account-inputs"><input class="t" id="auth-username" maxlength="20" placeholder="Username" autocomplete="username" aria-label="Account username">' +
-    '<input class="t" id="auth-password" type="password" minlength="10" maxlength="128" placeholder="Password (10+ characters)" autocomplete="current-password" aria-label="Account password"></div>' +
+    '<input class="t" id="auth-password" type="password" minlength="3" maxlength="128" placeholder="Password (3+ characters)" autocomplete="current-password" aria-label="Account password"></div>' +
     '<div class="row"><button class="btn go" data-a="authregister">Create account</button><button class="btn" data-a="authlogin">Sign in</button></div>') +
     '</div>';
 }
 function wardrobeModal() {
   F.sel = null; F.wtab = 'style';
-  openModal('wardrobe', () => { const col = PC[Math.max(0, mine0())], t = tryLook(); return '<div class="whead"><span class="pv bg-' + bgOf(t.look) + '">' + fig(t.look, col, 104) + petImg(t.pet, 40) + '</span><div class="wside">' + logo('sm') + pick('wtab', '', [['style', 'Profile'], ['shop', 'Shop']], F.wtab) + '<button class="btn go" data-a="close">Done</button></div></div>' + wardrobeHTML(col); });
+  openModal('wardrobe', () => { const col = PC[Math.max(0, mine0())], t = tryLook(); return '<div class="whead"><span class="pv bg-' + bgOf(t.look) + '">' + fig(t.look, col, 104) + petImg(t.pet, 40) + '</span><div class="wside">' + '<span class="logo sm"><b>' + esc((G && me >= 0 && G.players[me] ? G.players[me].name : F.name) || 'You') + '</b>' + mark() + '</span>' + pick('wtab', '', [['style', 'Profile'], ['shop', 'Shop']], F.wtab) + '<button class="btn go" data-a="close">Done</button></div></div>' + wardrobeHTML(col); });
 }
 /* loot boxes open on a prize wheel. The prize is decided first; the wheel is the reveal. */
 const WCOL = ['var(--mist)', '#8FDBFF', '#B6F26A', '#FF8AD8'];
@@ -2036,7 +2049,10 @@ async function spinLoot() {
 const muteBtns = () => [['sound', 'Sound effects'], ['music', 'Music']].map(q => '<button class="ib' + (settings[q[0]] ? '' : ' off') + '" data-a="mute" data-k="' + q[0] + '" aria-label="' + q[1] + '" aria-pressed="' + !!settings[q[0]] + '">' + ico(q[0], 20) + '</button>').join('');
 const PH = { create: 'Create a party', join: 'Join a party', me: 'Profile', shop: 'Shop' };
 /* The title screen: the logo drops onto the grid, then the two ways into a game with friends, and the rest underneath. */
+/* Guests play straight away; signing up keeps the same coins and items and syncs them to every device. */
+const acctLabel = () => !authInfo.persistent ? '' : authInfo.registered ? 'Signed in: ' + esc(authInfo.username) : 'Sign up / Log in';
 function titleFoot() {
+  const ta = $('#tacct'); if (ta) { const l = acctLabel(); ta.hidden = !l; if (ta.innerHTML !== l) ta.innerHTML = l; ta.classList.toggle('in', !!authInfo.registered); }
   const f = $('#tfoot'); if (!f) return;
   const html = '<button class="sme" data-a="go" data-v="me" aria-label="Your character">' + ava(F.look, PC[0], 40) + '<b>' + esc(F.name || 'You') + '</b></button><button class="pill" data-a="go" data-v="shop" aria-label="Your coins. Open the shop"><i class="coin"></i>' + fmt(wallet.coins) + '</button>' +
     (wallet.boxes ? '<button class="pill hot" data-a="loot" data-v="go" aria-label="Spin a loot box">' + lootImg(18) + wallet.boxes + '</button>' : '') + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button>';
@@ -2046,7 +2062,7 @@ function showTitle(back) {
   const t = $('#title'); t.hidden = false; t.className = 'bg-paper' + (back ? ' settled' : '');
   t.innerHTML = '<div class="tbox">' + logo('hero') + '<p class="ttag">Buy the city. Bankrupt your friends.</p>' +
     '<div class="tgo"><button class="btn go" data-a="go" data-v="create">Create party</button><button class="btn go" data-a="go" data-v="join">Join party</button></div>' +
-    '<div class="tmore"><button class="btn" data-a="go" data-v="me">Profile</button><button class="btn hotb" data-a="go" data-v="shop">Shop</button></div>' +
+    '<div class="tmore"><button class="btn acct" id="tacct" data-a="acct" hidden></button><button class="btn" data-a="go" data-v="me">Profile</button><button class="btn hotb" data-a="go" data-v="shop">Shop</button></div>' +
     '<div class="tfoot" id="tfoot"></div></div>';
   titleFoot();
 }
@@ -2101,11 +2117,11 @@ function renderHome(soft=false) {
   $('#app').dataset.page = F.page;
   const off = Net.ready && !Net.db ? '<p class="note">Parties need a connection to the game server. Play works without one.</p>' : Net.ready && !Net.canWrite ? '<p class="note">Your access is view-only. Ask the owner of this page to make you a Contributor.</p>' : '';
   let h = '<header class="hd"><button class="logob" data-a="title" aria-label="Back to the start">' + logo('xl') + '</button><div class="tools">' + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button><button class="ib" data-a="settings" aria-label="Settings">' + ico('gear', 20) + '</button></div></header>' +
-    '<div class="seg nav" role="tablist">' + PAGES.map(p => '<button data-a="page" data-v="' + p[0] + '" role="tab" aria-selected="' + (F.page === p[0]) + '" class="' + (F.page === p[0] ? 'on' : '') + (p[0] === 'shop' ? ' hot' : '') + '">' + p[1] + '</button>').join('') + '</div><h1 class="ph">' + PH[F.page] + '</h1>';
-  if (F.page === 'create') h += nameRow() + lengthRow() + row('Computer opponents', seg('bots', [[0,'None'],[1,'1 bot'],[2,'2 bots'],[3,'3 bots'],[4,'4 bots']])) + (F.bots ? row('Bot difficulty', seg('difficulty', [['easy','Easy'],['medium','Medium'],['hard','Hard']])) + '<p class="fine">Easy makes mistakes, Medium plays cautiously, Hard plans ahead. Bots take real turns on the server.</p>' : '') + '<details class="advanced"><summary>Advanced · turn timer</summary>' +
-    row('Turn timer', seg('turnTimer', [[0,'Auto'],[25,'25s'],[35,'35s'],[50,'50s']], 'dense')) +
-    '<p class="fine">Auto adjusts to how many people are playing.</p></details>' +
-    '<button class="btn go big" data-a="create">Create party</button><p class="fine">2–6 total players, including up to 4 bots. Invite friends with the party code.</p>' + off;
+    '<div class="seg nav" role="tablist">' + PAGES.map(p => '<button data-a="page" data-v="' + p[0] + '" role="tab" aria-selected="' + (F.page === p[0]) + '" class="' + (F.page === p[0] ? 'on' : '') + (p[0] === 'shop' ? ' hot' : '') + '">' + p[1] + '</button>').join('') + '</div><h1 class="ph">' + PH[F.page] + '</h1>' +
+    ((F.page === 'create' || F.page === 'join') && authInfo.persistent && !authInfo.registered ? '<button class="guestbar" data-a="acct"><b>Playing as a guest</b><span>Sign up / Log in to keep your coins on every device</span></button>' : '');
+  if (F.page === 'create') h += nameRow() + lengthRow() + row('Players in the party', seg('max', [[2,'2'],[3,'3'],[4,'4'],[5,'5'],[6,'6']])) + row('Computer opponents', seg('bots', [[0,'None'],[1,'1 bot'],[2,'2 bots'],[3,'3 bots'],[4,'4 bots']].slice(0, Math.min(4, F.max - 1) + 1))) + (F.bots ? row('Bot difficulty', seg('difficulty', [['easy','Easy'],['medium','Medium'],['hard','Hard']])) + '<p class="fine">Easy makes mistakes, Medium plays cautiously, Hard plans ahead. Bots take real turns on the server.</p>' : '') + row('Turn timer', seg('turnTimer', [[0,'Off'],[20,'20s'],[30,'30s'],[45,'45s'],[60,'60s']], 'dense')) +
+    '<p class="fine">' + (F.turnTimer ? 'Each turn plays itself after ' + F.turnTimer + ' seconds.' : 'No turn timer: take your time. If someone is away for 90 seconds, anyone can skip their turn.') + '</p>' +
+    '<button class="btn go big" data-a="create">Create party</button><p class="fine">' + F.max + ' seats' + (F.bots ? ', ' + Math.min(F.bots, F.max - 1) + ' of them bots' : '') + '. Invite friends with the party code.</p>' + off;
   else if (F.page === 'join') h += nameRow() + row('Party code', '<input class="t" id="f-code" maxlength="4" placeholder="ABCD" value="' + esc(F.code) + '" autocomplete="off" autocapitalize="characters">') + '<button class="btn go big" data-a="join">Join party</button>' + off;
   
   else if (F.page === 'me') h += accountHTML() + '<div class="mecard"><span class="pv bg-' + bgOf(F.look) + '">' + fig(F.look, PC[0], 104) + petImg(F.pet, 40) + '</span><div class="col">' + nameRow() + '<div class="pillrow"><span class="pill"><i class="coin"></i>' + fmt(wallet.coins) + '</span><span class="pill">' + lootImg(18) + wallet.boxes + '</span></div></div></div>' + styleHTML(PC[0]);
@@ -2131,7 +2147,7 @@ function renderLobby() {
     row('In the party: ' + s.players.length + ' of ' + s.max, bar('lob', s.players.length / s.max * 100)) +
     s.players.map((p, i) => '<div class="who" style="--c:' + PC[i] + '">' + ava(p.look, PC[i]) + '<span>' + esc(p.name) + '</span>' + petImg(p.pet, 30) + (i === me ? '<em>You</em>' : i === 0 ? '<em>Host</em>' : '') + '</div>').join('') +
     (open ? '<div class="who empty">' + (open === 1 ? '1 open seat' : open + ' open seats') + '</div>' : '') +
-    '<p class="fine">' + (s.mode === 'classic' ? 'Classic · Last player standing wins' : (s.mode === 35 ? 'FAST FUN' : s.mode === 25 ? 'QUICK' : 'LONG') + ' · ' + s.mode + ' minutes · highest net worth wins') + ' · ' + (s.timer || 'Auto') + 's turns' + '</p>' +
+    '<p class="fine">' + (s.mode === 'classic' ? 'Classic · Last player standing wins' : (s.mode === 35 ? 'FAST FUN' : s.mode === 25 ? 'QUICK' : 'LONG') + ' · ' + s.mode + ' minutes · highest net worth wins') + ' · ' + (s.timer ? s.timer + 's turns' : 'no turn timer') + '</p>' +
     (host ? (s.players.length >= 2 ? '<button class="btn go big" data-a="start">Start game</button>' : '<p class="tag dots">Waiting for friends to join</p>') : me >= 0 ? '<p class="tag dots">Waiting for the host to start</p>' : '') +
     '<div class="row">' + (me >= 0 ? '<button class="btn" data-a="wardrobe">Change look</button>' : '') + '<button class="btn" data-a="leave">Leave party</button></div>';
   patchHTML($('#side'),lobbyHTML);
@@ -2401,7 +2417,7 @@ function winnerModal() {
       (mode === 'online' && rematch ? '<p class="fine c">' + (rematch.phase === 'lobby' ? esc(rematch.players[0] ? rematch.players[0].name : 'Someone') + ' is setting up the next game.' : 'The others have started the next game.') + '</p>' : '');
   });
 }
-const RULES = [['star', 'Goal', 'Be the richest player when the clock runs out. In Classic, be the last one standing.'], ['arrow', 'Your turn', 'Roll and move. Buy the street you land on, or pay rent to whoever owns it. Doubles roll again, and three in a row means Jail. On a keyboard, Space does your main move. The camera closes in on whoever is rolling and moving; the Follow cam button switches that off.'], ['coins', 'Auctions', 'Pass on a street and it goes to auction. Everyone bids in turn, and the last bidder left wins it.'], ['home', 'Build', 'Own every street in a colour to double rent. Build evenly: three houses per street, then one hotel.'], ['cash', 'Short on cash', 'Sell houses and streets back to the bank for half price, or strike a trade. If you still cannot pay, you are out.'], ['bars', 'Jail', 'Roll doubles, pay £50 or play a card to get out. After three tries you pay and move.'], ['swap', 'Trades', 'Offer only cash and streets you own, for immediate acceptance or rejection. Trading closes in Final Chaos.'], ['arrow', 'Station travel', 'After landing at a station and paying rent or buying it, stay or travel to any other station. Travel is free from your own station, otherwise £50 to the bank or owner. No Start bonus or destination rent.'], ['cash', 'Final Chaos', 'The final 5 minutes double ordinary rent and stop trading. Highest net worth wins when time runs out.'], ['gift', 'Coins and loot boxes', 'Coins come from playing: buying, rent, sets, cards and Coin Rush. Spend them in the shop. You get a loot box for every game you finish, and more turn up along the way.']];
+const RULES = [['star', 'Goal', 'Be the richest player when the clock runs out. In Classic, be the last one standing.'], ['arrow', 'Your turn', 'Roll and move. Buy the street you land on, or pay rent to whoever owns it. Doubles roll again, and three in a row means Jail. On a keyboard, Space does your main move. The camera closes in on whoever is rolling and moving; the Follow cam button switches that off.'], ['coins', 'Auctions', 'Pass on a street and it goes to auction. Everyone bids in turn, and the last bidder left wins it.'], ['home', 'Build', 'Own every street in a colour to double rent. Build evenly: three houses per street, then one hotel.'], ['cash', 'Short on cash', 'Sell houses and streets back to the bank for half price, or strike a trade. If you still cannot pay, you are out.'], ['bars', 'Jail', 'Roll doubles, pay £50 or play a card to get out. After three tries you pay and move.'], ['swap', 'Trades', 'Offer only cash and streets you own, for immediate acceptance or rejection. Trading closes in Final Chaos.'], ['arrow', 'Station travel', 'After landing at a station and paying rent or buying it, stay or travel to any other station. Travel is free from your own station, otherwise £50 to the bank or owner. No Start bonus or destination rent.'], ['bars', 'Setting up', 'The host picks the mode, the number of players (2 to 6, bots included) and the turn timer. Everyone starts with £1,500 and no streets.'], ['arrow', 'Turn timer', 'Off, or 20, 30, 45 or 60 seconds, as the host chose. With it off, anyone can skip a player who has been away for 90 seconds.'], ['cash', 'Final Chaos', 'The final 5 minutes double ordinary rent and stop trading. Highest net worth wins when time runs out.'], ['gift', 'Coins and loot boxes', 'Coins come from playing: buying, rent, sets, cards and Coin Rush. Spend them in the shop. You get a loot box for every game you finish, and more turn up along the way.']];
 function rulesModal() { openModal('rules', () => '<div class="mhead">' + logo('sm') + xBtn() + '</div><h2>How to play</h2>' + RULES.map(r => '<div class="rule">' + ico(r[0], 24) + '<b>' + r[1] + '</b><p>' + r[2] + '</p></div>').join('') + '<button class="btn go" data-a="close">Got it</button>'); }
 function settingsModal() {
   F.reset = false;
@@ -2433,7 +2449,7 @@ document.addEventListener('click', async e => {
       renderHome(true); $('#side').scrollTop=0;
       break;
     }
-    case 'seg': { const v = el.dataset.v, k = el.dataset.k; F[k] = /^\d+$/.test(v) ? +v : v;
+    case 'seg': { const v = el.dataset.v, k = el.dataset.k; F[k] = /^\d+$/.test(v) ? +v : v; if (k === 'max') F.bots = Math.min(F.bots, F.max - 1);
       const group = el.closest('.seg');
       if (group) group.querySelectorAll('button').forEach(b => {
         const on = b.dataset.v === v; b.classList.toggle('on',on); b.setAttribute('aria-pressed',String(on));
@@ -2516,6 +2532,7 @@ document.addEventListener('click', async e => {
     }
     case 'mute': { const k = el.dataset.k; settings[k] = !settings[k]; applySettings(); Snd.music(!!settings.music); Snd('tap'); document.querySelectorAll('[data-a=mute][data-k=' + k + ']').forEach(b => { b.classList.toggle('off', !settings[k]); b.setAttribute('aria-pressed', String(!!settings[k])); }); break; }
     case 'go': F.page = el.dataset.v; F.sel = null; renderHome(true); hideTitle(); $('#side').scrollTop=0; break;
+    case 'acct': F.page = 'me'; F.sel = null; renderHome(true); hideTitle(); $('#side').scrollTop = 0; if (!authInfo.registered) setTimeout(() => { const u = $('#auth-username'); if (u) u.focus(); }, 80); break;
     case 'title': showTitle(true); break;
     case 'admin': { const f = $('#f-admin'); if (adminOk() && f && f.value === '123') { settings.admin = true; applySettings(); refreshModal(); toast('Admin tools unlocked.'); } else toast('That code is not right.'); break; }
     case 'adm': { if (!settings.admin || !adminOk()) break; const v = el.dataset.v;
@@ -2602,7 +2619,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal && F
   // on a keyboard, Space or Enter does the main move of your turn
   if ((e.key === ' ' || e.key === 'Enter') && !modal && $('#app').dataset.screen === 'game' && !/^(INPUT|BUTTON|TEXTAREA)$/.test(e.target.tagName)) { const b = document.querySelector('#actions .btns .btn.go'); if (b && !b.disabled) { e.preventDefault(); b.click(); } } });
 $('#view').addEventListener('pointerdown', e => e.stopPropagation());
-B3.onStep = k => Snd('hop', k); B3.onPoke = k => Snd('hop', 4 + k * 2);
+B3.onStep = k => Snd('hop', k); B3.onPoke = k => { Snd('hop', 4 + k * 2); if (V && V.players && V.players[k]) playerModal(k); };
 B3.onPick = i => {
   if (!$('#veil').hidden || $('#app').dataset.screen !== 'game' || !V || busy) return;
   if (V.stage==='travel' && E.cur(V)===me && E.RAILS.includes(i) && i!==V.station) {

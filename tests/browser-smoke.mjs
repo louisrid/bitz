@@ -83,11 +83,11 @@ async function stableLayout(page, label) {
       assert.equal(await page.locator('#side .seg.modes button[data-v="35"]').getAttribute('aria-pressed'),'true',
         label+' must recommend Fast Fun by default');
       const first=await page.evaluate(()=>document.querySelector('#stage').getBoundingClientRect().toJSON());
-      await page.locator('#side details.advanced summary').click();
+      await page.locator('#side [data-a=seg][data-k=turnTimer][data-v="30"]').click();
       const after=await page.evaluate(()=>document.querySelector('#stage').getBoundingClientRect().toJSON());
       assert(Math.abs(first.width-after.width)<2&&Math.abs(first.height-after.height)<2,
-        label+' advanced settings resized 3D board');
-      await page.locator('#side details.advanced summary').click();
+        label+' changing the turn timer resized 3D board');
+      await page.locator('#side [data-a=seg][data-k=turnTimer][data-v="0"]').click();
     }
     assert.equal(m.screen,'home',label+' should stay on the home screen');
     assert(m.headerSame && m.navSame,label+' '+tab+' replaced navigation controls');
