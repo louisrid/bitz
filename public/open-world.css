@@ -1,5 +1,5 @@
 /* Shared social world is the game. The original board remains dormant for backwards data compatibility. */
-:root{--fw:clamp(190px,20vw,310px)}
+:root{--fw:clamp(134px,14vw,217px)}
 html.fopen #fside{display:flex;background:#fff}
 #fside{background:#fff;box-shadow:2px 0 14px #13292022}
 #flist .fr .ava{width:46px;height:46px;border-radius:10px;background:#ecf8ed}
@@ -32,3 +32,20 @@ html.fopen #app[data-screen=home]{left:var(--fw);right:0;width:calc(100% - var(-
 #app[data-page=world] #stage{background:linear-gradient(#a9e7ff,#e4f8ff)}
 #app[data-screen=home] #corner,#app[data-screen=home] #dock{display:none!important}
 @media(max-width:900px){html.fopen #app[data-screen=home]{left:0;width:100%}#fside{z-index:18!important}#wbar{top:7px;left:8px;right:8px;gap:5px}#wbar .wbtn{padding:7px 8px;font-size:13px}#wbar .wstat{font-size:11px;padding:7px}#app[data-screen=home] #side{top:119px;bottom:8px}#app[data-screen=home] #wui .wtop{top:106px}#fprofov .fprof-panel{left:8px;top:120px;padding:12px;width:min(290px,calc(100% - 16px))}}
+
+/* Full-bleed social world; minimum friends footprint and no old game UI. */
+#app[data-screen="home"]{min-width:0!important;min-height:100dvh!important;max-width:none!important}
+html.fopen #app[data-screen="home"]{margin-left:0!important}
+#app[data-screen="home"][data-page="world"] #stage{position:absolute!important;inset:0!important;min-height:100dvh!important;overflow:hidden}
+#app[data-screen="home"][data-page="world"] #side,#app[data-screen="home"][data-page="world"] #hud,#app[data-screen="home"][data-page="world"] #dock,#app[data-screen="home"][data-page="world"] #corner,#app[data-screen="home"][data-page="world"] #view,#app[data-screen="home"][data-page="world"] #chaosTag{display:none!important}
+html.fopen #fside{display:flex!important}
+#fside{width:var(--fw)!important}
+#flist .fr{grid-template-columns:40px minmax(0,1fr);gap:7px;padding:5px;min-width:0}
+#flist .fr .ava{width:39px!important;height:39px!important}
+#flist .fr b{font-size:14px;min-width:0}
+#flist .fr small{font-size:11px}
+#fside .fhead{padding:12px 7px 8px;gap:3px}
+#fside .fhead b{font-size:19px}
+#app[data-screen="home"][data-page="world"] #wbar{z-index:30}
+#wbar .wstat:last-of-type{display:none}
+@media(max-width:900px){#fside{width:min(60vw,217px)!important}html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}}
