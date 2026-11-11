@@ -1053,9 +1053,34 @@ const B3 = (function () {
     halo.material.color.setHex(next?0xff3b30:0xff4b3e);
     api.setTime(daylight*.7+.3);
   };
-  api.flash = function (tile, col) {
-    const r = mesh(new THREE.TorusGeometry(1.6, 0.28, 8, 28), L(col)); r.castShadow = false; r.rotation.x = Math.PI / 2; r.position.copy(loc(tile, 0, 0)); r.position.y = 0.4; scene.add(r);
-    tween(650, f => { r.scale.setScalar(0.3 + back(f) * 1.1); r.position.y = 0.4 + f * 2.5; }).then(() => scene.remove(r));
+  api.flash=function(tile,col){
+    const r=mesh(new THREE.TorusGeometry(1.6,.28,8,28),L(col));
+    r.castShadow=false;r.rotation.x=Math.PI/2;r.position.copy(loc(tile,0,0));
+    r.position.y=.4;scene.add(r);
+    tween(600,f=>{r.scale.setScalar(.3+back(f)*1.1);r.position.y=.4+f*2.1;})
+      .finally(()=>{scene.remove(r);r.geometry.dispose();r.material.dispose();});
+  };
+  api.construction=function(tile,col,hotel){
+    if(still||document.hidden||api.fast)return;
+    const at=loc(tile,0,-C/2+.72);
+    const sparks=[],material=L(hotel?0xffd60a:col),geometry=new THREE.BoxGeometry(.22,.28,.2);
+    for(let k=0;k<6;k++){
+      const o=mesh(geometry,material);o.castShadow=false;
+      o.position.copy(at);scene.add(o);sparks.push(o);
+    }
+    tween(hotel?740:480,f=>{
+      sparks.forEach((o,k)=>{
+        const a=k*Math.PI/3,r=.3+1.25*f;
+        o.position.set(at.x+Math.cos(a)*r,.5+3.1*f+Math.sin(f*Math.PI)*.45,at.z+Math.sin(a)*r);
+        o.rotation.set(f*5,f*8,0);o.scale.setScalar(Math.max(.01,1-f));
+      });
+    }).finally(()=>{
+      sparks.forEach(o=>scene.remove(o));geometry.dispose();material.dispose();
+    });
+  };
+  api.completedSet=function(st,tile,pi){
+    const t=T[tile];if(!t||t.t!=='st'||!E.ownsGroup(st,pi,t.g))return;
+    E.GROUPS[t.g].forEach((j,k)=>setTimeout(()=>api.flash(j,PC[pi]),k*110));
   };
   // Persistent destination markers for the duration of a station choice,
   // without restarting the camera or rebuilding the board.
@@ -1746,8 +1771,23 @@ async function present(n) {
     }
     else if (f.t === 'card') { Snd(f.box ? 'box' : 'card'); await showCard(f, n); }
     else if (f.t === 'box') { Snd('box'); B3.ok && B3.react(f.p, 'cheer'); shout(nm(f.p) + ' found a loot box'); await wait(still ? 0 : 500); }
-    else if (f.t === 'buy') { Snd('buy'); if (B3.ok) { B3.flash(f.tile, PC[f.p]); B3.react(f.p, 'cheer'); B3.spot(f.p, 1500); } shout(nm(f.p) + ' bought ' + T[f.tile].n); }
-    else if (f.t === 'build') { Snd('buy'); if (B3.ok) { const o = E.owner(n, f.tile); B3.look(f.tile, 1800); B3.flash(f.tile, PC[Math.max(0, o)]); if (o >= 0) B3.react(o, 'cheer'); } }
+    else if (f.t === 'buy') {
+      Snd('buy');
+      if(B3.ok){
+        B3.flash(f.tile,PC[f.p]);B3.react(f.p,'cheer');
+        B3.completedSet(n,f.tile,f.p);
+      }
+      shout(nm(f.p)+' bought '+T[f.tile].n);
+    }
+    else if(f.t==='build'){
+      Snd('buy');
+      if(B3.ok){
+        const o=E.owner(n,f.tile),hotel=E.lvl(n,f.tile)===5,col=PC[Math.max(0,o)];
+        B3.construction(f.tile,col,hotel);B3.flash(f.tile,hotel?'#FFD60A':col);
+        if(o>=0)B3.react(o,'cheer');
+      }
+      if(E.lvl(n,f.tile)===5)shout('Hotel complete on '+T[f.tile].n+'!');
+    }
     else if (f.t === 'bust') { Snd('bust'); B3.ok && B3.spot(f.p, 2200); shout(nm(f.p) + ' is out'); shake(); await wait(still ? 0 : 900); }
     else if (f.t === 'pay') {
       if (B3.ok && f.a >= 20) B3.coins(f.from, f.to, f.a);
@@ -1755,15 +1795,22 @@ async function present(n) {
       else if (f.to >= 0 && f.a >= 200) { Snd('coin'); B3.ok && B3.react(f.to, 'cheer'); }
       else if (f.from >= 0 && f.a >= 100 && !spend) B3.ok && B3.react(f.from, 'sad');
     }
-    else if (f.t === 'auction') { Snd('card'); B3.ok && B3.look(f.tile, 30000); shout('Auction: ' + T[f.tile].n); await wait(still ? 0 : 500); }
+    else if(f.t==='auction'){
+      Snd('card');if(B3.ok)B3.flash(f.tile,'#3FA9FF');
+      shout('Auction: '+T[f.tile].n);await wait(still?0:280);
+    }
     else if (f.t === 'bid') { Snd('hop', Math.min(11, Math.floor(f.a / 40))); B3.ok && B3.react(f.p, 'cheer'); shout(nm(f.p) + ' bids ' + money(f.a)); }
     else if (f.t === 'pass') shout(nm(f.p) + ' passes');
-    else if (f.t === 'sold') { Snd('buy'); if (B3.ok) { B3.look(f.tile, 1800); B3.flash(f.tile, PC[f.p]); B3.react(f.p, 'cheer'); } shout('Sold to ' + nm(f.p) + ' for ' + money(f.a)); await wait(still ? 0 : 600); }
-    else if (f.t === 'unsold') { B3.ok && B3.look(f.tile, 700); shout('No bids for ' + T[f.tile].n); }
+    else if(f.t==='sold'){
+      Snd('buy');
+      if(B3.ok){B3.flash(f.tile,PC[f.p]);B3.react(f.p,'cheer');B3.completedSet(n,f.tile,f.p);}
+      shout('Sold to '+nm(f.p)+' for '+money(f.a));await wait(still?0:350);
+    }
+    else if(f.t==='unsold'){if(B3.ok)B3.flash(f.tile,'#FFFFFF');shout('No bids for '+T[f.tile].n);}
     else if (f.t === 'coins') { Snd('coin'); shout(n.players[f.p].name + ' grabbed ' + fmt(f.n) + ' coins'); }
     else if (f.t === 'gift') { Snd('coin'); shout(n.players[f.from].name + ' sent ' + n.players[f.to].name + ' ' + fmt(f.n) + ' coins'); }
     else if (f.t === 'trade') { Snd('buy'); if (B3.ok) { B3.coins(f.a, f.b, 150); B3.coins(f.b, f.a, 150); B3.react(f.a, 'cheer'); B3.react(f.b, 'cheer'); } shout(nm(f.a) + ' and ' + nm(f.b) + ' made a trade'); }
-    else if (f.t === 'win') { Snd('win'); B3.ok && (n.winners || []).forEach(i => B3.react(i, 'win')); }
+    else if(f.t==='win'){Snd('win');B3.ok&&(n.winners||[]).forEach(i=>B3.react(i,'win'));}
     else if (f.t === 'turn' && n.phase === 'play') { const mineT = f.p === me && solo(); if (mineT) Snd('turn'); shout(mineT ? 'Your turn' : n.players[f.p].name + '’s turn'); }
   }
   V = n; busy = false; B3.fast = false;
