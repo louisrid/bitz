@@ -97,16 +97,21 @@
   function ownsGroup(s, pi, g) { return GROUPS[g].every(function (i) { return owner(s, i) === pi; }); }
   function props(s, pi) { var r = []; for (var i = 0; i < 40; i++) if (owner(s, i) === pi) r.push(i); return r; }
   function isProp(i) { var t = T[i].t; return t === 'st' || t === 'rail' || t === 'util'; }
-  function rent(s, i, dice) {
+  function chaos(s, now) { return s.phase === 'play' && !!s.endAt && (now == null ? (s.t || 0) : now) >= s.endAt - 300000; }
+  function buildingCostLevel(h) { return h === 5 ? 4 : h; } // hotel unlocks on the fourth purchase
+  function rent(s, i, dice, now) {
     var t = T[i], o = owner(s, i);
     if (o < 0) return 0;
-    if (t.t === 'st') { var h = lvl(s, i); return h > 0 ? t.r[h] : (ownsGroup(s, o, t.g) ? t.r[0] * 2 : t.r[0]); }
-    var n = setOf(i).filter(function (j) { return owner(s, j) === o; }).length;
-    if (t.t === 'rail') return [25, 50, 100, 200][n - 1];
-    return dice * (n === 2 ? 10 : 4);
+    var base;
+    if (t.t === 'st') { var h = lvl(s, i); base = h > 0 ? t.r[h] : (ownsGroup(s, o, t.g) ? t.r[0] * 2 : t.r[0]); }
+    else {
+      var n = setOf(i).filter(function (j) { return owner(s, j) === o; }).length;
+      base = t.t === 'rail' ? [25, 50, 100, 200][n - 1] : dice * (n === 2 ? 10 : 4);
+    }
+    return base * (chaos(s, now) ? 2 : 1);
   }
   function worth(s, pi) {
-    return s.players[pi].cash + props(s, pi).reduce(function (a, i) { return a + T[i].p + (T[i].t === 'st' ? lvl(s, i) * HC[T[i].g] : 0); }, 0);
+    return s.players[pi].cash + props(s, pi).reduce(function (a, i) { return a + T[i].p + (T[i].t === 'st' ? buildingCostLevel(lvl(s, i)) * HC[T[i].g] : 0); }, 0);
   }
   function groupClear(s, i) { return setOf(i).every(function (j) { return lvl(s, j) === 0; }); }
   function canBuild(s, pi, i) {
@@ -135,9 +140,9 @@
 
   function newRoom(code, settings) {
     return {
-      v: 1, w: '', code: code, phase: 'lobby', mode: settings.mode || 'classic', max: settings.max || 5,
-      timer: settings.timer || 0, players: [], order: [], turn: 0, own: {}, dice: [1, 1], dbl: 0, again: false,
-      stage: 'lobby', debts: [], then: 0, trade: null, decks: { luck: [], fund: [] }, log: [], fx: [],
+      v: 1, w: '', code: code, phase: 'lobby', mode: settings.mode || 35, max: settings.max || 6,
+      timer: settings.timer || 0, turnTimer: settings.timer || 0, players: [], order: [], turn: 0, own: {}, dice: [1, 1], dbl: 0, again: false,
+      stage: 'lobby', station: -1, debts: [], then: 0, trade: null, decks: { luck: [], fund: [] }, log: [], fx: [],
       rush: -1, deadline: 0, t: 0, startedAt: 0, endAt: 0, winners: [], busts: 0, auc: null
     };
   }
@@ -172,7 +177,7 @@
     need(s0.phase === 'over', 'That game is still going');
     var old = s0.players.filter(function (p) { return p.id === id; })[0];
     need(old, 'You were not in that game');
-    var s = join(newRoom(s0.code, { mode: s0.mode, max: s0.max, timer: s0.timer }), id, old.name, old.look, old.pet);
+    var s = join(newRoom(s0.code, { mode: s0.mode, max: s0.max, timer: s0.turnTimer || 0 }), id, old.name, old.look, old.pet);
     s.v = s0.v + 1; s.w = 'again' + id + s.v;
     return s;
   }
@@ -196,18 +201,35 @@
     var s = clone(s0);
     need(s.phase === 'lobby', 'The game has already started');
     need(pi === 0, 'Only the host can start the game');
-    need(s.players.length >= 2, 'You need at least 2 players');
+    need(s.players.length >= 2 && s.players.length <= 6, 'A match needs 2–6 players');
     s.order = shuffle(s.players.map(function (p, i) { return i; }), ctx);
     s.phase = 'play'; s.turn = 0; s.startedAt = ctx.now;
+    s.timer = s.turnTimer || Math.max(25, 50 - (s.players.length - 2) * 5);
     s.endAt = s.mode === 'classic' ? 0 : ctx.now + Number(s.mode) * 60000;
-    s.players.forEach(function (p) { p.nb = ctx.now + (0.15 + ctx.rand() * 0.3) * gameLen(s); });
+    s.players.forEach(function (p) { p.nb = ctx.now + (0.15 + ctx.rand() * 0.3) * gameLen(s); p.cash = 1500; });
+    // Buy an equal number of affordable, randomly selected deeds for each
+    // player. Every player starts at equal net worth; no free property gifts.
+    var per = s.players.length >= 5 ? 2 : 3;
+    var pool = shuffle(T.map(function (t,i) { return isProp(i) ? i : -1; }).filter(function (i) { return i >= 0 && T[i].p <= 300; }),ctx);
+    var chosen = pool.slice(0, per * s.players.length).sort(function (a,b) { return T[b].p - T[a].p; });
+    var picked = s.players.map(function () { return { sum:0, count:0, random:ctx.rand() }; });
+    chosen.forEach(function (tile) {
+      var target = picked.map(function (p,i) { return { p:p, i:i }; })
+        .filter(function (x) { return x.p.count < per; })
+        .sort(function (a,b) { return a.p.sum - b.p.sum || a.p.random - b.p.random; })[0];
+      s.own[tile] = { o:target.i, h:0 };
+      s.players[target.i].cash -= T[tile].p;
+      target.p.sum += T[tile].p; target.p.count++;
+      s.players[target.i].bought++;
+    });
     s.v++; s.w = 'start' + ctx.rand(); s.fx = [];
-    log(s, -1, 'The game began. ' + nm(s, cur(s)) + ' goes first.');
+    log(s, -1, 'Everybody starts with £1,500 less the price of ' + per + ' random streets and stations.');
+    log(s, -1, nm(s, cur(s)) + ' goes first.');
     beginTurn(s, ctx);
     return s;
   }
   function beginTurn(s, ctx) {
-    s.stage = 'roll'; s.dbl = 0; s.again = false; s.then = 0; s.rush = -1; s.t = ctx.now;
+    s.stage = 'roll'; s.station = -1; s.dbl = 0; s.again = false; s.then = 0; s.rush = -1; s.t = ctx.now;
     s.deadline = s.timer ? ctx.now + s.timer * 1000 : 0;
     s.fx.push({ t: 'turn', p: cur(s) });
   }
@@ -217,18 +239,35 @@
     s.fx.push({ t: 'win' });
     log(s, list[0], list.map(function (i) { return nm(s, i); }).join(' and ') + ' won the game!');
   }
+  function chaosStep(s0, ctx) {
+    if (!s0 || s0.phase !== 'play' || !s0.endAt || ctx.now < s0.endAt-300000 || s0.chaosStarted) return s0;
+    var s=clone(s0);
+    s.chaosStarted=true; s.trade=null; s.fx=[];
+    s.v++; s.w='chaos:'+ctx.now;
+    log(s,-1,'FINAL CHAOS! Rents are doubled. Trading has closed.');
+    return s;
+  }
+  function expire(s0, ctx) {
+    if (!s0 || s0.phase !== 'play' || !s0.endAt || ctx.now < s0.endAt) return s0;
+    var s = clone(s0);
+    // Complete a real leading auction bid before counting final net worth.
+    if (s.auc) aucEnd(s, ctx);
+    // An unpaid debt reduces the current player's final value, even when
+    // they could not finish liquidating before the deadline.
+    var owing = s.debts.length ? debtTotal(s) : 0, debtor = s.order[s.turn];
+    var score = function (i) { return worth(s,i) - (i === debtor ? owing : 0); };
+    s.finalScores = s.players.map(function (_,i) { return score(i); });
+    var best = Math.max.apply(null, s.order.map(score));
+    var top = s.order.filter(function (i) { return score(i) === best; });
+    var bc = Math.max.apply(null, top.map(function (i) { return s.players[i].cash; }));
+    log(s, -1, 'Time is up. Final standings are based on cash, deeds and building value.');
+    win(s, top.filter(function (i) { return s.players[i].cash === bc; }));
+    s.v++; s.w = 'deadline:' + ctx.now; return s;
+  }
   function endTurn(s, ctx) {
     s.players[cur(s)].turns++;
     if (s.endAt && ctx.now >= s.endAt) {
-      var ts = s.order.map(function (i) { return s.players[i].turns; });
-      if (ts.every(function (x) { return x === ts[0]; })) {
-        var best = Math.max.apply(null, s.order.map(function (i) { return worth(s, i); }));
-        var top = s.order.filter(function (i) { return worth(s, i) === best; });
-        var bc = Math.max.apply(null, top.map(function (i) { return s.players[i].cash; }));
-        log(s, -1, 'Time is up.');
-        win(s, top.filter(function (i) { return s.players[i].cash === bc; }));
-        return;
-      }
+      var done = expire(s, ctx); Object.assign(s, done); return;
     }
     s.turn = (s.turn + 1) % s.order.length;
     beginTurn(s, ctx);
@@ -242,7 +281,7 @@
     var p = s.players[pi], wasCur = cur(s) === pi;
     var refund = 0;
     props(s, pi).forEach(function (i) {
-      if (T[i].t === 'st') refund += lvl(s, i) * HC[T[i].g] / 2;
+      if (T[i].t === 'st') refund += buildingCostLevel(lvl(s, i)) * HC[T[i].g] / 2;
       if (to >= 0) s.own[i] = { o: to, h: 0 }; else delete s.own[i];
     });
     if (to >= 0) { s.players[to].cash += Math.max(0, p.cash) + refund; s.players[to].kos++; give(s, to, 4000); }
@@ -283,7 +322,7 @@
     log(s, -1, T[tile].n + ' goes to auction.');
     aucClock(s, ctx);
   }
-  function aucClock(s, ctx) { s.t = ctx.now; s.deadline = s.timer ? ctx.now + 15000 : 0; }
+  function aucClock(s, ctx) { s.t = ctx.now; s.deadline = ctx.now + 10000; }
   function aucEnd(s, ctx) {
     var a = s.auc, w = a.by, t = T[a.tile];
     s.auc = null; s.stage = 'res'; s.t = ctx.now; s.deadline = s.timer ? ctx.now + s.timer * 1000 : 0;
@@ -376,12 +415,13 @@
   function land(s, pi, ctx) {
     var p = s.players[pi], i = p.pos, t = T[i];
     if (isProp(i)) {
+      if (t.t === 'rail') s.station = i;
       var o = owner(s, i);
       if (o < 0) {
         if (p.cash >= t.p) s.stage = 'buy';
         else { log(s, pi, p.name + " can't afford " + t.n + '.'); startAuction(s, i, ctx); }
       } else if (o !== pi) {
-        charge(s, [{ a: rent(s, i, s.dice[0] + s.dice[1]), to: o, rent: true }], ctx);
+        charge(s, [{ a: rent(s, i, s.dice[0] + s.dice[1],ctx.now), to: o, rent: true }], ctx);
       }
     } else if (t.t === 'tax') charge(s, [{ a: t.a, to: -1, why: t.n }], ctx);
     else if (t.t === 'luck' || t.t === 'fund') draw(s, pi, t.t, ctx);
@@ -412,7 +452,7 @@
     moveBy(s, c, tot, ctx);
   }
   function sellHouse(s, pi, i) {
-    var g = T[i].g; s.own[i].h--; s.players[pi].cash += HC[g] / 2;
+    var g = T[i].g; s.own[i].h = s.own[i].h === 5 ? 3 : s.own[i].h - 1; s.players[pi].cash += HC[g] / 2;
     s.fx.push({ t: 'pay', from: -1, to: pi, a: HC[g] / 2 });
   }
   function sellProp(s, pi, i) {
@@ -426,21 +466,25 @@
     need(tr.gc <= A.cash, A.name + " doesn't have that much cash");
     need(tr.tc <= B.cash, B.name + " doesn't have that much cash");
     need(tr.gp.every(function (i) { return tradeable(s, tr.from, i); }) && tr.tp.every(function (i) { return tradeable(s, tr.to, i); }), 'Sell the buildings on a colour set before trading it');
+    need(!chaos(s), 'Trading closes for the final five minutes');
     need(tr.gc + tr.tc + tr.gp.length + tr.tp.length > 0, 'Add something to the trade');
   }
   function finish(s) {
     if (s.phase === 'play' && s.stage === 'res') {
       if (s.players[cur(s)].jail) s.again = false;
-      s.stage = s.again ? 'roll' : 'act';
+      if (s.station >= 0 && s.players[cur(s)].pos === s.station) s.stage = 'travel';
+      else s.stage = s.again ? 'roll' : 'act';
     }
   }
 
   function act(s0, pi, a, ctx) {
     var s = clone(s0);
     need(s.phase === 'play', 'The game is not running');
+    if (s.endAt && ctx.now >= s.endAt) return expire(s, ctx);
     need(pi >= 0 && s.players[pi] && !s.players[pi].out, 'You are not playing in this game');
     s.fx = []; s.v++; s.w = pi + ':' + ctx.rand();
     var c = cur(s), p = s.players[pi], i = a.tile;
+    if (chaos(s,ctx.now) && s.trade) s.trade = null;
     if (pi === c) s.t = ctx.now;
     switch (a.t) {
       case 'roll':
@@ -472,12 +516,26 @@
       case 'pass':
         need(s.stage === 'auction' && s.auc && s.auc.who === pi, 'It is not your bid');
         s.fx.push({ t: 'pass', p: pi }); aucDrop(s, pi, ctx); break;
+      case 'stay':
+        need(pi === c && s.stage === 'travel' && s.station >= 0, 'No station travel is available');
+        s.station = -1; s.stage = 'res'; break;
+      case 'travel':
+        need(pi === c && s.stage === 'travel' && s.station >= 0, 'No station travel is available');
+        need(RAILS.indexOf(i) >= 0 && i !== s.station, 'Choose a different station');
+        var departureOwner = owner(s, s.station);
+        var fee = departureOwner === pi ? 0 : 50;
+        need(p.cash >= fee, 'You need £50 to travel');
+        if (fee) xfer(s, pi, departureOwner >= 0 ? departureOwner : -1, fee);
+        s.fx.push({t:'travel',p:pi,from:p.pos,to:i,fee:fee});
+        log(s,pi,p.name+' travelled to '+T[i].n+(fee?' for £50.':' for free.'));
+        p.pos = i; s.station = -1; s.again = false;
+        endTurn(s,ctx); break;
       case 'end':
         need(pi === c && s.stage === 'act' && !s.trade, "You can't end your turn yet");
         endTurn(s, ctx); break;
       case 'build':
         need(canBuild(s, pi, i), "You can't build there. Build evenly across the full colour set.");
-        xfer(s, pi, -1, HC[T[i].g]); s.own[i].h++;
+        xfer(s, pi, -1, HC[T[i].g]); s.own[i].h = s.own[i].h === 3 ? 5 : s.own[i].h + 1;
         s.fx.push({ t: 'build', tile: i }); give(s, pi, s.own[i].h === 5 ? 1500 : 150);
         log(s, pi, p.name + (s.own[i].h === 5 ? ' built a hotel on ' : ' built a house on ') + T[i].n + '.'); break;
       case 'sellHouse':
@@ -548,7 +606,8 @@
               if (s.players[who].cash >= s.debts[0].a || !props(s, who).length) settle(s, ctx);
             }
           }
-          else if (s.stage === 'roll') rollCore(s, ctx);
+          else if (s.stage === 'travel') { s.station=-1; s.stage='res'; }
+           else if (s.stage === 'roll') rollCore(s, ctx);
           else if (s.stage === 'act') { endTurn(s, ctx); break; }
           finish(s);
         }
@@ -559,7 +618,7 @@
     return s;
   }
 
-  var E = { T: T, HC: HC, GN: GN, GROUPS: GROUPS, DECKN: DECKN, newRoom: newRoom, join: join, leave: leave, restyle: restyle, again: again, start: start, act: act, cur: cur, owner: owner, lvl: lvl, rent: rent,
+  var E = { T: T, HC: HC, GN: GN, GROUPS: GROUPS, RAILS:RAILS, DECKN: DECKN, newRoom: newRoom, join: join, leave: leave, restyle: restyle, again: again, start: start, expire: expire, chaosStep:chaosStep, chaos:chaos, act: act, cur: cur, owner: owner, lvl: lvl, rent: rent,
     props: props, worth: worth, ownsGroup: ownsGroup, canBuild: canBuild, canSellHouse: canSellHouse, canSellProp: canSellProp, tradeable: tradeable, isProp: isProp, debtTotal: debtTotal, setOf: setOf };
   root.Engine = E;
   if (typeof module !== 'undefined' && module.exports) module.exports = E;

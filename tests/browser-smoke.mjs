@@ -1,0 +1,179 @@
+import assert from 'node:assert/strict';
+import { chromium, devices } from 'playwright';
+import { spawn } from 'node:child_process';
+import { createServer } from 'node:http';
+import { once } from 'node:events';
+import { setTimeout as delay } from 'node:timers/promises';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import os from 'node:os';
+import fs from 'node:fs';
+
+const root=fileURLToPath(new URL('../',import.meta.url));
+const storage={state:null};
+const cloud=createServer(async(req,res)=>{
+  res.setHeader('Content-Type','application/json');
+  if(req.method==='GET')return res.end(JSON.stringify(storage.state?[{state:storage.state}]:[]));
+  if(req.method==='POST'){
+    let body='';for await(const b of req)body+=b;
+    storage.state=JSON.parse(body)[0].state;
+    res.writeHead(201);return res.end('{}');
+  }
+  res.writeHead(405);res.end();
+});
+cloud.listen(0,'127.0.0.1');await once(cloud,'listening');
+const hold=createServer();hold.listen(0,'127.0.0.1');await once(hold,'listening');
+const port=hold.address().port;await new Promise(r=>hold.close(r));
+const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'stakkz-ui-'));
+const server=spawn(process.execPath,['server.js'],{
+  cwd:root,env:{...process.env,PORT:String(port),DATA_FILE:path.join(tmp,'data.json'),
+    STAKKZ_SECRET:'browser-e2e-testing-key-only',
+    STAKKZ_STORE_URL:'http://127.0.0.1:'+cloud.address().port+'/rest/v1/stakkz_state',
+    STAKKZ_STORE_KEY:'test-only'}
+});
+let serverLogs='',browser;
+server.stdout.on('data',b=>{serverLogs+=b.toString()});
+server.stderr.on('data',b=>{serverLogs+=b.toString()});
+const url='http://127.0.0.1:'+port+'/';
+const errors=[];
+const screenshots=path.join(root,'qa-screenshots');
+fs.mkdirSync(screenshots,{recursive:true});
+async function capture(page,name) {
+  await page.screenshot({path:path.join(screenshots,name+'.png'),animations:'disabled'});
+}
+async function observe(page,name){
+  page.on('pageerror',e=>errors.push(name+': '+e.message));
+  /* Validate UI and account sync independently of GPU/SwiftShader availability.
+     Real-device 3D performance still requires separate manual QA. */
+  await page.addInitScript(() => {
+    const original=HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext=function(type,...args){
+      if(['webgl','webgl2','experimental-webgl'].includes(String(type)))return null;
+      return original.call(this,type,...args);
+    };
+  });
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  await page.waitForSelector('#title [data-a=go]');
+}
+async function openPage(page,name){
+  await observe(page,name);
+  await page.locator('#title .tmore [data-a=go][data-v=me]').click();
+  await page.waitForSelector('#side [data-a=authregister]');
+}
+async function stableLayout(page, label) {
+  const tabs=['create','join','me','shop'];
+  let baseline=null;
+  await page.evaluate(()=>{
+    window.__stableHeader=document.querySelector('#side .hd');
+    window.__stableTabs=document.querySelector('#side .seg.nav');
+  });
+  for(const tab of tabs) {
+    await page.locator('#side .seg.nav [data-a=page][data-v="'+tab+'"]').click();
+    const m=await page.evaluate(()=>{
+      const a=document.querySelector('#side').getBoundingClientRect();
+      const b=document.querySelector('#stage').getBoundingClientRect();
+      return {screen:document.querySelector('#app').dataset.screen,sideWidth:a.width,sideLeft:a.left,
+        stageX:b.x,stageY:b.y,stageWidth:b.width,stageHeight:b.height,
+        total:document.documentElement.scrollWidth,window:innerWidth,
+        headerSame:document.querySelector('#side .hd')===window.__stableHeader,
+        navSame:document.querySelector('#side .seg.nav')===window.__stableTabs};
+    });
+    if(tab==='create'){
+      assert.equal(await page.locator('#side .seg.modes button').count(),4,label+' mode choices');
+      assert.equal(await page.locator('#side .seg.modes button[data-v="35"]').getAttribute('aria-pressed'),'true',
+        label+' must recommend Fast Fun by default');
+      const first=await page.evaluate(()=>document.querySelector('#stage').getBoundingClientRect().toJSON());
+      await page.locator('#side details.advanced summary').click();
+      const after=await page.evaluate(()=>document.querySelector('#stage').getBoundingClientRect().toJSON());
+      assert(Math.abs(first.width-after.width)<2&&Math.abs(first.height-after.height)<2,
+        label+' advanced settings resized 3D board');
+      await page.locator('#side details.advanced summary').click();
+    }
+    assert.equal(m.screen,'home',label+' should stay on the home screen');
+    assert(m.headerSame && m.navSame,label+' '+tab+' replaced navigation controls');
+    assert(m.total<=m.window+5,label+' '+tab+' horizontal overflow '+JSON.stringify(m));
+    assert(m.stageWidth>=160 && m.stageHeight>=110,label+' '+tab+' clipped stage '+JSON.stringify(m));
+    if(baseline) {
+      for(const key of ['sideWidth','sideLeft','stageX','stageY','stageWidth','stageHeight'])
+        assert(Math.abs(m[key]-baseline[key])<=2,label+' '+tab+' changed '+key+': '+JSON.stringify({baseline,m}));
+    } else baseline=m;
+  }
+  await page.locator('#side .seg.nav [data-a=page][data-v=me]').click();
+  console.log(label+': stable panel and board dimensions across all 4 tabs, no horizontal overflow.');
+}
+try {
+  for(let i=0;i<80;i++){
+    if(server.exitCode!==null)throw Error('Server exited: '+serverLogs);
+    try{const r=await fetch(url+'api/ping');if(r.ok)break;}catch(e){}
+    await delay(100);
+  }
+  browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',
+    args:['--no-sandbox','--use-angle=swiftshader','--disable-software-rasterizer=false']});
+  const desktop=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1});
+  const pc=await desktop.newPage();
+  await openPage(pc,'desktop');
+  for(const [width,height] of [[1440,900],[1280,800],[1024,768],[901,640]]) {
+    await pc.setViewportSize({width,height});
+    await stableLayout(pc,width+'x'+height+' desktop');
+  }
+  await pc.setViewportSize({width:1440,height:900});
+  await capture(pc,'desktop-profile-1440');
+  await pc.locator('#side .seg.nav [data-a=page][data-v=create]').click();
+  await capture(pc,'desktop-create-1440');
+  await pc.locator('#side .seg.nav [data-a=page][data-v=shop]').click();
+  await capture(pc,'desktop-shop-1440');
+  await pc.locator('#side .seg.nav [data-a=page][data-v=me]').click();
+  await pc.locator('#side #auth-username').fill('BrowserTester');
+  await pc.locator('#side #auth-password').fill('LongTestPassword2026!');
+  await pc.locator('#side [data-a=authregister]').click();
+  await pc.waitForFunction(()=>document.querySelector('#side .account-box')?.textContent.includes('Signed in'));
+  console.log('Desktop user account created.');
+  await pc.locator('#side .seg.nav [data-a=page][data-v=create]').click();
+  await pc.locator('#side [data-a=settings]').click();
+  await pc.evaluate(()=>{window.__oldControl=document.querySelector('#modal [data-a=set][data-k=music][data-v="0"]')});
+  await pc.locator('#modal [data-a=set][data-k=music][data-v="0"]').click();
+  assert(await pc.evaluate(()=>document.querySelector('#modal [data-a=set][data-k=music][data-v="0"]')===window.__oldControl),
+    'Music toggle must update its own element without rebuilding the modal');
+  await pc.locator('#modal [data-a=close]').first().click();
+  await pc.locator('#side [data-a=seg][data-k=bots][data-v="2"]').click();
+  await pc.locator('#side [data-a=seg][data-k=difficulty][data-v="hard"]').click();
+  await pc.locator('#side [data-a=create]').click();
+  await pc.waitForFunction(()=>document.querySelectorAll('#side .who:not(.empty)').length>=3);
+  assert.equal(await pc.locator('#side .who:not(.empty)').count(),3);
+  await pc.locator('#side [data-a=start]').click();
+  await pc.waitForSelector('#app[data-screen=game]',{timeout:20000});
+  console.log('Desktop modal, party, AI opponents and start-game UI passed.');
+
+  const {defaultBrowserType, ...iphone} = devices['iPhone 13'];
+  const phoneContext=await browser.newContext(iphone);
+  const phone=await phoneContext.newPage();
+  await observe(phone,'iPhone');
+  await phone.locator('#title .tmore [data-a=go][data-v=me]').click();
+  for(const [width,height] of [[390,844],[375,667],[430,932],[844,390]]) {
+    await phone.setViewportSize({width,height});
+    await stableLayout(phone,width+'x'+height+' mobile');
+  }
+  await phone.setViewportSize({width:390,height:844});
+  await capture(phone,'mobile-profile-390');
+  await phone.locator('#side .seg.nav [data-a=page][data-v=create]').click();
+  await capture(phone,'mobile-create-390');
+  await phone.locator('#side .seg.nav [data-a=page][data-v=shop]').click();
+  await capture(phone,'mobile-shop-390');
+  await phone.locator('#side .seg.nav [data-a=page][data-v=me]').click();
+  await phone.locator('#side #auth-username').fill('BrowserTester');
+  await phone.locator('#side #auth-password').fill('LongTestPassword2026!');
+  await phone.locator('#side [data-a=authlogin]').click();
+  await phone.waitForSelector('#app[data-screen=game]',{timeout:20000});
+  const size=await phone.evaluate(()=>({width:document.documentElement.scrollWidth,view:document.documentElement.clientWidth,
+    screen:document.querySelector('#app').dataset.screen}));
+  assert.equal(size.screen,'game');
+  assert(size.width<=size.view+5,'Mobile page overflows horizontally: '+JSON.stringify(size));
+  console.log('iPhone emulation: signed in to same account and resumed live game, no horizontal overflow.');
+  if(errors.length) throw Error('Browser errors: '+errors.join(' | '));
+} finally {
+  if(browser)await browser.close();
+  if(server.exitCode===null){server.kill('SIGTERM');await Promise.race([once(server,'exit'),delay(4000)])}
+  if(server.exitCode===null)server.kill('SIGKILL');
+  await new Promise(r=>cloud.close(r));
+  fs.rmSync(tmp,{recursive:true,force:true});
+}
