@@ -190,11 +190,12 @@ async function api(req, res, parts) {
     /* everyone with an account is everyone's friend: name, look, where they are right now */
     const inPlaza = new Set([...plaza.values()].filter(q => q.i).map(q => q.id)), inGame = new Set();
     parties.forEach(p => { if (p.phase === 'play') p.players.forEach(x => { if (!x.out && !x.bot) inGame.add(x.id); }); });
-    const list = [];
+    const list = [], hidden=[]; const excluded=new Set(Array.isArray(w.hiddenFriends)?w.hiddenFriends:[]);
     auth.users.forEach(u => { const a = accounts.get(u.id); if (!a || u.id === id) return;
-      list.push({ f: u.id.slice(2, 12), n: (a.name || u.username || 'Player').slice(0, 12), u: u.username, l: a.look || {}, pet: a.pet || '', at: inGame.has(u.id) ? 'game' : inPlaza.has(u.id) ? 'plaza' : '', seen: lastSeen.get(u.id) || a.t || 0, wins: a.wins || 0, played: a.played || 0 }); });
+      const friend={f:u.id.slice(2,12),n:(a.name||u.username||'Player').slice(0,12),u:u.username,l:a.look||{},pet:a.pet||'',at:inGame.has(u.id)?'game':inPlaza.has(u.id)?'plaza':'',seen:lastSeen.get(u.id)||a.t||0,wins:a.wins||0,played:a.played||0,swag:core.swag(a)};
+      (excluded.has(u.id)?hidden:list).push(friend); });
     list.sort((a, b) => (b.at ? 1 : 0) - (a.at ? 1 : 0) || b.seen - a.seen);
-    return send(res, 200, { friends: list.slice(0, 200), now });
+    return send(res, 200, { friends:list.slice(0,200),hidden:hidden.slice(0,200),now });
   }
   if (parts[0] === 'my-party' && req.method === 'GET') {
     const found = [...parties.values()].find(s => s.phase !== 'over' && s.players.some(p => p.id === id && !p.out));
@@ -207,7 +208,19 @@ async function api(req, res, parts) {
   const mine = extra => { const fresh = !!w.fresh, out = Object.assign({}, w); delete out.fresh; return Object.assign({ wallet: out, seal: seal(id, out), fresh: fresh, id: id, now: now }, extra); };
   const touch = () => { w.t = now; delete w.fresh; dirty = true; };
   try {
-    if (parts[0] === 'me') { if (req.method === 'POST') { core.setProfile(w, b); if (b.solo) core.credit(w, b.solo, true, now); touch(); } return send(res, 200, mine()); }
+    if(parts[0]==='friends'&&req.method==='POST'){
+      const target=String(b.friend||'');
+      if(!/^[a-f0-9]{10}$/.test(target))return send(res,400,{message:'Invalid friend account.'});
+      const match=[...auth.users.values()].find(u=>u.id!==id&&u.id.slice(2,12)===target);
+      if(!match)return send(res,404,{message:'Account not found.'});
+      const hidden=new Set(Array.isArray(w.hiddenFriends)?w.hiddenFriends:[]);
+      if(b.op==='remove')hidden.add(match.id);
+      else if(b.op==='restore')hidden.delete(match.id);
+      else return send(res,400,{message:'Unknown friend action.'});
+      w.hiddenFriends=[...hidden].slice(-500);touch();
+      return send(res,200,{ok:true,now});
+    }
+    if (parts[0] === 'me') { if (req.method === 'POST') { core.setProfile(w, b); if (b.solo) core.credit(w, b.solo, true, now); touch(); } return send(res, 200, mine({swag:core.swag(w)})); }
     if (parts[0] === 'restore' && req.method === 'POST') {
       // a sealed copy this server issued earlier, for an account it no longer has
       if (w.fresh && b.wallet && typeof b.seal === 'string' && b.seal === seal(id, b.wallet)) { Object.keys(w).forEach(k => delete w[k]); Object.assign(w, core.freshWallet(), b.wallet); core.setProfile(w, {}); touch(); }
@@ -265,7 +278,7 @@ const wss = new WebSocketServer({ noServer: true, maxPayload: 1024 });
    account, never from the client. Positions are relayed, batched, about ten times a second; nothing is stored. */
 const plaza = new Map();   // ws -> { i, id, n, l, pet, p: [x, y, z, ry, anim], moved }
 let plazaSeq = 0;
-const plazaCard = q => ({ i: q.i, n: q.n, l: q.l, pet: q.pet, p: q.p });
+const plazaCard = q => ({ i:q.i, f:q.id.slice(2,12), n:q.n, l:q.l, pet:q.pet, p:q.p });
 const plazaSend = (ws, m) => { if (ws.readyState === 1) { try { ws.send(typeof m === 'string' ? m : JSON.stringify(m)); } catch (e) {} } };
 const plazaAll = (m, except) => { const s = JSON.stringify(m); plaza.forEach((q, ws) => { if (ws !== except && q.i) plazaSend(ws, s); }); };
 function plazaWho(key) {
