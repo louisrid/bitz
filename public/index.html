@@ -517,7 +517,7 @@ button.chip.on{background:var(--ink);color:var(--paper)}
 'use strict';
 const E = Engine, T = E.T;
 const HOME = location.origin + location.pathname;   // where this game lives; an invite is this link plus the party code
-const PC = ['#FF4B3E', '#3FA9FF', '#3DDC84', '#FFD60A', '#B983FF'];
+const PC = ['#FF4B3E', '#3FA9FF', '#3DDC84', '#FFD60A', '#B983FF', '#FF962B'];
 const GC = ['#C68642', '#8FE3FF', '#FF8AD8', '#FF9F1C', '#FF3B30', '#FFE14D', '#2ECC71', '#3D5AFE'];
 const SKIN = ['#FFE0BD', '#F1C27D', '#D9A066', '#A56B46', '#6B4226'];
 const HAIRC = ['#2B2B2B', '#6B3E1E', '#E0B050', '#D9482B', '#FF8AD8', '#3FA9FF', '#F4F4F4']; // the last three need the hair dye kit
@@ -1151,7 +1151,7 @@ let myId = '', Net = { db: null, user: null, ref: null, unsub: null, canWrite: t
 const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }, del(k) { try { localStorage.removeItem(k); } catch (e) {} } };
 const ctx = () => ({ now: Date.now(), rand: Math.random, die: () => { try { return 1 + crypto.getRandomValues(new Uint32Array(1))[0] % 6; } catch (e) { return 1 + Math.floor(Math.random() * 6); } } });
 const LOOK0 = () => ({ skin: 0, hair: 'short', hc: 0, outfit: 'tee', hat: '', acc: '', bg: 'paper' });
-const F = { page: 'create', wtab: 'style', cat: 'body', filt: 'outfit', sel: null, reset: false, leave: false, name: '', look: LOOK0(), pet: '', mode: 25, bots: 0, difficulty: 'medium', code: '', ln: 2, cpu: 1, lc: 2 };
+const F = { page: 'create', wtab: 'style', cat: 'body', filt: 'outfit', sel: null, reset: false, leave: false, name: '', look: LOOK0(), pet: '', mode: 35, turnTimer: 0, bots: 0, difficulty: 'medium', code: '', ln: 2, cpu: 1, lc: 2 };
 let settings = Object.assign({ sound: true, music: true, calm: false, admin: false, follow: true }, store.get('stakkz-settings') || {});
 /* the account: coins, loot boxes, items and stats. The server keeps it; this is the page's copy of it. */
 const freshWallet = () => ({ v: 3, t: 0, coins: 10000, boxes: 1, own: [], claimed: [], grants: [], games: {}, gb: {}, played: 0, wins: 0, stats: { earned: 0, rent: 0, bought: 0, kos: 0, best: 0, opened: 0 } });
@@ -1292,7 +1292,7 @@ function whoAmI() {
 const clone = o => JSON.parse(JSON.stringify(o));
 function sane(d) {
   try {
-    if (!d || typeof d.v !== 'number' || ['lobby', 'play', 'over'].indexOf(d.phase) < 0 || !Array.isArray(d.players) || d.players.length < 1 || d.players.length > 5 || !Array.isArray(d.order) || !Array.isArray(d.log) || !d.own || typeof d.own !== 'object') return false;
+    if (!d || typeof d.v !== 'number' || ['lobby', 'play', 'over'].indexOf(d.phase) < 0 || !Array.isArray(d.players) || d.players.length < 1 || d.players.length > 6 || !Array.isArray(d.order) || !Array.isArray(d.log) || !d.own || typeof d.own !== 'object') return false;
     if (!d.players.every(p => p && typeof p.id === 'string' && typeof p.name === 'string' && Number.isFinite(p.cash) && p.pos >= 0 && p.pos < 40 && p.look && typeof p.look === 'object')) return false;
     if (!d.order.every(i => Number.isInteger(i) && i >= 0 && i < d.players.length) || (d.phase === 'play' && !(d.turn >= 0 && d.turn < d.order.length))) return false;
     if (!Object.keys(d.own).every(k => +k >= 0 && +k < 40 && d.own[k] && d.own[k].o >= 0 && d.own[k].o < d.players.length && d.own[k].h >= 0 && d.own[k].h <= 5)) return false;
@@ -1358,7 +1358,7 @@ async function online(quiet) {
 }
 async function createRoom() {
   if (!(await online())) return;
-  try { await syncAcct(); const r = await api('party', { mode: F.mode, bots: F.bots, difficulty: F.difficulty }); cpu = false; mode = 'online'; G = V = null; rematch = null; subscribe(r.state.code); adopt(r.state); }
+  try { await syncAcct(); const r = await api('party', { mode: F.mode, turnTimer:F.turnTimer, bots: F.bots, difficulty: F.difficulty }); cpu = false; mode = 'online'; G = V = null; rematch = null; subscribe(r.state.code); adopt(r.state); }
   catch (e) { toast(e.message); }
 }
 async function joinRoom(code, quiet) {
@@ -1378,9 +1378,9 @@ async function joinRoom(code, quiet) {
 const BOTS = [['Pixel', { hat: 'beanie' }], ['Byte', { acc: 'glasses' }], ['Volt', { hat: 'cap' }], ['Glitch', { acc: 'scarf' }]];
 function startLocal() {
   mode = 'local'; cpu = !!F.cpu; G = V = null; rematch = null;
-  let s = E.newRoom('LOCAL', { mode: F.mode, max: 5, timer: 45 });
-  const PRE = [F.look, { skin: 1, hair: 'bob', hc: 1, outfit: 'hoodie' }, { skin: 3, hair: 'spiky', hc: 0, outfit: 'tee' }, { skin: 0, hair: 'bun', hc: 3, outfit: 'hoodie' }, { skin: 2, hair: 'short', hc: 2, outfit: 'tee' }];
-  const count = cpu ? F.lc + 1 : F.ln;
+  let s = E.newRoom('LOCAL', { mode: F.mode, max: 6, timer: F.turnTimer });
+  const PRE = [F.look, { skin: 1, hair: 'bob', hc: 1, outfit: 'hoodie' }, { skin: 3, hair: 'spiky', hc: 0, outfit: 'tee' }, { skin: 0, hair: 'bun', hc: 3, outfit: 'hoodie' }, { skin: 2, hair: 'short', hc: 2, outfit: 'tee' }, { skin: 4, hair: 'bun', hc: 2, outfit: 'hoodie' }];
+  const count = Math.min(6, cpu ? F.lc + 1 : F.ln);
   for (let i = 0; i < count; i++) s = E.join(s, 'local' + i, !i ? F.name || 'Player 1' : cpu ? BOTS[i - 1][0] : 'Player ' + (i + 1), i && cpu ? Object.assign({}, PRE[i], BOTS[i - 1][1]) : PRE[i], i ? '' : F.pet);
   adopt(E.start(s, 0, ctx()));
 }
@@ -1607,7 +1607,8 @@ const xBtn = () => '<button class="ib" data-a="close" aria-label="Close">' + ico
 const PAGES = [['create', 'Create party'], ['join', 'Join party'], ['me', 'Profile'], ['shop', 'Shop']];
 const CATS = [['body', 'Body'], ['outfit', 'Outfit'], ['hat', 'Hat'], ['acc', 'Extra'], ['pet', 'Pet'], ['bg', 'Scene']];
 const FILTS = [['outfit', 'Outfits'], ['hat', 'Hats'], ['acc', 'Extras'], ['pet', 'Pets'], ['bg', 'Scenes']];
-const lengthRow = () => row('Game length', seg('mode', [[25, '25 min'], [45, '45 min'], ['classic', 'Classic']]));
+const lengthRow = () => row('Choose a mode', seg('mode', [[25, 'QUICK · 25m'], [35, 'FAST FUN · 35m'], [45, 'LONG · 45m'], ['classic', 'Classic']], 'modes') +
+  '<p class="fine"><b>FAST FUN recommended.</b> Start with £1,500, paid-for random properties and automatic pacing for 2–6 players.</p>');
 const nameRow = () => row('Your name', '<input class="t" id="f-name" maxlength="12" placeholder="Type a name" value="' + esc(F.name) + '" autocomplete="off">');
 const withItem = id => { const l = Object.assign({}, F.look), it = ITEMS[id]; if (!it) return l; if (it[0] === 'dye') { if (l.hc < 4) l.hc = 4; if (l.hair === 'none') l.hair = 'short'; } else if (it[0] !== 'pet') l[it[0]] = id; return l; };
 const tryLook = () => F.wtab === 'shop' && F.sel && ITEMS[F.sel] ? { look: withItem(F.sel), pet: ITEMS[F.sel][0] === 'pet' ? F.sel : F.pet } : { look: F.look, pet: F.pet };
@@ -1819,7 +1820,7 @@ function counts(s, i) { const ps = E.props(s, i); let h = 0, ht = 0; ps.forEach(
 function statusOf(s, i) {
   const p = s.players[i]; if (p.out) return 'Out'; if (s.phase === 'over') return s.winners.indexOf(i) >= 0 ? 'Winner' : 'Finished';
   if (s.stage === 'auction' && s.auc) return i === s.auc.who ? 'Bidding' : i === s.auc.by ? 'Top bid' : s.auc.live.indexOf(i) >= 0 ? 'In the auction' : 'Passed';
-  if (i === E.cur(s)) return s.stage === 'debt' ? 'In debt' : s.stage === 'buy' ? 'Deciding' : p.jail ? 'In jail' : s.stage === 'roll' ? 'Rolling' : 'Making moves';
+  if (i === E.cur(s)) return s.stage === 'travel' ? 'At station' : s.stage === 'debt' ? 'In debt' : s.stage === 'buy' ? 'Deciding' : p.jail ? 'In jail' : s.stage === 'roll' ? 'Rolling' : 'Making moves';
   return p.jail ? 'In jail' : 'Waiting';
 }
 const pipsHTML = (s, i) => E.props(s, i).map(t => '<i style="background:' + tcol(t) + '"' + (E.lvl(s, t) ? ' class="b"' : '') + '></i>').join('');
