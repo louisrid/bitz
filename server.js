@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
 import postgres from 'postgres';
 import * as core from './src/core.js';
+import { setupWorld } from './src/world.js';
 import { AccountAuth } from './src/auth.js';
 import { nextBotAction, isBot } from './src/bots.js';
 
@@ -109,7 +110,8 @@ setInterval(save, 4000).unref();
 setInterval(() => { const now = Date.now(); parties.forEach((s, code) => { if (now - (s.touched || s.made || 0) > IDLE) { parties.delete(code); dirty = true; tell(code, null); } }); }, 600000).unref();
 
 const idOf = key => 'p_' + crypto.createHash('sha256').update('stakkz:' + key).digest('hex').slice(0, 24);
-const account = id => { let w = accounts.get(id); if (!w) { w = core.freshWallet(); w.fresh = true; accounts.set(id, w); } return w; };
+const account = id => { let w = accounts.get(id); if (!w) { w = core.freshWallet(); w.fresh = true; accounts.set(id, w); dirty = true; } if (core.accrue(w)) dirty = true; return w; };
+const world = setupWorld({ auth: () => auth, account, accounts, getSwag:core.swag, onChange:()=>{dirty=true;} });
 function tell(code, s) { const set = watchers.get(code); if (!set) return; const m = JSON.stringify({ state: s, now: Date.now() }); set.forEach(ws => { try { ws.send(m); } catch (e) {} }); }
 /* one request to a party; because Node runs one thing at a time, two moves can never collide */
 function partyOp(code, op, user, body) {
@@ -180,6 +182,13 @@ async function api(req, res, parts) {
   const w = account(id);
   lastSeen.set(id,now);
   if (parts[0] === 'heartbeat' && req.method === 'POST') return send(res, 200, { ok:true });
+  if (parts[0] === 'world-profile' && req.method === 'GET') {
+    const target = String(parts[1] || id);
+    if (!/^p_[a-f0-9]{24}$/.test(target) || !accounts.has(target)) return send(res,404,{message:'Player not found.'});
+    const other = account(target);
+    return send(res,200,{ id:target, name:other.name||auth.username(target)||'Player', look:other.look, pet:other.pet, swag:core.swag(other), equipped:[other.look?.outfit,other.look?.hat,other.look?.acc,other.look?.bg,other.pet].filter(Boolean), collection:(other.own||[]).length, ...world.friends(id) });
+  }
+  if (parts[0] === 'friends' && req.method === 'GET') return send(res,200,{...world.friends(id),now});
   if (parts[0] === 'my-party' && req.method === 'GET') {
     const found = [...parties.values()].find(s => s.phase !== 'over' && s.players.some(p => p.id === id && !p.out));
     return send(res, 200, { code:found ? found.code:null });
@@ -191,13 +200,14 @@ async function api(req, res, parts) {
   const mine = extra => { const fresh = !!w.fresh, out = Object.assign({}, w); delete out.fresh; return Object.assign({ wallet: out, seal: seal(id, out), fresh: fresh, id: id, now: now }, extra); };
   const touch = () => { w.t = now; delete w.fresh; dirty = true; };
   try {
-    if (parts[0] === 'me') { if (req.method === 'POST') { core.setProfile(w, b); if (b.solo) core.credit(w, b.solo, true, now); touch(); } return send(res, 200, mine()); }
+    if (parts[0] === 'friends' && req.method === 'POST') { const out=world.friendOp(id,String(b.target||''),String(b.op||'')); return send(res,200,{...out,now}); }
+    if (parts[0] === 'me') { if (req.method === 'POST') { core.setProfile(w, b); if (b.solo) core.credit(w, b.solo, true, now); touch(); world.refresh(id); } return send(res, 200, mine({ swag:core.swag(w) })); }
     if (parts[0] === 'restore' && req.method === 'POST') {
       // a sealed copy this server issued earlier, for an account it no longer has
       if (w.fresh && b.wallet && typeof b.seal === 'string' && b.seal === seal(id, b.wallet)) { Object.keys(w).forEach(k => delete w[k]); Object.assign(w, core.freshWallet(), b.wallet); core.setProfile(w, {}); touch(); }
       return send(res, 200, mine());
     }
-    if (parts[0] === 'shop' && req.method === 'POST') { const out = core.shop(w, b.op, b.item); core.setProfile(w, {}); touch(); return send(res, 200, mine(out)); }
+    if (parts[0] === 'shop' && req.method === 'POST') { const out = core.shop(w, b.op, b.item); core.setProfile(w, {}); touch(); world.refresh(id); return send(res, 200, mine(out)); }
     if (parts[0] === 'party' && req.method === 'POST') {
       const user = { id: id, name: w.name, look: w.look, pet: w.pet };
       if (!parts[1]) {
@@ -245,7 +255,9 @@ const server = http.createServer((req, res) => {
 /* the live line: anyone with a party's code can watch it; the server sends the game whenever it changes */
 const wss = new WebSocketServer({ noServer: true, maxPayload: 1024 });
 server.on('upgrade', (req, socket, head) => {
-  const m = /\/api\/party\/([A-Z]{4})\/ws$/.exec(new URL(req.url, 'http://x').pathname);
+  const pathname = new URL(req.url,'http://x').pathname;
+  if (pathname === '/api/world/ws') return world.upgrade(req,socket,head);
+  const m = /\/api\/party\/([A-Z]{4})\/ws$/.exec(pathname);
   if (!m) return socket.destroy();
   wss.handleUpgrade(req, socket, head, ws => {
     const code = m[1]; let set = watchers.get(code); if (!set) watchers.set(code, set = new Set());
