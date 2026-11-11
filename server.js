@@ -33,30 +33,60 @@ try { saved = JSON.parse(fs.readFileSync(DATA, 'utf8')); Object.entries(saved.pa
    a returning player's coins and items can be restored and cannot be forged. Set STAKKZ_SECRET to keep it stable. */
 let SECRET = process.env.STAKKZ_SECRET || saved.secret || crypto.randomBytes(32).toString('hex');
 let auth = new AccountAuth(saved.auth, () => { dirty = true; });
-const seal = (id, w) => crypto.createHmac('sha256', SECRET).update(id + ':' + JSON.stringify(w)).digest('base64url');
+/* Deploy overlap. Each snapshot records when its writer booted. If an OLDER instance saved after this one
+   booted, this (newer) instance merges the records it is missing and saves again instead of being locked
+   out until restart. An older or outgoing instance still refuses to overwrite a newer one. Records this
+   instance removed on purpose (logouts, closed parties) are remembered so a merge never brings them back. */
+const BOOTED = Date.now(), dropped = new Set();
+const watchDrops = (map, tag) => { if (map.__watched) return; const del = map.delete.bind(map); map.delete = k => { dropped.add(tag + k); return del(k); }; map.__watched = true; };
+const watchAll = () => { watchDrops(parties, 'p'); watchDrops(accounts, 'a'); watchDrops(auth.users, 'u'); watchDrops(auth.sessions, 's'); };
+watchAll();
+const snapshot = () => ({ secret: SECRET, writer: BOOTED, parties: Object.fromEntries(parties), accounts: Object.fromEntries(accounts), auth: auth.export() });
+async function mergeNewer() {
+  if (shutdownStarted) return false;
+  const rows = await pg`select state, version from stakkz_state where id = 'main' limit 1`;
+  let remote = rows[0]?.state;
+  if (typeof remote === 'string') remote = JSON.parse(remote);
+  if (!remote || typeof remote !== 'object' || (Number(remote.writer) || 0) > BOOTED) return false;
+  const add = (map, obj, tag, newer) => Object.entries(obj || {}).forEach(([k, v]) => {
+    if (dropped.has(tag + k)) return;
+    if (!map.has(k) || (newer && newer(map.get(k), v))) map.set(k, v);
+  });
+  add(parties, remote.parties, 'p', (mine, theirs) => (Number(theirs?.v) || 0) > (Number(mine?.v) || 0));
+  add(accounts, remote.accounts, 'a');
+  add(auth.users, remote.auth?.users, 'u');
+  add(auth.sessions, remote.auth?.sessions, 's');
+  parties.forEach(room => (room.players || []).forEach(p => { if (!isBot(p) && !p.out && !lastSeen.has(p.id)) lastSeen.set(p.id, Date.now()); }));
+  dbVersion = Number(rows[0].version) || 0;
+  console.warn('An older instance saved during a deploy; merged its new records and saving again.');
+  return true;
+}
+const seal =(id, w) => crypto.createHmac('sha256', SECRET).update(id + ':' + JSON.stringify(w)).digest('base64url');
 /* Serialise every snapshot in write order. A slow older save cannot overwrite a
    newer one, and login/registration can explicitly await a durable write. */
 async function save(force = false) {
   if (!dirty && !force) return true;
   dirty = false;
-  const state = { secret: SECRET, parties: Object.fromEntries(parties), accounts: Object.fromEntries(accounts), auth: auth.export() };
   const write = async () => {
+    const state = snapshot();
     if (pg) {
       /* Versioned compare-and-swap prevents an older process terminating
          during a zero-downtime deploy from erasing newer accounts or parties. */
-      const json = JSON.stringify(state);
-      if (dbVersion === 0) {
-        const inserted = await pg`insert into stakkz_state (id, state, version)
-          values ('main', ${json}::jsonb, 1)
-          on conflict (id) do nothing returning version`;
-        if (inserted.length) { dbVersion = Number(inserted[0].version); return; }
+      for (let attempt = 0; ; attempt++) {
+        const json = JSON.stringify(snapshot());
+        if (dbVersion === 0) {
+          const inserted = await pg`insert into stakkz_state (id, state, version)
+            values ('main', ${json}::jsonb, 1)
+            on conflict (id) do nothing returning version`;
+          if (inserted.length) { dbVersion = Number(inserted[0].version); return; }
+        }
+        const updated = await pg`update stakkz_state
+          set state = ${json}::jsonb, version = version + 1
+          where id = 'main' and version = ${dbVersion}
+          returning version`;
+        if (updated.length) { dbVersion = Number(updated[0].version); return; }
+        if (attempt >= 2 || !(await mergeNewer())) throw Error('Database revision changed on another instance; refusing to overwrite newer saved game data.');
       }
-      const updated = await pg`update stakkz_state
-        set state = ${json}::jsonb, version = version + 1
-        where id = 'main' and version = ${dbVersion}
-        returning version`;
-      if (!updated.length) throw Error('Database revision changed on another instance; refusing to overwrite newer saved game data.');
-      dbVersion = Number(updated[0].version);
     } else if (cloud) {
       const res = await fetch(CLOUD_URL + '?on_conflict=id', {
         method: 'POST',
@@ -299,7 +329,7 @@ async function bootstrap() {
       parties.clear(); accounts.clear();
       Object.entries(saved.parties || {}).forEach(([k,v])=>parties.set(k,v));
       Object.entries(saved.accounts || {}).forEach(([k,v])=>accounts.set(k,v));
-      auth = new AccountAuth(saved.auth, () => {dirty=true;});
+      auth = new AccountAuth(saved.auth, () => {dirty=true;}); watchAll();
       if (!process.env.STAKKZ_SECRET && saved.secret) SECRET = saved.secret;
     }
     parties.forEach(room => room.players.forEach(p => {if(!isBot(p) && !p.out) lastSeen.set(p.id,Date.now());}));

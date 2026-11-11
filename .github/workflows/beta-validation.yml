@@ -89,6 +89,8 @@ jobs:
       - run: npm ci
       - name: Test rolling-deploy data integrity against real PostgreSQL
         run: node tests/postgres-rollover.mjs
+      - name: Test that an overlapping deploy cannot lock the live instance out of saving
+        run: node tests/postgres-overlap.mjs
 
   visual:
     runs-on: ubuntu-latest
