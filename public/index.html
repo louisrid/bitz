@@ -771,7 +771,40 @@ const B3 = (function () {
         (1.8+rnd()*3.2+(4-a-b)*1.25)*district.h,district.wall);
     }
   }));
-  for (let k = 0; k < 16; k++) { const a = Math.floor(k / 4), f = -11 + (k % 4) * 7.3 + rnd(); const p = [[f, 15.1], [-15.1, f], [f, -15.1], [15.1, f]][a]; tree(p[0], p[1], 0.7); }
+  // Four original stations: compact platforms, canopy, twin warning lamps.
+  // All detail sits along the inner edge of its existing property space.
+  const stations=[];
+  [5,15,25,35].forEach((i,k)=>{
+    const station=new THREE.Group();
+    station.add(mesh(new THREE.BoxGeometry(2.4,.16,1.0),L(0x2d343c),0,.1,0));
+    station.add(mesh(new THREE.BoxGeometry(2.3,.14,1.12),L(0xffd60a),0,1.44,0));
+    [-.9,.9].forEach(x=>{
+      station.add(mesh(new THREE.BoxGeometry(.12,1.32,.12),L(0x151515),x,.77,-.35));
+      const lamp=mesh(new THREE.BoxGeometry(.24,.21,.18),
+        new THREE.MeshBasicMaterial({color:k%2?0x88daff:0xffe98a}),x,1.31,.37);
+      lamp.castShadow=false;station.add(lamp);movingCityLights.push(lamp);
+    });
+    const seat=mesh(new THREE.BoxGeometry(.62,.35,.22),L(0xb9d6e1),0,.36,.25);
+    station.add(seat);
+    station.position.copy(loc(i,0,-C/2+.85));station.rotation.y=-TH[rect(i).side];
+    scene.add(station);stations.push(station);
+  });
+  // Two recognisable utilities with subtle, material-only electrical/water
+  // motion. No point lights or extra render passes are needed.
+  const utilities=[];
+  [12,28].forEach((i,k)=>{
+    const unit=new THREE.Group();
+    const base=L(k?0x278aac:0xc9c6b9);
+    unit.add(mesh(new THREE.BoxGeometry(1.8,.65,.9),base,0,.34,0));
+    [-.5,.5].forEach(x=>unit.add(mesh(new THREE.CylinderGeometry(.21,.24,1.0,8),L(k?0x3fa9ff:0x444d5a),x,1.08,0)));
+    const pulse=mesh(new THREE.TorusGeometry(.49,.085,6,16),
+      new THREE.MeshBasicMaterial({color:k?0x7eeeff:0xffda43,transparent:true,opacity:.8}),0,1.17,0);
+    pulse.rotation.x=Math.PI/2;pulse.castShadow=false;unit.add(pulse);
+    unit.userData={pulse:pulse,offset:k*1.5};
+    unit.position.copy(loc(i,0,-C/2+.83));unit.rotation.y=-TH[rect(i).side];
+    scene.add(unit);utilities.push(unit);
+  });
+    for (let k = 0; k < 16; k++) { const a = Math.floor(k / 4), f = -11 + (k % 4) * 7.3 + rnd(); const p = [[f, 15.1], [-15.1, f], [f, -15.1], [15.1, f]][a]; tree(p[0], p[1], 0.7); }
   const tt = wt.clone(); tt.needsUpdate = true; tt.repeat.set(8, 9);
   city.add(mesh(new THREE.CylinderGeometry(1.35, 1.6, 12, 14), new THREE.MeshLambertMaterial({ color: 0x4d96ff, map: tt }), 0, 6, 0));
   city.add(mesh(new THREE.CylinderGeometry(2, 2, 0.4, 14), L(0x111111), 0, 12.2, 0));
