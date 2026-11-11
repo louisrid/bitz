@@ -3,6 +3,7 @@
    Pure functions: the worker loads and saves the data around them. */
 import '../public/engine.js';
 import { ITEMS, HAIRS } from './shop.js';
+import { BOT_NAMES, BOT_LOOKS, isBot } from './bots.js';
 
 const E = globalThis.Engine;
 export const BOX_PRICE = 8000;
@@ -86,6 +87,18 @@ function cleanAct(a) {
   return { t: a.t, tile: int(a.tile, 0, 39), to: int(a.to, 0, 4), n: int(a.n, 0, 20000), amt: int(a.amt, 0, 1e6), gc: int(a.gc, 0, 1e6), tc: int(a.tc, 0, 1e6), gp: tiles(a.gp), tp: tiles(a.tp) };
 }
 const seat = (s, id) => s.players.findIndex(p => p.id === id);
+/* Bots are explicitly tagged on the server's player state, never identified by a client claim. */
+function addBots(s, count, difficulty, code) {
+  const num = int(count, 0, Math.min(4, s.max - s.players.length));
+  const level = ['easy','medium','hard'].includes(difficulty) ? difficulty : 'medium';
+  let out = s;
+  for (let i = 0; i < num; i++) {
+    const id = 'bot:' + code + ':' + (i + 1);
+    out = E.join(out, id, BOT_NAMES[i], BOT_LOOKS[i], '');
+    out.players[out.players.length - 1].bot = level;
+  }
+  return out;
+}
 /* One request to a party. `s` is the stored state (null if there is none), `user` is who is asking, as the server knows them.
    Returns the new state, or `gone` when the party is finished with. Throws Refused for anything the rules do not allow. */
 export function partyOp(s, op, user, body, now, code) {
@@ -95,7 +108,8 @@ export function partyOp(s, op, user, body, now, code) {
     if (op === 'create') {
       if (s) refuse('taken');
       const mode = body.mode === 'classic' ? 'classic' : Number(body.mode) === 45 ? 45 : 25;
-      n = E.join(E.newRoom(code, { mode: mode, max: 5, timer: 45 }), user.id, user.name || 'Host', user.look, user.pet); n.made = now;
+      n = E.join(E.newRoom(code, { mode: mode, max: 5, timer: 45 }), user.id, user.name || 'Host', user.look, user.pet);
+      n = addBots(n, body.bots, body.difficulty, code); n.made = now;
     } else if (!s) refuse('No party with the code ' + code + '.');
     else if (op === 'join') { if (s.phase === 'lobby' && me < 0) n = E.join(s, user.id, name, user.look, user.pet); }
     else if (op === 'leave') { if (s.phase === 'lobby' && me >= 0) { n = E.leave(s, user.id); if (!n.players.length) return { state: null, gone: true, credits: [] }; } }
@@ -106,7 +120,10 @@ export function partyOp(s, op, user, body, now, code) {
     }
     else if (op === 'start') { if (me < 0) refuse('You are not in this party.'); n = E.start(s, me, ctx(now)); }
     else if (op === 'again') {
-      if (s.phase === 'over') { if (me < 0) refuse('You were not in that game.'); n = E.restyle(E.again(s, user.id), user.id, user.look, user.pet); n.made = now; }
+      if (s.phase === 'over') { if (me < 0) refuse('You were not in that game.'); n = E.restyle(E.again(s, user.id), user.id, user.look, user.pet);
+        const oldBots = s.players.filter(isBot);
+        oldBots.forEach(bot => { n = E.join(n, bot.id, bot.name, bot.look, bot.pet); n.players[n.players.length-1].bot = bot.bot; });
+        n.made = now; }
       else if (s.phase === 'lobby' && me < 0) n = E.join(s, user.id, name, user.look, user.pet);
     }
     else if (op === 'act') { if (me < 0) refuse('You are not playing in this game.'); n = E.act(s, me, cleanAct(body.a), ctx(now)); }
@@ -123,6 +140,7 @@ function earnings(prev, next) {
   if (!next.startedAt || next.phase === 'lobby') return [];
   const key = next.code + ':' + next.startedAt, over = next.phase === 'over', fresh = !prev || prev.startedAt !== next.startedAt, ended = over && (!prev || prev.phase !== 'over');
   return next.players.map((p, i) => {
+    if (isBot(p)) return null;
     const q = fresh ? null : prev.players[i];
     if (q && !ended && q.coins === p.coins && q.boxes === p.boxes && q.out === p.out) return null;
     return { id: p.id, c: { key: key, coins: p.coins, boxes: p.boxes, over: over, win: over && next.winners.indexOf(i) >= 0, rent: p.rentIn, bought: p.bought, kos: p.kos, best: over ? E.worth(next, i) : 0 } };
