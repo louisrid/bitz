@@ -455,6 +455,11 @@ button.chip.on{background:var(--ink);color:var(--paper)}
 #side:not(.enter) > * { animation:none; }
 .seg button:focus-visible,.btn:focus-visible,.ib:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
 @media (max-width:600px){.seg button{min-height:38px}.seg.nav button{min-height:42px}}
+/* account & sync controls */
+.account-box{display:grid;gap:calc(var(--k)*10px);border:var(--bw) solid var(--ink);border-radius:var(--r);padding:calc(var(--k)*13px);background:var(--mist)}
+.account-box h3{font-size:max(14px,calc(var(--kf)*20px))}
+.account-inputs{display:grid;gap:calc(var(--k)*8px)}
+@media (min-width:560px){.account-inputs{grid-template-columns:1fr 1fr}}
 /* final polish */
 .pp{flex:1 0 auto}
 @media (min-width:901px) and (min-height:521px){
@@ -1171,11 +1176,16 @@ function fixLook() {
 loadProfile(store.get('bigrent-wallet')); fixLook();
 /* Every player has a long random key, made on first visit and kept in this browser. It is their account:
    no sign-up, and nobody else ever sees it (other players only see an id worked out from it). */
-const KEY = (() => { let k = store.get('stakkz-key'); if (typeof k !== 'string' || !/^[a-f0-9]{48}$/.test(k)) { const a = new Uint8Array(24); crypto.getRandomValues(a); k = Array.from(a, x => ('0' + x.toString(16)).slice(-2)).join(''); store.set('stakkz-key', k); } return k; })();
+const guestKey = () => Array.from(crypto.getRandomValues(new Uint8Array(24)), x => ('0'+x.toString(16)).slice(-2)).join('');
+let KEY = (() => { const k = store.get('stakkz-key'); if (typeof k === 'string' && /^[a-f0-9]{48}$/.test(k)) return k; const fresh=guestKey();store.set('stakkz-key',fresh);return fresh; })();
+let sessionToken = store.get('stakkz-session');
+if (typeof sessionToken !== 'string' || !/^s_[a-f0-9]{64}$/.test(sessionToken)) sessionToken = null;
+let activeKey = sessionToken || KEY;
+let authInfo = { username:null, registered:false, persistent:false };
 let skew = 0;   // how far this device's clock is from the server's, so timers agree for everyone
 async function api(path, body) {
   let r;
-  try { r = await Promise.race([fetch('api/' + path, { method: body ? 'POST' : 'GET', headers: Object.assign({ Authorization: 'Bearer ' + KEY }, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined }), new Promise((ok, no) => setTimeout(no, 12000))]); }
+  try { r = await Promise.race([fetch('api/' + path, { method: body ? 'POST' : 'GET', headers: Object.assign({ Authorization: 'Bearer ' + activeKey }, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined }), new Promise((ok, no) => setTimeout(no, 12000))]); }
   catch (e) { throw { code: 'unavailable', message: 'Could not reach the server. Check your connection and try again.' }; }
   let j = {}; try { j = await r.json(); } catch (e) {}
   if (j.now) skew = j.now - Date.now();
@@ -1259,7 +1269,12 @@ function rerender() {
   else if (V && V.phase !== 'lobby' && !busy) renderActions();
 }
 const capsReady = (async function () {
-  try { const kept = store.get('stakkz-seal'); let r = await api('me'); if (r.fresh && kept && kept.seal) { try { r = await api('restore', kept); } catch (e) {} } myId = r.id; Net.uid = r.id; Net.db = true; Net.acct = true; loadProfile(r.wallet); fixLook(); }
+  try { const kept = store.get('stakkz-seal'); let r;
+    try { r = await api('me'); }
+    catch (err) { if(!sessionToken) throw err; sessionToken=null;store.del('stakkz-session');activeKey=KEY;r=await api('me'); }
+ if (r.fresh && kept && kept.seal) { try { r = await api('restore', kept); } catch (e) {} } myId = r.id; Net.uid = r.id; Net.db = true; Net.acct = true; loadProfile(r.wallet); fixLook();
+    authInfo = await api('auth/me');
+  }
   catch (e) { Net.db = null; myId = 'offline'; }   // no server: games on this device still work
   Net.ready = true;
 })();
@@ -1630,6 +1645,19 @@ function shopHTML(col) {
   }).join('') + '</div>';
 }
 const wardrobeHTML = col => F.wtab === 'shop' ? shopHTML(col) : styleHTML(col);
+function accountHTML() {
+  if (authInfo.registered) return '<div class="account-box"><h3>Account & sync</h3><p class="fine">Signed in as <b>' + esc(authInfo.username) +
+    '</b>. Your account is shared across signed-in devices. Your active party can be resumed on another device.</p><button class="btn sm" data-a="signout">Sign out</button></div>';
+  const unavailable = !authInfo.persistent;
+  return '<div class="account-box"><h3>Account & sync</h3><p class="fine">' +
+    (unavailable ? 'Cross-device accounts need the persistent game database connected by the host. You can still play as a guest on this device.' :
+    'Sign up with a username and password to keep your coins, items and active party in sync across phone and desktop. No email required.') +
+    '</p>' + (unavailable ? '' :
+    '<div class="account-inputs"><input class="t" id="auth-username" maxlength="20" placeholder="Username" autocomplete="username" aria-label="Account username">' +
+    '<input class="t" id="auth-password" type="password" minlength="10" maxlength="128" placeholder="Password (10+ characters)" autocomplete="current-password" aria-label="Account password"></div>' +
+    '<div class="row"><button class="btn go" data-a="authregister">Create account</button><button class="btn" data-a="authlogin">Sign in</button></div>') +
+    '</div>';
+}
 function wardrobeModal() {
   F.sel = null; F.wtab = 'style';
   openModal('wardrobe', () => { const col = PC[Math.max(0, mine0())], t = tryLook(); return '<div class="whead"><span class="pv bg-' + bgOf(t.look) + '">' + fig(t.look, col, 104) + petImg(t.pet, 40) + '</span><div class="wside">' + logo('sm') + pick('wtab', '', [['style', 'Profile'], ['shop', 'Shop']], F.wtab) + '<button class="btn go" data-a="close">Done</button></div></div>' + wardrobeHTML(col); });
@@ -1716,7 +1744,7 @@ function renderHome() {
   if (F.page === 'create') h += nameRow() + lengthRow() + row('Computer opponents', seg('bots', [[0,'None'],[1,'1 bot'],[2,'2 bots'],[3,'3 bots'],[4,'4 bots']])) + (F.bots ? row('Bot difficulty', seg('difficulty', [['easy','Easy'],['medium','Medium'],['hard','Hard']])) + '<p class="fine">Easy makes mistakes, Medium plays cautiously, Hard plans ahead. Bots take real turns on the server.</p>' : '') + '<button class="btn go big" data-a="create">Create party</button><p class="fine">You get a code to share. Up to 5 can play, including bots.</p>' + off;
   else if (F.page === 'join') h += nameRow() + row('Party code', '<input class="t" id="f-code" maxlength="4" placeholder="ABCD" value="' + esc(F.code) + '" autocomplete="off" autocapitalize="characters">') + '<button class="btn go big" data-a="join">Join party</button>' + off;
   
-  else if (F.page === 'me') h += '<div class="mecard"><span class="pv bg-' + bgOf(F.look) + '">' + fig(F.look, PC[0], 104) + petImg(F.pet, 40) + '</span><div class="col">' + nameRow() + '<div class="pillrow"><span class="pill"><i class="coin"></i>' + fmt(wallet.coins) + '</span><span class="pill">' + lootImg(18) + wallet.boxes + '</span></div></div></div>' + styleHTML(PC[0]);
+  else if (F.page === 'me') h += accountHTML() + '<div class="mecard"><span class="pv bg-' + bgOf(F.look) + '">' + fig(F.look, PC[0], 104) + petImg(F.pet, 40) + '</span><div class="col">' + nameRow() + '<div class="pillrow"><span class="pill"><i class="coin"></i>' + fmt(wallet.coins) + '</span><span class="pill">' + lootImg(18) + wallet.boxes + '</span></div></div></div>' + styleHTML(PC[0]);
   else h += shopHTML(PC[0]);
   /* who you are and what you have, always one tap from Me, the shop and your loot boxes */
   if (F.page !== 'me' && F.page !== 'shop') h += '<div class="strip"><button class="sme" data-a="page" data-v="me" aria-label="Your character">' + ava(F.look, PC[0], 40) + '<b id="sname">' + esc(F.name || 'You') + '</b></button><button class="pill" data-a="page" data-v="shop" aria-label="Your coins. Open the shop"><i class="coin"></i>' + fmt(wallet.coins) + '</button>' + (wallet.boxes ? '<button class="pill hot" data-a="loot" data-v="go" aria-label="Spin a loot box">' + lootImg(18) + wallet.boxes + '</button>' : '') + '</div>';
@@ -1844,6 +1872,11 @@ function tick() {
   if (mode === 'online' && !s.timer && !busy && me >= 0 && me !== E.cur(s) && now - (s.t || now) > 90000 && nudgeV !== s.v) { nudgeV = s.v; renderActions(); }
 }
 setInterval(tick, 300);
+/* Presence heartbeat informs the server when a device is still actively viewing
+   a game. Hidden/backgrounded devices stop checking in; seats are preserved. */
+setInterval(() => {
+  if (Net.acct && !document.hidden && G && mode==='online') api('heartbeat',{}).catch(()=>{});
+}, 20000);
 /* now and then, a bird, a far-off horn or a tram bell */
 (function city() { setTimeout(() => { if (V && V.phase === 'play' && !document.hidden) Snd('city', Math.floor(Math.random() * 3)); city(); }, 9000 + Math.random() * 14000); })();
 
@@ -2016,6 +2049,33 @@ document.addEventListener('click', async e => {
     case 'rules': rulesModal(); break;
     case 'settings': settingsModal(); break;
     case 'menu': menuModal(); break;
+    case 'authregister': case 'authlogin': {
+      const username = ($('#auth-username') || {}).value, password = ($('#auth-password') || {}).value;
+      if(!username || !password) {toast('Enter your username and password.');break;}
+      el.disabled=true;
+      try {
+        if (a==='authregister' && sessionToken) {toast('Sign out of your current account before registering another.');break;}
+        const path = a==='authregister'?'register':'login';
+        const result = await api('auth/'+path,{username,password});
+        sessionToken=result.token;activeKey=sessionToken;store.set('stakkz-session',sessionToken);
+        if (path==='register') {KEY=guestKey();store.set('stakkz-key',KEY);}
+        myId=result.id;Net.uid=myId;Net.db=true;Net.acct=true;
+        authInfo=await api('auth/me');
+        const meData=await api('me');loadProfile(meData.wallet);fixLook();
+        toast('Signed in as '+result.username+'.');
+        const found=await api('my-party');
+        if(found.code) await joinRoom(found.code,true);else renderHome();
+      } catch(err) {toast(err.message||'Could not sign in.');}
+      finally {el.disabled=false;}
+      break;
+    }
+    case 'signout': {
+      try {if(sessionToken)await api('auth/logout',{});}catch(e){}
+      sessionToken=null;store.del('stakkz-session');activeKey=KEY;store.del('bigrent-room');store.del('stakkz-seal');
+      try {const r=await api('me');myId=r.id;Net.uid=myId;loadProfile(r.wallet);authInfo=await api('auth/me');}
+      catch(e){Net.db=null;}
+      renderHome();toast('Signed out on this device.');break;
+    }
     case 'set': {
       const k = el.dataset.k, v = el.dataset.v;
       settings[k] = v === '1'; applySettings(); Snd.music(!!settings.music);
@@ -2109,6 +2169,7 @@ B3.onPick = i => { if ($('#veil').hidden && $('#app').dataset.screen === 'game' 
     if (Net.grant) toast(fmt(Net.grant.coins) + ' coins' + (Net.grant.boxes ? ' and ' + Net.grant.boxes + ' loot boxes' : '') + ' were added to your account.');
     const saved = store.get('bigrent-room');
     if (saved && !G && Net.db) joinRoom(saved, true);
+    else if (!saved && !G && Net.db && authInfo.registered) api('my-party').then(r=>{ if(r.code && !G) joinRoom(r.code,true); }).catch(()=>{});
   });
 })();
 </script>
