@@ -43,7 +43,7 @@ async function observe(page,name){
 }
 async function openPage(page,name){
   await observe(page,name);
-  await page.locator('#title [data-a=go][data-v=me]').click();
+  await page.locator('#title .tmore [data-a=go][data-v=me]').click();
   await page.waitForSelector('#side [data-a=authregister]');
 }
 try {
@@ -82,7 +82,7 @@ try {
   const phoneContext=await browser.newContext(iphone);
   const phone=await phoneContext.newPage();
   await observe(phone,'iPhone');
-  await phone.locator('#title [data-a=go][data-v=me]').click();
+  await phone.locator('#title .tmore [data-a=go][data-v=me]').click();
   await phone.locator('#side #auth-username').fill('BrowserTester');
   await phone.locator('#side #auth-password').fill('LongTestPassword2026!');
   await phone.locator('#side [data-a=authlogin]').click();
