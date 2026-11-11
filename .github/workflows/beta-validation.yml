@@ -56,6 +56,35 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      pg:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: qa-only-password
+          POSTGRES_DB: stakkz_qa
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      STAKKZ_DATABASE_URL: postgres://postgres:qa-only-password@127.0.0.1:5432/stakkz_qa
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Test rolling-deploy data integrity against real PostgreSQL
+        run: node tests/postgres-rollover.mjs
+
   visual:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -82,7 +111,7 @@ jobs:
   staging:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    needs: [smoke, browser]
+    needs: [smoke, browser, postgres]
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
