@@ -650,7 +650,7 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="shop">Shop</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><span class="wstat"><em id="wgold">...</em><small id="wrate">+1,000/s</small></span><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="whp" aria-label="Health"><i></i><b>100</b></div><div class="wweap"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button><button class="ww" data-a="wpn" data-v="1"><kbd>2</kbd>Pulse</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wjump" aria-label="Jump">Jump</button></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="shop">Shop</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><span class="wstat"><em id="wgold">...</em><small id="wrate">+1,000/s</small></span><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="whp" aria-label="Health"><i></i><b>100</b></div><div class="wweap"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button><button class="ww" data-a="wpn" data-v="1"><kbd>2</kbd>Pulse</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wjump" aria-label="Jump">Jump</button></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
 <div id="title" class="bg-paper" hidden></div>
 <div id="veil" hidden><div id="modal" class="card" role="dialog" aria-modal="true"></div></div>
@@ -1400,12 +1400,19 @@ const B3 = (function () {
     if (!api.showing) showAz = az;
     api.showing = true;
   };
+  function flameTick(t, mv) {
+    if ((fN2 & 255) === 1) { for (let i = FLAMES.length - 1; i >= 0; i--) { let q = FLAMES[i]; while (q.parent) q = q.parent; if (!q.isScene) FLAMES.splice(i, 1); } }
+    FLAMES.forEach(m => { const u = m.userData;
+      if (u.o) { const a = u.a0 + t * u.w * mv; m.position.set(Math.sin(a) * u.r, u.y0 + Math.sin(t * 2 + u.fl) * 0.05 * mv, Math.cos(a) * u.r); m.rotation.y = a; return; }
+      if (u.p) { const ph = (t * u.w + u.fl) % 1; m.position.y = u.y0 + ph * 0.6 * mv; m.position.x = u.x0 + Math.sin(t * 3 + u.fl) * 0.05 * mv; m.scale.setScalar(1 - ph * 0.85 * mv); return; }
+      const k = 1 + Math.sin(t * 17 + u.fl) * 0.3 * mv; m.scale.set(1 + Math.sin(t * 13 + u.fl) * 0.12 * mv, k, 1 + Math.cos(t * 11 + u.fl) * 0.12 * mv); m.position.y = u.y0 + (k - 1) * u.h / 2; });
+  }
   function drawShow(now) {
-    const t = now / 1000, mv = still ? 0 : 1, u = showChar.userData;
+    const t = now / 1000, mv = still ? 0 : 1, u = showChar.userData; flameTick(t, mv);
     showChar.rotation.y = Math.sin(t * 0.6) * 0.45 * mv; showChar.position.y = Math.abs(Math.sin(t * 2.2)) * 0.12 * mv;
     u.arms[1].rotation.z = 2.5 + Math.sin(t * 7) * 0.4 * mv; u.arms[1].rotation.x = 0; u.arms[0].rotation.x = Math.sin(t * 2) * 0.15 * mv; u.head.rotation.z = Math.sin(t * 1.4) * 0.07 * mv; u.legs[0].rotation.x = u.legs[1].rotation.x = 0;
     if (showPet) { const ud = showPet.userData; showPet.position.y = ud.fly ? 1.5 + Math.sin(t * 2.4) * 0.3 * mv : Math.abs(Math.sin(t * 3.2)) * 0.22 * mv; showPet.rotation.y = -0.5 + Math.sin(t * 0.8) * 0.3 * mv; ud.wings.forEach(w => { w.rotation.z = w.userData.sg * (0.2 + Math.sin(t * 16) * 0.7 * mv); }); }
-    const asp = rc.width / rc.height, tv = Math.tan(cam.fov * Math.PI / 360), d = 4.2 / tv / Math.min(1, asp * 0.8), a = az - showAz, e = 0.1;
+    const asp = rc.width / rc.height, tv = Math.tan(cam.fov * Math.PI / 360), d = (WD.profileActive ? 3.1 : 4.2) / tv / Math.min(1, asp * 0.8), a = az - showAz, e = 0.1;
     cam.position.set(Math.sin(a) * Math.cos(e) * d, 2.4 + Math.sin(e) * d, Math.cos(a) * Math.cos(e) * d); cam.lookAt(0, 2.4, 0);
     const tN = cam.near * tv, rN = tN * asp; cam.projectionMatrix.makePerspective(-rN, rN, tN, -tN, cam.near, cam.far); cam.projectionMatrixInverse.copy(cam.projectionMatrix).invert();
     renderer.render(showScene, cam);
@@ -1679,11 +1686,7 @@ const B3 = (function () {
     });
     halo.rotation.z = t * 0.6 * mv; halo.position.y = 11 + Math.sin(t * 1.3) * 0.25 * mv;
     balloon.position.set(Math.cos(t * 0.12) * 10, 17 + Math.sin(t * 0.7) * 0.8 * mv, Math.sin(t * 0.12) * 10);
-    if ((fN2 & 255) === 1) { for (let i = FLAMES.length - 1; i >= 0; i--) { let q = FLAMES[i]; while (q.parent) q = q.parent; if (!q.isScene) FLAMES.splice(i, 1); } }
-    FLAMES.forEach(m => { const u = m.userData;
-      if (u.o) { const a = u.a0 + t * u.w * mv; m.position.set(Math.sin(a) * u.r, u.y0 + Math.sin(t * 2 + u.fl) * 0.05 * mv, Math.cos(a) * u.r); m.rotation.y = a; return; }
-      if (u.p) { const ph = (t * u.w + u.fl) % 1; m.position.y = u.y0 + ph * 0.6 * mv; m.position.x = u.x0 + Math.sin(t * 3 + u.fl) * 0.05 * mv; m.scale.setScalar(1 - ph * 0.85 * mv); return; }
-      const k = 1 + Math.sin(t * 17 + u.fl) * 0.3 * mv; m.scale.set(1 + Math.sin(t * 13 + u.fl) * 0.12 * mv, k, 1 + Math.cos(t * 11 + u.fl) * 0.12 * mv); m.position.y = u.y0 + (k - 1) * u.h / 2; });
+    flameTick(t, mv);
     Object.keys(tokens).forEach(k => {
       const tk = tokens[k], u = tk.userData, mvg = api.moving === +k || api.traveling === +k, cur = +k === api.cur;
       if (!tw.length) {
@@ -2658,9 +2661,11 @@ function renderFriends() {
   const on = FRIENDS.filter(f => f.at).length;
   $('#fcount').textContent = on + ' online'; $('#fon').textContent = on ? '· ' + on : '';
   patchHTML($('#flist'), (FRIENDS.length ? FRIENDS.map((f, i) => '<button class="fr" data-a="friend" data-i="' + i + '">' + ava(f.l, plazaCol(f.n), 46) + '<span><b>' + esc(f.n) + '</b><small>' + fStatus(f) + '</small></span></button>').join('') : '<p class="fnote">No friends yet. Everyone who signs up shows up here.</p>') +
+    (HIDDEN.length ? '<p class="fnote fh">Removed</p>' + HIDDEN.map(f => '<div class="fr gone">' + ava(f.l, plazaCol(f.n), 46) + '<span><b>' + esc(f.n) + '</b><button class="frest" data-a="frestore" data-f="' + f.f + '">Add back</button></span></div>').join('') : '') +
     (authInfo.registered ? '' : '<p class="fnote">Sign up in Profile so your friends can see you here.</p>'));
 }
-async function loadFriends() { if (!Net.ready || !Net.db) return; try { const r = await api('friends'); FRIENDS = r.friends || []; renderFriends(); } catch (e) {} }
+let HIDDEN = [];
+async function loadFriends() { if (!Net.ready || !Net.db) return; try { const r = await api('friends'); FRIENDS = r.friends || []; HIDDEN = r.hidden || []; renderFriends(); if (PROF) profilePaint(); } catch (e) {} }
 setInterval(loadFriends, 10000); setTimeout(loadFriends, 1500);
 function friendModal(i) {
   const f = FRIENDS[i]; if (!f) return; const L2 = f.l || {};
@@ -2669,6 +2674,67 @@ function friendModal(i) {
     '<p class="fine">@' + esc(f.u || f.n) + ' · ' + fStatus(f).replace(/<i[^>]*><\/i>/, '') + ' · ' + (f.wins || 0) + ' wins in ' + (f.played || 0) + ' games</p></div>' +
     '<h3>Wearing</h3><div class="wear">' + (worn.length ? worn.map(x => { const it = ITEMS[x[1]], ra = rarity(it[2]); return '<div class="wrow r' + ra[0] + '"><b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + ' · ' + ra[1] + '</small></div>'; }).join('') : '<p class="fine">The starter look.</p>') + '</div>' +
     '<button class="btn" data-a="close">Close</button>');
+}
+/* ================= full-screen profiles =================
+   Tap a friend or a character in the world: their character fills the world area in front of their own scene. */
+let PROF = null;
+function profileOpen(p) {
+  if (!p) return; if (modal) closeModal();
+  PROF = p; B3.world.profileActive = true; B3.show(p.l || {}, p.pet, plazaCol(p.n)); $('#bd').className = 'bg-' + bgOf(p.l); $('#stage').classList.add('prof'); profilePaint();
+}
+function profileClose() {
+  if (!PROF) return; PROF = null; B3.world.profileActive = false; B3.show(null); $('#fprofov').hidden = true; $('#stage').classList.remove('prof'); $('#bd').className = 'bg-' + bgOf(F.look);
+}
+function profilePaint() {
+  const p = PROF, ov = $('#fprofov'); if (!p) { ov.hidden = true; return; }
+  const fr = FRIENDS.find(f => f.f === p.f), hid = HIDDEN.find(f => f.f === p.f), info = fr || hid || p, L2 = p.l || {}, col = plazaCol(p.n);
+  let live = null, liveI = ''; B3.world.others.forEach((o, i) => { if (o.f === p.f) { live = o; liveI = i; } });
+  const full = !!FULLV[L2.outfit], worn = [['outfit', L2.outfit || 'tee'], ['hat', full ? '' : L2.hat], ['acc', full ? '' : L2.acc], ['pet', p.pet], ['bg', L2.bg || 'paper']].filter(x => x[1] && ITEMS[x[1]]);
+  const swag = live && live.sw != null ? live.sw : info.swag != null ? info.swag : -100, where = live ? 'In the world now' : info.at === 'game' ? 'In a game' : info.seen ? 'Last seen ' + ago(info.seen).toLowerCase() : 'Offline';
+  ov.hidden = false;
+  patchHTML(ov, '<button class="pback" data-a="profclose">&#x2039; Back to world</button>' +
+    '<div class="pname"><h1>' + esc(p.n) + '</h1><p>' + (info.u ? '@' + esc(info.u) : 'Guest') + ' · ' + where + '</p></div>' +
+    '<div class="pswag"><small>Swag Level</small><b>' + fmt(swag) + '</b></div>' +
+    '<div class="pcard2"><h3>Wearing</h3><div class="plist">' + worn.map(x => { const it = ITEMS[x[1]], ra = it[2] > 0 ? rarity(it[2]) : [0, 'Starter']; return '<div class="prow pr' + ra[0] + '">' + pimg(x[1], 48, col) + '<span><b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + (exclusive(x[1]) ? ' · Exclusive' : '') + '</small></span><span class="prar">' + ra[1] + '</span></div>'; }).join('') + '</div>' +
+    '<div class="pbtns"><button class="btn go big" data-a="tradeask" data-i="' + liveI + '"' + (live ? '' : ' disabled') + '>' + (live ? 'Trade' : 'Trade (not in the world)') + '</button>' +
+    (fr ? '<button class="btn" data-a="fop" data-v="remove">Remove friend</button>' : hid ? '<button class="btn ok" data-a="fop" data-v="restore">Add friend back</button>' : '') + '</div></div>');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && PROF && !modal) profileClose(); });
+/* ================= trading ================= */
+let Trade = null;
+function tradeBanner() {
+  const b = $('#wtrade'), t = Trade; if (!t || t.phase === 'open') { b.hidden = true; return; }
+  b.hidden = false; b.innerHTML = t.phase === 'ask' ? '<span><b>' + esc(t.n) + '</b> wants to trade</span><button class="btn ok sm" data-a="tradeyes">Accept</button><button class="btn sm" data-a="tradeno">Decline</button>' : '<span>Waiting for <b>' + esc(t.n) + '</b> to answer</span><button class="btn sm" data-a="tradeno">Cancel</button>';
+}
+function tradeSend(m) { if (Trade) plazaSend({ trade: Object.assign({ id: Trade.id }, m) }); }
+function tradeDrop(text) { Trade = null; tradeBanner(); if (modal && modal.kind === 'trade') closeModal(); if (text) toast(text); }
+function tradeGot(m) {
+  if (m.ev === 'busy') return toast(m.n + ' is already in a trade.');
+  if (m.ev === 'wait' || m.ev === 'ask') { Trade = { id: m.id, phase: m.ev, n: m.n }; if (m.ev === 'ask') Snd('coin'); return tradeBanner(); }
+  const t = Trade; if (!t || t.id !== m.id) return;
+  if (m.ev === 'cancel') return tradeDrop(({ declined: t.n + ' declined the trade.', left: t.n + ' left, so the trade was cancelled.', 'no answer': t.n + ' did not answer.' })[m.why] || 'Trade cancelled.');
+  if (m.ev === 'note') { toast(m.text); return; }
+  if (m.ev === 'state') {
+    const first = t.phase !== 'open'; Object.assign(t, { phase: 'open', v: m.v, me: m.me, them: m.them, n: m.n }); tradeBanner();
+    if (first || !modal || modal.kind !== 'trade') { profileClose(); openModal('trade', tradeHTML, { onClose: () => { if (Trade && Trade.phase === 'open') { tradeSend({ op: 'cancel' }); Trade = null; } } }); } else refreshModal();
+    return;
+  }
+  if (m.ev === 'done') {
+    Trade = null; tradeBanner(); if (modal && modal.kind === 'trade') closeModal(); Snd('coin');
+    api('me').then(r => { loadProfile(r.wallet); fixLook(); rerender(); }).catch(() => {});
+    const list = (ids, gold) => (ids.length || gold ? ids.map(id => '<span class="tchip r' + rarity(ITEMS[id][2])[0] + '">' + pimg(id, 44) + '<b>' + esc(ITEMS[id][1]) + '</b></span>').join('') + (gold ? '<span class="tchip gold">' + coin(fmt(gold)) + '</span>' : '') : '<p class="fine">Nothing</p>');
+    openModal('traded', () => '<div class="mhead"><h2>Trade complete</h2>' + xBtn() + '</div><div class="tgrid"><div class="tside ok"><h3>You got</h3><div class="tlist">' + list(m.got, m.gotGold) + '</div></div><div class="tside"><h3>You gave</h3><div class="tlist">' + list(m.gave, m.gaveGold) + '</div></div></div><button class="btn go big" data-a="close">Done</button>');
+  }
+}
+function tradeHTML() {
+  const t = Trade; if (!t || t.phase !== 'open') return '<p class="fine">This trade has ended.</p><button class="btn" data-a="close">Close</button>';
+  const chip = id => '<span class="tchip r' + rarity(ITEMS[id][2])[0] + '">' + pimg(id, 44) + '<b>' + esc(ITEMS[id][1]) + '</b></span>';
+  const side = (o, title) => '<div class="tside' + (o.ok ? ' ok' : '') + '"><h3>' + title + (o.ok ? '<span class="tok">Confirmed</span>' : '') + '</h3><div class="tlist">' + (o.items.length || o.gold ? o.items.filter(id => ITEMS[id]).map(chip).join('') + (o.gold ? '<span class="tchip gold">' + coin(fmt(o.gold)) + '</span>' : '') : '<p class="fine">Nothing yet</p>') + '</div></div>';
+  const inv = wallet.own.filter(id => ITEMS[id] && ITEMS[id][2] > 0);
+  return '<div class="mhead"><h2>Trade with ' + esc(t.n) + '</h2>' + xBtn() + '</div><div class="tgrid">' + side(t.me, 'You give') + side(t.them, 'You get') + '</div>' +
+    '<h3>Your items</h3><div class="tinv">' + (inv.length ? inv.map(id => '<button class="titem' + (t.me.items.indexOf(id) >= 0 ? ' on' : '') + '" data-a="tradeitem" data-v="' + id + '">' + pimg(id, 52) + '<small>' + esc(ITEMS[id][1]) + '</small></button>').join('') : '<p class="fine">Nothing to trade yet. Buy something in the shop or open a loot box.</p>') + '</div>' +
+    '<div class="tgold"><span>Add gold</span>' + [0, 50000, 250000, 1000000].map(g => '<button class="btn sm' + (t.me.gold === g ? ' go' : '') + '" data-a="tradegold" data-v="' + g + '">' + (g ? fmt(g) : 'None') + '</button>').join('') + '<input id="tgold" type="number" min="0" step="1000" inputmode="numeric" placeholder="Other amount" aria-label="Other amount of gold"><button class="btn sm" data-a="tradegoldset">Set</button></div>' +
+    '<div class="row"><button class="btn ok big" data-a="tradeok"' + (t.me.ok ? ' disabled' : '') + '>' + (t.me.ok ? 'Waiting for ' + esc(t.n) : t.them.ok ? esc(t.n) + ' confirmed. Confirm trade' : 'Confirm trade') + '</button><button class="btn" data-a="close">Cancel trade</button></div>';
 }
 /* ================= the plaza connection =================
    Everyone outside a match is in one shared world. The page joins it on arrival and in lobbies, leaves it when a
@@ -2695,7 +2761,7 @@ function plazaOpen() {
   Plaza.ws = ws; Plaza.sent = null;
   ws.onopen = () => { Plaza.tries = 0; try { ws.send(JSON.stringify({ hello: activeKey || KEY })); } catch (e) {} };
   ws.onmessage = e => { if (e.data === 'pong') return; let d; try { d = JSON.parse(e.data); } catch (x) { return; } plazaGot(d); };
-  ws.onclose = () => { if (Plaza.ws !== ws) return; Plaza.ws = null; Plaza.you = null; B3.world.clear(); plazaCount(); if (plazaWanted()) Plaza.timer = setTimeout(plazaSync, Math.min(10000, 800 * Math.pow(1.7, Plaza.tries++))); };
+  ws.onclose = () => { if (Plaza.ws !== ws) return; Plaza.ws = null; Plaza.you = null; if (Trade) tradeDrop('The trade was cancelled.'); B3.world.clear(); plazaCount(); if (plazaWanted()) Plaza.timer = setTimeout(plazaSync, Math.min(10000, 800 * Math.pow(1.7, Plaza.tries++))); };
   ws.onerror = () => { try { ws.close(); } catch (x) {} };
 }
 function plazaClose() { const ws = Plaza.ws; Plaza.ws = null; Plaza.you = null; clearTimeout(Plaza.timer); try { ws && ws.close(); } catch (e) {} B3.world.clear(); plazaCount(); }
@@ -2707,6 +2773,7 @@ function plazaFeed(text) {
 }
 function plazaGot(d) {
   const W = B3.world;
+  if (d.trade) return tradeGot(d.trade);
   if (typeof d.gold === 'number') { goldSync(d); if (d.got) { Snd('boost'); toast('Gold boost: x' + d.got + ' for ' + Math.round(d.boost.left / 1000) + ' seconds'); } if (d.bonus) plazaFeed('+' + fmt(d.bonus) + ' gold for the elimination'); return; }
   if (d.shot) { W.shot(d.shot); if (d.shot[0] !== Plaza.you) Snd(d.shot[1] ? 'boom' : 'zap'); }
   if (d.hp) { W.setHp(d.hp[0], d.hp[1]); if (d.hp[0] === Plaza.you) Snd('hurt'); }
@@ -2740,7 +2807,7 @@ function worldHud(kind) {
   $('#wdead').hidden = !W.dead;
   if (kind === 'hit' || kind === 'ko') { const st = $('#stage'); st.classList.remove('hurt'); void st.offsetWidth; st.classList.add('hurt'); setTimeout(() => st.classList.remove('hurt'), 320); }
 }
-if (B3.world) { B3.world.send = m => plazaSend(m); B3.world.onHud = worldHud; B3.world.onFire = w => Snd(w ? 'boom' : 'zap'); B3.world.onPick = o => { const i = FRIENDS.findIndex(f => f.f === o.f); if (i >= 0) friendModal(i); else toast(o.n + ' is playing as a guest.'); }; }
+if (B3.world) { B3.world.send = m => plazaSend(m); B3.world.onHud = worldHud; B3.world.onFire = w => Snd(w ? 'boom' : 'zap'); B3.world.onPick = o => profileOpen({ f: o.f, n: o.n, l: o.l, pet: o.pet, swag: o.sw }); }
 function plazaEmote(e) { if (!B3.world || !B3.world.on) return; B3.world.emote('me', e); if (e === 'jump') B3.world.jump(); plazaSend({ emote: e }); }
 /* touch: a thumb stick on the left, a jump button on the right */
 (function plazaTouch() {
@@ -3038,7 +3105,17 @@ document.addEventListener('click', async e => {
       renderActions(); break; }
     case 'tile': tileModal(i); break;
     case 'fmin': friendsToggle(); break;
-    case 'friend': friendModal(+el.dataset.i); break;
+    case 'friend': profileOpen(FRIENDS[+el.dataset.i]); break;
+    case 'profclose': profileClose(); break;
+    case 'fop': if (PROF) { try { await api('friends', { op: el.dataset.v, friend: PROF.f }); await loadFriends(); toast(el.dataset.v === 'remove' ? 'Removed from your friends.' : 'Back in your friends.'); } catch (e) { toast(e.message || 'That did not work.'); } } break;
+    case 'frestore': try { await api('friends', { op: 'restore', friend: el.dataset.f }); await loadFriends(); } catch (e) { toast(e.message || 'That did not work.'); } break;
+    case 'tradeask': if (el.dataset.i) { plazaSend({ trade: { op: 'ask', to: el.dataset.i } }); profileClose(); } break;
+    case 'tradeyes': tradeSend({ op: 'accept' }); break;
+    case 'tradeno': if (Trade) { tradeSend({ op: Trade.phase === 'ask' ? 'decline' : 'cancel' }); } break;
+    case 'tradeitem': if (Trade && Trade.me) { const id = el.dataset.v, it = Trade.me.items.slice(), k = it.indexOf(id); if (k >= 0) it.splice(k, 1); else it.push(id); tradeSend({ op: 'offer', items: it, gold: Trade.me.gold }); } break;
+    case 'tradegold': if (Trade && Trade.me) tradeSend({ op: 'offer', items: Trade.me.items, gold: +el.dataset.v }); break;
+    case 'tradegoldset': if (Trade && Trade.me) tradeSend({ op: 'offer', items: Trade.me.items, gold: Math.max(0, Math.floor(+($('#tgold') || {}).value || 0)) }); break;
+    case 'tradeok': if (Trade) tradeSend({ op: 'confirm', v: Trade.v }); break;
     case 'emote': plazaEmote(el.dataset.v); break;
     case 'wpn': B3.world.setWeapon(+el.dataset.v); break;
     case 'acct': F.page = 'me'; F.sel = null; renderHome(true); hideTitle(); $('#side').scrollTop = 0; if (!authInfo.registered) setTimeout(() => { const u = $('#auth-username'); if (u) u.focus(); }, 80); break;

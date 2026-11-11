@@ -71,6 +71,23 @@ export function shop(w, what, item) {
   if (what === 'reset') refuse('Accounts can no longer be reset.');
   refuse('Unknown request.');
 }
+/* ---------- trading ---------- */
+/* what one side may put up: things they own that the other side does not, and gold they really have */
+export function tradeCheck(w, other, offer) {
+  const raw = Array.isArray(offer && offer.items) ? offer.items : [], items = [...new Set(raw.filter(id => typeof id === 'string'))].slice(0, 12);
+  items.forEach(id => { const it = ITEMS[id]; if (!it || it[2] <= 0 || w.own.indexOf(id) < 0) refuse('You can only trade items you own.'); if (other.own.indexOf(id) >= 0) refuse('They already own the ' + it[1] + '.'); });
+  const gold = int(offer && offer.gold, 0, 1e12); if (gold > Math.floor(w.coins || 0)) refuse('You do not have that much gold.');
+  return { items: items, gold: gold };
+}
+/* both sides are checked again at the moment of the swap, then everything moves at once */
+export function tradeSwap(a, b, oa, ob) {
+  const ca = tradeCheck(a, b, oa), cb = tradeCheck(b, a, ob);
+  if (!ca.items.length && !cb.items.length && !ca.gold && !cb.gold) refuse('There is nothing in this trade.');
+  a.own = a.own.filter(id => ca.items.indexOf(id) < 0).concat(cb.items); b.own = b.own.filter(id => cb.items.indexOf(id) < 0).concat(ca.items);
+  a.coins = Math.floor(a.coins) - ca.gold + cb.gold; b.coins = Math.floor(b.coins) - cb.gold + ca.gold;
+  setProfile(a, {}); setProfile(b, {});   // anything traded away comes off
+  return { a: ca, b: cb };
+}
 /* Swag Level: starts at -100, tops out at 9,999. What you are wearing counts most; the whole collection adds to it. */
 const WORN = [20, 70, 180, 520, 1500], KEPT = [3, 8, 20, 60, 150];
 export function swag(w) {

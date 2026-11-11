@@ -301,6 +301,36 @@ function plazaShoot(q, m, now) {
     if (now - (q.paid[o.id] || 0) > 60000 && o.id !== q.id) { q.paid[o.id] = now; w.coins += 5000; dirty = true; plazaSend(wsOf(q), { gold: w.coins, bonus: 5000 }); }
   });
 }
+/* trading: two people in the world put up items and gold; nothing moves until both confirm the same version of the offer */
+const trades = new Map(); let tradeSeq = 0;
+const tradeSide = () => ({ items: [], gold: 0, ok: false });
+const tradeTell = (q, m) => plazaSend(wsOf(q), { trade: m });
+const tradeView = (t, q) => { const a = q === t.a, o = a ? t.b : t.a; return { ev: 'state', id: t.id, v: t.v, with: o.i, n: o.n, me: a ? t.oa : t.ob, them: a ? t.ob : t.oa }; };
+function tradeEnd(t, why) { trades.delete(t.id); [t.a, t.b].forEach(q => { if (q.trade === t.id) q.trade = 0; tradeTell(q, { ev: 'cancel', id: t.id, why: why }); }); }
+function plazaTrade(q, m, now) {
+  if (m.op === 'ask') {
+    const o = [...plaza.values()].find(x => x.i && x.i === m.to); if (!o || o === q || o.id === q.id) return;
+    if (q.trade || o.trade) return tradeTell(q, { ev: 'busy', n: o.n });
+    const t = { id: ++tradeSeq, a: q, b: o, open: false, v: 0, at: now, oa: tradeSide(), ob: tradeSide() }; trades.set(t.id, t); q.trade = o.trade = t.id;
+    tradeTell(o, { ev: 'ask', id: t.id, from: q.i, n: q.n }); return tradeTell(q, { ev: 'wait', id: t.id, n: o.n });
+  }
+  const t = trades.get(q.trade); if (!t || t.id !== m.id) return;
+  if (m.op === 'decline' || m.op === 'cancel') return tradeEnd(t, m.op === 'decline' ? 'declined' : 'cancelled');
+  if (m.op === 'accept') { if (q !== t.b || t.open) return; t.open = true; tradeTell(t.a, tradeView(t, t.a)); return tradeTell(t.b, tradeView(t, t.b)); }
+  if (!t.open) return;
+  const mine = q === t.a ? 'oa' : 'ob', o = q === t.a ? t.b : t.a, both = () => { tradeTell(t.a, tradeView(t, t.a)); tradeTell(t.b, tradeView(t, t.b)); };
+  if (m.op === 'offer') {
+    let c; try { c = core.tradeCheck(account(q.id), account(o.id), m); } catch (e) { return tradeTell(q, { ev: 'note', id: t.id, text: e.message }); }
+    t[mine] = { items: c.items, gold: c.gold, ok: false }; t.oa.ok = t.ob.ok = false; t.v++; return both();
+  }
+  if (m.op === 'confirm') {
+    if (m.v !== t.v) return; t[mine].ok = true; if (!(t.oa.ok && t.ob.ok)) return both();
+    const wa = account(t.a.id), wb = account(t.b.id);
+    try { core.tradeSwap(wa, wb, t.oa, t.ob); } catch (e) { t.oa.ok = t.ob.ok = false; t.v++; [t.a, t.b].forEach(x => tradeTell(x, { ev: 'note', id: t.id, text: e.message })); return both(); }
+    wa.t = wb.t = now; dirty = true; trades.delete(t.id);
+    [[t.a, wa, t.ob, t.oa], [t.b, wb, t.oa, t.ob]].forEach(r => { const x = r[0]; x.trade = 0; x.l = r[1].look || {}; x.pet = r[1].pet || ''; x.sw = core.swag(r[1]); plazaAll({ look: plazaCard(x) }); tradeTell(x, { ev: 'done', id: t.id, got: r[2].items, gotGold: r[2].gold, gave: r[3].items, gaveGold: r[3].gold }); });
+  }
+}
 const wsOf = q => { for (const [ws, v] of plaza) if (v === q) return ws; return null; };
 function plazaPads(q, ws, now, far) {
   if (q.dead || far) return;
@@ -314,6 +344,7 @@ function plazaPads(q, ws, now, far) {
 setInterval(() => { const now = Date.now(); let ch = false;
   plaza.forEach(q => { if (q.i && q.dead && q.dead <= now) { q.dead = 0; q.hp = 100; q.safe = now + 2500; q.p = spawnAt(); q.lastAt = now; plazaAll({ spawn: [q.i, q.p[0], q.p[2]] }); } });
   pads.forEach(d => { if (d.at && d.at <= now) { d.at = 0; ch = true; } }); if (ch) plazaAll({ pads: padList(now) });
+  trades.forEach(t => { if (!t.open && now - t.at > 30000) tradeEnd(t, 'no answer'); });
 }, 250).unref();
 const plazaSend = (ws, m) => { if (ws.readyState === 1) { try { ws.send(typeof m === 'string' ? m : JSON.stringify(m)); } catch (e) {} } };
 const plazaAll = (m, except) => { const s = JSON.stringify(m); plaza.forEach((q, ws) => { if (ws !== except && q.i) plazaSend(ws, s); }); };
@@ -343,6 +374,7 @@ function plazaJoin(ws, raw) {
     const far = Math.hypot(np[0] - q.p[0], np[2] - q.p[2]) > 16 * Math.min(3, (now - (q.lastAt || now)) / 1000) + 2.5;   // faster than anyone can run: no pick-ups from that step
     q.p = np; q.lastAt = now; q.moved = true; plazaPads(q, ws, now, far);
   } else if (Array.isArray(msg.shoot)) { plazaShoot(q, msg.shoot, Date.now());
+  } else if (msg.trade && typeof msg.trade === 'object') { plazaTrade(q, msg.trade, Date.now());
   } else if (msg.wpn === 0 || msg.wpn === 1) { q.w = msg.wpn; plazaAll({ wpn: [q.i, q.w] });
   } else if (msg.restyle) {
     const w = account(q.id); q.n = (w.name || auth.username(q.id) || 'Guest').slice(0, 12); q.l = w.look || {}; q.pet = w.pet || ''; q.sw = core.swag(w);
@@ -367,7 +399,7 @@ server.on('upgrade', (req, socket, head) => {
         const now = Date.now(); if (now - since > 1000) { since = now; count = 0; } if (++count > 40) return;   // flood guard
         plazaJoin(ws, m);
       });
-      ws.on('close', () => { const q = plaza.get(ws); plaza.delete(ws); if (q && q.i) plazaAll({ leave: q.i }); });
+      ws.on('close', () => { const q = plaza.get(ws); if (q && q.trade && trades.get(q.trade)) tradeEnd(trades.get(q.trade), 'left'); plaza.delete(ws); if (q && q.i) plazaAll({ leave: q.i }); });
       ws.on('error', () => {});
     });
   }
