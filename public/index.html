@@ -1832,20 +1832,21 @@ function floatAt(el, html, cls) {
 function renderGame(prev, fast) {
   const s = viewState(V); if (!s) return; const got = bank();
   const c = s.phase === 'play' ? E.cur(s) : -1; B3.cur = c;
-  { const ab = $('#aucbar'), a = s.stage === 'auction' ? s.auc : null; ab.hidden = !a; if (a) ab.innerHTML = '<b>Auction</b><span>' + esc(T[a.tile].n) + '</span><b>' + (a.by >= 0 ? money(a.bid) : 'No bids') + '</b>' + (a.by >= 0 ? ava(s.players[a.by].look, PC[a.by], 30) : ''); }
+  { const ab = $('#aucbar'), a = s.stage === 'auction' ? s.auc : null; ab.hidden = !a; if (a) patchHTML(ab,'<b>Auction</b><span>' + esc(T[a.tile].n) + '</span><b>' + (a.by >= 0 ? money(a.bid) : 'No bids') + '</b>' + (a.by >= 0 ? ava(s.players[a.by].look, PC[a.by], 30) : '')); }
   // the light warms and the shadows lengthen as the match goes on
   if (B3.ok && s.startedAt) B3.setTime(s.phase === 'over' ? 1 : s.endAt ? (Date.now() - s.startedAt) / (s.endAt - s.startedAt) : Math.min(1, (Date.now() - s.startedAt) / 24e5));
   const top = Math.max.apply(null, s.players.map(p => p.cash).concat([1500]));
   const gh = $('#ghead'), gk = mode + s.code;
   if (gh.dataset.k !== gk) { gh.dataset.k = gk; gh.innerHTML = logo('sm') + (mode === 'online' ? '<span class="codechip" aria-label="Party code">' + s.code + '</span>' : '') + '<span id="clock" hidden></span><button class="ib" data-a="menu" aria-label="Menu">' + ico('menu', 16) + '</button>'; }
-  $('#players').innerHTML = s.players.map((p, i) => {
+  const playersHTML = s.players.map((p, i) => {
     if (i === me) return '';
     return '<button class="pp' + (i === c ? ' on' : '') + (p.out ? ' out' : '') + '" data-a="player" data-i="' + i + '" data-pp="' + i + '" style="--c:' + PC[i] + '">' + ava(p.look, PC[i]) + '<span class="nm">' + esc(p.name) + '</span><span class="cash">' + money(p.cash) + '</span>' +
       '<span class="pips">' + pipsHTML(s, i) + '</span><span class="sub">' + statusOf(s, i) + '</span>' + bar('c' + i, p.cash / top * 100) + (i === (s.stage === 'auction' && s.auc ? s.auc.who : c) && s.deadline ? '<i class="tm"><i id="tmbar"></i></i>' : '') + '</button>';
   }).join('');
+  patchHTML($('#players'), playersHTML);
   const lg = s.log.slice().reverse(), dot = e => '<i style="background:' + (e.p >= 0 ? PC[e.p] : '#000') + '"></i>';
-  $('#loglist').innerHTML = lg.slice(0, 18).map(e => '<li>' + dot(e) + '<span>' + esc(e.m) + '</span></li>').join('');
-  $('#ticker').innerHTML = lg.length ? dot(lg[0]) + '<span>' + esc(lg[0].m) + '</span>' : '<span>The game log shows up here.</span>';
+  patchHTML($('#loglist'),lg.slice(0, 18).map(e => '<li>' + dot(e) + '<span>' + esc(e.m) + '</span></li>').join(''));
+  patchHTML($('#ticker'),lg.length ? dot(lg[0]) + '<span>' + esc(lg[0].m) + '</span>' : '<span>The game log shows up here.</span>');
   renderActions();
   if (prev && prev.players.length === s.players.length) {
     s.players.forEach((p, i) => {
@@ -1902,7 +1903,8 @@ function renderActions() {
       '<span class="mx">' + coin(own ? wallet.coins : my.coins || 0) + '<span>Worth ' + money(E.worth(s, me)) + '</span><span>' + statusOf(s, me) + '</span></span></button>' + bar('c' + me, my.cash / top * 100) +
       '<div class="mrow"><div class="pips big">' + (pipsHTML(s, me) || '<span class="fine">No streets yet</span>') + '</div>' + (own ? (wallet.boxes ? '<button class="pill hot" data-a="loot" aria-label="Open your loot boxes">' + lootImg(18) + wallet.boxes + '</button>' : '') + (my.out ? '' : '<button class="btn sm" data-a="wardrobe">Style</button>') : '') + '</div>' + (me === (s.stage === 'auction' && s.auc ? s.auc.who : c) && s.deadline ? '<i class="tm"><i id="tmbar"></i></i>' : '') + '</div>';
   }
-  dock.innerHTML = card + '<div class="act"><div class="dicebox"><div class="dice" aria-label="Dice">' + dieHTML(s.dice[0]) + dieHTML(s.dice[1]) + '</div><span class="pw"><i></i></span></div><div class="say"><span>' + say + '</span><small id="subline">' + sub + '</small></div><div class="btns">' + B.join('') + '</div></div>';
+  const actionsHTML = card + '<div class="act"><div class="dicebox"><div class="dice" aria-label="Dice">' + dieHTML(s.dice[0]) + dieHTML(s.dice[1]) + '</div><span class="pw"><i></i></span></div><div class="say"><span>' + say + '</span><small id="subline">' + sub + '</small></div><div class="btns">' + B.join('') + '</div></div>';
+  patchHTML(dock,actionsHTML);
   growBars();
 }
 let autoV = -1, nudgeV = -1;
