@@ -55,6 +55,36 @@ async function openPage(page,name){
   await page.locator('#title .tmore [data-a=go][data-v=me]').click();
   await page.waitForSelector('#side [data-a=authregister]');
 }
+async function stableLayout(page, label) {
+  const tabs=['create','join','me','shop'];
+  let baseline=null;
+  await page.evaluate(()=>{
+    window.__stableHeader=document.querySelector('#side .hd');
+    window.__stableTabs=document.querySelector('#side .seg.nav');
+  });
+  for(const tab of tabs) {
+    await page.locator('#side [data-a=page][data-v="'+tab+'"]').click();
+    const m=await page.evaluate(()=>{
+      const a=document.querySelector('#side').getBoundingClientRect();
+      const b=document.querySelector('#stage').getBoundingClientRect();
+      return {screen:document.querySelector('#app').dataset.screen,sideWidth:a.width,sideLeft:a.left,
+        stageX:b.x,stageY:b.y,stageWidth:b.width,stageHeight:b.height,
+        total:document.documentElement.scrollWidth,window:innerWidth,
+        headerSame:document.querySelector('#side .hd')===window.__stableHeader,
+        navSame:document.querySelector('#side .seg.nav')===window.__stableTabs};
+    });
+    assert.equal(m.screen,'home',label+' should stay on the home screen');
+    assert(m.headerSame && m.navSame,label+' '+tab+' replaced navigation controls');
+    assert(m.total<=m.window+5,label+' '+tab+' horizontal overflow '+JSON.stringify(m));
+    assert(m.stageWidth>=160 && m.stageHeight>=110,label+' '+tab+' clipped stage '+JSON.stringify(m));
+    if(baseline) {
+      for(const key of ['sideWidth','sideLeft','stageX','stageY','stageWidth','stageHeight'])
+        assert(Math.abs(m[key]-baseline[key])<=2,label+' '+tab+' changed '+key+': '+JSON.stringify({baseline,m}));
+    } else baseline=m;
+  }
+  await page.locator('#side [data-a=page][data-v=me]').click();
+  console.log(label+': stable panel and board dimensions across all 4 tabs, no horizontal overflow.');
+}
 try {
   for(let i=0;i<80;i++){
     if(server.exitCode!==null)throw Error('Server exited: '+serverLogs);
@@ -66,6 +96,11 @@ try {
   const desktop=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1});
   const pc=await desktop.newPage();
   await openPage(pc,'desktop');
+  for(const [width,height] of [[1440,900],[1280,800],[1024,768],[901,640]]) {
+    await pc.setViewportSize({width,height});
+    await stableLayout(pc,width+'x'+height+' desktop');
+  }
+  await pc.setViewportSize({width:1440,height:900});
   await pc.locator('#side #auth-username').fill('BrowserTester');
   await pc.locator('#side #auth-password').fill('LongTestPassword2026!');
   await pc.locator('#side [data-a=authregister]').click();
@@ -92,6 +127,11 @@ try {
   const phone=await phoneContext.newPage();
   await observe(phone,'iPhone');
   await phone.locator('#title .tmore [data-a=go][data-v=me]').click();
+  for(const [width,height] of [[390,844],[375,667],[430,932],[844,390]]) {
+    await phone.setViewportSize({width,height});
+    await stableLayout(phone,width+'x'+height+' mobile');
+  }
+  await phone.setViewportSize({width:390,height:844});
   await phone.locator('#side #auth-username').fill('BrowserTester');
   await phone.locator('#side #auth-password').fill('LongTestPassword2026!');
   await phone.locator('#side [data-a=authlogin]').click();
