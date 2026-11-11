@@ -1792,7 +1792,10 @@ function renderHome(soft=false) {
      only when the displayed subject changes, not whenever a button is pressed. */
   const side = $('#side');
   if (side.childNodes.length) patchHTML(side,h); else side.innerHTML=h;
-  const sceneKey = JSON.stringify([F.page, F.look, F.pet, F.sel]);
+  /* Create and Join share the same city scene. Profile and Shop share the
+     same character scene unless the selected shop preview actually changes. */
+  const portraitScene = F.page === 'me' || F.page === 'shop';
+  const sceneKey = JSON.stringify([portraitScene ? 'portrait' : 'city', F.look, F.pet, F.page === 'shop' ? F.sel : null]);
   if (sceneKey !== lastHomeSceneKey) homeScene();
   lastHomeSceneKey = sceneKey;
   titleFoot();
