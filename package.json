@@ -1,0 +1,10 @@
+{
+  "name": "stakkz",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Stakkz: a 3D city property game for 2 to 5 players, with its own multiplayer server",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": { "ws": "^8.18.0" }
+}
