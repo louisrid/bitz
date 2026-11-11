@@ -1782,7 +1782,10 @@ function renderHome(soft=false) {
   const off = Net.ready && !Net.db ? '<p class="note">Parties need a connection to the game server. Play works without one.</p>' : Net.ready && !Net.canWrite ? '<p class="note">Your access is view-only. Ask the owner of this page to make you a Contributor.</p>' : '';
   let h = '<header class="hd"><button class="logob" data-a="title" aria-label="Back to the start">' + logo('xl') + '</button><div class="tools">' + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button><button class="ib" data-a="settings" aria-label="Settings">' + ico('gear', 20) + '</button></div></header>' +
     '<div class="seg nav" role="tablist">' + PAGES.map(p => '<button data-a="page" data-v="' + p[0] + '" role="tab" aria-selected="' + (F.page === p[0]) + '" class="' + (F.page === p[0] ? 'on' : '') + (p[0] === 'shop' ? ' hot' : '') + '">' + p[1] + '</button>').join('') + '</div><h1 class="ph">' + PH[F.page] + '</h1>';
-  if (F.page === 'create') h += nameRow() + lengthRow() + row('Computer opponents', seg('bots', [[0,'None'],[1,'1 bot'],[2,'2 bots'],[3,'3 bots'],[4,'4 bots']])) + (F.bots ? row('Bot difficulty', seg('difficulty', [['easy','Easy'],['medium','Medium'],['hard','Hard']])) + '<p class="fine">Easy makes mistakes, Medium plays cautiously, Hard plans ahead. Bots take real turns on the server.</p>' : '') + '<button class="btn go big" data-a="create">Create party</button><p class="fine">You get a code to share. Up to 5 can play, including bots.</p>' + off;
+  if (F.page === 'create') h += nameRow() + lengthRow() + row('Computer opponents', seg('bots', [[0,'None'],[1,'1 bot'],[2,'2 bots'],[3,'3 bots'],[4,'4 bots']])) + (F.bots ? row('Bot difficulty', seg('difficulty', [['easy','Easy'],['medium','Medium'],['hard','Hard']])) + '<p class="fine">Easy makes mistakes, Medium plays cautiously, Hard plans ahead. Bots take real turns on the server.</p>' : '') + '<details class="advanced"><summary>Advanced · turn timer</summary>' +
+    row('Turn timer', seg('turnTimer', [[0,'Auto'],[25,'25s'],[35,'35s'],[50,'50s']], 'dense')) +
+    '<p class="fine">Auto adjusts to how many people are playing.</p></details>' +
+    '<button class="btn go big" data-a="create">Create party</button><p class="fine">2–6 total players, including up to 4 bots. Invite friends with the party code.</p>' + off;
   else if (F.page === 'join') h += nameRow() + row('Party code', '<input class="t" id="f-code" maxlength="4" placeholder="ABCD" value="' + esc(F.code) + '" autocomplete="off" autocapitalize="characters">') + '<button class="btn go big" data-a="join">Join party</button>' + off;
   
   else if (F.page === 'me') h += accountHTML() + '<div class="mecard"><span class="pv bg-' + bgOf(F.look) + '">' + fig(F.look, PC[0], 104) + petImg(F.pet, 40) + '</span><div class="col">' + nameRow() + '<div class="pillrow"><span class="pill"><i class="coin"></i>' + fmt(wallet.coins) + '</span><span class="pill">' + lootImg(18) + wallet.boxes + '</span></div></div></div>' + styleHTML(PC[0]);
@@ -1808,7 +1811,7 @@ function renderLobby() {
     row('In the party: ' + s.players.length + ' of ' + s.max, bar('lob', s.players.length / s.max * 100)) +
     s.players.map((p, i) => '<div class="who" style="--c:' + PC[i] + '">' + ava(p.look, PC[i]) + '<span>' + esc(p.name) + '</span>' + petImg(p.pet, 30) + (i === me ? '<em>You</em>' : i === 0 ? '<em>Host</em>' : '') + '</div>').join('') +
     (open ? '<div class="who empty">' + (open === 1 ? '1 open seat' : open + ' open seats') + '</div>' : '') +
-    '<p class="fine">' + (s.mode === 'classic' ? 'Classic: the last player standing wins.' : s.mode + ' minutes, then the richest player wins.') + '</p>' +
+    '<p class="fine">' + (s.mode === 'classic' ? 'Classic · Last player standing wins' : (s.mode === 35 ? 'FAST FUN' : s.mode === 25 ? 'QUICK' : 'LONG') + ' · ' + s.mode + ' minutes · highest net worth wins') + ' · ' + (s.timer || 'Auto') + 's turns' + '</p>' +
     (host ? (s.players.length >= 2 ? '<button class="btn go big" data-a="start">Start game</button>' : '<p class="tag dots">Waiting for friends to join</p>') : me >= 0 ? '<p class="tag dots">Waiting for the host to start</p>' : '') +
     '<div class="row">' + (me >= 0 ? '<button class="btn" data-a="wardrobe">Change look</button>' : '') + '<button class="btn" data-a="leave">Leave party</button></div>';
   patchHTML($('#side'),lobbyHTML);
@@ -1894,9 +1897,16 @@ function renderActions() {
       if (p.jail) { sub = 'You are in Jail. Roll doubles, pay £50 or use a card. Try ' + (p.jt + 1) + ' of 3.'; b('roll', 'Roll for doubles', 'go'); if (p.cash >= 50) b('payJail', 'Pay £50'); if (p.gojf.length) b('useCard', 'Use card', 'blue'); }
       else { b('roll', s.again ? 'Roll again' : 'Roll dice', 'go'); if (s.again) sub = 'Doubles! Roll again.'; }
     } else if (s.stage === 'buy') { sub = 'Buy ' + T[p.pos].n + ' or send it to auction.'; b('viewbuy', 'Buy or auction', 'go'); }
+    else if (s.stage === 'travel') {
+      const fee = E.owner(s,s.station) === me ? 0 : 50;
+      say = 'Station fast travel';
+      sub = 'Rent or purchase resolved. Travel ' + (fee ? 'for £50' : 'for free') + ' to another station, or stay. No Start bonus or destination rent.';
+      b('stations', 'Choose station', 'blue');
+      b('stay', 'Stay here', 'go');
+    }
     else if (s.stage === 'debt') { const d = s.debts[0]; say = 'You owe ' + money(E.debtTotal(s)); sub = 'Pay ' + (d.to >= 0 ? esc(s.players[d.to].name) : 'the bank') + ' by selling or trading. You have ' + money(p.cash) + '.'; }
     if (mineP.length) b('props', canB ? 'Build' : 'My streets', canB ? 'ok' : '');
-    if (s.order.length > 1 && s.stage !== 'buy') b('trade', 'Trade', 'blue');
+    if (s.order.length > 1 && s.stage !== 'buy' && s.stage !== 'travel' && !E.chaos(s,Date.now()+skew)) b('trade', 'Trade', 'blue');
     if (s.stage === 'act') b('end', 'End turn', 'go');
     if (s.stage === 'debt') b('bankrupt', 'Go bankrupt', 'bad');
   }
@@ -1959,7 +1969,7 @@ function forcedModals() {
 const chip = (i, btn, on) => '<' + (btn ? 'button data-a="' + btn + '" data-i="' + i + '" aria-pressed="' + !!on + '"' : 'span') + ' class="chip' + (on ? ' on' : '') + '" style="--g:' + tcol(i) + '"><i></i>' + esc(T[i].n) + '</' + (btn ? 'button' : 'span') + '>';
 function rentRows(s, i) {
   const t = T[i], o = E.owner(s, i), h = E.lvl(s, i), hl = k => (o >= 0 && h === k ? ' class="hl"' : '');
-  if (t.t === 'st') return '<dt' + hl(0) + '>Rent</dt><dd>' + money(t.r[0]) + '</dd><dt>Rent with the full colour set</dt><dd>' + money(t.r[0] * 2) + '</dd>' + [1, 2, 3, 4].map(k => '<dt' + hl(k) + '>With ' + k + (k > 1 ? ' houses' : ' house') + '</dt><dd>' + money(t.r[k]) + '</dd>').join('') + '<dt' + hl(5) + '>With a hotel</dt><dd>' + money(t.r[5]) + '</dd><dt>Each house costs</dt><dd>' + money(E.HC[t.g]) + '</dd>';
+  if (t.t === 'st') return '<dt' + hl(0) + '>Rent</dt><dd>' + money(t.r[0]) + '</dd><dt>Rent with the full colour set</dt><dd>' + money(t.r[0] * 2) + '</dd>' + [1, 2, 3].map(k => '<dt' + hl(k) + '>With ' + k + (k > 1 ? ' houses' : ' house') + '</dt><dd>' + money(t.r[k]) + '</dd>').join('') + '<dt' + hl(5) + '>With a hotel</dt><dd>' + money(t.r[5]) + '</dd><dt>Each house costs</dt><dd>' + money(E.HC[t.g]) + '</dd>';
   if (t.t === 'rail') return [25, 50, 100, 200].map((r, k) => '<dt>Rent with ' + (k + 1) + (k ? ' stations' : ' station') + '</dt><dd>' + money(r) + '</dd>').join('');
   return '<dt>Rent with 1 utility</dt><dd>Dice × 4</dd><dt>Rent with both</dt><dd>Dice × 10</dd>';
 }
@@ -1990,7 +2000,7 @@ function tileModal(i) {
 }
 function propButtons(s, i) {
   const t = T[i], h = E.lvl(s, i), B = [];
-  if (E.canBuild(s, me, i)) B.push('<button class="btn sm ok" data-a="build" data-i="' + i + '">' + (h === 4 ? 'Hotel ' : 'Build ') + money(E.HC[t.g]) + '</button>');
+  if (E.canBuild(s, me, i)) B.push('<button class="btn sm ok" data-a="build" data-i="' + i + '">' + (h === 3 ? 'Hotel ' : 'Build ') + money(E.HC[t.g]) + '</button>');
   if (E.canSellHouse(s, me, i)) B.push('<button class="btn sm" data-a="sellHouse" data-i="' + i + '">' + (h === 5 ? 'Downgrade' : 'Sell house') + ' +' + money(E.HC[t.g] / 2) + '</button>');
   if (E.canSellProp(s, me, i)) B.push('<button class="btn sm bad" data-a="sellProp" data-i="' + i + '">Sell to bank +' + money(t.p / 2) + '</button>');
   return B.length ? '<div class="pb">' + B.join('') + '</div>' : '';
@@ -2226,7 +2236,9 @@ document.addEventListener('click', async e => {
     case 'build': case 'sellHouse': case 'sellProp': act({ t: a, tile: i }); break;
     case 'bid': act({ t: 'bid', amt: +el.dataset.n }); break;
     case 'viewauction': auctionModal(); break;
-    case 'roll': case 'payJail': case 'useCard': case 'skip': case 'end': case 'accept': case 'reject': case 'cancel': case 'bankrupt': case 'pass': act({ t: a }); break;
+    case 'stations': stationModal(); break;
+    case 'travel': if (V && V.stage === 'travel') { act({t:'travel',tile:i}); closeModal(); } break;
+    case 'roll': case 'payJail': case 'useCard': case 'skip': case 'end': case 'stay': case 'accept': case 'reject': case 'cancel': case 'bankrupt': case 'pass': act({ t: a }); break;
   }
 });
 document.addEventListener('input', e => {
