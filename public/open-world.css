@@ -1,0 +1,34 @@
+/* Shared social world is the game. The original board remains dormant for backwards data compatibility. */
+:root{--fw:clamp(190px,20vw,310px)}
+html.fopen #fside{display:flex;background:#fff}
+#fside{background:#fff;box-shadow:2px 0 14px #13292022}
+#flist .fr .ava{width:46px;height:46px;border-radius:10px;background:#ecf8ed}
+#flist .fr{border:1.5px solid #d8e3dc;box-shadow:none;border-radius:10px}
+#flist .fr:hover{background:#f1f8f3}
+#app[data-screen=home]{display:block;position:fixed;inset:0;padding:0;margin:0;width:100%;height:100%;background:none;pointer-events:none}
+html.fopen #app[data-screen=home]{left:var(--fw);right:0;width:calc(100% - var(--fw))}
+#app[data-screen=home] #stage{position:absolute;inset:0;margin:0;border:0;border-radius:0;box-shadow:none;pointer-events:auto}
+#app[data-screen=home] #side{position:absolute;top:76px;right:14px;bottom:18px;left:auto;width:min(435px,calc(100% - 28px));max-height:none;z-index:12;background:#fff;border:2px solid #14261d;border-radius:17px;padding:14px;overflow:auto;box-shadow:0 9px 32px #09201266;pointer-events:auto}
+#app[data-page=world] #side{display:none!important}
+#app[data-screen=home] #wui{pointer-events:none}
+#app[data-screen=home] #wui button,#app[data-screen=home] #wui #wstick{pointer-events:auto}
+#wbar{position:absolute;left:12px;right:12px;top:12px;z-index:11;display:flex;gap:8px;align-items:center;flex-wrap:wrap;pointer-events:none}
+#wbar>*{pointer-events:auto}
+#wbar .wbtn{background:#fff;color:#142f2b;border:2px solid #153629;padding:9px 13px;border-radius:10px;font:400 17px/1 'Coolvetica','Arial Black',sans-serif;box-shadow:0 3px 0 #153629;cursor:pointer}
+#wbar .wbtn.active{background:#baf9ab}
+#wbar .wstat{background:#132a21e9;color:#fff;border:1px solid #9fd78b;padding:10px 12px;border-radius:10px;font:700 14px/1.2 'Space Grotesk',sans-serif}
+#wbar .wstat em{font-style:normal;color:#a7f9a6}
+#app[data-screen=game] #wbar,#app[data-screen=lobby] #wbar{display:none}
+#app[data-screen=home] #wui .wtop{top:64px}
+#app[data-screen=home] #wui .whelp{background:#f9fff9d9;color:#143427}
+#app[data-screen=home] #wui .wemo{bottom:16px}
+#fprofov{position:absolute;inset:0;z-index:14;pointer-events:none}
+#fprofov[hidden]{display:none}
+#fprofov .fprof-panel{position:absolute;left:18px;top:20px;width:min(370px,calc(100% - 36px));max-height:calc(100% - 38px);overflow:auto;pointer-events:auto;background:#fffffff0;border:2px solid #162a25;border-radius:18px;padding:17px;box-shadow:0 9px 30px #0004}
+#fprofov .fprof-panel h2{font-size:28px}
+#fprofov .fprof-panel .wear{max-height:42vh;overflow:auto}
+#fprofov .fprof-panel .wrow{background:#fff}
+#fprofov .fprof-panel button{margin:8px 0}
+#app[data-page=world] #stage{background:linear-gradient(#a9e7ff,#e4f8ff)}
+#app[data-screen=home] #corner,#app[data-screen=home] #dock{display:none!important}
+@media(max-width:900px){html.fopen #app[data-screen=home]{left:0;width:100%}#fside{z-index:18!important}#wbar{top:7px;left:8px;right:8px;gap:5px}#wbar .wbtn{padding:7px 8px;font-size:13px}#wbar .wstat{font-size:11px;padding:7px}#app[data-screen=home] #side{top:119px;bottom:8px}#app[data-screen=home] #wui .wtop{top:106px}#fprofov .fprof-panel{left:8px;top:120px;padding:12px;width:min(290px,calc(100% - 16px))}}
