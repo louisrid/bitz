@@ -21,7 +21,7 @@ const cloud = !!(CLOUD_URL && CLOUD_KEY);
 const PG_URL = process.env.STAKKZ_DATABASE_URL || '';
 const pg = PG_URL ? postgres(PG_URL, { max: 2, idle_timeout: 15, connect_timeout: 12, prepare: false }) : null;
 const persistent = !!(pg || cloud);
-let dirty = false, saved = {}, saveChain = Promise.resolve();
+let dirty = false, saved = {}, saveChain = Promise.resolve(), dbVersion = 0;
 const lastSeen = new Map();
 // Always two minutes in real deployments. A short test-only interval lets CI
 // verify reconnect and eviction timing without waiting two wall-clock minutes.
@@ -42,8 +42,21 @@ async function save(force = false) {
   const state = { secret: SECRET, parties: Object.fromEntries(parties), accounts: Object.fromEntries(accounts), auth: auth.export() };
   const write = async () => {
     if (pg) {
-      await pg`insert into stakkz_state (id, state) values ('main', ${JSON.stringify(state)}::jsonb)
-        on conflict (id) do update set state = excluded.state`;
+      /* Versioned compare-and-swap prevents an older process terminating
+         during a zero-downtime deploy from erasing newer accounts or parties. */
+      const json = JSON.stringify(state);
+      if (dbVersion === 0) {
+        const inserted = await pg`insert into stakkz_state (id, state, version)
+          values ('main', ${json}::jsonb, 1)
+          on conflict (id) do nothing returning version`;
+        if (inserted.length) { dbVersion = Number(inserted[0].version); return; }
+      }
+      const updated = await pg`update stakkz_state
+        set state = ${json}::jsonb, version = version + 1
+        where id = 'main' and version = ${dbVersion}
+        returning version`;
+      if (!updated.length) throw Error('Database revision changed on another instance; refusing to overwrite newer saved game data.');
+      dbVersion = Number(updated[0].version);
     } else if (cloud) {
       const res = await fetch(CLOUD_URL + '?on_conflict=id', {
         method: 'POST',
@@ -253,8 +266,10 @@ async function bootstrap() {
   if (persistent) {
     let remote;
     if (pg) {
-      await pg`create table if not exists stakkz_state (id text primary key, state jsonb not null)`;
-      const rows = await pg`select state from stakkz_state where id = 'main' limit 1`;
+      await pg`create table if not exists stakkz_state (id text primary key, state jsonb not null, version bigint not null default 0)`;
+      await pg`alter table stakkz_state add column if not exists version bigint not null default 0`;
+      const rows = await pg`select state, version from stakkz_state where id = 'main' limit 1`;
+      dbVersion = Number(rows[0]?.version) || 0;
       remote = rows[0]?.state;
     } else {
       const res = await fetch(CLOUD_URL + '?id=eq.main&select=state', {
@@ -280,8 +295,17 @@ async function bootstrap() {
   server.listen(PORT, () => console.log('Stakkz is running on port ' + PORT));
 }
 bootstrap().catch(e => { console.error('Startup aborted to protect accounts:',e.message); process.exitCode=1; });
+let shutdownStarted = false;
 process.on('SIGTERM', () => {
-  dirty = true;
-  void save(true).then(() => pg?.end({ timeout: 1 })).finally(() => process.exit(0));
+  if (shutdownStarted) return;
+  shutdownStarted = true;
+  /* Never mark an unchanged instance dirty during Render rolling deploys.
+     Its stale empty snapshot must not overwrite a newer running server. */
+  void (async () => {
+    if (dirty) await save();
+    await saveChain;
+    if (pg) await pg.end({ timeout: 1 });
+  })().catch(e => console.error('Stakkz shutdown flush failed:', e.message))
+    .finally(() => process.exit(0));
   setTimeout(() => process.exit(0), 2500).unref();
 });
