@@ -1,3 +1,20 @@
+# Stakkz hosted beta update — 11 November 2026 (IMPORTANT: supersedes earlier setup notes)
+
+**Real beta storage is NOW CONFIGURED and LIVE; do not repeat the old Supabase setup instructions.**
+
+- Attempted to create a dedicated Supabase project in louisrid's Org at quoted $0/month. Supabase rejected it due to the organisation owner already having two active free projects. NO existing Supabase projects were changed and no Supabase Stakkz project was created.
+- Created a new **free Render Postgres** database named `stakkz-beta-store` (ID `dpg-dbqcd3m1egvs73bp9h6g-a`, Frankfurt), available over Render's private network. **It expires 11 December 2026** and has no backups: use only for beta tests, never real long-term users.
+- Added Render Postgres support to the Node server via pinned `postgres@3.4.9`; the original Supabase REST code remains as an optional future alternative. The server auto-creates `stakkz_state` and persists the entire app-state snapshot.
+- Created and applied a **beta-only** Render Blueprint at `render-stakkz-beta.yaml` (ID `exs-dbqceam7bikc73ani6h0`), adopting ONLY existing staging service `stakkz-beta-test-20261111` and free beta database. The Blueprint safely supplies the private DB connection via `STAKKZ_DATABASE_URL` fromDatabase:connectionString. No database credential was put in GitHub, and no other Render resources were modified. Blueprint autoSync is OFF by design; staging web-service autoDeploy is ON.
+- Hosted beta URL: https://stakkz-beta-test-20261111.onrender.com
+- Production URL: https://stakkz.onrender.com ; production service `stakkz` (ID `srv-dbq9106gekts73epirig`) remains on branch `main`, unchanged.
+- Verified staging logs: "Persistent storage ready" and web server started. GitHub Actions run 43091267131 (push) completed **smoke/browser/staging ALL SUCCESS**. The real-hosted integration test `tests/staging-live-smoke.mjs` confirmed Render database-backed signup, login as same account, creating a party with two Medium bots, game start and party rejoin.
+- Earlier tests cover simulated server restart recovery with a mock database, and emulated iPhone/browser UI without WebGL. **Not verified yet:** literal 120-second offline grace on real devices, genuine iPhone Safari/WebGL performance, real-hosted persistence after a Render restart and long-term storage.
+- CRITICAL: Before any production rollout choose a **permanent** database, migrate test data if needed, and set robust backups. Render free Postgres expires on 11 Dec 2026; do not imply it is permanent. Supabase would require freeing a project slot or a plan change and the user explicitly prohibited altering other projects.
+- Do not merge PR #1 until production storage, device QA and user approval; do not rotate the production `STAKKZ_SECRET`.
+
+---
+
 # STAKKZ — Claude handoff (11 November 2026)
 
 ## Read this first
