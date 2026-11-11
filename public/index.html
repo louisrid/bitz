@@ -953,7 +953,52 @@ const B3 = (function () {
     await tween(170,f=>{tk.scale.y=(tk.userData.crowdScale||1)*(1-.28*Math.sin(f*Math.PI));});
     tk.scale.setScalar(tk.userData.crowdScale || 1); api.moving = -1;
   };
-  /* two real dice, thrown beside whoever is rolling: they tumble, bounce and settle on the numbers rolled */
+  /* Station fast travel: luminous route, miniature train, and the existing
+     player token all move together. The camera remains on the board instead
+     of snapping to a different scene. No extra network/gameplay actions. */
+  api.traveling=-1;
+  api.trainTravel=async function(pi,from,to){
+    const token=tokens[pi];if(!token)return;
+    if(api.fast||still||document.hidden){
+      token.position.copy(slot({players:Object.keys(tokens).map((_,j)=>({pos:j===pi?to:-1,out:false}))},pi));
+      return;
+    }
+    const a=loc(from,0,-C/2+.7),b=loc(to,0,-C/2+.7);
+    a.y=b.y=1.0;
+    const middle=a.clone().add(b).multiplyScalar(.5);middle.y=6.4;
+    const curve=new THREE.QuadraticBezierCurve3(a,middle,b);
+    const routeGeo=new THREE.BufferGeometry().setFromPoints(curve.getPoints(25));
+    const routeMat=new THREE.LineBasicMaterial({color:0x3fa9ff,transparent:true,opacity:.87});
+    const route=new THREE.Line(routeGeo,routeMat);
+    const train=new THREE.Group();
+    const hull=L(0xffd60a), dark=L(0x151515);
+    train.add(mesh(new THREE.BoxGeometry(1.28,.53,.7),hull,0,.45,0));
+    train.add(mesh(new THREE.BoxGeometry(.74,.43,.58),dark,-.18,.88,0));
+    const face=mesh(new THREE.BoxGeometry(.12,.2,.31),
+      new THREE.MeshBasicMaterial({color:0xfff2a0}),.7,.54,0);
+    face.castShadow=false;train.add(face);
+    scene.add(route);scene.add(train);
+    api.traveling=pi;
+    try{
+      await tween(820,f=>{
+        const q=curve.getPoint(Math.min(1,f));
+        train.position.copy(q);
+        const tangent=curve.getTangent(Math.min(.999,f));
+        train.rotation.y=Math.atan2(tangent.x,tangent.z);
+        token.position.set(q.x,q.y+1.45+Math.sin(f*Math.PI)*.26,q.z);
+        token.rotation.y=train.rotation.y;
+        routeMat.opacity=.85-.42*f;
+      });
+    }finally{
+      token.position.copy(b).setY(0);
+      token.scale.setScalar(token.userData.crowdScale||1);
+      api.traveling=-1;
+      scene.remove(route);scene.remove(train);
+      routeGeo.dispose();routeMat.dispose();
+      train.traverse(q=>{if(q.geometry)q.geometry.dispose();if(q.material)q.material.dispose();});
+    }
+  };
+    /* two real dice, thrown beside whoever is rolling: they tumble, bounce and settle on the numbers rolled */
   const dice3 = (function () {
     const PIP = { 1: [[32, 32]], 2: [[20, 20], [44, 44]], 3: [[18, 18], [32, 32], [46, 46]], 4: [[20, 20], [44, 20], [20, 44], [44, 44]], 5: [[19, 19], [45, 19], [32, 32], [19, 45], [45, 45]], 6: [[20, 17], [44, 17], [20, 32], [44, 32], [20, 47], [44, 47]] };
     const mats = [3, 4, 1, 6, 2, 5].map(v => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 64, 64); x.strokeStyle = '#000'; x.lineWidth = 7; x.strokeRect(3.5, 3.5, 57, 57); x.fillStyle = '#000'; PIP[v].forEach(p => { x.beginPath(); x.arc(p[0], p[1], 5.6, 0, 7); x.fill(); }); return new THREE.MeshLambertMaterial({ map: new THREE.CanvasTexture(c) }); });
@@ -1221,7 +1266,7 @@ const B3 = (function () {
     halo.rotation.z = t * 0.6 * mv; halo.position.y = 11 + Math.sin(t * 1.3) * 0.25 * mv;
     balloon.position.set(Math.cos(t * 0.12) * 10, 17 + Math.sin(t * 0.7) * 0.8 * mv, Math.sin(t * 0.12) * 10);
     Object.keys(tokens).forEach(k => {
-      const tk = tokens[k], u = tk.userData, mvg = api.moving === +k, cur = +k === api.cur;
+      const tk = tokens[k], u = tk.userData, mvg = api.moving === +k || api.traveling === +k, cur = +k === api.cur;
       if (!tw.length) {
         tk.position.y=cur?Math.abs(Math.sin(t*3))*.35*mv:0;
         if(!mvg)tk.scale.setScalar(u.crowdScale||1);
@@ -1253,12 +1298,12 @@ const B3 = (function () {
     const kk = 1 - Math.exp(-Math.min(0.1, (now - (api.last || now)) / 1000) * 6); api.last = now;
     // the whole board is the resting view. The camera closes in on a player when their turn starts, while the dice
     // roll and the piece moves, and for a moment after it lands; then it eases back out.
-    const actor = api.moving >= 0 ? api.moving : api.rolling;
+    const actor = api.traveling >= 0 ? -1 : api.moving >= 0 ? api.moving : api.rolling;
     if (api.cur !== fCur) { fCur = api.cur; fOff = 0; if (api.cur >= 0) { fWho = api.cur; fSpot = false; fUntil = Math.max(fUntil, now + 2400); } }
     if (actor >= 0) { fWho = actor; fSpot = false; fUntil = Math.max(fUntil, now + 2000); }
     if (now > fUntil) fSpot = false;
     if (!fSpot && tokens[fWho]) fpos.copy(tokens[fWho].position);
-    chasing = !api.home && api.follow && now < fUntil && (fSpot || !!tokens[fWho]);
+    chasing = !api.home && api.follow && api.traveling < 0 && now < fUntil && (fSpot || !!tokens[fWho]);
     const foc = api.home ? (api.focus ? (api.focus === 'start' ? fv2.copy(loc(0, 0, 0)) : tokens[0] ? tokens[0].position : null) : null) : chasing ? fpos : null, near = foc && api.home && api.focus !== 'start';
     // in a close-up the camera stands outside the board looking in, so the city is behind the player
     { let d = (chasing ? Math.atan2(fpos.x, fpos.z) + fOff : az) - cA; if (chasing) d = Math.atan2(Math.sin(d), Math.cos(d)); cA += d * Math.min(1, kk * (chasing ? 0.55 : 4)); if (!chasing && Math.abs(az - cA) > Math.PI * 2) cA = az; }
@@ -1658,6 +1703,11 @@ async function present(n) {
     const nm = i => n.players[i] ? n.players[i].name : 'Someone', spend = n.fx.some(x => x.t === 'buy' || x.t === 'sold' || x.t === 'build');
     if (f.t === 'dice') { Snd('dice'); await rollDice(f.d, f.p, n); }
     else if (f.t === 'move') { B3.cur = -1; if (B3.ok) { await B3.moveToken(f.p, f.from, f.to, f.dir); const o = E.owner(n, f.to); B3.flash(f.to, PC[o >= 0 && o !== f.p ? o : f.p]); Snd('land'); } }
+    else if (f.t === 'travel') {
+      Snd('hop',7);
+      if(B3.ok){await B3.trainTravel(f.p,f.from,f.to);B3.flash(f.to,PC[f.p]);}
+      shout(n.players[f.p].name+' fast travelled to '+T[f.to].n);
+    }
     else if (f.t === 'card') { Snd(f.box ? 'box' : 'card'); await showCard(f, n); }
     else if (f.t === 'box') { Snd('box'); B3.ok && B3.react(f.p, 'cheer'); shout(nm(f.p) + ' found a loot box'); await wait(still ? 0 : 500); }
     else if (f.t === 'buy') { Snd('buy'); if (B3.ok) { B3.flash(f.tile, PC[f.p]); B3.react(f.p, 'cheer'); B3.spot(f.p, 1500); } shout(nm(f.p) + ' bought ' + T[f.tile].n); }
