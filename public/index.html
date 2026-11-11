@@ -1804,8 +1804,8 @@ async function present(n) {
       if(B3.ok){await B3.trainTravel(f.p,f.from,f.to);B3.flash(f.to,PC[f.p]);}
       shout(n.players[f.p].name+' fast travelled to '+T[f.to].n);
     }
-    else if (f.t === 'card') { Snd(f.box ? 'box' : 'card'); await showCard(f, n); }
-    else if (f.t === 'box') { Snd('box'); B3.ok && B3.react(f.p, 'cheer'); shout(nm(f.p) + ' found a loot box'); await wait(still ? 0 : 500); }
+    else if (f.t === 'card') { if (f.box && f.p !== me) continue; Snd(f.box ? 'box' : 'card'); await showCard(f, n); }
+    else if (f.t === 'box') { if (f.p !== me) continue; Snd('box'); B3.ok && B3.react(f.p, 'cheer'); shout('You found a loot box'); await wait(still ? 0 : 500); }
     else if (f.t === 'buy') {
       Snd('buy');
       if(B3.ok){
@@ -1851,8 +1851,8 @@ async function present(n) {
       shout('Sold to '+nm(f.p)+' for '+money(f.a));await wait(still?0:350);
     }
     else if(f.t==='unsold'){if(B3.ok)B3.flash(f.tile,'#FFFFFF');shout('No bids for '+T[f.tile].n);}
-    else if (f.t === 'coins') { Snd('coin'); shout(n.players[f.p].name + ' grabbed ' + fmt(f.n) + ' coins'); }
-    else if (f.t === 'gift') { Snd('coin'); shout(n.players[f.from].name + ' sent ' + n.players[f.to].name + ' ' + fmt(f.n) + ' coins'); }
+    else if (f.t === 'coins') { if (f.p !== me) continue; Snd('coin'); shout('You grabbed ' + fmt(f.n) + ' coins'); }
+    else if (f.t === 'gift') { if (f.from !== me && f.to !== me) continue; Snd('coin'); shout(f.to === me ? n.players[f.from].name + ' sent you ' + fmt(f.n) + ' coins' : 'You sent ' + n.players[f.to].name + ' ' + fmt(f.n) + ' coins'); }
     else if (f.t === 'trade') { Snd('buy'); if (B3.ok) { B3.coins(f.a, f.b, 150); B3.coins(f.b, f.a, 150); B3.react(f.a, 'cheer'); B3.react(f.b, 'cheer'); } shout(nm(f.a) + ' and ' + nm(f.b) + ' made a trade'); }
     else if(f.t==='win'){Snd('win');B3.ok&&(n.winners||[]).forEach(i=>B3.react(i,'win'));}
     else if (f.t === 'turn' && n.phase === 'play') { const mineT = f.p === me && solo(); if (mineT) Snd('turn'); shout(mineT ? 'Your turn' : n.players[f.p].name + '’s turn'); }
