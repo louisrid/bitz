@@ -45,3 +45,16 @@ jobs:
         run: google-chrome --version
       - name: Test desktop UI and iPhone account-to-game handoff
         run: node tests/browser-smoke.mjs
+
+  staging:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    needs: [smoke, browser]
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test the real Render beta with its private Postgres database
+        run: node tests/staging-live-smoke.mjs
