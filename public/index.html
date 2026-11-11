@@ -418,6 +418,7 @@ button.chip.on{background:var(--ink);color:var(--paper)}
 .logo.hero{font-size:clamp(66px,13vw,152px);animation:drop .9s cubic-bezier(.3,1.5,.5,1) both}
 .logo.hero .mk{animation:drop .9s .22s cubic-bezier(.3,1.5,.5,1) both,bob 2.6s 1.4s ease-in-out infinite}
 #title.in .logo.hero,#title.in .logo.hero .mk{animation:bob 2.6s ease-in-out infinite}
+#title.settled .logo.hero,#title.settled .logo.hero .mk{animation:none}
 #title.in .logo.hero{animation:none}
 .ttag{margin:0;text-align:center;font:400 clamp(17px,1.9vw,23px)/1.15 var(--ui);animation:fadeup .4s .95s both}
 .tgo{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%}
@@ -444,15 +445,16 @@ button.chip.on{background:var(--ink);color:var(--paper)}
 #side.enter > .btn.go{animation:fadeup .34s .19s cubic-bezier(.2,.9,.3,1) both}
 /* big screens: menus get a wider column and larger controls than the in-game panel; the shop and Me get the most room */
 @media (min-width:901px) and (min-height:521px){
-  #app{transition:grid-template-columns .35s cubic-bezier(.3,1,.4,1)}
-  #app[data-screen="home"],#app[data-screen="lobby"]{--sw:clamp(330px,27vw,410px)}
-  #app[data-screen="home"][data-page="me"],#app[data-screen="home"][data-page="shop"]{--sw:clamp(390px,35vw,560px)}
+  /* Profile-width controls and stable split layout across all desktop screens. */
+  #app{--sw:clamp(390px,35vw,560px);transition:none}
   .roomy #side,#veil,#toast{--k:.74;--kf:.92;--r:calc(var(--k)*12px);--h:calc(var(--k)*38px);--fs:max(12px,calc(var(--kf)*15px));--fb:max(12px,calc(var(--kf)*17px));--fl:max(12px,calc(var(--kf)*13px));--gap:calc(var(--k)*13px)}
   #app[data-screen="home"][data-page="shop"] .item{flex-basis:calc((100% - calc(var(--k)*36px)) / 4)}
   #app[data-screen="home"][data-page="shop"] .items.two .item{flex-basis:calc((100% - calc(var(--k)*36px)) / 4)}
 }
 /* targeted control feedback: no full-panel white re-entry on selections */
 #side:not(.enter) > * { animation:none; }
+#side .who{animation:none}
+#app,#stage,#side,#hud{transition-property:none}
 .seg button:focus-visible,.btn:focus-visible,.ib:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
 @media (max-width:600px){.seg button{min-height:38px}.seg.nav button{min-height:42px}}
 /* account & sync controls */
@@ -471,7 +473,8 @@ button.chip.on{background:var(--ink);color:var(--paper)}
 }
 /* a phone held upright: the lobby gives the stage whatever the short list leaves over */
 @media (max-width:900px) and (orientation:portrait){
-  #app[data-screen="lobby"]{grid-template-rows:minmax(calc(var(--k)*170px),1fr) fit-content(66%)}
+  /* Do not shrink the board when the lobby fills. Scroll the player list. */
+  #app[data-screen="lobby"]{grid-template-rows:minmax(calc(var(--k)*170px),36%) minmax(0,1fr)}
 }
 /* a phone on its side, or a very short window: controls in a column on the left, the stage beside it at full height */
 @media (max-height:520px) and (orientation:landscape){
@@ -1714,18 +1717,22 @@ const PH = { create: 'Create a party', join: 'Join a party', me: 'Profile', shop
 /* The title screen: the logo drops onto the grid, then the two ways into a game with friends, and the rest underneath. */
 function titleFoot() {
   const f = $('#tfoot'); if (!f) return;
-  f.innerHTML = '<button class="sme" data-a="go" data-v="me" aria-label="Your character">' + ava(F.look, PC[0], 40) + '<b>' + esc(F.name || 'You') + '</b></button><button class="pill" data-a="go" data-v="shop" aria-label="Your coins. Open the shop"><i class="coin"></i>' + fmt(wallet.coins) + '</button>' +
+  const html = '<button class="sme" data-a="go" data-v="me" aria-label="Your character">' + ava(F.look, PC[0], 40) + '<b>' + esc(F.name || 'You') + '</b></button><button class="pill" data-a="go" data-v="shop" aria-label="Your coins. Open the shop"><i class="coin"></i>' + fmt(wallet.coins) + '</button>' +
     (wallet.boxes ? '<button class="pill hot" data-a="loot" data-v="go" aria-label="Spin a loot box">' + lootImg(18) + wallet.boxes + '</button>' : '') + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button>';
+  patchHTML(f, html);
 }
 function showTitle(back) {
-  const t = $('#title'); t.hidden = false; t.className = 'bg-paper' + (back ? ' in' : '');
+  const t = $('#title'); t.hidden = false; t.className = 'bg-paper' + (back ? ' settled' : '');
   t.innerHTML = '<div class="tbox">' + logo('hero') + '<p class="ttag">Buy the city. Bankrupt your friends.</p>' +
     '<div class="tgo"><button class="btn go" data-a="go" data-v="create">Create party</button><button class="btn go" data-a="go" data-v="join">Join party</button></div>' +
     '<div class="tmore"><button class="btn" data-a="go" data-v="me">Profile</button><button class="btn hotb" data-a="go" data-v="shop">Shop</button></div>' +
     '<div class="tfoot" id="tfoot"></div></div>';
   titleFoot();
 }
-function hideTitle() { const t = $('#title'); if (t.hidden) return; t.classList.remove('in'); t.classList.add('out'); setTimeout(() => { if (t.classList.contains('out')) { t.hidden = true; t.innerHTML = ''; } }, still ? 0 : 430); }
+function hideTitle() {
+  const t = $('#title'); if (t.hidden) return;
+  t.hidden = true; t.className = 'bg-paper'; t.replaceChildren();
+}
 /* the page's parts slide in one after another when you arrive on it */
 function enter() {
   /* Do not fade/reanimate every existing button on a page change.
@@ -1783,7 +1790,8 @@ function renderHome(soft=false) {
   if (F.page !== 'me' && F.page !== 'shop') h += '<div class="strip"><button class="sme" data-a="page" data-v="me" aria-label="Your character">' + ava(F.look, PC[0], 40) + '<b id="sname">' + esc(F.name || 'You') + '</b></button><button class="pill" data-a="page" data-v="shop" aria-label="Your coins. Open the shop"><i class="coin"></i>' + fmt(wallet.coins) + '</button>' + (wallet.boxes ? '<button class="pill hot" data-a="loot" data-v="go" aria-label="Spin a loot box">' + lootImg(18) + wallet.boxes + '</button>' : '') + '</div>';
     /* Preserve existing DOM nodes on option/filter changes. Rebuild the 3D scene
      only when the displayed subject changes, not whenever a button is pressed. */
-  if (soft) patchHTML($('#side'),h); else $('#side').innerHTML = h;
+  const side = $('#side');
+  if (side.childNodes.length) patchHTML(side,h); else side.innerHTML=h;
   const sceneKey = JSON.stringify([F.page, F.look, F.pet, F.sel]);
   if (sceneKey !== lastHomeSceneKey) homeScene();
   lastHomeSceneKey = sceneKey;
@@ -2053,7 +2061,12 @@ document.addEventListener('click', async e => {
   const a = el.dataset.a, i = +el.dataset.i;
   Snd('tap'); Snd.music(!!settings.music);
   switch (a) {
-    case 'page': F.page = el.dataset.v; F.sel = null; renderHome(); enter(); break;
+    case 'page': {
+      if (F.page === el.dataset.v) break;
+      F.page = el.dataset.v; F.sel = null;
+      renderHome(true); $('#side').scrollTop=0;
+      break;
+    }
     case 'seg': { const v = el.dataset.v, k = el.dataset.k; F[k] = /^\d+$/.test(v) ? +v : v;
       const group = el.closest('.seg');
       if (group) group.querySelectorAll('button').forEach(b => {
@@ -2065,7 +2078,7 @@ document.addEventListener('click', async e => {
     }
     case 'wtab': F.wtab = el.dataset.v; F.sel = null; rerender(); break;
     case 'cat': F.cat = el.dataset.v;
-      if(!modal && F.page === 'me') { const body=$('.catbody'); if(body) { const next=document.createElement('div'); next.innerHTML=styleHTML(PC[0]); const n=next.querySelector('.catbody'); if(n) body.innerHTML=n.innerHTML; const bar=el.closest('.seg'); if(bar) bar.querySelectorAll('button').forEach(b => { const on=b.dataset.v===F.cat; b.classList.toggle('on',on); b.setAttribute('aria-pressed',String(on)); }); } }
+      if(!modal && F.page === 'me') { const body=$('.catbody'); if(body) { const next=document.createElement('div'); next.innerHTML=styleHTML(PC[0]); const n=next.querySelector('.catbody'); if(n) patchHTML(body,n.innerHTML); const bar=el.closest('.seg'); if(bar) bar.querySelectorAll('button').forEach(b => { const on=b.dataset.v===F.cat; b.classList.toggle('on',on); b.setAttribute('aria-pressed',String(on)); }); } }
       else rerender();
       break;
     case 'filt': F.filt = el.dataset.v; F.sel = null; rerender(); break;
@@ -2129,7 +2142,7 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'mute': { const k = el.dataset.k; settings[k] = !settings[k]; applySettings(); Snd.music(!!settings.music); Snd('tap'); document.querySelectorAll('[data-a=mute][data-k=' + k + ']').forEach(b => { b.classList.toggle('off', !settings[k]); b.setAttribute('aria-pressed', String(!!settings[k])); }); break; }
-    case 'go': F.page = el.dataset.v; F.sel = null; renderHome(); hideTitle(); enter(); break;
+    case 'go': F.page = el.dataset.v; F.sel = null; renderHome(true); hideTitle(); $('#side').scrollTop=0; break;
     case 'title': showTitle(true); break;
     case 'admin': { const f = $('#f-admin'); if (adminOk() && f && f.value === '123') { settings.admin = true; applySettings(); refreshModal(); toast('Admin tools unlocked.'); } else toast('That code is not right.'); break; }
     case 'adm': { if (!settings.admin || !adminOk()) break; const v = el.dataset.v;
