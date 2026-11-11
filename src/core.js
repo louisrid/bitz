@@ -2,13 +2,51 @@
    the board rules (the same engine the page uses to draw and to play offline), dice, timers, coins, the shop and loot boxes.
    Pure functions: the worker loads and saves the data around them. */
 import '../public/engine.js';
-import { ITEMS, HAIRS } from './shop.js';
+import { ITEMS, HAIRS, EXCLUSIVES, BOX_PRICE, GOLD_RATE, ECONOMY_VERSION, OFFLINE_CAP_MS } from './shop.js';
 import { BOT_NAMES, BOT_LOOKS, isBot } from './bots.js';
 
 const E = globalThis.Engine;
-export const BOX_PRICE = 8000;
-const LOOT = [['coins', 40], [0, 32], [1, 18], [2, 8], [3, 2]];
-const rarity = p => (p <= 5000 ? 0 : p <= 15000 ? 1 : p <= 50000 ? 2 : 3);
+export { BOX_PRICE, GOLD_RATE };
+/* Server-owned time economy. One migration per account resets gold, never inventory.
+   Up to ten minutes of earnings are catch-up eligible after an offline spell. */
+export function accrue(w, now = Date.now()) {
+  if (w.economy !== ECONOMY_VERSION) {
+    w.economy = ECONOMY_VERSION;
+    w.coins = 1000000;
+    w.earnAt = now;
+    return true;
+  }
+  if (!Number.isFinite(w.earnAt) || w.earnAt > now) { w.earnAt = now; return true; }
+  const elapsed = Math.min(OFFLINE_CAP_MS, Math.max(0, now - w.earnAt));
+  const seconds = Math.floor(elapsed / 1000);
+  if (!seconds) return false;
+  w.coins = Math.min(1e12, (Math.max(0, Math.floor(w.coins)) || 0) + seconds * GOLD_RATE);
+  w.earnAt = now - (elapsed % 1000);
+  return true;
+}
+export function swag(w) {
+  const score = id => {
+    const it = ITEMS[id];
+    if (!it || !id || !(it[2] === 0 || w.own?.includes(id))) return 0;
+    if (it[3] === 'Mythical') return 3350;
+    if (it[3] === 'Legendary') return 1350;
+    const p = it[2];
+    return p <= 0 ? 0 : p <= 35000 ? 24 : p <= 100000 ? 70 : p <= 300000 ? 160 : p <= 700000 ? 350 : p <= 1200000 ? 600 : 950;
+  };
+  const l = w.look || {};
+  const equipped = score(l.outfit) + score(l.hat) + score(l.acc) + score(l.bg) + score(w.pet);
+  const collection = Math.min(1750, new Set((w.own || []).filter(id => ITEMS[id])).size * 17);
+  return Math.max(-100, Math.min(9999, -100 + equipped + collection));
+}
+function rollLoot(w) {
+  const fresh = EXCLUSIVES.filter(id => !w.own.includes(id));
+  const pool = fresh.length ? fresh : EXCLUSIVES;
+  /* Mythicals remain rare until the collector has earned their way through the legendaries. */
+  const weighted = pool.map(id => [id, ITEMS[id][3] === 'Mythical' ? 1 : 12]);
+  let r = rnd() * weighted.reduce((total, p) => total + p[1], 0);
+  for (const [id, weight] of weighted) if ((r -= weight) < 0) return { item: id, rarity: ITEMS[id][3], duplicate: !fresh.length };
+  return { item: pool[0], rarity: ITEMS[pool[0]][3], duplicate: !fresh.length };
+}
 const int = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.floor(Number(v) || 0)));
 const rnd = () => { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; };
 const ctx = now => ({ now: now, rand: rnd, die: () => 1 + Math.floor(rnd() * 6) });
@@ -18,7 +56,7 @@ const refuse = m => { throw new Refused(m); };
 
 /* ---------- accounts ---------- */
 export function freshWallet() {
-  return { v: 3, t: 0, coins: 10000, boxes: 1, own: [], claimed: [], games: {}, gb: {}, played: 0, wins: 0, soloAt: 0,
+  return { v: 3, economy: ECONOMY_VERSION, earnAt: Date.now(), t: 0, coins: 1000000, boxes: 1, own: [], friends: [], incoming: [], outgoing: [], claimed: [], games: {}, gb: {}, played: 0, wins: 0, soloAt: 0,
     stats: { earned: 0, rent: 0, bought: 0, kos: 0, best: 0, opened: 0 }, name: '', look: { skin: 0, hair: 'short', hc: 0, outfit: 'tee', hat: '', acc: '', bg: 'paper' }, pet: '' };
 }
 const owns = (w, id) => !!ITEMS[id] && (ITEMS[id][2] === 0 || w.own.indexOf(id) >= 0);
@@ -33,15 +71,6 @@ export function setProfile(w, b) {
   const pet = typeof b.pet === 'string' ? b.pet : w.pet;
   w.pet = pet && owns(w, pet) && ITEMS[pet][0] === 'pet' ? pet : '';
 }
-function rollLoot(w) {
-  let r = rnd() * 100, tier = 'coins';
-  for (const q of LOOT) { if (r < q[1]) { tier = q[0]; break; } r -= q[1]; }
-  if (tier === 'coins') return { coins: [2500, 3500, 5000, 7500][Math.floor(rnd() * 4)] };
-  const pool = Object.keys(ITEMS).filter(id => ITEMS[id][2] > 0 && rarity(ITEMS[id][2]) === tier), fresh = pool.filter(id => !owns(w, id));
-  if (fresh.length) return { item: fresh[Math.floor(rnd() * fresh.length)] };
-  const d = pool[Math.floor(rnd() * pool.length)];
-  return { coins: Math.max(500, Math.round(ITEMS[d][2] * 0.4 / 500) * 500), dupe: d };
-}
 export function shop(w, what, item) {
   if (what === 'buy') {
     const it = ITEMS[item]; if (!it || it[2] <= 0) refuse('That is not for sale.');
@@ -53,7 +82,7 @@ export function shop(w, what, item) {
   if (what === 'open') {
     if (w.boxes < 1) refuse('No loot boxes left.');
     const pz = rollLoot(w); w.boxes--; w.stats.opened++;
-    if (pz.item) w.own.push(pz.item); else w.coins += pz.coins;
+    if (pz.item && !owns(w, pz.item)) w.own.push(pz.item);
     return { prize: pz };
   }
   if (what === 'reset') { const f = freshWallet(); Object.keys(w).forEach(k => delete w[k]); Object.assign(w, f); return {}; }
