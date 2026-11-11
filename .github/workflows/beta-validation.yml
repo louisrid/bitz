@@ -26,3 +26,5 @@ jobs:
           node --check public/engine.js
       - name: Beta smoke tests
         run: node tests/beta-smoke.mjs
+      - name: Server, persistent storage and cross-device integration
+        run: node tests/integration.mjs
