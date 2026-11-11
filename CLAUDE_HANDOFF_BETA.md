@@ -1,5 +1,22 @@
 # Stakkz beta handoff for Claude — 11 November 2026
 
+## LATEST: GAMEPLAY FINALISATION PART 1, IMPLEMENTED ON BETA
+
+This section supersedes earlier gameplay mode and player-count descriptions. **Keep this implementation when doing Part 2, which is focused on polish of the existing 3D world. Do not rebuild.**
+
+- The authoritative shared engine is `public/engine.js`; validation is `src/core.js`, server time ticks are `server.js`, and AI decisions are `src/bots.js`. `public/index.html` remains the existing 3D client.
+- 2–6 seats, any viable human/0–4 Easy/Medium/Hard bot combination. Added a distinct sixth colour. Lobby size and all client state validators updated.
+- Modes: QUICK 25m, **FAST FUN 35m default**, LONG 45m; Classic remains available. Automatic turn timers: 2 players 50s, 3 45s, 4 40s, 5 35s, 6 30s. The only optional Advanced mode setting is the turn timer. Existing UI sizing is unchanged.
+- **Paid starting portfolios:** all players initially have £1,500 before buying 3 randomly selected, fairly balanced deeds; with 5–6 players, 2 deeds. Deduct each purchase from starting cash. No changes to board, original property price/rent tables, utility or station base rents.
+- Hotels are now buyable after 3 houses per property. The existing hotel level (5) and original rent table remain, so the fourth build jumps 3→5. Downgrading jumps 5→3. Updated net worth, bankruptcy refunds, rent tooltip, build buttons and bot ROI logic accordingly.
+- Four existing stations support **STAY** or **TRAVEL** after normal rent/purchase/auction resolution. Destination is one of the other three stations, no chained travel, destination rent or Start bonus. Depart from owned station free; depart from unowned station £50 to bank; depart from another player's station £50 to the owner **after ordinary landing rent**. Travelling ends the turn. Bots consider fares/destinations. Existing 3D board temporarily displays persistent blue rings over eligible destinations and those tiles can be tapped. The chooser supplies clear named buttons.
+- Auctions now use a 10-second per-bid timer with visible countdown. At the last 5 minutes the server activates FINAL CHAOS once, clears pending trades, doubles ordinary rent and broadcasts a message. The indicator is absolutely positioned over the 3D stage to avoid shifting the desktop/mobile toolbar.
+- At timed deadline the **server** finalises the game even if players disconnect, are trading, deciding a purchase, or are in auction. Leading valid auction bid is settled, unpaid debts reduce debtor's final net value, and rankings use cash + deed value + paid building value. The last surviving player still wins immediately. Normal rewards, stats, rematches and persistence remain.
+- New tests: `tests/gameplay-finalisation.mjs` covers 2–6, paid portfolios, modes, timer adaptation, server action validation for travel, ownership fees, no chaining, early hotel and downgrade, doubled rent, chaos trade cancellation, deadlines/winner payouts and bot station decisions. `tests/integration.mjs` now also tests a six-seat HTTP match; `tests/browser-smoke.mjs` now checks selected Fast Fun mode and stable 3D board dimensions when Advanced is opened; the existing 1800-step bot simulations handle the new travel stage.
+- The complete new game rules and client inline JS **passed direct V8 execution/syntax verification** in this ChatGPT session. GitHub Actions were queued behind numerous prior auto-deploy commits at the time of this update; do not claim all latest CI jobs passed until their results are checked. Existing pre-Part-1 five-job workflow was green.
+- Production `main` is untouched; all source changes are on `beta-ui-bots-account-sync-20261111`. No new infrastructure was created. Render Free PostgreSQL still expires **11 December 2026**, has no backups, and needs a production-grade replacement before shipping.
+- For Part 2: preserve all the above rules, account/session code, stable Profile-width left panel, existing board and scene, responsive controls, and working game actions. Aim for smoother 3D visuals and polish without camera/layout jumps or rewriting the core systems.
+
 ## Critical status
 
 **Preserve this work. DO NOT overwrite files from an older Claude Artifact or merge the branch without the user's approval.**
