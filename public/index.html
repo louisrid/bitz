@@ -1265,7 +1265,7 @@ function styleChanged() {
 function rerender() {
   if (lootSt && lootSt.phase === 'spin') return;
   if (modal && (modal.kind === 'wardrobe' || modal.kind === 'loot')) refreshModal();
-  else if ($('#app').dataset.screen === 'home') renderHome();
+  else if ($('#app').dataset.screen === 'home') renderHome(true);
   else if (V && V.phase !== 'lobby' && !busy) renderActions();
 }
 const capsReady = (async function () {
@@ -1735,7 +1735,35 @@ function homeScene() {
   if (card) B3.show(t.look, t.pet, PC[0]); else B3.show(null);
   $('#bd').className = 'bg-' + (card ? (sel && ITEMS[sel][0] === 'bg' ? sel : bgOf(F.look)) : 'paper');
 }
-function renderHome() {
+/* Diff dynamic interface markup in place instead of destroying every control.
+   This prevents the white blink on swatches, tabs, shop filters and modal settings.
+   Existing input focus and scroll position remain intact. */
+function patchHTML(root, html) {
+  const next = document.createElement('template'); next.innerHTML = html;
+  const patchNode = (old, fresh) => {
+    if (old.nodeType !== fresh.nodeType ||
+        (old.nodeType === 1 && old.tagName !== fresh.tagName)) {
+      old.replaceWith(fresh.cloneNode(true));return;
+    }
+    if (old.nodeType === 3) {if (old.nodeValue !== fresh.nodeValue) old.nodeValue=fresh.nodeValue;return;}
+    if (old.nodeType !== 1) return;
+    [...old.attributes].forEach(a=>{if(!fresh.hasAttribute(a.name)) old.removeAttribute(a.name);});
+    [...fresh.attributes].forEach(a=>{if(old.getAttribute(a.name)!==a.value) old.setAttribute(a.name,a.value);});
+    if (old.tagName==='INPUT' && document.activeElement!==old && old.value!==fresh.value) old.value=fresh.value;
+    patchChildren(old,fresh);
+  };
+  const patchChildren = (old, fresh) => {
+    const nodes=[...fresh.childNodes];
+    nodes.forEach((n,i)=>{
+      const prev=old.childNodes[i];
+      if(!prev) old.appendChild(n.cloneNode(true));
+      else patchNode(prev,n);
+    });
+    while(old.childNodes.length>nodes.length) old.removeChild(old.lastChild);
+  };
+  patchChildren(root,next.content);
+}
+function renderHome(soft=false) {
   F.wtab = F.page === 'shop' ? 'shop' : 'style';
   $('#app').dataset.page = F.page;
   const off = Net.ready && !Net.db ? '<p class="note">Parties need a connection to the game server. Play works without one.</p>' : Net.ready && !Net.canWrite ? '<p class="note">Your access is view-only. Ask the owner of this page to make you a Contributor.</p>' : '';
@@ -1748,7 +1776,7 @@ function renderHome() {
   else h += shopHTML(PC[0]);
   /* who you are and what you have, always one tap from Me, the shop and your loot boxes */
   if (F.page !== 'me' && F.page !== 'shop') h += '<div class="strip"><button class="sme" data-a="page" data-v="me" aria-label="Your character">' + ava(F.look, PC[0], 40) + '<b id="sname">' + esc(F.name || 'You') + '</b></button><button class="pill" data-a="page" data-v="shop" aria-label="Your coins. Open the shop"><i class="coin"></i>' + fmt(wallet.coins) + '</button>' + (wallet.boxes ? '<button class="pill hot" data-a="loot" data-v="go" aria-label="Spin a loot box">' + lootImg(18) + wallet.boxes + '</button>' : '') + '</div>';
-  $('#side').innerHTML = h; homeScene(); titleFoot();
+  if (soft) patchHTML($('#side'),h); else $('#side').innerHTML = h; homeScene(); titleFoot();
 }
 function renderLobby() {
   const s = V, host = me === 0, open = Math.max(0, s.max - s.players.length);
@@ -1888,7 +1916,7 @@ function openModal(kind, render, opt) {
   modal = Object.assign({ kind: kind, render: render }, opt || {});
   const m = $('#modal'); m.className = 'card' + (modal.flip ? ' flip' : ''); m.style.animation = ''; inM = true; try { m.innerHTML = render(); } finally { inM = false; } $('#veil').hidden = false; m.scrollTop = 0;
 }
-function refreshModal() { if (modal) { const m = $('#modal'), y = m.scrollTop; m.className = 'card'; m.style.animation = 'none'; inM = true; try { m.innerHTML = modal.render(); } finally { inM = false; } m.scrollTop = y; } }
+function refreshModal() { if (modal) { const m = $('#modal'), y = m.scrollTop; m.className = 'card'; m.style.animation = 'none'; inM = true; try { patchHTML(m, modal.render()); } finally { inM = false; } m.scrollTop = y; } }
 function closeModal() { const f = modal && modal.onClose; modal = null; $('#veil').hidden = true; $('#modal').style.animation = ''; if (f) f(); }
 function forcedModals() {
   const s = V;
@@ -2020,7 +2048,7 @@ document.addEventListener('click', async e => {
         const on = b.dataset.v === v; b.classList.toggle('on',on); b.setAttribute('aria-pressed',String(on));
       });
       /* Bot count changes whether difficulty selection is visible. Re-render only then. */
-      if(k === 'bots') renderHome();
+      if(k === 'bots') renderHome(true);
       break;
     }
     case 'wtab': F.wtab = el.dataset.v; F.sel = null; rerender(); break;
