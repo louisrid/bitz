@@ -526,7 +526,7 @@
         var fee = departureOwner === pi ? 0 : 50;
         need(p.cash >= fee, 'You need £50 to travel');
         if (fee) xfer(s, pi, departureOwner >= 0 ? departureOwner : -1, fee);
-        s.fx.push({t:'move',p:pi,from:p.pos,to:i,dir:0});
+        s.fx.push({t:'travel',p:pi,from:p.pos,to:i,fee:fee});
         log(s,pi,p.name+' travelled to '+T[i].n+(fee?' for £50.':' for free.'));
         p.pos = i; s.station = -1; s.again = false;
         endTurn(s,ctx); break;
