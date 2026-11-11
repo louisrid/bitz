@@ -1478,7 +1478,7 @@ const B3 = (function () {
      buildings. Everyone else outside a match is drawn from what the server relays, eased between updates. */
   const worldG = new THREE.Group(); worldG.visible = false; scene.add(worldG);
   const worldHidden=new Map();
-  const socialEnvironment=STAKKZ_BUILD_WORLD(THREE,worldG);
+  const socialEnvironment=STAKKZ_BUILD_WORLD(THREE,worldG); api._s = scene; api._wg = worldG; api._r = renderer;
   const colliders = [];
   setTimeout(() => {   // solid things in the city: anything taller than a person with a modest footprint
     city.updateMatrixWorld(true);
@@ -1564,7 +1564,7 @@ const B3 = (function () {
       animate(o, o.g.userData, o.sp, o.y > 0.05, now, t);
     });
     // a third-person camera behind and above you: drag to look around, pinch or scroll to zoom
-    const tx=m?m.x:0,ty=(m?m.y*.6:0)+2.8,tz=m?m.z:0,pitch=Math.max(.12,Math.min(1.2,el-.3)),dist=24*zoom;
+    const tx=m?m.x:0,ty=(m?m.y*.6:0)+2.8,tz=m?m.z:0,pitch=Math.max(.12,Math.min(1.2,el-.42)),dist=33*zoom;
     cT.set(cT.x + (tx - cT.x) * Math.min(1, dt * 10), cT.y + (ty - cT.y) * Math.min(1, dt * 10), cT.z + (tz - cT.z) * Math.min(1, dt * 10));
     cam.position.set(cT.x + Math.sin(az) * Math.cos(pitch) * dist, cT.y + Math.sin(pitch) * dist, cT.z + Math.cos(az) * Math.cos(pitch) * dist);
     cam.lookAt(cT); cam.aspect = rc.width / rc.height; cam.updateProjectionMatrix();
@@ -1728,6 +1728,8 @@ async function api(path, body) {
   if (j.wallet) { setWallet(j.wallet); if (j.seal) store.set('stakkz-seal', { wallet: j.wallet, seal: j.seal }); }   // the sealed copy lets the server give the account back if it ever loses it
   return j;
 }
+function goldPaint() { const e = document.getElementById('wgold'); if (e && wallet) e.textContent = Math.floor(wallet.coins || 0).toLocaleString('en-GB'); }
+setInterval(goldPaint, 500);
 function setWallet(w) { wallet = newWallet(Object.assign({}, w, { v: 3 })); store.set('bigrent-wallet', Object.assign({}, wallet, { name: F.name, look: F.look, pet: F.pet })); }
 const refreshAcct = () => api('me').then(rerender, () => {});
 /* name and look are sent to the server a moment after they change; a game played on this device reports what it earned */

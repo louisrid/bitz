@@ -59,3 +59,6 @@ html.fopen #fside{display:flex!important}
 #wbar .wstat:last-of-type{display:none}
 #app[data-screen="home"] #wui .wtop{top:73px}
 @media(max-width:900px){#wbar{padding-right:0;top:53px}#wbar .wstat:has(#wgold){font-size:17px;top:7px;right:7px;padding:8px 9px}#app[data-screen="home"] #wui .wtop{top:103px}}
+
+/* The 3D canvas sits behind the app layer: nothing in the world view may paint over it. */
+#app[data-screen="home"],#app[data-screen="home"] #stage,#app[data-page=world] #stage{background:none!important}
