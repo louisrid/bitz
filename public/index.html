@@ -457,6 +457,19 @@ button.chip.on{background:var(--ink);color:var(--paper)}
 #app,#stage,#side,#hud{transition-property:none}
 .seg button:focus-visible,.btn:focus-visible,.ib:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
 @media (max-width:600px){.seg button{min-height:38px}.seg.nav button{min-height:42px}}
+/* gameplay: compact, consistent controls with no panel-width changes */
+.seg.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(var(--k)*7px)}
+.seg.modes button{min-width:0;min-height:42px;white-space:normal}
+.advanced{border:var(--bw) solid var(--ink);border-radius:var(--r);padding:calc(var(--k)*10px);background:var(--mist)}
+.advanced summary{cursor:pointer;font:400 max(14px,calc(var(--kf)*16px))/1.2 var(--ui)}
+.advanced[open]{display:grid;gap:var(--gap)}
+.station-choices{display:grid;grid-template-columns:1fr;gap:calc(var(--k)*9px)}
+.station-choices .btn{text-align:center;min-height:44px;white-space:normal}
+.chaos-tag{background:var(--hot);border:2px solid var(--ink);border-radius:10px;padding:5px 7px;font:700 12px/1.1 var(--text);white-space:nowrap}
+.chaos-tag[hidden]{display:none!important}
+.seg.tradepeople{display:flex;flex-wrap:wrap}
+.seg.tradepeople button{flex:1 1 28%;min-width:90px}
+@media (max-width:600px){.chaos-tag{font-size:10px;padding:4px}.seg.modes button{min-height:44px}}
 /* account & sync controls */
 .account-box{display:grid;gap:calc(var(--k)*10px);border:var(--bw) solid var(--ink);border-radius:var(--r);padding:calc(var(--k)*13px);background:var(--mist)}
 .account-box h3{font-size:max(14px,calc(var(--kf)*20px))}
@@ -2046,6 +2059,20 @@ function playerModal(i) {
   });
 }
 function logModal() { openModal('log', () => '<div class="mhead"><h2>What just happened</h2>' + xBtn() + '</div>' + V.log.slice().reverse().map(e => '<div class="prow" style="--g:' + (e.p >= 0 ? PC[e.p] : '#000') + '"><i style="border-radius:50%"></i><span class="fine">' + esc(e.m) + '</span></div>').join('')); }
+function stationModal() {
+  if (!V || V.stage !== 'travel' || me !== E.cur(V) || V.station < 0) return;
+  const source=V.station, fee=E.owner(V,source)===me?0:50, can=V.players[me].cash>=fee;
+  if (B3.ok) E.RAILS.filter(i=>i!==source).forEach(i=>B3.flash(i,'#3FA9FF'));
+  openModal('station', () =>
+    '<div class="mhead"><h2>Station fast travel</h2>' + xBtn() + '</div>' +
+    '<p class="fine">From ' + esc(T[source].n) + '. Rent and purchase have already been resolved. ' +
+    (fee ? 'Travel costs £50 ' + (E.owner(V,source)>=0?'paid to the station owner.':'paid to the bank.') : 'You own this station, so travel is free.') +
+    ' You collect no Start bonus or destination rent.</p>' +
+    '<div class="station-choices">' + E.RAILS.filter(i=>i!==source).map(i =>
+      '<button class="btn' + (can?' blue':'') + '" data-a="travel" data-i="' + i + '"' + (can?'':' disabled') + '>' +
+      esc(T[i].n) + ' · ' + (fee?money(fee):'Free') + '</button>').join('') + '</div>' +
+    '<button class="btn go big" data-a="stationstay">Stay here</button>');
+}
 function tradeModal() {
   if (V && E.chaos(V,Date.now()+skew)) { toast('Trading closes during FINAL CHAOS.'); return; }
   const s = V, others = s.order.filter(i => i !== me); TB = { to: others[0], gc: 0, tc: 0, gp: [], tp: [] };
@@ -2076,7 +2103,7 @@ function winnerModal() {
       (mode === 'online' && rematch ? '<p class="fine c">' + (rematch.phase === 'lobby' ? esc(rematch.players[0] ? rematch.players[0].name : 'Someone') + ' is setting up the next game.' : 'The others have started the next game.') + '</p>' : '');
   });
 }
-const RULES = [['star', 'Goal', 'Be the richest player when the clock runs out. In Classic, be the last one standing.'], ['arrow', 'Your turn', 'Roll and move. Buy the street you land on, or pay rent to whoever owns it. Doubles roll again, and three in a row means Jail. On a keyboard, Space does your main move. The camera closes in on whoever is rolling and moving; the Follow cam button switches that off.'], ['coins', 'Auctions', 'Pass on a street and it goes to auction. Everyone bids in turn, and the last bidder left wins it.'], ['home', 'Build', 'Own every street in a colour to double its rent, then add houses and a hotel. Build evenly across the set.'], ['cash', 'Short on cash', 'Sell houses and streets back to the bank for half price, or strike a trade. If you still cannot pay, you are out.'], ['bars', 'Jail', 'Roll doubles, pay £50 or play a card to get out. After three tries you pay and move.'], ['swap', 'Trades', 'On your turn, offer any player cash and streets. They accept or reject.'], ['gift', 'Coins and loot boxes', 'Coins come from playing: buying, rent, sets, cards and Coin Rush. Spend them in the shop. You get a loot box for every game you finish, and more turn up along the way.']];
+const RULES = [['star', 'Goal', 'Be the richest player when the clock runs out. In Classic, be the last one standing.'], ['arrow', 'Your turn', 'Roll and move. Buy the street you land on, or pay rent to whoever owns it. Doubles roll again, and three in a row means Jail. On a keyboard, Space does your main move. The camera closes in on whoever is rolling and moving; the Follow cam button switches that off.'], ['coins', 'Auctions', 'Pass on a street and it goes to auction. Everyone bids in turn, and the last bidder left wins it.'], ['home', 'Build', 'Own every street in a colour to double rent. Build evenly: three houses per street, then one hotel.'], ['cash', 'Short on cash', 'Sell houses and streets back to the bank for half price, or strike a trade. If you still cannot pay, you are out.'], ['bars', 'Jail', 'Roll doubles, pay £50 or play a card to get out. After three tries you pay and move.'], ['swap', 'Trades', 'Offer only cash and streets you own, for immediate acceptance or rejection. Trading closes in Final Chaos.'], ['arrow', 'Station travel', 'After landing at a station and paying rent or buying it, stay or travel to any other station. Travel is free from your own station, otherwise £50 to the bank or owner. No Start bonus or destination rent.'], ['cash', 'Final Chaos', 'The final 5 minutes double ordinary rent and stop trading. Highest net worth wins when time runs out.'], ['gift', 'Coins and loot boxes', 'Coins come from playing: buying, rent, sets, cards and Coin Rush. Spend them in the shop. You get a loot box for every game you finish, and more turn up along the way.']];
 function rulesModal() { openModal('rules', () => '<div class="mhead">' + logo('sm') + xBtn() + '</div><h2>How to play</h2>' + RULES.map(r => '<div class="rule">' + ico(r[0], 24) + '<b>' + r[1] + '</b><p>' + r[2] + '</p></div>').join('') + '<button class="btn go" data-a="close">Got it</button>'); }
 function settingsModal() {
   F.reset = false;
@@ -2262,6 +2289,7 @@ document.addEventListener('click', async e => {
     case 'bid': act({ t: 'bid', amt: +el.dataset.n }); break;
     case 'viewauction': auctionModal(); break;
     case 'stations': stationModal(); break;
+    case 'stationstay': closeModal(); act({t:'stay'}); break;
     case 'travel': if (V && V.stage === 'travel') { act({t:'travel',tile:i}); closeModal(); } break;
     case 'roll': case 'payJail': case 'useCard': case 'skip': case 'end': case 'stay': case 'accept': case 'reject': case 'cancel': case 'bankrupt': case 'pass': act({ t: a }); break;
   }
