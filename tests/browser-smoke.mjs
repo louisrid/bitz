@@ -72,8 +72,8 @@ try {
   await pc.locator('#side [data-a=seg][data-k=bots][data-v="2"]').click();
   await pc.locator('#side [data-a=seg][data-k=difficulty][data-v="hard"]').click();
   await pc.locator('#side [data-a=create]').click();
-  await pc.waitForFunction(()=>document.querySelectorAll('#side .who').length>=3);
-  assert.equal(await pc.locator('#side .who').count(),3);
+  await pc.waitForFunction(()=>document.querySelectorAll('#side .who:not(.empty)').length>=3);
+  assert.equal(await pc.locator('#side .who:not(.empty)').count(),3);
   await pc.locator('#side [data-a=start]').click();
   await pc.waitForSelector('#app[data-screen=game]',{timeout:20000});
   console.log('Desktop modal, party, AI opponents and start-game UI passed.');
