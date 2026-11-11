@@ -27,6 +27,11 @@ const css=`
 #sw-help{position:absolute;bottom:12px;left:14px;background:#14283be3;border-radius:10px;padding:10px;pointer-events:none}
 #sw-alert{position:absolute;bottom:65px;left:14px;background:#14283b;padding:10px;border-radius:10px}
 #sw-root input{padding:10px;background:white;color:black;border-radius:8px;max-width:88%}
+#sw-combat{position:absolute;bottom:65px;right:232px;background:#172e42e9;border:2px solid #91eea3;border-radius:14px;padding:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:400px}
+#sw-combat button.active{background:#ffdc65}
+#sw-hp{white-space:nowrap;min-width:100px}
+#sw-crosshair{position:absolute;top:50%;left:calc((100% - 216px)/2);transform:translate(-50%,-50%);font-size:28px;color:#fff;pointer-events:none;text-shadow:0 0 4px #000}
+#sw-combat .sw-weapon{font-size:12px;padding:8px}
 @media(max-width:640px){#sw-side{width:145px;padding:8px}#sw-header{right:147px;top:5px;left:5px}#sw-menu{top:145px;left:5px;width:calc(100vw - 155px);padding:9px}#sw-profile{right:145px}#sw-profile-box{top:5px;left:5px;right:5px;padding:10px;max-height:52%}#sw-help{font-size:11px;max-width:48vw}}
 `;
 const style=document.createElement('style');style.textContent=css;document.head.appendChild(style);
@@ -36,13 +41,14 @@ const root=document.createElement('div');root.id='sw-root';root.innerHTML=`
 <aside id="sw-side"><h2>Online players</h2><div id="sw-roster">Connecting...</div><h3>Friend requests</h3><div id="sw-requests"></div><h3>Friends</h3><div id="sw-friends"></div></aside>
 <div id="sw-menu" hidden></div>
 <div id="sw-profile" hidden><canvas id="sw-profile-canvas"></canvas><div id="sw-profile-box"></div></div>
-<div id="sw-help">WASD move · Arrow keys turn camera · Space jump · Click a player to inspect</div><div id="sw-alert" hidden></div>`;
+<div id="sw-combat"><span id="sw-hp">Health 100/100</span><button class="sw-weapon active" data-sw="weapon" data-id="blaster">1 · Blaster</button><button class="sw-weapon" data-sw="weapon" data-id="pulse">2 · Pulse</button><button data-sw="shoot">Shoot (F)</button></div><div id="sw-crosshair">+</div>
+<div id="sw-help">WASD walk · Arrow keys rotate camera · Space jump · F shoot · 1/2 switch weapons · Click a character for profile</div><div id="sw-alert" hidden></div>`;
 document.body.appendChild(root);
 const $w=id=>document.getElementById(id);
 const escapeHTML=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const gold=n=>Math.max(0,Math.floor(n)).toLocaleString('en-GB');
 let players=new Map(),self='',ws=null,tab='',filter='outfit',profileId='',friends={friends:[],incoming:[],outgoing:[]},keys=new Set(),yaw=0,vy=0,last=performance.now(),lastSend=0,modelScene,renderer,cam,profScene,profRenderer,profCam,profModel,position=new THREE.Vector3();
-let count=0;
+let count=0, selectedWeapon='blaster',shotFX=[];
 function alertMsg(t){$w('sw-alert').textContent=t;$w('sw-alert').hidden=false;clearTimeout(alertMsg.timer);alertMsg.timer=setTimeout(()=>$w('sw-alert').hidden=true,3000)}
 function request(type,rest={}){if(ws?.readyState===1)ws.send(JSON.stringify({type,...rest}))}
 function setup(){
@@ -83,7 +89,7 @@ function renderRoster(){
  const a=[...players.values()].sort((x,y)=>x.id===self?-1:y.id===self?1:0);
  $w('sw-roster').innerHTML=a.map(p=>'<button data-sw="profile" data-id="'+escapeHTML(p.id)+'">'+escapeHTML(p.name||'Player')+(p.id===self?' (you)':'')+' · '+(p.swag??-100)+' swag</button>').join('')||'No players';
  $w('sw-requests').innerHTML=(friends.incoming||[]).map(id=>'<button data-sw="profile" data-id="'+id+'">'+escapeHTML(players.get(id)?.name||'Friend request')+'</button><button data-sw="friend" data-op="accept" data-id="'+id+'">Accept</button>').join('')||'<p>None</p>';
- $w('sw-friends').innerHTML=(friends.friends||[]).map(id=>'<button data-sw="profile" data-id="'+id+'">'+escapeHTML(players.get(id)?.name||'Friend')+'</button>').join('')||'<p>No friends yet</p>';
+ $w('sw-friends').innerHTML=(friends.friends||[]).map(id=>'<div><button data-sw="profile" data-id="'+id+'">'+escapeHTML(players.get(id)?.name||'Friend')+'</button><button data-sw="friend" data-op="remove" data-id="'+id+'">Remove friend</button></div>').join('')||'<p>No friends yet</p>';
 }
 function connect(){
  if(ws&&ws.readyState===1)return;
@@ -98,10 +104,41 @@ function connect(){
  }else if(m.type==='profile')upsert(m.player);
  else if(m.type==='leave'){let p=players.get(m.id);if(p?.obj)modelScene.remove(p.obj);players.delete(m.id);renderRoster();}
  else if(m.type==='move'){let p=players.get(m.id);if(p&&m.id!==self){p.x=m.x;p.z=m.z;p.y=m.y;p.yaw=m.yaw;}}
+ else if(m.type==='combat')combatEvent(m);
  else if(m.type==='friends'){friends={friends:m.friends||[],incoming:m.incoming||[],outgoing:m.outgoing||[]};renderRoster();}
  };
  ws.onclose=()=>{setTimeout(connect,2000);};
 }
+function combatEvent(m){
+ const p=players.get(m.id);
+ if(m.event==='equip'){if(p)p.weapon=m.weapon;return;}
+ if(m.event==='health'){if(p)p.hp=m.hp;if(m.id===self)$w('sw-hp').textContent='Health '+m.hp+'/100';return;}
+ if(m.event==='ko'){
+   if(p){p.hp=0;p.respawnAt=m.respawnAt;}
+   const attacker=players.get(m.by);if(attacker)attacker.knockouts=m.knockouts;
+   alertMsg((p?.name||'A player')+' was eliminated'+(attacker?' by '+attacker.name:'')+'. Respawning...');
+   return;
+ }
+ if(m.event==='respawn'){
+   if(p){p.hp=100;p.respawnAt=0;p.x=m.x;p.z=m.z;if(p.obj)p.obj.position.set(m.x,0,m.z);}
+   if(m.id===self){position.set(m.x,0,m.z);vy=0;$w('sw-hp').textContent='Health 100/100';}
+   return;
+ }
+ if(m.event==='shot'){
+   const from=new THREE.Vector3(m.x,2.1+(m.y||0),m.z);
+   const to=m.hit&&players.get(m.hit)?new THREE.Vector3(players.get(m.hit).x,2.1+(players.get(m.hit).y||0),players.get(m.hit).z):new THREE.Vector3(m.x+Math.sin(m.yaw)*24,2.1+(m.y||0),m.z+Math.cos(m.yaw)*24);
+   const direction=to.clone().sub(from),length=direction.length();
+   if(length<.1)return;
+   const geometry=new THREE.CylinderGeometry(.04,.04,length,6);
+   const material=new THREE.MeshBasicMaterial({color:m.weapon==='pulse'?0x6bf7ff:0xffdf6e,transparent:true,opacity:.87});
+   const beam=new THREE.Mesh(geometry,material);
+   beam.position.copy(from).addScaledVector(direction,.5);
+   beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
+   modelScene.add(beam);shotFX.push({obj:beam,until:performance.now()+150});
+ }
+}
+function shoot(){if(profileId)return;const p=players.get(self);if(!p||p.hp===0)return;request('shoot');}
+function equipWeapon(w){if(!['blaster','pulse'].includes(w))return;selectedWeapon=w;request('weapon',{weapon:w});document.querySelectorAll('[data-sw="weapon"]').forEach(b=>b.classList.toggle('active',b.dataset.id===w));}
 function equip(id){if(!ITEMS[id]||!wallet.own.includes(id)&&ITEMS[id][2]!==0)return;
  let slot=ITEMS[id][0];if(slot==='pet')F.pet=id;else if(slot==='dye'){F.look.hc=4;}else F.look[slot]=id;
  styleChanged();api('me',acctBody()).then(()=>{if(players.has(self)){let p=players.get(self);p.look={...F.look};p.pet=F.pet;avatar(p);}}).catch(()=>{});}
@@ -140,6 +177,8 @@ async function showProfile(id){
 async function act(e){
  const btn=e.target.closest('[data-sw]');if(!btn)return;const action=btn.dataset.sw,id=btn.dataset.id;
  if(action==='profile')return showProfile(id);
+ if(action==='weapon'){equipWeapon(id);return;}
+ if(action==='shoot'){shoot();return;}
  if(action==='profileclose'){profileId='';$w('sw-profile').hidden=true;return;}
  if(action==='self')return showProfile(self);
  if(action==='close'){tab='';renderMenu();return;}
@@ -152,6 +191,11 @@ async function act(e){
  if(action==='friend'){try{friends=await api('friends',{op:btn.dataset.op,target:id});renderRoster();showProfile(id);alertMsg('Friends updated')}catch(er){alertMsg(er.message||'Could not update friend')}return;}
 }
 root.addEventListener('click',act);
+$w('sw-canvas').addEventListener('contextmenu',e=>{e.preventDefault();shoot();});
+window.addEventListener('keydown',e=>{if(/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName||''))return;
+  if(e.key.toLowerCase()==='f'){e.preventDefault();if(!e.repeat)shoot();}
+  if(e.key==='1')equipWeapon('blaster');if(e.key==='2')equipWeapon('pulse');
+},true);
 window.addEventListener('keydown',e=>{if(/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName||''))return;
  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','w','a','s','d','W','A','S','D'].includes(e.key)){keys.add(e.key.toLowerCase());e.preventDefault();}},true);
 window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()),true);
@@ -171,6 +215,7 @@ function frame(now){
  if(w&&h&&(renderer.domElement.width!==Math.round(w*renderer.getPixelRatio())||renderer.domElement.height!==Math.round(h*renderer.getPixelRatio()))){renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
  const me=players.get(self);
  if(me&&me.obj){
+ if(me.hp===0)keys.clear();
  const x=(keys.has('d')?1:0)-(keys.has('a')?1:0),z=(keys.has('w')?1:0)-(keys.has('s')?1:0);
  if(keys.has('arrowleft'))yaw+=dt*2.1;
  if(keys.has('arrowright'))yaw-=dt*2.1;
@@ -193,6 +238,7 @@ function frame(now){
  if(p.id!==self){p.obj.position.lerp(new THREE.Vector3(p.x||0,p.y||0,p.z||0),Math.min(1,dt*11));p.obj.rotation.y=p.yaw||0;}
  p.obj.userData.animateFX?.(now/1000);
  }
+ for(let i=shotFX.length-1;i>=0;i--){const q=shotFX[i];if(now>=q.until){modelScene.remove(q.obj);q.obj.geometry.dispose();q.obj.material.dispose();shotFX.splice(i,1);}}
  renderer.render(modelScene,cam);
  if(profileId&&profModel){
  const ww=$w('sw-profile').clientWidth,hh=$w('sw-profile').clientHeight;
