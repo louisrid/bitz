@@ -30,6 +30,8 @@ jobs:
         run: node tests/integration.mjs
       - name: Long-running bot gameplay simulations
         run: node tests/bot-simulation.mjs
+      - name: Two-device reconnect and offline grace behaviour
+        run: node tests/reconnect-grace.mjs
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 10
