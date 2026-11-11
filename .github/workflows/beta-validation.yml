@@ -28,3 +28,5 @@ jobs:
         run: node tests/beta-smoke.mjs
       - name: Server, persistent storage and cross-device integration
         run: node tests/integration.mjs
+      - name: Long-running bot gameplay simulations
+        run: node tests/bot-simulation.mjs
