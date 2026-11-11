@@ -1,0 +1,28 @@
+name: Stakkz beta validation
+on:
+  push:
+    branches:
+      - beta-ui-bots-account-sync-20261111
+  pull_request:
+    branches:
+      - main
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Syntax-check game and server modules
+        run: |
+          node --check server.js
+          node --check src/core.js
+          node --check src/bots.js
+          node --check src/auth.js
+          node --check public/engine.js
+      - name: Beta smoke tests
+        run: node tests/beta-smoke.mjs
