@@ -304,6 +304,13 @@ button.pill.hot{background:var(--sun);animation:nudge 2.4s ease-in-out infinite}
 @keyframes rcpop{0%{transform:scale(0)}15%{transform:scale(1.15)}30%,80%{transform:scale(1)}100%{transform:scale(0)}}
 @keyframes rchit{to{transform:scale(1.9);opacity:0}}
 
+/* Card reveal within the existing modal. Short and motion-safe. */
+.chest-reveal .fund-chest{position:absolute;left:50%;top:calc(var(--k)*10px);width:calc(var(--k)*54px);height:calc(var(--k)*36px);transform:translateX(-50%);background:var(--sun);border:3px solid var(--ink);border-radius:5px;animation:chestOpen .45s ease-out both;pointer-events:none}
+.chest-reveal .fund-chest::before{content:"";position:absolute;left:-3px;right:-3px;top:-11px;height:10px;border:3px solid var(--ink);border-radius:5px 5px 0 0;background:var(--sky);transform-origin:bottom;animation:chestLid .45s .10s ease-out both}
+.chest-reveal .fund-chest i{position:absolute;left:43%;top:25%;width:7px;height:11px;border:2px solid var(--ink);background:var(--paper)}
+@keyframes chestOpen{from{opacity:0;transform:translate(-50%,12px) scale(.8)}}
+@keyframes chestLid{to{transform:rotateX(62deg)}}
+@media (prefers-reduced-motion:reduce){.chest-reveal .fund-chest,.chest-reveal .fund-chest::before{animation:none}}
 /* prize wheel */
 .wheelwrap{position:relative;justify-self:center;width:calc(var(--k)*270px);height:calc(var(--k)*270px);margin:calc(var(--k)*16px) 0 calc(var(--k)*6px)}
 .wheel{position:absolute;inset:0;border:var(--bw) solid var(--ink);border-radius:50%;box-shadow:var(--drop);transition:transform 4.2s cubic-bezier(.12,.62,.08,1)}
@@ -1790,8 +1797,17 @@ async function present(n) {
     }
     else if (f.t === 'bust') { Snd('bust'); B3.ok && B3.spot(f.p, 2200); shout(nm(f.p) + ' is out'); shake(); await wait(still ? 0 : 900); }
     else if (f.t === 'pay') {
-      if (B3.ok && f.a >= 20) B3.coins(f.from, f.to, f.a);
-      if (f.from >= 0 && f.to >= 0) { Snd(f.to === mine0() ? 'coin' : 'pay'); if (B3.ok) { B3.react(f.from, 'sad'); B3.react(f.to, 'cheer'); } if (f.a >= 150) shake(); shout(nm(f.from) + ' pays ' + nm(f.to) + ' ' + money(f.a)); await wait(still ? 0 : 450); }
+      if(B3.ok&&f.a>=20)B3.coins(f.from,f.to,f.a);
+      if(B3.ok&&f.a>=250&&f.from>=0&&f.to>=0){
+        B3.flash(n.players[f.from].pos,PC[f.to]);
+      }
+      if(B3.ok&&f.from<0&&f.to>=0&&f.a===200){
+        B3.flash(0,'#FFD60A');B3.react(f.to,'cheer');
+        shout(nm(f.to)+' collects £200!');
+      }
+      if (f.from >= 0 && f.to >= 0) { Snd(f.to === mine0() ? 'coin' : 'pay'); if (B3.ok) { B3.react(f.from, 'sad'); B3.react(f.to, 'cheer'); } if(f.a>=250&&B3.ok)B3.react(f.to,'cheer');
+        shout(nm(f.from)+' pays '+nm(f.to)+' '+money(f.a));
+        await wait(still?0:Math.min(350,f.a>=250?330:180)); }
       else if (f.to >= 0 && f.a >= 200) { Snd('coin'); B3.ok && B3.react(f.to, 'cheer'); }
       else if (f.from >= 0 && f.a >= 100 && !spend) B3.ok && B3.react(f.from, 'sad');
     }
@@ -1873,7 +1889,10 @@ function showCard(f, n) {
     const amt = f.x === 'cash' ? '<b class="amt ' + (f.a >= 0 ? 'up' : 'dn') + '">' + (f.a >= 0 ? '+' : '−') + money(Math.abs(f.a)) + '</b>' : kind === 'party' ? up('+£20') + up(coin('+1,500')) : kind === 'box' ? up('+1 loot box') : '';
     const pic = kind === 'to' || kind === 'back' ? fig(n.players[f.p].look, PC[f.p], 92) : kind === 'rush' ? '<i class="coin big"></i>' : kind === 'box' ? lootImg(92) : ico(SCN[kind] || 'star', 60);
     openModal('card', () => '<div class="band" style="--g:' + (f.deck === 'luck' ? 'var(--pink)' : 'var(--sky)') + '"><span>' + esc(n.players[f.p].name) + ' drew</span><b>' + E.DECKN[f.deck] + '</b><i class="bm">' + mark() + '</i></div>' +
-      '<div class="scene s-' + kind + '"><span class="em">' + pic + '</span>' + (kind === 'jail' ? '<i class="bars"></i>' : '') + (good ? burst() : '') + '</div><h2>' + esc(f.m) + '</h2>' + (amt || f.k ? '<div class="chips c">' + amt + (f.k ? up(coin('+' + fmt(f.k))) : '') + '</div>' : '') +
+      '<div class="scene s-' + kind + (f.deck === 'fund' ? ' chest-reveal' : ' luck-flip') + '">' +
+      (f.deck==='fund'?'<span class="fund-chest" aria-hidden="true"><i></i></span>':'') +
+      '<span class="em">' + pic + '</span>' + (kind === 'jail' ? '<i class="bars"></i>' : '') +
+      (good ? burst() : '') + '</div><h2>' + esc(f.m) + '</h2>' + (amt || f.k ? '<div class="chips c">' + amt + (f.k ? up(coin('+' + fmt(f.k))) : '') + '</div>' : '') +
       '<button class="btn go" data-a="close">OK</button>', { flip: true, onClose: end });
     setTimeout(end, 3400);
   });
