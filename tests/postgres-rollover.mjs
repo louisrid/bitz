@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {fileURLToPath} from 'node:url';
+import postgres from 'postgres';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const folder=fs.mkdtempSync(path.join(os.tmpdir(),'stakkz-pg-'));
 const url=process.env.STAKKZ_DATABASE_URL;
@@ -53,8 +54,14 @@ try {
   const old=await start('old');
   const oldSignup=await api(old,'auth/register','a'.repeat(48),{username:'RolloverOne',password:'StrongTestPassword-A1'});
   assert.equal(oldSignup.status,200,JSON.stringify(oldSignup));
+  const db=postgres(url,{prepare:false});
+  const saved=await db`select state,version from stakkz_state where id='main'`;
+  assert(saved[0]?.state?.auth?.users?.rolloverone, 'Registration did not persist to the actual PostgreSQL row');
+  console.log('PostgreSQL saved version',String(saved[0].version),'and first account');
+  await db.end({timeout:1});
   const next=await start('next');
-  assert.equal((await api(next,'auth/login','',{username:'RolloverOne',password:'StrongTestPassword-A1'})).status,200);
+  const relogin=await api(next,'auth/login','',{username:'RolloverOne',password:'StrongTestPassword-A1'});
+  assert.equal(relogin.status,200,JSON.stringify({error:relogin.message,logs:next.logs.join('').slice(-900)}));
   const second=await api(next,'auth/register','b'.repeat(48),{username:'RolloverTwo',password:'StrongTestPassword-B2'});
   assert.equal(second.status,200,JSON.stringify(second));
   // Simulate stale outgoing instance receiving a last-minute write while the
