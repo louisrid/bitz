@@ -711,22 +711,64 @@ const B3 = (function () {
   const wt = new THREE.CanvasTexture(wc); wt.wrapS = wt.wrapT = THREE.RepeatWrapping;
   const CITY = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FF8FD1', '#B983FF', '#FF9F1C', '#5CE1E6', '#FFFFFF'];
   const city = new THREE.Group(); scene.add(city);
+  // Eight readable miniature neighbourhoods, all inside the original city
+  // footprint. Palette/roof choices add personality without moving any tiles.
+  const DIST = [
+    { wall:0x9f644b, roof:0x613a2d, glow:0xffc993, h:.75 }, // brick
+    { wall:0x99d5e8, roof:0x32698e, glow:0xffeead, h:.55 }, // suburban
+    { wall:0xe993c4, roof:0x873b84, glow:0xffe96a, h:1.0 }, // entertainment
+    { wall:0xeeb369, roof:0x865437, glow:0xffd782, h:.92 }, // shopping
+    { wall:0xb0b5bd, roof:0x33394b, glow:0xffe4aa, h:1.36 }, // centre
+    { wall:0xd1bc6d, roof:0x70603b, glow:0xffe69b, h:1.3 }, // commercial
+    { wall:0x83bca5, roof:0x295e5b, glow:0xc8ffdd, h:1.1 }, // modern homes
+    { wall:0x667ac3, roof:0x232b59, glow:0xb4eeff, h:1.7 } // skyline
+  ];
+  const districtAt=(x,z)=>Math.max(0,Math.min(7,Math.floor((Math.atan2(z,x)+Math.PI)/(Math.PI/4))%8));
+  const cityWindows=[], movingCityLights=[];
+  const windowMaterials=DIST.map(d=>new THREE.MeshBasicMaterial({color:d.glow,transparent:true,opacity:.64}));
+  const roofTrimMat=new THREE.MeshBasicMaterial({color:0xf5e7c0});
+
   function tree(x, z, s) {
     city.add(mesh(new THREE.CylinderGeometry(0.14 * s, 0.18 * s, 0.9 * s, 6), L(0x8a5a2b), x, 0.45 * s, z));
     city.add(mesh(new THREE.IcosahedronGeometry(0.75 * s, 0), new THREE.MeshPhongMaterial({ color: rnd() < 0.5 ? 0x2ecc71 : 0x27ae60, flatShading: true, shininess: 0 }), x, 1.35 * s, z));
   }
   function building(x, z, w, d, h, col) {
-    const t = wt.clone(); t.needsUpdate = true; t.repeat.set(Math.max(1, Math.round(w / 0.85)), Math.max(1, Math.round(h / 0.95)));
-    city.add(mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshLambertMaterial({ color: col, map: t }), x, h / 2, z));
-    if (h < 3.6) { const r = mesh(new THREE.ConeGeometry(Math.max(w, d) * 0.78, 1.2, 4), L(0x111111), x, h + 0.6, z); r.rotation.y = Math.PI / 4; city.add(r); }
-    else { city.add(mesh(new THREE.BoxGeometry(w + 0.25, 0.28, d + 0.25), L(0x111111), x, h + 0.14, z)); if (rnd() < 0.5) city.add(mesh(new THREE.BoxGeometry(w * 0.4, 0.7, d * 0.4), L(0xffffff), x + w * 0.15, h + 0.6, z - d * 0.1)); }
+    const zId=districtAt(x,z), style=DIST[zId], t=wt.clone();
+    t.needsUpdate=true; t.repeat.set(Math.max(1,Math.round(w/.85)),Math.max(1,Math.round(h/.95)));
+    const base=mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:col||style.wall,map:t}),x,h/2,z);
+    city.add(base);
+    const roof=L(style.roof);
+    if (h < 3.7) {
+      const r=mesh(new THREE.ConeGeometry(Math.max(w,d)*.78,.95,4),roof,x,h+.46,z);
+      r.rotation.y=Math.PI/4;city.add(r);
+    } else {
+      city.add(mesh(new THREE.BoxGeometry(w+.24,.2,d+.24),roof,x,h+.1,z));
+      if (zId>=4 && rnd()<.68) city.add(mesh(new THREE.BoxGeometry(w*.32,.56,d*.32),L(0xdbeaf0),x+w*.17,h+.4,z-d*.1));
+    }
+    // Two shallow emissive windows and a subtle roof/awning detail keep the
+    // district legible even on phones without expensive shadows or shaders.
+    for(let k=0;k<2;k++){
+      const wx=x+(k?1:-1)*w*.23, wy=Math.min(h-.32,1.1+k*.72);
+      const win=mesh(new THREE.BoxGeometry(.31,.35,.055),windowMaterials[zId],wx,wy,z+d/2+.033);
+      win.castShadow=false;city.add(win);cityWindows.push(win);
+    }
+    if(zId===2||zId===3||zId===5){
+      const sign=mesh(new THREE.BoxGeometry(w*.66,.12,.25),zId===2?windowMaterials[2]:roofTrimMat,x,Math.min(h-.23,1.35),z+d/2+.2);
+      sign.castShadow=false;city.add(sign);
+    }
+    if(zId===6||zId===7){
+      const cap=mesh(new THREE.BoxGeometry(w*.5,.1,d*.5),roofTrimMat,x,h+.23,z);
+      cap.castShadow=false;city.add(cap);
+    }
   }
   [-1, 1].forEach(sx => [-1, 1].forEach(sz => {
     for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) {
       const x = sx * (3.3 + a * 3.25), z = sz * (3.3 + b * 3.25);
       if (sx === 1 && sz === 1 && a === 2 && b === 2) continue;
       if ((a === 0 && b === 0) || rnd() < 0.14) { tree(x - 0.6, z + 0.5, 1); tree(x + 0.7, z - 0.4, 0.8); tree(x + 0.1, z + 0.9, 0.65); continue; }
-      building(x, z, 2 + rnd() * 0.7, 2 + rnd() * 0.7, 1.8 + rnd() * 3.2 + (4 - a - b) * 1.25, CITY[Math.floor(rnd() * CITY.length)]);
+      const district=DIST[districtAt(x,z)];
+      building(x,z,2+rnd()*.7,2+rnd()*.7,
+        (1.8+rnd()*3.2+(4-a-b)*1.25)*district.h,district.wall);
     }
   }));
   for (let k = 0; k < 16; k++) { const a = Math.floor(k / 4), f = -11 + (k % 4) * 7.3 + rnd(); const p = [[f, 15.1], [-15.1, f], [f, -15.1], [15.1, f]][a]; tree(p[0], p[1], 0.7); }
