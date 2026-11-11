@@ -56,7 +56,10 @@ try {
   assert.equal(oldSignup.status,200,JSON.stringify(oldSignup));
   const db=postgres(url,{prepare:false});
   const saved=await db`select state,version from stakkz_state where id='main'`;
-  assert(saved[0]?.state?.auth?.users?.rolloverone, 'Registration did not persist to the actual PostgreSQL row');
+  const fromDb=typeof saved[0]?.state==='string'?JSON.parse(saved[0].state):saved[0]?.state;
+  console.log('DB state type',typeof saved[0]?.state,'top keys',Object.keys(fromDb||{}),
+    'auth keys',Object.keys(fromDb?.auth||{}),'usernames',Object.keys(fromDb?.auth?.users||{}));
+  assert(fromDb?.auth?.users?.rolloverone, 'Registration did not persist to the actual PostgreSQL row');
   console.log('PostgreSQL saved version',String(saved[0].version),'and first account');
   await db.end({timeout:1});
   const next=await start('next');
