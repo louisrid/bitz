@@ -893,8 +893,8 @@ const B3 = (function () {
     const tile = st.players[pi].pos, here = st.players.map((p, i) => i).filter(i => !st.players[i].out && st.players[i].pos === tile), n = here.length, k = here.indexOf(pi);
     const corner = tile % 10 === 0;
     if (n === 1) return loc(tile, 0, corner ? 0 : 0.9);
-    const a = k / n * Math.PI * 2 + 0.6, r = corner ? 1.6 : 1.1;
-    return loc(tile, Math.cos(a) * r, (corner ? 0 : 0.8) + Math.sin(a) * r * (corner ? 1 : 1.25));
+    const a=k/n*Math.PI*2+.6, r=corner?1.7:n>=4?1.29:1.1;
+    return loc(tile,Math.cos(a)*r,(corner?0:n>=4?.5:.8)+Math.sin(a)*r*(corner?1:n>=4?1.08:1.25));
   }
 
   /* tweens */
@@ -917,8 +917,8 @@ const B3 = (function () {
       // the last few hops slow down, so everyone sees where this is going to end
       await tween(ms * (left === 0 ? 1.9 : left === 1 ? 1.5 : left === 2 ? 1.2 : 1), f => { tk.position.lerpVectors(a, b, f); tk.position.y = Math.sin(f * Math.PI) * (left === 0 ? 2.4 : 1.4); tk.scale.y = (1 + 0.3 * Math.sin(f * Math.PI)); });
     }
-    await tween(170, f => { tk.scale.y = 1 - 0.28 * Math.sin(f * Math.PI); });
-    tk.scale.setScalar(1); api.moving = -1;
+    await tween(170,f=>{tk.scale.y=(tk.userData.crowdScale||1)*(1-.28*Math.sin(f*Math.PI));});
+    tk.scale.setScalar(tk.userData.crowdScale || 1); api.moving = -1;
   };
   /* two real dice, thrown beside whoever is rolling: they tumble, bounce and settle on the numbers rolled */
   const dice3 = (function () {
@@ -984,13 +984,20 @@ const B3 = (function () {
     const s2 = JSON.stringify(st ? st.own : {}); if (s2 !== sig) { sig = s2; paint(st); }
     const ps = st ? st.players : [];
     Object.keys(tokens).forEach(k => { if (!ps[k] || ps[k].out || tokens[k].userData.kind !== JSON.stringify(ps[k].look)) { const t = tokens[k]; delete tokens[k]; if (ps[k] && ps[k].out && !snap) tween(700, f => { t.rotation.z = f * 1.5; t.position.y = -f * 2.5; t.scale.setScalar(1 - f * 0.6); }).then(() => scene.remove(t)); else scene.remove(t); } });
-    ps.forEach((p, i) => {
+    ps.forEach((p,i)=>{
       if (p.out) return;
-      let t = tokens[i];
-      if (!t) { t = tokens[i] = makeChar(p.look, PC[i]); t.userData.kind = JSON.stringify(p.look); t.position.copy(slot(st, i)); scene.add(t); tween(500, f => t.scale.setScalar(Math.max(0.01, back(f)))); return; }
-      const a = t.position.clone(), b = slot(st, i);
-      if (a.distanceTo(b) > 0.05) tween(snap ? 1 : 260, f => { t.position.lerpVectors(a, b, f); });
-      t.rotation.set(0, 0, 0);
+      const count=ps.filter(q=>!q.out&&q.pos===p.pos).length;
+      const scale=count>=6?.58:count>=4?.69:count===3?.79:1;
+      let t=tokens[i];
+      if(!t){
+        t=tokens[i]=makeChar(p.look,PC[i]);t.userData.kind=JSON.stringify(p.look);
+        t.userData.crowdScale=scale;t.position.copy(slot(st,i));scene.add(t);
+        tween(440,f=>t.scale.setScalar(Math.max(.01,back(f)*scale)));return;
+      }
+      t.userData.crowdScale=scale;
+      const a=t.position.clone(),b=slot(st,i);
+      if(a.distanceTo(b)>.05&&api.moving!==i) tween(snap?1:260,f=>t.position.lerpVectors(a,b,f));
+      if(api.moving!==i)t.rotation.set(0,0,0);
     });
     Object.keys(pets).forEach(k => { if (!ps[k] || ps[k].out || pets[k].userData.kind !== ps[k].pet) { scene.remove(pets[k]); delete pets[k]; } });
     ps.forEach((p, i) => { if (p.out || !(ITEMS[p.pet] && ITEMS[p.pet][0] === 'pet') || pets[i]) return; const q = pets[i] = makePet(p.pet), b = slot(st, i); Object.assign(q.userData, { kind: p.pet, ph: i * 1.7 }); q.position.set(b.x + 1, 0, b.z + 0.6); scene.add(q); });
@@ -1151,7 +1158,10 @@ const B3 = (function () {
     balloon.position.set(Math.cos(t * 0.12) * 10, 17 + Math.sin(t * 0.7) * 0.8 * mv, Math.sin(t * 0.12) * 10);
     Object.keys(tokens).forEach(k => {
       const tk = tokens[k], u = tk.userData, mvg = api.moving === +k, cur = +k === api.cur;
-      if (!tw.length) tk.position.y = cur ? Math.abs(Math.sin(t * 3)) * 0.35 * mv : 0;
+      if (!tw.length) {
+        tk.position.y=cur?Math.abs(Math.sin(t*3))*.35*mv:0;
+        if(!mvg)tk.scale.setScalar(u.crowdScale||1);
+      }
       if (!mvg) tk.rotation.y = Math.atan2(cam.position.x - tk.position.x, cam.position.z - tk.position.z);
       if (u.legs) {
         const sw = mvg ? Math.sin(t * 18) * 0.9 : 0;
