@@ -113,7 +113,8 @@ setInterval(() => { const now = Date.now(); parties.forEach((s, code) => { if (n
 
 const idOf = key => 'p_' + crypto.createHash('sha256').update('stakkz:' + key).digest('hex').slice(0, 24);
 const account = id => { let w = accounts.get(id); if (!w) { w = core.freshWallet(); w.fresh = true; accounts.set(id, w); }
-  if (!w.m1) { w.coins = (w.coins || 0) + 1000000; w.m1 = 1; dirty = true; }   // one-off: every player gets 1,000,000 coins for boxes
+  if (!w.m1) { w.coins = (w.coins || 0) + 1000000; w.m1 = 1; dirty = true; }
+  if (!w.m10) { w.coins = (w.coins || 0) + 10000000; w.m10 = 1; dirty = true; }   // one-off: 10,000,000 coins for everyone   // one-off: every player gets 1,000,000 coins for boxes
   return w; };
 function tell(code, s) { const set = watchers.get(code); if (!set) return; const m = JSON.stringify({ state: s, now: Date.now() }); set.forEach(ws => { try { ws.send(m); } catch (e) {} }); }
 /* one request to a party; because Node runs one thing at a time, two moves can never collide */
@@ -185,6 +186,16 @@ async function api(req, res, parts) {
   const w = account(id);
   lastSeen.set(id,now);
   if (parts[0] === 'heartbeat' && req.method === 'POST') return send(res, 200, { ok:true });
+  if (parts[0] === 'friends' && req.method === 'GET') {
+    /* everyone with an account is everyone's friend: name, look, where they are right now */
+    const inPlaza = new Set([...plaza.values()].filter(q => q.i).map(q => q.id)), inGame = new Set();
+    parties.forEach(p => { if (p.phase === 'play') p.players.forEach(x => { if (!x.out && !x.bot) inGame.add(x.id); }); });
+    const list = [];
+    auth.users.forEach(u => { const a = accounts.get(u.id); if (!a || u.id === id) return;
+      list.push({ f: u.id.slice(2, 12), n: (a.name || u.username || 'Player').slice(0, 12), u: u.username, l: a.look || {}, pet: a.pet || '', at: inGame.has(u.id) ? 'game' : inPlaza.has(u.id) ? 'plaza' : '', seen: lastSeen.get(u.id) || a.t || 0, wins: a.wins || 0, played: a.played || 0 }); });
+    list.sort((a, b) => (b.at ? 1 : 0) - (a.at ? 1 : 0) || b.seen - a.seen);
+    return send(res, 200, { friends: list.slice(0, 200), now });
+  }
   if (parts[0] === 'my-party' && req.method === 'GET') {
     const found = [...parties.values()].find(s => s.phase !== 'over' && s.players.some(p => p.id === id && !p.out));
     return send(res, 200, { code:found ? found.code:null });
@@ -249,7 +260,62 @@ const server = http.createServer((req, res) => {
 });
 /* the live line: anyone with a party's code can watch it; the server sends the game whenever it changes */
 const wss = new WebSocketServer({ noServer: true, maxPayload: 1024 });
+/* ---------- the plaza: one shared 3D world everyone outside a match walks around in ----------
+   Each connection says who it is with the same key or session the API uses; name and outfit come from the
+   account, never from the client. Positions are relayed, batched, about ten times a second; nothing is stored. */
+const plaza = new Map();   // ws -> { i, id, n, l, pet, p: [x, y, z, ry, anim], moved }
+let plazaSeq = 0;
+const plazaCard = q => ({ i: q.i, n: q.n, l: q.l, pet: q.pet, p: q.p });
+const plazaSend = (ws, m) => { if (ws.readyState === 1) { try { ws.send(typeof m === 'string' ? m : JSON.stringify(m)); } catch (e) {} } };
+const plazaAll = (m, except) => { const s = JSON.stringify(m); plaza.forEach((q, ws) => { if (ws !== except && q.i) plazaSend(ws, s); }); };
+function plazaWho(key) {
+  const session = auth.authenticate(key);
+  if (!session && !/^[a-f0-9]{48}$/.test(key)) return null;
+  const id = session ? session.id : idOf(key);
+  if (!session && auth.username(id)) return null;
+  const w = account(id);
+  return { id: id, n: (w.name || auth.username(id) || 'Guest').slice(0, 12), l: w.look || {}, pet: w.pet || '' };
+}
+function plazaJoin(ws, raw) {
+  const q = plaza.get(ws); if (!q) return;
+  const msg = (() => { try { return JSON.parse(raw); } catch (e) { return null; } })(); if (!msg || typeof msg !== 'object') return;
+  if (!q.i) {
+    if (typeof msg.hello !== 'string') return;
+    const who = plazaWho(msg.hello); if (!who) { plazaSend(ws, { error: 'Sign in again to enter the plaza.' }); return ws.close(); }
+    if (plaza.size > 80) { plazaSend(ws, { error: 'The plaza is full right now.' }); return ws.close(); }
+    Object.assign(q, who, { i: 'w' + (++plazaSeq), p: [(Math.random() - 0.5) * 6, 0, 17 + Math.random() * 2, Math.PI, 0], moved: false });
+    plazaSend(ws, { you: q.i, all: [...plaza.values()].filter(o => o.i && o !== q).map(plazaCard) });
+    plazaAll({ join: plazaCard(q) }, ws);
+    return;
+  }
+  if (Array.isArray(msg.p) && msg.p.length === 5 && msg.p.every(Number.isFinite)) {
+    q.p = [Math.max(-30, Math.min(30, msg.p[0])), Math.max(0, Math.min(12, msg.p[1])), Math.max(-30, Math.min(30, msg.p[2])), msg.p[3] % 7, msg.p[4] | 0];
+    q.moved = true;
+  } else if (msg.restyle) {
+    const w = account(q.id); q.n = (w.name || auth.username(q.id) || 'Guest').slice(0, 12); q.l = w.look || {}; q.pet = w.pet || '';
+    plazaAll({ look: plazaCard(q) });
+  } else if (typeof msg.emote === 'string' && /^(wave|dance|cheer|jump)$/.test(msg.emote)) {
+    const now = Date.now(); if (now - (q.em || 0) < 700) return; q.em = now;
+    plazaAll({ emote: { i: q.i, e: msg.emote } });
+  }
+}
+setInterval(() => {
+  const s = []; plaza.forEach(q => { if (q.i && q.moved) { q.moved = false; s.push([q.i].concat(q.p.map(v => Math.round(v * 100) / 100))); } });
+  if (s.length) plazaAll({ s: s });
+}, 100).unref();
 server.on('upgrade', (req, socket, head) => {
+  if (new URL(req.url, 'http://x').pathname.endsWith('/api/plaza/ws')) {
+    return wss.handleUpgrade(req, socket, head, ws => {
+      plaza.set(ws, {}); let count = 0, since = Date.now();
+      ws.on('message', d => {
+        const m = String(d); if (m === 'ping') return plazaSend(ws, 'pong');
+        const now = Date.now(); if (now - since > 1000) { since = now; count = 0; } if (++count > 40) return;   // flood guard
+        plazaJoin(ws, m);
+      });
+      ws.on('close', () => { const q = plaza.get(ws); plaza.delete(ws); if (q && q.i) plazaAll({ leave: q.i }); });
+      ws.on('error', () => {});
+    });
+  }
   const m = /\/api\/party\/([A-Z]{4})\/ws$/.exec(new URL(req.url, 'http://x').pathname);
   if (!m) return socket.destroy();
   wss.handleUpgrade(req, socket, head, ws => {

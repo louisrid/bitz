@@ -7,7 +7,7 @@ import { BOT_NAMES, BOT_LOOKS, isBot } from './bots.js';
 
 const E = globalThis.Engine;
 export const BOX_PRICE = 8000;
-const LOOT = [['coins', 40], [0, 32], [1, 18], [2, 8], [3, 1.75], [4, 0.25]];   // Mythical: 1 box in 400
+const LOOT = [['coins', 8], [0, 30], [1, 28], [2, 18], [3, 11], [4, 5]];   // mostly items; coins are rare
 const rarity = p => (p <= 5000 ? 0 : p <= 15000 ? 1 : p <= 50000 ? 2 : p <= 200000 ? 3 : 4);
 const int = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.floor(Number(v) || 0)));
 const rnd = () => { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; };
@@ -18,7 +18,7 @@ const refuse = m => { throw new Refused(m); };
 
 /* ---------- accounts ---------- */
 export function freshWallet() {
-  return { v: 3, t: 0, coins: 1000000, m1: 1, boxes: 1, own: [], claimed: [], games: {}, gb: {}, played: 0, wins: 0, soloAt: 0,
+  return { v: 3, t: 0, coins: 10000000, m1: 1, m10: 1, boxes: 1, own: [], claimed: [], games: {}, gb: {}, played: 0, wins: 0, soloAt: 0,
     stats: { earned: 0, rent: 0, bought: 0, kos: 0, best: 0, opened: 0 }, name: '', look: { skin: 0, hair: 'short', hc: 0, outfit: 'tee', hat: '', acc: '', bg: 'paper' }, pet: '' };
 }
 const owns = (w, id) => !!ITEMS[id] && (ITEMS[id][2] === 0 || w.own.indexOf(id) >= 0);
@@ -36,15 +36,18 @@ export function setProfile(w, b) {
 function rollLoot(w) {
   let r = rnd() * 100, tier = 'coins';
   for (const q of LOOT) { if (r < q[1]) { tier = q[0]; break; } r -= q[1]; }
-  if (tier === 'coins') return { coins: [2500, 3500, 5000, 7500][Math.floor(rnd() * 4)] };
-  const pool = Object.keys(ITEMS).filter(id => ITEMS[id][2] > 0 && rarity(ITEMS[id][2]) === tier), fresh = pool.filter(id => !owns(w, id));
-  if (fresh.length) return { item: fresh[Math.floor(rnd() * fresh.length)] };
-  const d = pool[Math.floor(rnd() * pool.length)];
-  return { coins: Math.max(500, Math.round(ITEMS[d][2] * 0.4 / 500) * 500), dupe: d };
+  if (tier === 'coins') return { coins: [5000, 10000, 20000, 50000][Math.floor(rnd() * 4)] };
+  /* never a duplicate: if everything in the rolled tier is owned, look in the tiers above it, then below */
+  const fresh = t => Object.keys(ITEMS).filter(id => ITEMS[id][2] > 0 && rarity(ITEMS[id][2]) === t && !owns(w, id));
+  for (const t of [0, 1, 2, 3, 4].filter(t => t >= tier).concat([3, 2, 1, 0].filter(t => t < tier))) {
+    const pool = fresh(t); if (pool.length) return { item: pool[Math.floor(rnd() * pool.length)] };
+  }
+  return { coins: 100000 };   // owns every item in the game
 }
 export function shop(w, what, item) {
   if (what === 'buy') {
     const it = ITEMS[item]; if (!it || it[2] <= 0) refuse('That is not for sale.');
+    if (it[3]) refuse('That one only comes from loot boxes.');
     if (owns(w, item)) return {};
     if (w.coins < it[2]) refuse('You need ' + (it[2] - w.coins).toLocaleString('en-GB') + ' more coins.');
     w.coins -= it[2]; w.own.push(item); return {};
