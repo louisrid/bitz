@@ -65,3 +65,18 @@ The server expects GET `?id=eq.main&select=state` and POST upsert `?on_conflict=
 - Auth rate limiting currently shares a general IP bucket; add username/password login abuse protection.
 - Snapshots can lose up to a few seconds of changes on unexpected shutdown and need robust durable transaction semantics if expanding beyond private beta.
 - `STAKKZ_SECRET` must not be changed; previously signed wallet backups depend on it.
+
+
+## Additional verification completed in this session
+- Added `tests/integration.mjs`: end-to-end HTTP server with simulated durable database, registration/login, another-device identity, server restart and party recovery.
+- Added `tests/bot-simulation.mjs`: 1,800-step game simulations at each difficulty and multiple server bot actions.
+- Added `tests/browser-smoke.mjs`: actual headless desktop Chrome account signup; Settings music toggle retains the same button DOM node (no whole-dialog rebuild); party creation with two hard bots; starting the game; emulated iPhone logs into the same username and resumes the active game; no horizontal overflow.
+- GitHub Actions run 43088555201: **both smoke and browser jobs passed**. The browser smoke test deliberately disables WebGL to test the browser interactions independently of GPU availability, so real 3D rendering and performance on actual iPhones are not yet verified.
+- Further reduced flashing in `public/index.html` by updating lobby nodes in place and avoiding unnecessary 3D scene rebuilds for unchanged player scene data.
+- Rate limiting added to auth endpoint; durable writes serialised, successful signup/login/logout now await storage acknowledgement.
+
+## Costs/decisions requiring user input
+Supabase projects list (11 Nov 2026) showed two active projects (ZEUS; Football Card Battles), and three inactive projects. Supabase Free allows two active projects; additional dedicated Stakkz project may require a plan change or changes to active projects. **Do not create, pause, repurpose, delete or upgrade another project without the user's explicit permission and a verified quote.** Dedicated isolated project preferred. User has exactly one visible organisation: `louisrid's Org`. The required project-specific service role key cannot be retrieved from our existing project list; use Render server-only env var once authorised. Render connector was newly linked during this work; verify capabilities before acting.
+
+## Updated completion definition
+All of the above branch tests passed, but deployment is **not finished** until an isolated persistent database is configured, Render env vars set, independent staging verified with real Supabase, and a safe merge/deploy is authorised. The 2-minute disconnect-to-removal timing remains unverified with an actual 120-second wall-clock device test.
