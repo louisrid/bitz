@@ -186,6 +186,24 @@ async function main() {
     }
     files.push(f); chosen.push({p,file:f,entity});
   }
+  // Individually checked Commons files for players whose Wikidata P18 is missing or ambiguous.
+  // Each file still passes the Commons image metadata, MIME and licence verification below.
+  const curated = {
+    'chris-wood': 'Chris Wood (cropped).jpg',
+    'reece-james': 'Reece James FIFA Club World Cup final extraction.jpg',
+    'joao-gomes': 'Joao Gomes.png',
+    'sven-botman': 'Sven Botman 24052026 (6) (cropped).jpg',
+    'murillo': 'Murillo and Tony Loughlan 22122025 (1) (Murillo Santiago Costa dos Santos).jpg',
+    'rayan': 'Rayan 2026.png'
+  };
+  for (const p of lookup) {
+    if (!curated[p.id]) continue;
+    const file = curated[p.id];
+    const existing = chosen.find(x => x.p.id === p.id);
+    if (existing) existing.file = file;
+    else chosen.push({p,file,entity:'Commons-verified-'+p.id});
+    files.push(file);
+  }
   const media = new Map();
   for (const part of batches([...new Set(files)],35)) {
     try {
