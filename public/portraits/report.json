@@ -1,7 +1,315 @@
 {
   "total": 265,
-  "imported": 23,
-  "missing": 242,
-  "generatedAt": "2026-11-12",
-  "source": "Archived Wikimedia Commons images from the previous BITZ branch; missing players await import"
+  "imported": 204,
+  "downloadedNow": 181,
+  "missing": 61,
+  "missingPlayers": [
+    {
+      "id": "adam-smith",
+      "name": "Adam Smith",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "alex-scott",
+      "name": "Alex Scott",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "andrew-robertson",
+      "name": "Andrew Robertson",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "antonin-kinsky",
+      "name": "Antonin Kinsky",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "antonio-silva",
+      "name": "Antonio Silva",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "bernd-leno",
+      "name": "Bernd Leno",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "callum-hudson-odoi",
+      "name": "Callum Hudson-Odoi",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "carl-rushworth",
+      "name": "Carl Rushworth",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "chris-wood",
+      "name": "Chris Wood",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "dan-ndoye",
+      "name": "Dan Ndoye",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "diego-gomez",
+      "name": "Diego Gomez",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "djordje-petrovic",
+      "name": "Djordje Petrovic",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "eliot-matazo",
+      "name": "Eliot Matazo",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "ephron-mason-clark",
+      "name": "Ephron Mason-Clark",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "estevao-willian",
+      "name": "Estevao Willian",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "ethan-pinnock",
+      "name": "Ethan Pinnock",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "ferdi-kadioglu",
+      "name": "Ferdi Kadioglu",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "gabriel-magalhaes",
+      "name": "Gabriel Magalhaes",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "geovany-quenda",
+      "name": "Geovany Quenda",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "gonzalo-garcia",
+      "name": "Gonzalo Garcia",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "hidemasa-morita",
+      "name": "Hidemasa Morita",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "ibrahim-sangare",
+      "name": "Ibrahim Sangare",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "jack-clarke",
+      "name": "Jack Clarke",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "james-hill",
+      "name": "James Hill",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "james-mcatee",
+      "name": "James McAtee",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "jay-dasilva",
+      "name": "Jay Dasilva",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "joachim-andersen",
+      "name": "Joachim Andersen",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "joao-gomes",
+      "name": "Joao Gomes",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "joao-pedro",
+      "name": "Joao Pedro",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "joe-gelhardt",
+      "name": "Joe Gelhardt",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "joe-rodon",
+      "name": "Joe Rodon",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "john-egan",
+      "name": "John Egan",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "jorgen-strand-larsen",
+      "name": "Jorgen Strand Larsen",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "julio-enciso",
+      "name": "Julio Enciso",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "junior-kroupi",
+      "name": "Junior Kroupi",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "kenny-tete",
+      "name": "Kenny Tete",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "levi-colwill",
+      "name": "Levi Colwill",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "lewis-miley",
+      "name": "Lewis Miley",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "liam-delap",
+      "name": "Liam Delap",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "martin-odegaard",
+      "name": "Martin Odegaard",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "matheus-cunha",
+      "name": "Matheus Cunha",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "milan-van-ewijk",
+      "name": "Milan van Ewijk",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "mohamed-belloumi",
+      "name": "Mohamed Belloumi",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "morgan-gibbs-white",
+      "name": "Morgan Gibbs-White",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "murillo",
+      "name": "Murillo",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "neco-williams",
+      "name": "Neco Williams",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "nico-gonzalez",
+      "name": "Nico Gonzalez",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "nikola-milenkovic",
+      "name": "Nikola Milenkovic",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "ola-aina",
+      "name": "Ola Aina",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "oliver-mcburnie",
+      "name": "Oliver McBurnie",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "pascal-gross",
+      "name": "Pascal Gross",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "raphinha",
+      "name": "Raphinha",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "rayan",
+      "name": "Rayan",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "reece-james",
+      "name": "Reece James",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "robin-roefs",
+      "name": "Robin Roefs",
+      "reason": "No licensed photograph located"
+    },
+    {
+      "id": "sven-botman",
+      "name": "Sven Botman",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "tarik-muharemovic",
+      "name": "Tarik Muharemovic",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "thierno-barry",
+      "name": "Thierno Barry",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "trai-hume",
+      "name": "Trai Hume",
+      "reason": "Download failed: Error: HTTP 429"
+    },
+    {
+      "id": "tyler-dibling",
+      "name": "Tyler Dibling",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "wesley-fofana",
+      "name": "Wesley Fofana",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    }
+  ],
+  "source": "Wikidata P18 / Wikimedia Commons",
+  "generatedAt": "2026-11-12T19:46:17.930Z"
 }
