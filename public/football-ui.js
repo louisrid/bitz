@@ -253,7 +253,7 @@
   });
  }
  function refreshPhotos(id,url){
-  if(!state.active)return;
+  if(!state.active&&!document.querySelector('#fc-profile-favorites .fc-card'))return;
   const player=byId.get(id);if(!player)return;
   [...document.querySelectorAll('#fc-overlay .fc-no-photo')].forEach(q=>{
    if(q.dataset.playerId!==id)return;
@@ -282,6 +282,7 @@
     '<div class="fc-profile-grid">'+(j.top||[]).map(c=>frame(c,{small:true})).join('')+
     (j.top?.length?'':'<span class="fc-empty">No favourites selected</span>')+'</div>'+
     (p.self?button('EDIT FAVOURITES','show-collection','','primary'):'');
+   loadVisiblePhotos(node);
   }catch(e){if(node.isConnected)node.innerHTML='<small>Card showcase unavailable</small>';}
  }
  async function handle(action,el){
