@@ -652,7 +652,7 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="stuff">My Stuff</button><button class="wbtn" data-a="explore">Explore</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><button class="wbtn wzom" data-a="zombies" id="wzom" hidden>Zombies: off</button><button class="wbtn wadm" data-a="adminpanel" id="wadm" hidden>Admin</button><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="stuff">My Stuff</button><button class="wbtn" data-a="explore">Explore</button><button class="wbtn" data-a="clans">Clans</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><button class="wbtn wzom" data-a="zombies" id="wzom" hidden>Zombies: off</button><button class="wbtn wadm" data-a="adminpanel" id="wadm" hidden>Admin</button><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
 <div id="title" class="bg-paper" hidden></div><div id="goldtop" aria-label="Your gold"><i class="gc"></i><span><em id="wgold">...</em><small id="wrate">+1,000,000/min</small></span></div><button id="shopbig" data-a="page" data-v="shop"><span class="sbi"></span><b>Shop</b><i class="sale">Sale</i></button><div id="bload" aria-label="Loading BITZ"><canvas id="blc"></canvas><div class="bl-vig"></div><div class="bl-scan"></div><div class="bl-hud"><i></i><i></i><i></i><i></i><span>BITZ</span><span>Loading</span></div><p class="bl-sr">Loading BITZ</p></div><script>(function(){
 var host=document.getElementById('bload'),cv=document.getElementById('blc');if(!host||!cv||!cv.getContext)return;
@@ -2733,6 +2733,28 @@ function lootGalleryHTML(st,col){
     (page<Math.ceil(pool.length/12)-1?'<button class="bx-btn" data-a="lootpage" data-v="'+(page+1)+'">NEXT</button>':'')+
     '<button class="bx-btn" data-a="lootback">BACK TO BOX</button></div></div></div>';
 }
+let ClanSt=null;
+function clanHTML(){
+  const st=ClanSt;if(!st)return '';
+  const head='<div class="mhead"><h2>Clans</h2>'+xBtn()+'</div>';
+  if(st.loading)return head+'<p class="fine">Loading your clan…</p>';
+  if(st.err)return head+'<p class="fine">'+esc(st.err)+'</p><button class="btn" data-a="clanrefresh">Try again</button>';
+  const c=st.clan;
+  if(!c)return head+'<p class="fine">Team up with friends. Create a clan or join one with its code.</p>'+
+    '<div class="clan-panel"><h3>Create clan</h3><input class="t" id="clan-name" maxlength="24" autocomplete="off" placeholder="Clan name" aria-label="Clan name"><button class="btn go" data-a="clanop" data-v="create">CREATE CLAN</button></div>'+
+    '<div class="clan-panel"><h3>Join clan</h3><input class="t" id="clan-code" maxlength="6" autocomplete="off" autocapitalize="characters" placeholder="6-letter code" aria-label="Clan join code"><button class="btn" data-a="clanop" data-v="join">JOIN CLAN</button></div>';
+  return head+'<div class="clan-main"><span class="clan-overline">YOUR CLAN</span><h2>'+esc(c.name)+'</h2>'+
+    '<div class="clan-invite"><span>Join code <strong>'+esc(c.code)+'</strong></span><button class="btn sm" data-a="clancopy" data-v="'+esc(c.code)+'">COPY</button></div>'+
+    '<p class="fine">'+c.members.length+' / 30 members</p>'+
+    '<div class="clan-roster">'+c.members.map(p=>'<div class="clan-member"><span>'+esc(p.name)+'</span>'+(p.leader?'<small>FOUNDER</small>':'')+'</div>').join('')+'</div>'+
+    '<button class="btn" data-a="clanop" data-v="'+(c.leader?'disband':'leave')+'">'+(c.leader?'DISBAND CLAN':'LEAVE CLAN')+'</button></div>';
+}
+function clansModal(){
+  const st=ClanSt={loading:true,clan:null};
+  openModal('clans',clanHTML,{onClose:()=>{if(ClanSt===st)ClanSt=null;}});
+  api('clan').then(r=>{if(ClanSt!==st)return;st.loading=false;st.clan=r.clan||null;refreshModal();})
+  .catch(e=>{if(ClanSt!==st)return;st.loading=false;st.err=e.message||'Could not load clans.';refreshModal();});
+}
 function exploreModal(){
   const map=globalThis.STAKKZ_WORLD_LAYOUT;
   if(!map)return toast('World map unavailable.');
@@ -3695,6 +3717,20 @@ document.addEventListener('click', async e => {
     case 'zombies': plazaSend({ admin: { k: 'zom', on: !Zom.on } }); break;
     case 'adminpanel': openModal('admin', adminHTML); break;
     case 'stuff': stuffOpen(el.dataset.f ? { f: el.dataset.f, n: el.dataset.n } : { self: true }); break;
+    case 'clans': clansModal();break;
+    case 'clanrefresh': clansModal();break;
+    case 'clancopy': try{await navigator.clipboard.writeText(el.dataset.v);toast('Clan code copied.');}catch(e){toast('Clan code: '+el.dataset.v);}break;
+    case 'clanop': {
+      if(!ClanSt||ClanSt.loading)break;
+      const op=el.dataset.v,name=($('#clan-name')||{}).value||'',code=($('#clan-code')||{}).value||'';
+      if(op==='create'&&!name.trim()){toast('Enter a clan name.');break;}
+      if(op==='join'&&code.trim().length!==6){toast('Enter a six-letter code.');break;}
+      if(op==='disband'&&!window.confirm('Disband your clan for every member?'))break;
+      el.disabled=true;ClanSt.loading=true;
+      try{const r=await api('clan',{op,name,code});if(ClanSt){ClanSt.clan=r.clan||null;ClanSt.err=null;ClanSt.loading=false;refreshModal();toast(op==='create'?'Clan created.':op==='join'?'Joined clan.':op==='leave'?'Left clan.':'Clan disbanded.');}}
+      catch(er){if(ClanSt){ClanSt.loading=false;ClanSt.err=null;refreshModal();}toast(er.message||'Could not update clan.');}
+      break;
+    }
     case 'explore': exploreModal();break;
     case 'worldgoto': if(!Plaza.you){toast('Connect to the world first.');break;} closeModal();F.page='world';renderHome(true);plazaSend({travel:el.dataset.v});break;
     case 'stufftab': if (StuffSt) { StuffSt.tab = el.dataset.v; refreshModal(); } break;
