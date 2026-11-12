@@ -25,7 +25,7 @@ try{
   await page.evaluate(()=>document.querySelector('#bload')?.remove());
   await sleep(1400);
   const v=await page.evaluate(()=>{
-   const map=globalThis.STAKKZ_WORLD_LAYOUT, b=globalThis.B3;
+   const map=globalThis.STAKKZ_WORLD_LAYOUT, b=typeof B3==='undefined'?null:B3;
    return {three:!!globalThis.THREE,renderer:!!(b&&b.ok),env:!!globalThis.STAKKZ_BUILD_WORLD,layout:!!map,caves:map?.caves.length,field:map?.field,weaponCount:globalThis.BITZ_WEAPONS?.length,stage:document.querySelector('#stage').getBoundingClientRect().toJSON()};
   });
   assert(v.three&&v.renderer&&v.env&&v.layout,config.name+' WebGL scene not ready '+JSON.stringify(v));
