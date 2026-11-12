@@ -639,7 +639,7 @@ html.fopen #ftab{display:none}
 </style>
 
 <div id="bd" class="bg-paper"></div>
-<link rel="stylesheet" href="open-world.css?v=pastel-return1">
+<link rel="stylesheet" href="open-world.css?v=pastel-return1"><link rel="stylesheet" href="loot-polish.css?v=bluepurple4">
 
 <canvas id="gl" aria-hidden="true"></canvas>
 <aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div><div id="flogo" aria-label="BITZ"><span>B</span><span>I</span><span>T</span><span>Z</span></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
@@ -746,7 +746,7 @@ requestAnimationFrame(frame);
 <script src="three.min.js"></script>
 <script src="engine.js"></script>
 <script src="voxel-world.js?v=b1tz"></script>
-<script src="loot-rules.js?v=better-odds2"></script>
+<script src="loot-rules.js?v=better-odds3"></script>
 <script src="weapon-defs.js?v=weapons17a"></script>
 <script>
 'use strict';
@@ -2662,7 +2662,9 @@ function bxRemaining(){return BITZ_LOOT_RULES.eligible(ITEMS,wallet&&wallet.own|
 function bxTier(id){return BITZ_LOOT_RULES.tier(id,ITEMS)||'epic';}
 function bxTierTag(id){const t=bxTier(id);return '<span class="bx-tier bx-'+t+'">'+t.toUpperCase()+'</span>';}
 function bxOdds(){
-  const rates=BITZ_LOOT_RULES.odds(bxRemaining(),ITEMS);
+  const remaining=bxRemaining();
+  if(!remaining.length)return '<div class="bx-odds bx-complete">SEASON COMPLETE · EVERY REWARD COLLECTED</div>';
+  const rates=BITZ_LOOT_RULES.odds(remaining,ITEMS);
   return '<div class="bx-odds" aria-label="Current drop chances"><b>DROP CHANCES</b>'+
     BITZ_LOOT_RULES.order.map(t=>'<span class="bx-odd bx-'+t+'">'+t.toUpperCase()+' <strong>'+
       (Number.isInteger(rates[t])?rates[t]:rates[t].toFixed(1))+'%</strong></span>').join('')+'</div>';
@@ -2686,8 +2688,8 @@ function wheelHTML(st,col){
   return '<section class="bx-roulette" aria-label="Single-line prize ticker">'+
     '<div class="bx-reel-top"><strong>'+(st.phase==='spin'?'YOUR REWARD IS COMING':'POSSIBLE REWARDS')+'</strong><span>SEASON 1</span></div>'+
     '<div id="bx-reel-viewport" class="bx-reel-viewport'+(st.phase==='spin'?' bx-moving':'')+'">'+
-    '<div id="bx-reel-track" class="bx-reel-track">'+cards.map(x=>bxCard(x.item,col)).join('')+'</div></div>'+
-    '<span class="bx-pointer" aria-hidden="true"></span></section>';
+    '<div id="bx-reel-track" class="bx-reel-track">'+cards.map(x=>bxCard(x.item,col)).join('')+'</div><span class="bx-pointer" aria-hidden="true"></span></div>'+
+    '</section>';
 }
 function bxPrizeArt(id,col) {
   if(!id || !ITEMS[id])return '<i class="coin big"></i>';
@@ -2753,14 +2755,13 @@ function lootHTML(){
       bxConfetti()+'<div class="bx-reward-image"><div class="bx-reward-halo"></div>'+art+'</div>'+
       '<div class="bx-reward-text"><strong class="bx-win-title">'+(it?'YOU WON!':'BOX REFUNDED')+'</strong>'+
       (it?bxTierTag(id):'')+'<h2 class="bx-prize-name">'+(it?esc(it[1]):'GOLD RETURNED')+'</h2>'+
-      '<span class="bx-win-note">'+(it?(worn?'You are wearing this outfit':'Added to your collection'):'You already own every reward')+'</span>'+
+      '<span class="bx-win-note">'+(it?(worn?'Equipped and saved to your collection':'Saved to My Stuff · ready to equip'):'Every Season 1 outfit is already yours')+'</span>'+
       '<span class="bx-win-progress">'+owned+' / '+total+' COLLECTED</span></div></section>';
     const buttons='<div class="bx-actions bx-win-actions">'+
       (it&&!worn?'<button class="bx-cta" data-a="lootwear">EQUIP &amp; PLAY</button>':
-      '<button class="bx-cta" data-a="close">DONE</button>')+
-      (n>0?'<button class="bx-btn" data-a="lootopen">OPEN NEXT</button>':remaining.length?
-        '<button class="bx-btn" data-a="lootbuy">BUY ANOTHER</button>':'')+
-      (it&&!worn?'<button class="bx-btn bx-close" data-a="close">NOT NOW</button>':'')+
+      '<button class="bx-cta" data-a="lootdone">BACK TO WORLD</button>')+
+      (n>0?'<button class="bx-btn" data-a="lootopen">OPEN NEXT BOX</button>':remaining.length?
+        '<button class="bx-btn" data-a="lootbuy">BUY &amp; OPEN NEXT</button>':'')+
       '</div>';
     return '<div class="bx-shell">'+head+seasonRibbon()+section+buttons+'</div>';
   }
@@ -2772,10 +2773,10 @@ function lootHTML(){
     '<div class="bx-current-progress">'+owned+' / '+total+' COLLECTED</div></div></section>';
   const button=busy?'<button class="bx-cta" disabled>OPENING...</button>':
     n>0?'<button class="bx-cta" data-a="lootopen">OPEN BOX</button>':
-    remaining.length?'<button class="bx-cta" data-a="lootbuy">BUY</button>':
+    remaining.length?'<button class="bx-cta" data-a="lootbuy">BUY &amp; OPEN</button>':
     '<button class="bx-cta" disabled>SEASON COMPLETE</button>';
   const price=n>0?'<span class="bx-cost">'+fmt(n)+' AVAILABLE</span>':
-    remaining.length?'<span class="bx-cost">'+fmt(BOX_PRICE)+' GOLD</span>':'';
+    remaining.length?'<span class="bx-cost">'+fmt(BOX_PRICE)+' GOLD PER BOX</span>':'';
   return '<div class="bx-shell">'+head+seasonRibbon()+hero+bxOdds()+wheelHTML(st,col)+
     '<div class="bx-actions bx-base-actions">'+price+button+
     (busy?'':'<button class="bx-btn bx-browse" data-a="lootbrowse">VIEW REWARDS</button>')+'</div></div>';
@@ -3388,7 +3389,7 @@ function openModal(kind, render, opt) {
   if (typeof renderActions === 'function' && G) try { renderActions(); } catch (e) {}
 }
 function refreshModal() { if (modal) { const m = $('#modal'), y = m.scrollTop; m.className = 'card'; m.style.animation = 'none'; inM = true; try { patchHTML(m, modal.render()); } finally { inM = false; } m.scrollTop = y; } }
-function closeModal() { const f = modal && modal.onClose; modal = null; $('#veil').hidden = true; $('#modal').style.animation = ''; if (f) f(); if (G && typeof renderActions === 'function') try { renderActions(); } catch (e) {} }
+function closeModal() { if(modal&&modal.kind==='loot'&&lootSt&&['spin','purchasing','opening'].includes(lootSt.phase))return; const f = modal && modal.onClose; modal = null; $('#veil').hidden = true; $('#modal').style.animation = ''; if (f) f(); if (G && typeof renderActions === 'function') try { renderActions(); } catch (e) {} }
 function forcedModals() {
   const s = V;
   if (s.phase === 'over') { if (!modal || (modal.kind !== 'winner' && modal.kind !== 'loot')) winnerModal(); else if (modal.kind === 'winner') refreshModal(); return; }
@@ -3504,7 +3505,7 @@ const WORLD_HELP = [['arrow', 'Getting around', 'WASD walks. Arrow keys or dragg
   ['coins', 'Gold', 'You earn 1,000 gold every second, counted by the server, whether the page is open on your phone or your laptop. Walk into a floating cube to boost it for a while.'],
   ['gift', 'Collecting', 'Spend gold in the Shop on outfits, hats, extras, pets and scenes. Loot boxes cost 500,000 and only ever hold Legendary or Mythical exclusives you cannot buy.'],
   ['star', 'Swag Level', 'Everyone starts at -100. Rare things you wear, and everything you collect, push it up towards 9,999.'],
-  ['bolt', 'Blasters', 'Five guns on keys 1 to 5: Blaster, Pulse, Cannon, Scatter and Longshot. Click, F or right-click fires. At zero health you respawn a few seconds later. Eliminations pay 5,000 gold.'],
+  ['bolt', 'Blasters', 'Choose a gun in the Shop, then select it in the world. Left-click or hold to fire, or use F and right-click. Each gun has its own effects against zombies and bosses. At zero health you respawn a few seconds later.'],
   ['swap', 'Friends and trading', 'Everyone with an account is in your friends list. Tap a friend, or tap somebody in the world, to open their profile, trade with them, or remove them.']];
 const RULES = [['star', 'Goal', 'Be the last player standing. Everyone else goes bankrupt.'], ['arrow', 'Your turn', 'Roll and move. Buy the street you land on, or pay rent to whoever owns it. Doubles roll again, and three in a row means Jail. On a keyboard, Space does your main move. The camera closes in on whoever is rolling and moving; the Follow cam button switches that off.'], ['coins', 'Auctions', 'Pass on a street and it goes to auction. Everyone bids in turn, and the last bidder left wins it.'], ['home', 'Build', 'Own every street in a colour to double rent. Build evenly: three houses per street, then one hotel.'], ['cash', 'Short on cash', 'Sell houses and streets back to the bank for half price, or strike a trade. If you still cannot pay, you are out.'], ['bars', 'Jail', 'Roll doubles, pay £50 or play a card to get out. After three tries you pay and move.'], ['swap', 'Trades', 'Offer only cash and streets you own, for immediate acceptance or rejection. Trading closes in Final Chaos.'], ['arrow', 'Station travel', 'Land on a station you own and you can take the train, free, to any other station you own. You need to own both stations. Travelling ends your turn, with no Start bonus.'], ['bars', 'Setting up', 'The host picks the number of players (2 to 6, bots included), the bots and the turn timer. Everyone starts with £2,500 and no streets. Passing Start pays £200 and a loot box.'], ['arrow', 'Turn timer', 'Off, or 20, 30, 45 or 60 seconds, as the host chose. With it off, anyone can skip a player who has been away for 90 seconds.'], ['cash', 'Mortgages', 'Short of cash? Mortgage a street for half its price. It collects no rent until you pay back 55% of its price. You cannot build on a colour set with a mortgaged street.'], ['gift', 'Coins and loot boxes', 'Coins come from playing: buying, rent, sets, cards and Coin Rush. Spend them in the shop. You get a loot box every time you pass Start, and one for every game you finish.']];
 function rulesModal() { const home = $('#app').dataset.screen === 'home'; openModal('rules', () => '<div class="mhead">' + logo('sm') + xBtn() + '</div><h2>How to play</h2>' + (home ? WORLD_HELP : RULES).map(r => '<div class="rule">' + ico(r[0], 24) + '<b>' + r[1] + '</b><p>' + r[2] + '</p></div>').join('') + '<button class="btn go" data-a="close">Got it</button>'); }
@@ -3557,7 +3558,7 @@ document.addEventListener('click', async e => {
     case 'filt': F.filt = el.dataset.v; F.sel = null; rerender(); break;
     case 'more': F.filt = FGROUP[el.dataset.v] || 'outfit'; F.sel = null; F.wtab = 'shop'; if (!modal) F.page = 'shop'; rerender(); break;
     case 'look': { const k = el.dataset.k; F.look[k] = k === 'hair' ? el.dataset.v : +el.dataset.v; styleChanged(); break; }
-    case 'wear': { const k = el.dataset.k, v = el.dataset.v; if (k === 'gun' || (v && ITEMS[v] && ITEMS[v][0] === 'gun')) { const n = GUNIDS.indexOf(v); if (n >= 0 && gunOwned(n)) { B3.world.setWeapon(n); toast(ITEMS[v][1] + ' in hand. Press F or right-click to fire.'); } break; } if (!v) { if (k === 'pet') F.pet = ''; else if (k === 'outfit') F.look.outfit = 'tee'; else F.look[k] = ''; styleChanged(); } else if (owns(v)) { wearItem(v); styleChanged(); } break; }
+    case 'wear': { const k = el.dataset.k, v = el.dataset.v; if (k === 'gun' || (v && ITEMS[v] && ITEMS[v][0] === 'gun')) { const n = GUNIDS.indexOf(v); if (n >= 0 && gunOwned(n)) { B3.world.setWeapon(n); toast(ITEMS[v][1] + ' equipped. Click or hold to shoot.'); } break; } if (!v) { if (k === 'pet') F.pet = ''; else if (k === 'outfit') F.look.outfit = 'tee'; else F.look[k] = ''; styleChanged(); } else if (owns(v)) { wearItem(v); styleChanged(); } break; }
     case 'item': { const v = el.dataset.v; F.sel = v || null; if (v && ITEMS[v]) { F.filt = filtOf(v); F.wtab = 'shop'; if (!modal) F.page = 'shop'; } rerender(); break; }
     case 'buy': if (modal && modal.kind === 'buy') { act({ t: 'buy' }); break; } // falls through to the shop purchase
     case 'equip': { const id = F.sel, it = ITEMS[id]; if (!it) break;
@@ -3602,7 +3603,8 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'lootopen': await spinLoot(); break;
-    case 'lootwear': { const id=lootSt&&lootSt.prize&&lootSt.prize.item; if(!id)break; wearItem(id);styleChanged();closeModal();toast('Equipped '+ITEMS[id][1]+'!'); break; }
+    case 'lootwear': { const id=lootSt&&lootSt.prize&&lootSt.prize.item; if(!id)break; wearItem(id);F.page='world';F.sel=null;styleChanged();closeModal();renderHome(true);toast('Equipped '+ITEMS[id][1]+'. Ready to play!');break; }
+    case 'lootdone': F.page='world';F.sel=null;closeModal();renderHome(true);break;
     case 'gift': { const n = +el.dataset.n; if (!G || mode !== 'online' || me !== E.cur(G) || busy) { toast('You can send coins when it is your turn.'); break; } if (wallet.coins < n) { toast('You only have ' + fmt(wallet.coins) + ' coins.'); break; } if (await act({ t: 'gift', to: i, n: n })) { closeModal(); refreshAcct(); } break; }
     case 'view': settings.follow = settings.follow === false; applySettings(); break;
     case 'rules': rulesModal(); break;
