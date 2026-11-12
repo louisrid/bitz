@@ -1809,7 +1809,7 @@ const B3 = (function () {
   WD.setHp = (i, hp) => { const o = who(i); if (!o) return; setBar(o, hp); if (o === WD.me) { WD.hp = hp; hud('hit'); } };
   WD.ko = i => { const o = who(i); if (!o) return; o.dead = true; setBar(o, 0); o.g.rotation.x = -Math.PI / 2; burst(o.x, 2, o.z, 0xff4b3e, performance.now(), 16); if (o === WD.me) { WD.dead = true; WD.hp = 0; hud('ko'); } };
   WD.spawn = (i, x, z) => { const o = who(i); if (!o) return; o.dead = false; o.g.rotation.x = 0; setBar(o, 100); o.x = x; o.z = z; o.y = 0; if (o === WD.me) { WD.dead = false; WD.hp = 100; o.vy = 0; hud(); } else o.t = [x, 0, z, o.ry, 0]; };
-  WD.gun = (i, w) => { const o = WD.others.get(i); if (o) setGun(o, w ? 1 : 0); };
+  WD.gun = (i, w) => { const o = WD.others.get(i); if (o) setGun(o, w); };
   /* gold boost pads: walk into the floating cube; the server gives the boost and rests the pad */
   socialEnvironment.pickups.forEach(q => { q.mesh.visible = false; });
   const padG = new THREE.Group(), padM = new Map(), PADC = [0xffd60a, 0x19e3ff, 0xff2bd6], PADX = [2, 3, 5]; worldG.add(padG);
