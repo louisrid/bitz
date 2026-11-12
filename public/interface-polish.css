@@ -1,0 +1,22 @@
+/* Unified flat-outlined UI, using the shop as the baseline rather than adding a third design. */
+html:has(#veil:not([hidden])) #shopbig,html:has(#fprofov:not([hidden])) #shopbig{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#modal[data-kind="explore"],#modal[data-kind="stuff"]{font-family:"Coolvetica","Arial Black",sans-serif!important}
+#modal[data-kind="explore"] .mhead h2,#modal[data-kind="stuff"] .mhead h2{font:400 clamp(28px,4vw,36px)/1 "Coolvetica",sans-serif!important}
+#modal[data-kind="explore"] .explore-list{display:grid;gap:9px;margin-top:18px}
+#modal[data-kind="explore"] .explore-place{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#f4f3ff;border:3px solid #000;border-radius:13px;padding:12px;box-shadow:3px 4px 0 #000}
+#modal[data-kind="explore"] .explore-place>div{min-width:0;display:grid;gap:4px}
+#modal[data-kind="explore"] .explore-place b{font:400 23px/1.1 "Coolvetica",sans-serif}
+#modal[data-kind="explore"] .explore-place small{font:600 12px/1.3 "Space Grotesk",sans-serif}
+#modal[data-kind="explore"] .explore-place .btn{min-width:66px;background:#fff}
+#modal[data-kind="explore"] .explore-place .btn:hover{background:#cfc7ff}
+#modal[data-kind="stuff"] .stuff-tabs button{background:#fff;border:3px solid #000;color:#000;border-radius:10px;box-shadow:2px 3px 0 #000;font:400 17px/1 "Coolvetica",sans-serif}
+#modal[data-kind="stuff"] .stuff-tabs button.on{background:#d5cdff}
+#modal[data-kind="stuff"] .stile{border:3px solid #000!important;border-radius:12px!important;box-shadow:2px 3px 0 #000!important}
+#modal[data-kind="stuff"] button.stile:hover{background:#eeebff!important;transform:translateY(-2px)}
+@media(max-width:650px){
+ #modal[data-kind="explore"] .explore-place{padding:9px}
+ #modal[data-kind="explore"] .explore-place b{font-size:20px}
+ #modal[data-kind="explore"] .explore-place small{font-size:11px}
+ #modal[data-kind="explore"] .explore-place .btn{min-width:56px;padding:0 10px}
+ #app[data-screen="home"] #wbar .wbtn[data-a="explore"]{background:#d6ceff!important}
+}

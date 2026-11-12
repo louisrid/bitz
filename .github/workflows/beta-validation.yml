@@ -29,6 +29,10 @@ jobs:
           node --check public/engine.js
       - name: Beta smoke tests
         run: node tests/beta-smoke.mjs
+      - name: Loot fairness and duplicate-free server rewards
+        run: node tests/loot-ux.mjs
+      - name: Expanded world, landmarks and weapon definitions
+        run: node tests/world-and-weapons.mjs
       - name: Six-player game modes, station travel, hotels and final chaos
         run: node tests/gameplay-finalisation.mjs
       - name: Server, persistent storage and cross-device integration

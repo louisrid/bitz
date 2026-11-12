@@ -17,7 +17,14 @@
     {id:'g_phoenixgun',price:8000000,n:'Phoenix Lance',col:0xff9150,dmg:63,cd:980,range:41,rad:1.2,chain:2,burnMs:3500,burnDamage:18,ability:'Fire arcs'},
     {id:'g_crystalgun',price:3400000,n:'Crystal Storm',col:0xffa8f9,dmg:31,cd:480,range:31,rad:1.1,pellets:3,spread:.13,slowMs:1800,ability:'Shard barrage'},
     {id:'g_gravity',price:6500000,n:'Gravity Cannon',col:0x8ebaff,dmg:76,cd:1700,range:40,rad:1.8,splash:5.5,slowMs:3500,ability:'Gravity shockwave'},
-    {id:'g_spectral',price:15000000,n:'Spectral Beam',col:0xffcff6,dmg:115,cd:1450,range:90,rad:1.1,all:true,bossMult:2.1,ability:'Boss destroyer'}
+    {id:'g_spectral',price:15000000,n:'Spectral Beam',col:0xffcff6,dmg:115,cd:1450,range:90,rad:1.1,all:true,bossMult:2.1,ability:'Boss destroyer'},
+    {id:'g_shockwave',price:2900000,n:'Shockwave Blaster',col:0x75cfff,dmg:56,cd:970,range:35,rad:1.6,splash:5.5,knockback:11,ability:'Knocks back zombies'},
+    {id:'g_reaperblaze',price:3900000,n:'Soul Reaper',col:0xbe93ff,dmg:75,cd:1200,range:52,rad:1.1,chain:2,healOnKill:12,ability:'Heals when you finish a zombie'},
+    {id:'g_blizzard',price:6100000,n:'Blizzard Launcher',col:0xa9f8ff,dmg:58,cd:1250,range:41,rad:1.3,splash:6,slowMs:5200,ability:'Ice storm slows whole groups'},
+    {id:'g_hyperion',price:9000000,n:'Hyperion Rail',col:0xffdd83,dmg:125,cd:1900,range:110,rad:.8,all:true,execute:1.8,bossMult:1.4,ability:'Pierces and finishes wounded bosses'},
+    {id:'g_dragonfire',price:11000000,n:'Dragonfire',col:0xff6748,dmg:64,cd:1150,range:40,rad:1.4,splash:5,burnMs:5000,burnDamage:24,ability:'Burning area attack'},
+    {id:'g_eclipse',price:14000000,n:'Eclipse Coil',col:0xcf96ff,dmg:76,cd:1000,range:60,rad:1.4,chain:5,bossMult:1.55,ability:'Chains to five enemies'},
+    {id:'g_omniblast',price:18000000,n:'Omniblast',col:0xfff5bd,dmg:140,cd:2200,range:85,rad:1.6,all:true,splash:8,bossMult:2.3,knockback:5,ability:'Ultimate boss-clearing shockwave'}
   ];
   root.BITZ_WEAPONS=Object.freeze(list.map(x=>Object.freeze(x)));
 })(globalThis);

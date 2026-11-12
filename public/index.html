@@ -639,7 +639,7 @@ html.fopen #ftab{display:none}
 </style>
 
 <div id="bd" class="bg-paper"></div>
-<link rel="stylesheet" href="open-world.css?v=pastel-return1"><link rel="stylesheet" href="loot-polish.css?v=bluepurple4">
+<link rel="stylesheet" href="open-world.css?v=pastel-return1"><link rel="stylesheet" href="loot-polish.css?v=bluepurple4"><link rel="stylesheet" href="interface-polish.css?v=world1">
 
 <canvas id="gl" aria-hidden="true"></canvas>
 <aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div><div id="flogo" aria-label="BITZ"><span>B</span><span>I</span><span>T</span><span>Z</span></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
@@ -652,7 +652,7 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="stuff">My Stuff</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><button class="wbtn wzom" data-a="zombies" id="wzom" hidden>Zombies: off</button><button class="wbtn wadm" data-a="adminpanel" id="wadm" hidden>Admin</button><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="stuff">My Stuff</button><button class="wbtn" data-a="explore">Explore</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><button class="wbtn wzom" data-a="zombies" id="wzom" hidden>Zombies: off</button><button class="wbtn wadm" data-a="adminpanel" id="wadm" hidden>Admin</button><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
 <div id="title" class="bg-paper" hidden></div><div id="goldtop" aria-label="Your gold"><i class="gc"></i><span><em id="wgold">...</em><small id="wrate">+1,000,000/min</small></span></div><button id="shopbig" data-a="page" data-v="shop"><span class="sbi"></span><b>Shop</b><i class="sale">Sale</i></button><div id="bload" aria-label="Loading BITZ"><canvas id="blc"></canvas><div class="bl-vig"></div><div class="bl-scan"></div><div class="bl-hud"><i></i><i></i><i></i><i></i><span>BITZ</span><span>Loading</span></div><p class="bl-sr">Loading BITZ</p></div><script>(function(){
 var host=document.getElementById('bload'),cv=document.getElementById('blc');if(!host||!cv||!cv.getContext)return;
@@ -745,9 +745,10 @@ requestAnimationFrame(frame);
 
 <script src="three.min.js"></script>
 <script src="engine.js"></script>
-<script src="voxel-world.js?v=b1tz"></script>
+<script src="world-layout.js?v=exploration1"></script>
+<script src="voxel-world.js?v=exploration1"></script>
 <script src="loot-rules.js?v=better-odds3"></script>
-<script src="weapon-defs.js?v=weapons17a"></script>
+<script src="weapon-defs.js?v=weapons24a"></script>
 <script>
 'use strict';
 const E = Engine, T = E.T;
@@ -1711,8 +1712,8 @@ const B3 = (function () {
       else if (sub === 'gem') { P(0.34, 0.9, 0.34, 0x7ef9ff, 0, 0.45, 0, 'g'); P(0.24, 0.6, 0.24, 0xb388ff, 0.3, 0.3, 0.1, 'g'); P(0.2, 0.5, 0.2, 0x7ef9ff, -0.26, 0.25, -0.1, 'g'); P(0.9, 0.14, 0.8, 0x8d938a, 0, 0.07, 0); u.spark = 0x7ef9ff; }
       else { P(1.3, 0.7, 0.9, 0x7a4a26, 0, 0.35, 0); P(1.36, 0.3, 0.96, 0x5c3a1e, 0, 0.82, 0); P(1.4, 0.1, 0.12, 0xe8b830, 0, 0.6, 0.44, 's'); P(0.22, 0.26, 0.08, 0xe8b830, 0, 0.6, 0.5, 's'); [-0.62, 0.62].forEach(x => P(0.1, 1.0, 1.0, 0xe8b830, x, 0.5, 0, 's')); u.spark = 0xffd60a; }
     } else {
-      const boss = sub === 'boss', z = makeChar({ outfit: 'zombie', skin: 0 }, '#4f6b3d', 'bust'); const brute = sub === 'brute', runner = sub === 'runner', tint = boss ? 0x4a2a6a : brute ? 0x2c4f7a : runner ? 0x9a3b2a : 0; z.scale.setScalar(boss ? 4.6 : brute ? CHAR * 1.5 : runner ? CHAR * 0.9 : CHAR); if (tint) z.traverse(q => { if (q.isMesh && q.material && q.material.color && q.material.color.getHex() === 0x4f6b3d) q.material = L(tint); }); g.add(z); u.z = z;
-      const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xff2b2b, depthWrite: false })); const bw = boss ? 6.4 : brute ? 4.2 : 3.2, bh = boss ? 0.62 : 0.38; bar.scale.set(bw, bh, 1); bar.position.y = boss ? 16 : brute ? 11.5 : 8; bar.renderOrder = 7; const back = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x2a0000, depthWrite: false })); back.scale.set(bw + 0.16, bh + 0.14, 1); back.position.copy(bar.position); back.renderOrder = 6; g.add(back); g.add(bar); u.bar = bar; u.barW = bw; if (brute) { const tg = label('BRUTE', '#7ec8ff'); tg.position.y = 12.9; g.add(tg); }
+      const boss = sub === 'boss', z = makeChar({ outfit: 'zombie', skin: 0 }, '#4f6b3d', 'bust'); const brute = sub === 'brute', runner = sub === 'runner', cave = sub === 'cave', tint = boss ? 0x4a2a6a : brute ? 0x2c4f7a : runner ? 0x9a3b2a : cave ? 0x585580 : 0; z.scale.setScalar(boss ? 4.6 : brute ? CHAR * 1.5 : runner ? CHAR * 0.9 : CHAR); if (tint) z.traverse(q => { if (q.isMesh && q.material && q.material.color && q.material.color.getHex() === 0x4f6b3d) q.material = L(tint); }); g.add(z); u.z = z;
+      const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xff2b2b, depthWrite: false })); const bw = boss ? 6.4 : brute ? 4.2 : 3.2, bh = boss ? 0.62 : 0.38; bar.scale.set(bw, bh, 1); bar.position.y = boss ? 16 : brute ? 11.5 : 8; bar.renderOrder = 7; const back = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x2a0000, depthWrite: false })); back.scale.set(bw + 0.16, bh + 0.14, 1); back.position.copy(bar.position); back.renderOrder = 6; g.add(back); g.add(bar); u.bar = bar; u.barW = bw; if (brute) { const tg = label('BRUTE', '#7ec8ff'); tg.position.y = 12.9; g.add(tg); } if(cave){const tg=label('CAVE ZOMBIE','#b6b2ff');tg.position.y=9.4;g.add(tg);}
       if (boss) { const tg = label('BOSS', '#ff4b3e'); tg.position.y = 17.4; tg.scale.set(5, 1.25, 1); g.add(tg); u.beam = beacon(0xff4b3e, 40); g.add(u.beam); }
     }
     g.traverse(q => { q.castShadow = q.isMesh && !(q.material && q.material.transparent); });
@@ -1896,7 +1897,7 @@ const B3 = (function () {
       const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
       if (ml < 0.08) WD.sprinting = false; const sprinting = WD.sprinting && ml > 0.08, speed = (sprinting ? 34 : K.shift || Math.hypot(WD.joy.x, WD.joy.y) > 0.92 ? 13.5 : 8.5) * Math.min(1, ml);
       if (sprinting && ml > 0.1 && Math.random() < 0.6) burst(m.x - Math.sin(m.ry) * 0.6, 0.3, m.z - Math.cos(m.ry) * 0.6, 0xf4f1e2, now, 1);
-      const lim = 143; let nx = Math.max(-lim, Math.min(lim, m.x + mx * speed * dt)), nz = Math.max(-lim, Math.min(lim, m.z + mz * speed * dt));
+      const lim = (globalThis.STAKKZ_WORLD_LAYOUT||{}).limit||331; let nx = Math.max(-lim, Math.min(lim, m.x + mx * speed * dt)), nz = Math.max(-lim, Math.min(lim, m.z + mz * speed * dt));
       if (m.y < 2.6) { if (blocked(nx, nz)) { if (!blocked(nx, m.z)) nz = m.z; else if (!blocked(m.x, nz)) nx = m.x; else { nx = m.x; nz = m.z; } } }
       m.sp = Math.hypot(nx - m.x, nz - m.z) / Math.max(dt, 0.001); m.x = nx; m.z = nz;
       m.vy -= 32 * dt; m.y = Math.max(0, m.y + m.vy * dt); if (m.y === 0) m.vy = Math.max(0, m.vy);
@@ -2732,6 +2733,16 @@ function lootGalleryHTML(st,col){
     (page<Math.ceil(pool.length/12)-1?'<button class="bx-btn" data-a="lootpage" data-v="'+(page+1)+'">NEXT</button>':'')+
     '<button class="bx-btn" data-a="lootback">BACK TO BOX</button></div></div></div>';
 }
+function exploreModal(){
+  const map=globalThis.STAKKZ_WORLD_LAYOUT;
+  if(!map)return toast('World map unavailable.');
+  const p=B3.world&&B3.world.me||{x:0,z:0};
+  const entries=map.destinations.map(d=>{
+    const distance=Math.round(Math.hypot(p.x-d.x,p.z-d.z));
+    return '<div class="explore-place"><div><b>'+esc(d.name)+'</b><small>'+esc(d.desc)+' · '+distance+'m away</small></div><button class="btn" data-a="worldgoto" data-v="'+d.id+'">GO</button></div>';
+  }).join('');
+  openModal('explore',()=>'<div class="mhead"><h2>Explore the World</h2>'+xBtn()+'</div><p class="fine">Travel to the caves or waterfall. Walk over chests to collect prizes.</p><div class="explore-list">'+entries+'</div>');
+}
 function lootModal() {
   lootSt = {phase:'idle', prize:null};
   openModal('loot', lootHTML, {onClose:()=>{
@@ -3239,6 +3250,7 @@ function plazaGot(d) {
   if (d.shot) { W.shot(d.shot); if (d.shot[0] !== Plaza.you) Snd(d.shot[1] ? 'boom' : 'zap'); }
   if (d.hp) { W.setHp(d.hp[0], d.hp[1]); if (d.hp[0] === Plaza.you) Snd('hurt'); }
   if (d.ko) { const nm = i => (i === Plaza.you ? (F.name || 'You') : (W.others.get(i) || {}).n || 'Someone'); plazaFeed(nm(d.ko[1]) + ' eliminated ' + nm(d.ko[0])); W.ko(d.ko[0]); if (d.ko[0] === Plaza.you) Snd('hurt'); }
+  if (d.warp) {W.spawn(Plaza.you,d.warp[0],d.warp[1]);if(d.destination)toast('Arrived at '+d.destination+'.');}
   if (d.spawn) W.spawn(d.spawn[0], d.spawn[1], d.spawn[2]);
   if (d.wpn && d.wpn[0] !== Plaza.you) W.gun(d.wpn[0], d.wpn[1]);
   if (d.pads) W.pads(d.pads);
@@ -3501,7 +3513,7 @@ function winnerModal() {
       (mode === 'online' && rematch ? '<p class="fine c">' + (rematch.phase === 'lobby' ? esc(rematch.players[0] ? rematch.players[0].name : 'Someone') + ' is setting up the next game.' : 'The others have started the next game.') + '</p>' : '');
   });
 }
-const WORLD_HELP = [['arrow', 'Getting around', 'WASD walks. Arrow keys or dragging turn the camera. Double-tap W to sprint at four times the speed for as long as you keep moving. The + and − keys, the wheel or the zoom buttons zoom. Space jumps, Shift runs, scroll or pinch zooms. Click, hold the button, F or right-click shoots where you are looking. Shift-click a player to open their profile.'],
+const WORLD_HELP = [['star', 'Explore and collect', 'Choose Explore above the world to visit three caves and the waterfall. Walk into tunnels and pick up chests, but beware of cave zombies.'], ['arrow', 'Getting around', 'WASD walks. Arrow keys or dragging turn the camera. Double-tap W to sprint at four times the speed for as long as you keep moving. The + and − keys, the wheel or the zoom buttons zoom. Space jumps, Shift runs, scroll or pinch zooms. Click, hold the button, F or right-click shoots where you are looking. Shift-click a player to open their profile.'],
   ['coins', 'Gold', 'You earn 1,000 gold every second, counted by the server, whether the page is open on your phone or your laptop. Walk into a floating cube to boost it for a while.'],
   ['gift', 'Collecting', 'Spend gold in the Shop on outfits, hats, extras, pets and scenes. Loot boxes cost 500,000 and only ever hold Legendary or Mythical exclusives you cannot buy.'],
   ['star', 'Swag Level', 'Everyone starts at -100. Rare things you wear, and everything you collect, push it up towards 9,999.'],
@@ -3683,6 +3695,8 @@ document.addEventListener('click', async e => {
     case 'zombies': plazaSend({ admin: { k: 'zom', on: !Zom.on } }); break;
     case 'adminpanel': openModal('admin', adminHTML); break;
     case 'stuff': stuffOpen(el.dataset.f ? { f: el.dataset.f, n: el.dataset.n } : { self: true }); break;
+    case 'explore': exploreModal();break;
+    case 'worldgoto': if(!Plaza.you){toast('Connect to the world first.');break;} closeModal();F.page='world';renderHome(true);plazaSend({travel:el.dataset.v});break;
     case 'stufftab': if (StuffSt) { StuffSt.tab = el.dataset.v; refreshModal(); } break;
     case 'zoomin': B3.world.zoomBy(0.8); break;
     case 'zoomout': B3.world.zoomBy(1.25); break;
