@@ -71,6 +71,27 @@ try {
   assert.equal(laptop.id,registered.id,'phone and laptop must reference the same account');
   const me=await request('me',laptop.token);
   assert.equal(me.status,200);assert.equal(me.id,registered.id);
+  // Registered clan membership is server-authoritative and persists on accounts.
+  const clanKeyA='9'.repeat(48),clanKeyB='8'.repeat(48);
+  const founder=await request('auth/register',clanKeyA,{username:'ClanFounderQA',password:'ClanTestPassword123!'});
+  const member=await request('auth/register',clanKeyB,{username:'ClanMemberQA',password:'ClanTestPassword123!'});
+  assert.equal(founder.status,200,JSON.stringify(founder));
+  assert.equal(member.status,200,JSON.stringify(member));
+  assert.equal((await request('clan',other,{op:'create',name:'Guest Clan'})).status,403,'guests cannot create clans');
+  const created=await request('clan',founder.token,{op:'create',name:'Purple Squad'});
+  assert.equal(created.status,200,JSON.stringify(created));
+  assert.equal(created.clan.leader,true);
+  assert.match(created.clan.code,/^[A-Z]{6}$/);
+  const invite=created.clan.code;
+  const joined=await request('clan',member.token,{op:'join',code:invite});
+  assert.equal(joined.status,200,JSON.stringify(joined));
+  assert.equal(joined.clan.members.length,2);
+  assert.equal((await request('clan',founder.token)).clan.members.length,2);
+  assert.equal((await request('clan',member.token,{op:'leave'})).clan,null);
+  assert.equal((await request('clan',member.token,{op:'join',code:invite})).clan.members.length,2);
+  assert.equal((await request('clan',founder.token,{op:'disband'})).clan,null);
+  assert.equal((await request('clan',member.token)).clan,null);
+  console.log('Clan creation, registered invites, roster, leaving and founder disband passed.');
   // Leaving a bot-only lobby must delete it, not leave an AI as host.
   const botOnly=await request('party',other,{mode:25,bots:2,difficulty:'easy'});
   assert.equal(botOnly.status,200);

@@ -639,7 +639,7 @@ html.fopen #ftab{display:none}
 </style>
 
 <div id="bd" class="bg-paper"></div>
-<link rel="stylesheet" href="open-world.css?v=pastel-return1">
+<link rel="stylesheet" href="open-world.css?v=pastel-return1"><link rel="stylesheet" href="loot-polish.css?v=bluepurple4"><link rel="stylesheet" href="interface-polish.css?v=world1">
 
 <canvas id="gl" aria-hidden="true"></canvas>
 <aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div><div id="flogo" aria-label="BITZ"><span>B</span><span>I</span><span>T</span><span>Z</span></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
@@ -652,7 +652,7 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="stuff">My Stuff</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><button class="wbtn wzom" data-a="zombies" id="wzom" hidden>Zombies: off</button><button class="wbtn wadm" data-a="adminpanel" id="wadm" hidden>Admin</button><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="stuff">My Stuff</button><button class="wbtn" data-a="explore">Explore</button><button class="wbtn" data-a="clans">Clans</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><button class="wbtn wzom" data-a="zombies" id="wzom" hidden>Zombies: off</button><button class="wbtn wadm" data-a="adminpanel" id="wadm" hidden>Admin</button><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
 <div id="title" class="bg-paper" hidden></div><div id="goldtop" aria-label="Your gold"><i class="gc"></i><span><em id="wgold">...</em><small id="wrate">+1,000,000/min</small></span></div><button id="shopbig" data-a="page" data-v="shop"><span class="sbi"></span><b>Shop</b><i class="sale">Sale</i></button><div id="bload" aria-label="Loading BITZ"><canvas id="blc"></canvas><div class="bl-vig"></div><div class="bl-scan"></div><div class="bl-hud"><i></i><i></i><i></i><i></i><span>BITZ</span><span>Loading</span></div><p class="bl-sr">Loading BITZ</p></div><script>(function(){
 var host=document.getElementById('bload'),cv=document.getElementById('blc');if(!host||!cv||!cv.getContext)return;
@@ -745,9 +745,10 @@ requestAnimationFrame(frame);
 
 <script src="three.min.js"></script>
 <script src="engine.js"></script>
-<script src="voxel-world.js?v=b1tz"></script>
-<script src="loot-rules.js?v=better-odds2"></script>
-<script src="weapon-defs.js?v=weapons17a"></script>
+<script src="world-layout.js?v=exploration1"></script>
+<script src="voxel-world.js?v=exploration1"></script>
+<script src="loot-rules.js?v=better-odds3"></script>
+<script src="weapon-defs.js?v=weapons24a"></script>
 <script>
 'use strict';
 const E = Engine, T = E.T;
@@ -1711,8 +1712,8 @@ const B3 = (function () {
       else if (sub === 'gem') { P(0.34, 0.9, 0.34, 0x7ef9ff, 0, 0.45, 0, 'g'); P(0.24, 0.6, 0.24, 0xb388ff, 0.3, 0.3, 0.1, 'g'); P(0.2, 0.5, 0.2, 0x7ef9ff, -0.26, 0.25, -0.1, 'g'); P(0.9, 0.14, 0.8, 0x8d938a, 0, 0.07, 0); u.spark = 0x7ef9ff; }
       else { P(1.3, 0.7, 0.9, 0x7a4a26, 0, 0.35, 0); P(1.36, 0.3, 0.96, 0x5c3a1e, 0, 0.82, 0); P(1.4, 0.1, 0.12, 0xe8b830, 0, 0.6, 0.44, 's'); P(0.22, 0.26, 0.08, 0xe8b830, 0, 0.6, 0.5, 's'); [-0.62, 0.62].forEach(x => P(0.1, 1.0, 1.0, 0xe8b830, x, 0.5, 0, 's')); u.spark = 0xffd60a; }
     } else {
-      const boss = sub === 'boss', z = makeChar({ outfit: 'zombie', skin: 0 }, '#4f6b3d', 'bust'); const brute = sub === 'brute', runner = sub === 'runner', tint = boss ? 0x4a2a6a : brute ? 0x2c4f7a : runner ? 0x9a3b2a : 0; z.scale.setScalar(boss ? 4.6 : brute ? CHAR * 1.5 : runner ? CHAR * 0.9 : CHAR); if (tint) z.traverse(q => { if (q.isMesh && q.material && q.material.color && q.material.color.getHex() === 0x4f6b3d) q.material = L(tint); }); g.add(z); u.z = z;
-      const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xff2b2b, depthWrite: false })); const bw = boss ? 6.4 : brute ? 4.2 : 3.2, bh = boss ? 0.62 : 0.38; bar.scale.set(bw, bh, 1); bar.position.y = boss ? 16 : brute ? 11.5 : 8; bar.renderOrder = 7; const back = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x2a0000, depthWrite: false })); back.scale.set(bw + 0.16, bh + 0.14, 1); back.position.copy(bar.position); back.renderOrder = 6; g.add(back); g.add(bar); u.bar = bar; u.barW = bw; if (brute) { const tg = label('BRUTE', '#7ec8ff'); tg.position.y = 12.9; g.add(tg); }
+      const boss = sub === 'boss', z = makeChar({ outfit: 'zombie', skin: 0 }, '#4f6b3d', 'bust'); const brute = sub === 'brute', runner = sub === 'runner', cave = sub === 'cave', tint = boss ? 0x4a2a6a : brute ? 0x2c4f7a : runner ? 0x9a3b2a : cave ? 0x585580 : 0; z.scale.setScalar(boss ? 4.6 : brute ? CHAR * 1.5 : runner ? CHAR * 0.9 : CHAR); if (tint) z.traverse(q => { if (q.isMesh && q.material && q.material.color && q.material.color.getHex() === 0x4f6b3d) q.material = L(tint); }); g.add(z); u.z = z;
+      const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xff2b2b, depthWrite: false })); const bw = boss ? 6.4 : brute ? 4.2 : 3.2, bh = boss ? 0.62 : 0.38; bar.scale.set(bw, bh, 1); bar.position.y = boss ? 16 : brute ? 11.5 : 8; bar.renderOrder = 7; const back = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x2a0000, depthWrite: false })); back.scale.set(bw + 0.16, bh + 0.14, 1); back.position.copy(bar.position); back.renderOrder = 6; g.add(back); g.add(bar); u.bar = bar; u.barW = bw; if (brute) { const tg = label('BRUTE', '#7ec8ff'); tg.position.y = 12.9; g.add(tg); } if(cave){const tg=label('CAVE ZOMBIE','#b6b2ff');tg.position.y=9.4;g.add(tg);}
       if (boss) { const tg = label('BOSS', '#ff4b3e'); tg.position.y = 17.4; tg.scale.set(5, 1.25, 1); g.add(tg); u.beam = beacon(0xff4b3e, 40); g.add(u.beam); }
     }
     g.traverse(q => { q.castShadow = q.isMesh && !(q.material && q.material.transparent); });
@@ -1808,7 +1809,7 @@ const B3 = (function () {
   WD.setHp = (i, hp) => { const o = who(i); if (!o) return; setBar(o, hp); if (o === WD.me) { WD.hp = hp; hud('hit'); } };
   WD.ko = i => { const o = who(i); if (!o) return; o.dead = true; setBar(o, 0); o.g.rotation.x = -Math.PI / 2; burst(o.x, 2, o.z, 0xff4b3e, performance.now(), 16); if (o === WD.me) { WD.dead = true; WD.hp = 0; hud('ko'); } };
   WD.spawn = (i, x, z) => { const o = who(i); if (!o) return; o.dead = false; o.g.rotation.x = 0; setBar(o, 100); o.x = x; o.z = z; o.y = 0; if (o === WD.me) { WD.dead = false; WD.hp = 100; o.vy = 0; hud(); } else o.t = [x, 0, z, o.ry, 0]; };
-  WD.gun = (i, w) => { const o = WD.others.get(i); if (o) setGun(o, w ? 1 : 0); };
+  WD.gun = (i, w) => { const o = WD.others.get(i); if (o) setGun(o, w); };
   /* gold boost pads: walk into the floating cube; the server gives the boost and rests the pad */
   socialEnvironment.pickups.forEach(q => { q.mesh.visible = false; });
   const padG = new THREE.Group(), padM = new Map(), PADC = [0xffd60a, 0x19e3ff, 0xff2bd6], PADX = [2, 3, 5]; worldG.add(padG);
@@ -1896,7 +1897,7 @@ const B3 = (function () {
       const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
       if (ml < 0.08) WD.sprinting = false; const sprinting = WD.sprinting && ml > 0.08, speed = (sprinting ? 34 : K.shift || Math.hypot(WD.joy.x, WD.joy.y) > 0.92 ? 13.5 : 8.5) * Math.min(1, ml);
       if (sprinting && ml > 0.1 && Math.random() < 0.6) burst(m.x - Math.sin(m.ry) * 0.6, 0.3, m.z - Math.cos(m.ry) * 0.6, 0xf4f1e2, now, 1);
-      const lim = 143; let nx = Math.max(-lim, Math.min(lim, m.x + mx * speed * dt)), nz = Math.max(-lim, Math.min(lim, m.z + mz * speed * dt));
+      const lim = (globalThis.STAKKZ_WORLD_LAYOUT||{}).limit||331; let nx = Math.max(-lim, Math.min(lim, m.x + mx * speed * dt)), nz = Math.max(-lim, Math.min(lim, m.z + mz * speed * dt));
       if (m.y < 2.6) { if (blocked(nx, nz)) { if (!blocked(nx, m.z)) nz = m.z; else if (!blocked(m.x, nz)) nx = m.x; else { nx = m.x; nz = m.z; } } }
       m.sp = Math.hypot(nx - m.x, nz - m.z) / Math.max(dt, 0.001); m.x = nx; m.z = nz;
       m.vy -= 32 * dt; m.y = Math.max(0, m.y + m.vy * dt); if (m.y === 0) m.vy = Math.max(0, m.vy);
@@ -2662,7 +2663,9 @@ function bxRemaining(){return BITZ_LOOT_RULES.eligible(ITEMS,wallet&&wallet.own|
 function bxTier(id){return BITZ_LOOT_RULES.tier(id,ITEMS)||'epic';}
 function bxTierTag(id){const t=bxTier(id);return '<span class="bx-tier bx-'+t+'">'+t.toUpperCase()+'</span>';}
 function bxOdds(){
-  const rates=BITZ_LOOT_RULES.odds(bxRemaining(),ITEMS);
+  const remaining=bxRemaining();
+  if(!remaining.length)return '<div class="bx-odds bx-complete">SEASON COMPLETE · EVERY REWARD COLLECTED</div>';
+  const rates=BITZ_LOOT_RULES.odds(remaining,ITEMS);
   return '<div class="bx-odds" aria-label="Current drop chances"><b>DROP CHANCES</b>'+
     BITZ_LOOT_RULES.order.map(t=>'<span class="bx-odd bx-'+t+'">'+t.toUpperCase()+' <strong>'+
       (Number.isInteger(rates[t])?rates[t]:rates[t].toFixed(1))+'%</strong></span>').join('')+'</div>';
@@ -2686,8 +2689,8 @@ function wheelHTML(st,col){
   return '<section class="bx-roulette" aria-label="Single-line prize ticker">'+
     '<div class="bx-reel-top"><strong>'+(st.phase==='spin'?'YOUR REWARD IS COMING':'POSSIBLE REWARDS')+'</strong><span>SEASON 1</span></div>'+
     '<div id="bx-reel-viewport" class="bx-reel-viewport'+(st.phase==='spin'?' bx-moving':'')+'">'+
-    '<div id="bx-reel-track" class="bx-reel-track">'+cards.map(x=>bxCard(x.item,col)).join('')+'</div></div>'+
-    '<span class="bx-pointer" aria-hidden="true"></span></section>';
+    '<div id="bx-reel-track" class="bx-reel-track">'+cards.map(x=>bxCard(x.item,col)).join('')+'</div><span class="bx-pointer" aria-hidden="true"></span></div>'+
+    '</section>';
 }
 function bxPrizeArt(id,col) {
   if(!id || !ITEMS[id])return '<i class="coin big"></i>';
@@ -2730,6 +2733,38 @@ function lootGalleryHTML(st,col){
     (page<Math.ceil(pool.length/12)-1?'<button class="bx-btn" data-a="lootpage" data-v="'+(page+1)+'">NEXT</button>':'')+
     '<button class="bx-btn" data-a="lootback">BACK TO BOX</button></div></div></div>';
 }
+let ClanSt=null;
+function clanHTML(){
+  const st=ClanSt;if(!st)return '';
+  const head='<div class="mhead"><h2>Clans</h2>'+xBtn()+'</div>';
+  if(st.loading)return head+'<p class="fine">Loading your clan…</p>';
+  if(st.err)return head+'<p class="fine">'+esc(st.err)+'</p><button class="btn" data-a="clanrefresh">Try again</button>';
+  const c=st.clan;
+  if(!c)return head+'<p class="fine">Team up with friends. Create a clan or join one with its code.</p>'+
+    '<div class="clan-panel"><h3>Create clan</h3><input class="t" id="clan-name" maxlength="24" autocomplete="off" placeholder="Clan name" aria-label="Clan name"><button class="btn go" data-a="clanop" data-v="create">CREATE CLAN</button></div>'+
+    '<div class="clan-panel"><h3>Join clan</h3><input class="t" id="clan-code" maxlength="6" autocomplete="off" autocapitalize="characters" placeholder="6-letter code" aria-label="Clan join code"><button class="btn" data-a="clanop" data-v="join">JOIN CLAN</button></div>';
+  return head+'<div class="clan-main"><span class="clan-overline">YOUR CLAN</span><h2>'+esc(c.name)+'</h2>'+
+    '<div class="clan-invite"><span>Join code <strong>'+esc(c.code)+'</strong></span><button class="btn sm" data-a="clancopy" data-v="'+esc(c.code)+'">COPY</button></div>'+
+    '<p class="fine">'+c.members.length+' / 30 members</p>'+
+    '<div class="clan-roster">'+c.members.map(p=>'<div class="clan-member"><span>'+esc(p.name)+'</span>'+(p.leader?'<small>FOUNDER</small>':'')+'</div>').join('')+'</div>'+
+    '<button class="btn" data-a="clanop" data-v="'+(c.leader?'disband':'leave')+'">'+(c.leader?'DISBAND CLAN':'LEAVE CLAN')+'</button></div>';
+}
+function clansModal(){
+  const st=ClanSt={loading:true,clan:null};
+  openModal('clans',clanHTML,{onClose:()=>{if(ClanSt===st)ClanSt=null;}});
+  api('clan').then(r=>{if(ClanSt!==st)return;st.loading=false;st.clan=r.clan||null;refreshModal();})
+  .catch(e=>{if(ClanSt!==st)return;st.loading=false;st.err=e.message||'Could not load clans.';refreshModal();});
+}
+function exploreModal(){
+  const map=globalThis.STAKKZ_WORLD_LAYOUT;
+  if(!map)return toast('World map unavailable.');
+  const p=B3.world&&B3.world.me||{x:0,z:0};
+  const entries=map.destinations.map(d=>{
+    const distance=Math.round(Math.hypot(p.x-d.x,p.z-d.z));
+    return '<div class="explore-place"><div><b>'+esc(d.name)+'</b><small>'+esc(d.desc)+' · '+distance+'m away</small></div><button class="btn" data-a="worldgoto" data-v="'+d.id+'">GO</button></div>';
+  }).join('');
+  openModal('explore',()=>'<div class="mhead"><h2>Explore the World</h2>'+xBtn()+'</div><p class="fine">Travel to the caves or waterfall. Walk over chests to collect prizes.</p><div class="explore-list">'+entries+'</div>');
+}
 function lootModal() {
   lootSt = {phase:'idle', prize:null};
   openModal('loot', lootHTML, {onClose:()=>{
@@ -2753,14 +2788,13 @@ function lootHTML(){
       bxConfetti()+'<div class="bx-reward-image"><div class="bx-reward-halo"></div>'+art+'</div>'+
       '<div class="bx-reward-text"><strong class="bx-win-title">'+(it?'YOU WON!':'BOX REFUNDED')+'</strong>'+
       (it?bxTierTag(id):'')+'<h2 class="bx-prize-name">'+(it?esc(it[1]):'GOLD RETURNED')+'</h2>'+
-      '<span class="bx-win-note">'+(it?(worn?'You are wearing this outfit':'Added to your collection'):'You already own every reward')+'</span>'+
+      '<span class="bx-win-note">'+(it?(worn?'Equipped and saved to your collection':'Saved to My Stuff · ready to equip'):'Every Season 1 outfit is already yours')+'</span>'+
       '<span class="bx-win-progress">'+owned+' / '+total+' COLLECTED</span></div></section>';
     const buttons='<div class="bx-actions bx-win-actions">'+
       (it&&!worn?'<button class="bx-cta" data-a="lootwear">EQUIP &amp; PLAY</button>':
-      '<button class="bx-cta" data-a="close">DONE</button>')+
-      (n>0?'<button class="bx-btn" data-a="lootopen">OPEN NEXT</button>':remaining.length?
-        '<button class="bx-btn" data-a="lootbuy">BUY ANOTHER</button>':'')+
-      (it&&!worn?'<button class="bx-btn bx-close" data-a="close">NOT NOW</button>':'')+
+      '<button class="bx-cta" data-a="lootdone">BACK TO WORLD</button>')+
+      (n>0?'<button class="bx-btn" data-a="lootopen">OPEN NEXT BOX</button>':remaining.length?
+        '<button class="bx-btn" data-a="lootbuy">BUY &amp; OPEN NEXT</button>':'')+
       '</div>';
     return '<div class="bx-shell">'+head+seasonRibbon()+section+buttons+'</div>';
   }
@@ -2772,10 +2806,10 @@ function lootHTML(){
     '<div class="bx-current-progress">'+owned+' / '+total+' COLLECTED</div></div></section>';
   const button=busy?'<button class="bx-cta" disabled>OPENING...</button>':
     n>0?'<button class="bx-cta" data-a="lootopen">OPEN BOX</button>':
-    remaining.length?'<button class="bx-cta" data-a="lootbuy">BUY</button>':
+    remaining.length?'<button class="bx-cta" data-a="lootbuy">BUY &amp; OPEN</button>':
     '<button class="bx-cta" disabled>SEASON COMPLETE</button>';
   const price=n>0?'<span class="bx-cost">'+fmt(n)+' AVAILABLE</span>':
-    remaining.length?'<span class="bx-cost">'+fmt(BOX_PRICE)+' GOLD</span>':'';
+    remaining.length?'<span class="bx-cost">'+fmt(BOX_PRICE)+' GOLD PER BOX</span>':'';
   return '<div class="bx-shell">'+head+seasonRibbon()+hero+bxOdds()+wheelHTML(st,col)+
     '<div class="bx-actions bx-base-actions">'+price+button+
     (busy?'':'<button class="bx-btn bx-browse" data-a="lootbrowse">VIEW REWARDS</button>')+'</div></div>';
@@ -2882,7 +2916,7 @@ function renderHome(soft=false) {
   $('#app').dataset.page=F.page;
   if(F.page==='world'){
     $('#side').replaceChildren();
-    B3.show(null);plazaSync();return;
+    if(B3.ok) B3.show(null);plazaSync();return;
   }
   const off = Net.ready && !Net.db ? '<p class="note">Parties need a connection to the game server. Play works without one.</p>' : Net.ready && !Net.canWrite ? '<p class="note">Your access is view-only. Ask the owner of this page to make you a Contributor.</p>' : '';
   let h = '<header class="hd"><span class="whoami">' + ava(F.look, PC[0], 40) + '<span><b>' + esc(F.name || 'You') + '</b><small><i class="coin"></i>' + fmt(wallet.coins) + '</small></span></span><div class="tools">' + (F.page !== 'world' ? '<button class="bigx" data-a="page" data-v="world" aria-label="Close">&#x2715;</button>' : '') + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button><button class="ib" data-a="settings" aria-label="Settings">' + ico('gear', 20) + '</button></div></header>' +
@@ -3238,6 +3272,7 @@ function plazaGot(d) {
   if (d.shot) { W.shot(d.shot); if (d.shot[0] !== Plaza.you) Snd(d.shot[1] ? 'boom' : 'zap'); }
   if (d.hp) { W.setHp(d.hp[0], d.hp[1]); if (d.hp[0] === Plaza.you) Snd('hurt'); }
   if (d.ko) { const nm = i => (i === Plaza.you ? (F.name || 'You') : (W.others.get(i) || {}).n || 'Someone'); plazaFeed(nm(d.ko[1]) + ' eliminated ' + nm(d.ko[0])); W.ko(d.ko[0]); if (d.ko[0] === Plaza.you) Snd('hurt'); }
+  if (d.warp) {W.spawn(Plaza.you,d.warp[0],d.warp[1]);if(d.destination)toast('Arrived at '+d.destination+'.');}
   if (d.spawn) W.spawn(d.spawn[0], d.spawn[1], d.spawn[2]);
   if (d.wpn && d.wpn[0] !== Plaza.you) W.gun(d.wpn[0], d.wpn[1]);
   if (d.pads) W.pads(d.pads);
@@ -3388,7 +3423,7 @@ function openModal(kind, render, opt) {
   if (typeof renderActions === 'function' && G) try { renderActions(); } catch (e) {}
 }
 function refreshModal() { if (modal) { const m = $('#modal'), y = m.scrollTop; m.className = 'card'; m.style.animation = 'none'; inM = true; try { patchHTML(m, modal.render()); } finally { inM = false; } m.scrollTop = y; } }
-function closeModal() { const f = modal && modal.onClose; modal = null; $('#veil').hidden = true; $('#modal').style.animation = ''; if (f) f(); if (G && typeof renderActions === 'function') try { renderActions(); } catch (e) {} }
+function closeModal() { if(modal&&modal.kind==='loot'&&lootSt&&['spin','purchasing','opening'].includes(lootSt.phase))return; const f = modal && modal.onClose; modal = null; $('#veil').hidden = true; $('#modal').style.animation = ''; if (f) f(); if (G && typeof renderActions === 'function') try { renderActions(); } catch (e) {} }
 function forcedModals() {
   const s = V;
   if (s.phase === 'over') { if (!modal || (modal.kind !== 'winner' && modal.kind !== 'loot')) winnerModal(); else if (modal.kind === 'winner') refreshModal(); return; }
@@ -3500,11 +3535,11 @@ function winnerModal() {
       (mode === 'online' && rematch ? '<p class="fine c">' + (rematch.phase === 'lobby' ? esc(rematch.players[0] ? rematch.players[0].name : 'Someone') + ' is setting up the next game.' : 'The others have started the next game.') + '</p>' : '');
   });
 }
-const WORLD_HELP = [['arrow', 'Getting around', 'WASD walks. Arrow keys or dragging turn the camera. Double-tap W to sprint at four times the speed for as long as you keep moving. The + and − keys, the wheel or the zoom buttons zoom. Space jumps, Shift runs, scroll or pinch zooms. Click, hold the button, F or right-click shoots where you are looking. Shift-click a player to open their profile.'],
+const WORLD_HELP = [['star', 'Explore and collect', 'Choose Explore above the world to visit three caves and the waterfall. Walk into tunnels and pick up chests, but beware of cave zombies.'], ['arrow', 'Getting around', 'WASD walks. Arrow keys or dragging turn the camera. Double-tap W to sprint at four times the speed for as long as you keep moving. The + and − keys, the wheel or the zoom buttons zoom. Space jumps, Shift runs, scroll or pinch zooms. Click, hold the button, F or right-click shoots where you are looking. Shift-click a player to open their profile.'],
   ['coins', 'Gold', 'You earn 1,000 gold every second, counted by the server, whether the page is open on your phone or your laptop. Walk into a floating cube to boost it for a while.'],
   ['gift', 'Collecting', 'Spend gold in the Shop on outfits, hats, extras, pets and scenes. Loot boxes cost 500,000 and only ever hold Legendary or Mythical exclusives you cannot buy.'],
   ['star', 'Swag Level', 'Everyone starts at -100. Rare things you wear, and everything you collect, push it up towards 9,999.'],
-  ['bolt', 'Blasters', 'Five guns on keys 1 to 5: Blaster, Pulse, Cannon, Scatter and Longshot. Click, F or right-click fires. At zero health you respawn a few seconds later. Eliminations pay 5,000 gold.'],
+  ['bolt', 'Blasters', 'Choose a gun in the Shop, then select it in the world. Left-click or hold to fire, or use F and right-click. Each gun has its own effects against zombies and bosses. At zero health you respawn a few seconds later.'],
   ['swap', 'Friends and trading', 'Everyone with an account is in your friends list. Tap a friend, or tap somebody in the world, to open their profile, trade with them, or remove them.']];
 const RULES = [['star', 'Goal', 'Be the last player standing. Everyone else goes bankrupt.'], ['arrow', 'Your turn', 'Roll and move. Buy the street you land on, or pay rent to whoever owns it. Doubles roll again, and three in a row means Jail. On a keyboard, Space does your main move. The camera closes in on whoever is rolling and moving; the Follow cam button switches that off.'], ['coins', 'Auctions', 'Pass on a street and it goes to auction. Everyone bids in turn, and the last bidder left wins it.'], ['home', 'Build', 'Own every street in a colour to double rent. Build evenly: three houses per street, then one hotel.'], ['cash', 'Short on cash', 'Sell houses and streets back to the bank for half price, or strike a trade. If you still cannot pay, you are out.'], ['bars', 'Jail', 'Roll doubles, pay £50 or play a card to get out. After three tries you pay and move.'], ['swap', 'Trades', 'Offer only cash and streets you own, for immediate acceptance or rejection. Trading closes in Final Chaos.'], ['arrow', 'Station travel', 'Land on a station you own and you can take the train, free, to any other station you own. You need to own both stations. Travelling ends your turn, with no Start bonus.'], ['bars', 'Setting up', 'The host picks the number of players (2 to 6, bots included), the bots and the turn timer. Everyone starts with £2,500 and no streets. Passing Start pays £200 and a loot box.'], ['arrow', 'Turn timer', 'Off, or 20, 30, 45 or 60 seconds, as the host chose. With it off, anyone can skip a player who has been away for 90 seconds.'], ['cash', 'Mortgages', 'Short of cash? Mortgage a street for half its price. It collects no rent until you pay back 55% of its price. You cannot build on a colour set with a mortgaged street.'], ['gift', 'Coins and loot boxes', 'Coins come from playing: buying, rent, sets, cards and Coin Rush. Spend them in the shop. You get a loot box every time you pass Start, and one for every game you finish.']];
 function rulesModal() { const home = $('#app').dataset.screen === 'home'; openModal('rules', () => '<div class="mhead">' + logo('sm') + xBtn() + '</div><h2>How to play</h2>' + (home ? WORLD_HELP : RULES).map(r => '<div class="rule">' + ico(r[0], 24) + '<b>' + r[1] + '</b><p>' + r[2] + '</p></div>').join('') + '<button class="btn go" data-a="close">Got it</button>'); }
@@ -3557,7 +3592,7 @@ document.addEventListener('click', async e => {
     case 'filt': F.filt = el.dataset.v; F.sel = null; rerender(); break;
     case 'more': F.filt = FGROUP[el.dataset.v] || 'outfit'; F.sel = null; F.wtab = 'shop'; if (!modal) F.page = 'shop'; rerender(); break;
     case 'look': { const k = el.dataset.k; F.look[k] = k === 'hair' ? el.dataset.v : +el.dataset.v; styleChanged(); break; }
-    case 'wear': { const k = el.dataset.k, v = el.dataset.v; if (k === 'gun' || (v && ITEMS[v] && ITEMS[v][0] === 'gun')) { const n = GUNIDS.indexOf(v); if (n >= 0 && gunOwned(n)) { B3.world.setWeapon(n); toast(ITEMS[v][1] + ' in hand. Press F or right-click to fire.'); } break; } if (!v) { if (k === 'pet') F.pet = ''; else if (k === 'outfit') F.look.outfit = 'tee'; else F.look[k] = ''; styleChanged(); } else if (owns(v)) { wearItem(v); styleChanged(); } break; }
+    case 'wear': { const k = el.dataset.k, v = el.dataset.v; if (k === 'gun' || (v && ITEMS[v] && ITEMS[v][0] === 'gun')) { const n = GUNIDS.indexOf(v); if (n >= 0 && gunOwned(n)) { B3.world.setWeapon(n); toast(ITEMS[v][1] + ' equipped. Click or hold to shoot.'); } break; } if (!v) { if (k === 'pet') F.pet = ''; else if (k === 'outfit') F.look.outfit = 'tee'; else F.look[k] = ''; styleChanged(); } else if (owns(v)) { wearItem(v); styleChanged(); } break; }
     case 'item': { const v = el.dataset.v; F.sel = v || null; if (v && ITEMS[v]) { F.filt = filtOf(v); F.wtab = 'shop'; if (!modal) F.page = 'shop'; } rerender(); break; }
     case 'buy': if (modal && modal.kind === 'buy') { act({ t: 'buy' }); break; } // falls through to the shop purchase
     case 'equip': { const id = F.sel, it = ITEMS[id]; if (!it) break;
@@ -3602,7 +3637,8 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'lootopen': await spinLoot(); break;
-    case 'lootwear': { const id=lootSt&&lootSt.prize&&lootSt.prize.item; if(!id)break; wearItem(id);styleChanged();closeModal();toast('Equipped '+ITEMS[id][1]+'!'); break; }
+    case 'lootwear': { const id=lootSt&&lootSt.prize&&lootSt.prize.item; if(!id)break; wearItem(id);F.page='world';F.sel=null;styleChanged();closeModal();renderHome(true);toast('Equipped '+ITEMS[id][1]+'. Ready to play!');break; }
+    case 'lootdone': F.page='world';F.sel=null;closeModal();renderHome(true);break;
     case 'gift': { const n = +el.dataset.n; if (!G || mode !== 'online' || me !== E.cur(G) || busy) { toast('You can send coins when it is your turn.'); break; } if (wallet.coins < n) { toast('You only have ' + fmt(wallet.coins) + ' coins.'); break; } if (await act({ t: 'gift', to: i, n: n })) { closeModal(); refreshAcct(); } break; }
     case 'view': settings.follow = settings.follow === false; applySettings(); break;
     case 'rules': rulesModal(); break;
@@ -3681,6 +3717,22 @@ document.addEventListener('click', async e => {
     case 'zombies': plazaSend({ admin: { k: 'zom', on: !Zom.on } }); break;
     case 'adminpanel': openModal('admin', adminHTML); break;
     case 'stuff': stuffOpen(el.dataset.f ? { f: el.dataset.f, n: el.dataset.n } : { self: true }); break;
+    case 'clans': clansModal();break;
+    case 'clanrefresh': clansModal();break;
+    case 'clancopy': try{await navigator.clipboard.writeText(el.dataset.v);toast('Clan code copied.');}catch(e){toast('Clan code: '+el.dataset.v);}break;
+    case 'clanop': {
+      if(!ClanSt||ClanSt.loading)break;
+      const op=el.dataset.v,name=($('#clan-name')||{}).value||'',code=($('#clan-code')||{}).value||'';
+      if(op==='create'&&!name.trim()){toast('Enter a clan name.');break;}
+      if(op==='join'&&code.trim().length!==6){toast('Enter a six-letter code.');break;}
+      if(op==='disband'&&!window.confirm('Disband your clan for every member?'))break;
+      el.disabled=true;ClanSt.loading=true;
+      try{const r=await api('clan',{op,name,code});if(ClanSt){ClanSt.clan=r.clan||null;ClanSt.err=null;ClanSt.loading=false;refreshModal();toast(op==='create'?'Clan created.':op==='join'?'Joined clan.':op==='leave'?'Left clan.':'Clan disbanded.');}}
+      catch(er){if(ClanSt){ClanSt.loading=false;ClanSt.err=null;refreshModal();}toast(er.message||'Could not update clan.');}
+      break;
+    }
+    case 'explore': exploreModal();break;
+    case 'worldgoto': if(!Plaza.you){toast('Connect to the world first.');break;} closeModal();F.page='world';renderHome(true);plazaSend({travel:el.dataset.v});break;
     case 'stufftab': if (StuffSt) { StuffSt.tab = el.dataset.v; refreshModal(); } break;
     case 'zoomin': B3.world.zoomBy(0.8); break;
     case 'zoomout': B3.world.zoomBy(1.25); break;
