@@ -1,11 +1,16 @@
-/* BITZ hub lobby layout, shared by the page and the server (movement limit).
-   A small floating island: a plaza in the middle and four portals you can walk into. */
+/* BITZ plaza layout, shared by the page and the server: where the stands and circles are, how far anyone can walk,
+   and how close you must be to use a stand. A flat white world; everything is a few seconds from spawn. */
 (function (root) {
-  const destinations = Object.freeze([
-    Object.freeze({ id: 'cards', name: 'FOOTBALL CARDS', x: 0, z: -22, r: 2.8, col: 0x7a52ff }),
-    Object.freeze({ id: 'monopoly', name: 'MONOPOLY', x: 22, z: 0, r: 2.8, col: 0x2fbf71 }),
-    Object.freeze({ id: 'boxes', name: 'MYSTERY BOXES', x: 0, z: 22, r: 2.8, col: 0xffb020 }),
-    Object.freeze({ id: 'shop', name: 'SHOP', x: -22, z: 0, r: 2.8, col: 0xff5ca8 })
-  ]);
-  root.STAKKZ_WORLD_LAYOUT = Object.freeze({ size: 82, field: 33, limit: 32, caves: Object.freeze([]), waterfall: null, destinations });
+  const spots = Object.freeze({
+    seller: Object.freeze({ id: 'seller', name: 'PACK SELLER', x: -24, z: -20, r: 7, face: 0.75 }),
+    buyer: Object.freeze({ id: 'buyer', name: 'CARD BUYER', x: 24, z: -20, r: 7, face: -0.75 }),
+    dealer: Object.freeze({ id: 'dealer', name: 'THE DEALER', x: 0, z: -34, r: 7, face: 0 }),
+    wardrobe: Object.freeze({ id: 'wardrobe', name: 'WARDROBE', x: -34, z: 10, r: 7, face: 1.57 })
+  });
+  const circles = Object.freeze({
+    gold: Object.freeze({ id: 'gold', x: -13, z: 18, r: 5.5 }),
+    purple: Object.freeze({ id: 'purple', x: 13, z: 18, r: 5.5 })
+  });
+  const hall = Object.freeze({ x: 0, z: -52, w: 30, h: 13 });
+  root.STAKKZ_WORLD_LAYOUT = Object.freeze({ size: 400, field: 62, limit: 60, speed: 20, spots, circles, hall, caves: Object.freeze([]), waterfall: null, destinations: Object.freeze([]) });
 })(globalThis);

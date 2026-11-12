@@ -118,6 +118,16 @@ export function applyFiction(seed) {
       portrait: null, source: null
     });
   }
+  /* desirability (D): the value multiplier for every player. Ranked by rating inside each group, so it never changes.
+     Squad 0.6-1.2, Starter 1.2-2.6, Star 3-6, Superstar 10-25, Icon 15-40 (the two biggest icons sit at 40). */
+  const lerp = (a, b, t) => a + (b - a) * t, by = (x, y) => y.rating - x.rating || (x.id < y.id ? -1 : 1);
+  const tiers = (list, bands) => { list.sort(by); list.forEach((p, i) => { const q = i / list.length; let lo = 0; for (const [share, hi, low, name] of bands) { if (q < lo + share || share === 1) { const t = Math.min(1, (q - lo) / share); p.d = Math.round(lerp(hi, low, t) * 100) / 100; p.tier = name; break; } lo += share; } }); };
+  const prem = seed.players.filter(p => p.league === 'Premier League'), euro = seed.players.filter(p => p.league !== 'Premier League');
+  const icons = euro.filter(p => p.slot <= 3), rest = euro.filter(p => p.slot > 3);
+  tiers(prem, [[0.04, 25, 10, 'Superstar'], [0.13, 6, 3, 'Star'], [0.27, 2.6, 1.2, 'Starter'], [1, 1.2, 0.6, 'Squad']]);
+  tiers(icons, [[1, 40, 15, 'Icon']]); icons.slice(0, 2).forEach(p => { p.d = 40; }); icons.forEach(p => { p.icon = true; p.rating = Math.max(p.rating, 90); });
+  tiers(rest, [[0.15, 20, 10, 'Superstar'], [0.35, 6, 2, 'Star'], [1, 2, 0.8, 'Starter']]);
+  prem.forEach(p => { if (p.slot <= 2) p.uv = true; });   // the Ultraviolet set: two players per club, Purple Pack only
   seed.source = { clubs: 'BITZ League (fictional)', roster: 'fictional', portraits: 'drawn in-game' };
   return seed;
 }
