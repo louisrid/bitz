@@ -1,8 +1,8 @@
 {
   "total": 265,
-  "imported": 242,
-  "downloadedNow": 38,
-  "missing": 23,
+  "imported": 248,
+  "downloadedNow": 6,
+  "missing": 17,
   "missingPlayers": [
     {
       "id": "adam-smith",
@@ -18,11 +18,6 @@
       "id": "carl-rushworth",
       "name": "Carl Rushworth",
       "reason": "No verified footballer P18 photograph"
-    },
-    {
-      "id": "chris-wood",
-      "name": "Chris Wood",
-      "reason": "No unambiguous footballer identity on Wikidata"
     },
     {
       "id": "djordje-petrovic",
@@ -55,11 +50,6 @@
       "reason": "No verified footballer P18 photograph"
     },
     {
-      "id": "joao-gomes",
-      "name": "Joao Gomes",
-      "reason": "No unambiguous footballer identity on Wikidata"
-    },
-    {
       "id": "julio-enciso",
       "name": "Julio Enciso",
       "reason": "No unambiguous footballer identity on Wikidata"
@@ -85,28 +75,8 @@
       "reason": "No unambiguous footballer identity on Wikidata"
     },
     {
-      "id": "murillo",
-      "name": "Murillo",
-      "reason": "No unambiguous footballer identity on Wikidata"
-    },
-    {
       "id": "oliver-mcburnie",
       "name": "Oliver McBurnie",
-      "reason": "No unambiguous footballer identity on Wikidata"
-    },
-    {
-      "id": "rayan",
-      "name": "Rayan",
-      "reason": "No unambiguous footballer identity on Wikidata"
-    },
-    {
-      "id": "reece-james",
-      "name": "Reece James",
-      "reason": "No unambiguous footballer identity on Wikidata"
-    },
-    {
-      "id": "sven-botman",
-      "name": "Sven Botman",
       "reason": "No unambiguous footballer identity on Wikidata"
     },
     {
@@ -121,5 +91,5 @@
     }
   ],
   "source": "Wikidata P18 / Wikimedia Commons",
-  "generatedAt": "2026-11-12T19:52:16.850Z"
+  "generatedAt": "2026-11-12T19:58:24.377Z"
 }

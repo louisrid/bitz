@@ -459,6 +459,17 @@
     "attribution": "Wikimedia Commons",
     "adapted": false
   },
+  "chris-wood": {
+    "file": "chris-wood.jpg",
+    "player": "Chris Wood",
+    "wikidata": "Commons-verified-chris-wood",
+    "source": "https://commons.wikimedia.org/wiki/File:Chris_Wood_(cropped).jpg",
+    "artist": "Sebalston",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attribution": "Wikimedia Commons",
+    "adapted": false
+  },
   "cody-gakpo": {
     "file": "cody-gakpo.jpg",
     "player": "Cody Gakpo",
@@ -1277,6 +1288,17 @@
     "attribution": "Wikimedia Commons",
     "adapted": false
   },
+  "joao-gomes": {
+    "file": "joao-gomes.png",
+    "player": "Joao Gomes",
+    "wikidata": "Commons-verified-joao-gomes",
+    "source": "https://commons.wikimedia.org/wiki/File:Joao_Gomes.png",
+    "artist": "Æthelred",
+    "licence": "CC BY 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+    "attribution": "Wikimedia Commons",
+    "adapted": false
+  },
   "joao-pedro": {
     "file": "joao-pedro.jpg",
     "player": "Joao Pedro",
@@ -1951,6 +1973,17 @@
     "attribution": "Wikimedia Commons",
     "adapted": false
   },
+  "murillo": {
+    "file": "murillo.jpg",
+    "player": "Murillo",
+    "wikidata": "Commons-verified-murillo",
+    "source": "https://commons.wikimedia.org/wiki/File:Murillo_and_Tony_Loughlan_22122025_(1)_(Murillo_Santiago_Costa_dos_Santos).jpg",
+    "artist": "Timmy96",
+    "licence": "CC0",
+    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "attribution": "Wikimedia Commons",
+    "adapted": false
+  },
   "nathan-collins": {
     "file": "nathan-collins.jpg",
     "player": "Nathan Collins",
@@ -2193,6 +2226,17 @@
     "attribution": "Wikimedia Commons",
     "adapted": false
   },
+  "rayan": {
+    "file": "rayan.png",
+    "player": "Rayan",
+    "wikidata": "Commons-verified-rayan",
+    "source": "https://commons.wikimedia.org/wiki/File:Rayan_2026.png",
+    "artist": "AFC Bournemouth",
+    "licence": "CC BY 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+    "attribution": "Wikimedia Commons",
+    "adapted": false
+  },
   "rayan-ait-nouri": {
     "file": "rayan-ait-nouri.jpg",
     "player": "Rayan Ait-Nouri",
@@ -2212,6 +2256,17 @@
     "artist": "Bryan Berlin",
     "licence": "CC BY-SA 4.0",
     "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attribution": "Wikimedia Commons",
+    "adapted": false
+  },
+  "reece-james": {
+    "file": "reece-james.jpg",
+    "player": "Reece James",
+    "wikidata": "Commons-verified-reece-james",
+    "source": "https://commons.wikimedia.org/wiki/File:Reece_James_FIFA_Club_World_Cup_final_extraction.jpg",
+    "artist": "The White House",
+    "licence": "Public domain",
+    "licenceUrl": "",
     "attribution": "Wikimedia Commons",
     "adapted": false
   },
@@ -2399,6 +2454,17 @@
     "artist": "Bryan Berlin",
     "licence": "CC BY-SA 4.0",
     "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attribution": "Wikimedia Commons",
+    "adapted": false
+  },
+  "sven-botman": {
+    "file": "sven-botman.jpg",
+    "player": "Sven Botman",
+    "wikidata": "Commons-verified-sven-botman",
+    "source": "https://commons.wikimedia.org/wiki/File:Sven_Botman_24052026_(6)_(cropped).jpg",
+    "artist": "Timmy96",
+    "licence": "CC0",
+    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "attribution": "Wikimedia Commons",
     "adapted": false
   },
