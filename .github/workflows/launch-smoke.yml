@@ -1,0 +1,22 @@
+name: BITZ live launch verification
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  production-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify one public BITZ site, deployment commit and persistent storage
+        env:
+          BITZ_PUBLIC_URL: https://stakkz.onrender.com/
+          BITZ_EXPECT_SHA: ${{ github.sha }}
+          BITZ_SMOKE_TIMEOUT_MS: '540000'
+        run: node tools/launch-smoke.mjs
