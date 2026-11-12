@@ -142,11 +142,48 @@
   const ICON = { packs: '<path d="M6 3h12l1.2 3-1.2 3 1.2 3-1.2 3 1.2 3-1.2 3H6l-1.2-3L6 15l-1.2-3L6 9 4.8 6z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>', cards: '<rect x="3" y="4" width="8" height="11" rx="1.6" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="8" y="9" width="8" height="11" rx="1.6" fill="#fff" stroke="currentColor" stroke-width="2.2"/><rect x="13" y="4" width="8" height="11" rx="1.6" fill="none" stroke="currentColor" stroke-width="2.2"/>', book: '<path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 6v14" stroke="currentColor" stroke-width="2.2"/>', top: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>', friends: '<circle cx="9" cy="8" r="3.4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="17" cy="9" r="2.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 14c2.8 0 5 2.2 5 5" fill="none" stroke="currentColor" stroke-width="2.2"/>', trade: '<path d="M4 8h14l-4-4M20 16H6l4 4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>', board: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>', ones: '<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M11 8l2-1v10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>', ms: '<path d="M5 20V9l7-5 7 5v11z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 11v5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>', style: '<path d="M8 3l4 2 4-2 4 4-3 2v11H7V9L4 7z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>', dealer: '<path d="M3 8l9-4 9 4-9 4z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M3 8v8l9 4 9-4V8M12 12v8" fill="none" stroke="currentColor" stroke-width="2.2"/>', account: '<circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="2.2"/>', settings: '<circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>' };
   const ic = k => '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[k] + '</svg>';
   function menu() {
-    const s = BZ.state || {}, packs = Object.values(s.packs || {}).reduce((a, b) => a + b, 0), incoming = (s.trades || []).filter(t => t.status === 'pending' && t.toCode === BZ.code).length + ((s.friends || {}).in || []).length, ready = (s.milestones || []).filter(m => m.ready).length + (s.clubs || []).filter(c => c.owned >= 11 && !c.claimed).length;
-    const items = [['packs', 'Packs', packs], ['cards', 'My Cards'], ['book', 'Collector Book', ready ? ready : 0], ['top', 'Top 5'], ['dealer', 'The Dealer'], ['trade', 'Trades', incoming], ['friends', 'Friends'], ['board', 'Leaderboard'], ['ones', '1 of 1 Tracker'], ['ms', 'Milestones'], ['style', 'Style & Pets'], ['account', BZ.auth.registered ? '@' + BZ.auth.username : 'Account'], ['settings', 'Settings']];
-    const nw = s.nw || { total: 0, cash: 0, cards: 0, packs: 0 }, next = (s.milestones || []).find(m => !m.claimed && !m.ready);
-    screen({ title: 'MENU', body: '<div class="card-box" style="margin-bottom:12px"><div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:12px"><div class="stat"><small>Net worth</small><b>' + money(nw.total) + '</b></div><div class="stat"><small>Rank</small><b>' + (BZ.rank ? '#' + BZ.rank.rank : '–') + '</b></div><div class="stat"><small>Cards</small><b>' + money(nw.cards) + '</b></div><div class="stat"><small>Packs</small><b>' + money(nw.packs) + '</b></div></div>' + (next ? '<p class="mute" style="margin:8px 0 0">Next milestone at ' + money(next.at) + ': ' + Math.min(100, Math.round(nw.total / next.at * 100)) + '% there.</p>' : '') + '</div><div class="menu-grid">' + items.map(([k, n, b]) => '<button class="btn" data-m="' + k + '">' + ic(k) + '<span>' + esc(n) + '</span>' + (b ? '<i class="badge">' + b + '</i>' : '') + '</button>').join('') + '</div>' }).addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (!b) return; sound('click'); const k = b.dataset.m; if (k === 'account') account(); else if (k === 'settings') settings(); else CARDS.open(k); });
+    const s=BZ.state||{},packs=Object.values(s.packs||{}).reduce((a,b)=>a+b,0);
+    const incoming=(s.trades||[]).filter(t=>t.status==='pending'&&t.toCode===BZ.code).length+((s.friends||{}).in||[]).length;
+    const ready=(s.milestones||[]).filter(m=>m.ready).length+(s.clubs||[]).filter(c=>c.owned>=11&&!c.claimed).length;
+    const nw=s.nw||{total:0,cash:0,cards:0,packs:0},next=(s.milestones||[]).find(m=>!m.claimed&&!m.ready);
+    const progress=next&&next.at>0?Math.min(100,Math.max(0,Math.round(nw.total/next.at*100))):100;
+    const rank=BZ.rank&&BZ.rank.rank?'#'+BZ.rank.rank:'UNRANKED';
+    const sections=[
+      {name:'COLLECT',lead:'Your cards and discoveries',items:[
+        ['packs','My Packs','Rip something good',packs],['cards','My Cards','Your collection',0],
+        ['book','Collector Book','Complete the clubs',ready],['top','Top 5','Show your best pulls',0],
+        ['dealer','The Dealer','Orders and live races',0],['ones','1 of 1 Tracker','See what remains',0]]},
+      {name:'COMPETE & CONNECT',lead:'See who is collecting',items:[
+        ['trade','Trades','Exchange cards',incoming],['friends','Friends','Find other collectors',0],['board','Leaderboard','The richest collectors',0]]},
+      {name:'YOU',lead:'Everything about your player',items:[
+        ['ms','Milestones','Claim your rewards',0],['style','Style & Pets','Make it yours',0],
+        ['account',BZ.auth.registered?'@'+BZ.auth.username:'Account','Your player account',0],
+        ['settings','Settings','Sound and controls',0]]}
+    ];
+    const tile=(row,i)=>{
+      const [key,name,note,count]=row;
+      return '<button class="btn menu-tile" type="button" data-m="'+key+'" style="--i:'+i+'" aria-label="'+esc(name)+'">'+
+        '<span class="menu-tile-icon">'+ic(key)+'</span>'+
+        '<span class="menu-tile-copy"><strong>'+esc(name)+'</strong><small>'+esc(note)+'</small></span>'+
+        (count?'<span class="menu-tile-badge">'+count+'</span>':'')+
+        '<span class="menu-tile-go" aria-hidden="true">›</span></button>';
+    };
+    const groups=sections.map((part,ind)=>
+      '<section class="menu-group" aria-label="'+part.name+'"><div class="menu-group-top"><h2>'+part.name+'</h2><span>'+part.lead+'</span></div>'+
+      '<div class="menu-grid'+(ind===0?' menu-grid-main':'')+'">'+part.items.map(tile).join('')+'</div></section>'
+    ).join('');
+    const hero='<section class="menu-hero"><div class="menu-hero-top"><span class="menu-overline">YOUR COLLECTOR STATUS</span><span class="menu-rank">RANK '+esc(rank)+'</span></div>'+
+      '<div class="menu-hero-number">'+money(nw.total)+'</div><div class="menu-hero-caption">TOTAL NET WORTH</div>'+
+      '<div class="menu-hero-stats"><div><small>IN THE BANK</small><strong>'+money(nw.cash)+'</strong></div>'+
+      '<div><small>CARD VALUE</small><strong>'+money(nw.cards)+'</strong></div>'+
+      '<div><small>SEALED PACKS</small><strong>'+money(nw.packs)+'</strong></div></div>'+
+      (next?'<div class="menu-milestone"><div><b>NEXT MILESTONE</b><strong>'+money(next.at)+'</strong></div>'+
+        '<div class="menu-track" role="progressbar" aria-valuenow="'+progress+'" aria-valuemin="0" aria-valuemax="100" aria-label="Next milestone"><span style="width:'+progress+'%"></span></div></div>':'')+
+      '</section>';
+    screen({title:'BITZ',body:'<div class="bitz-menu"><div class="menu-intro"><span>THE COLLECTOR CLUB</span><p>Build your collection. Climb the leaderboard.</p></div>'+hero+groups+'</div>'})
+      .addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;sound('click');const k=b.dataset.m;if(k==='account')account();else if(k==='settings')settings();else CARDS.open(k);});
   }
+
   function settings() {
     const row = (k, name, note) => '<div class="kv"><div><b>' + name + '</b><div class="mute" style="font-size:12px">' + note + '</div></div><button class="chip ' + (BZ.settings[k] ? 'on' : '') + '" data-s="' + k + '">' + (BZ.settings[k] ? 'On' : 'Off') + '</button></div>';
     const el = screen({ title: 'SETTINGS', back: true, body: '<div class="card-box">' + row('sound', 'Sound', 'Pack tears, flips, cash and reveals') + row('haptics', 'Vibration', 'Little taps on rare pulls (phones)') + row('motion', 'Animation', 'Turn off for a calmer, faster game') + '</div><p class="mute" style="margin-top:14px">Move with WASD or the stick, jump with Space, run with Shift, talk with E. Drag to look around, scroll or pinch to zoom.</p><p class="mute">Your player code: <b class="brand">' + esc(BZ.code) + '</b></p><p class="mute">Football photographs: <a href="portraits/credits.html" target="_blank" rel="noopener noreferrer">Image credits and sources</a></p>' });
