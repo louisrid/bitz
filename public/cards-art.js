@@ -1,7 +1,7 @@
 /* BITZ card art. Every card, pack, box, crest, flag and signature is drawn here, from one catalogue, so the shop,
    the opening stage, the book, the buyer, trades, profiles and inspection all show exactly the same thing.
-   Portraits come from portraits/<player id>.png and fall back to portraits/placeholder.png, so a real photo
-   dropped into that folder later appears everywhere without touching this file. */
+   Portraits resolve through the licensed, identity-checked manifest (portraits/manifest.js),
+   with a stable shared placeholder for unmatched players. See portraits/credits.json. */
 (function () {
   'use strict';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -97,7 +97,11 @@
   }
 
   /* ---------------- portraits ---------------- */
-  const portraitSrc = pid => 'portraits/' + encodeURIComponent(pid) + '.png';
+  const portraitSrc = pid => {
+    const record = (globalThis.BITZ_PORTRAITS || {})[pid];
+    const file = record && record.file;
+    return /^[-a-z0-9]+\\.(?:jpg|png|webp)$/.test(file || '') ? 'portraits/' + file : 'portraits/placeholder.png';
+  };
   const portrait = (pid, alt) => '<img src="' + portraitSrc(pid) + '" alt="' + esc(alt || '') + '" loading="lazy" decoding="async" draggable="false" onerror="this.onerror=null;this.src=\'portraits/placeholder.png\'">';
 
   /* ---------------- the card ---------------- */
