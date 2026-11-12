@@ -1957,6 +1957,7 @@ function goldPaint() {
   if (wallet && Gold.live && typeof Plaza !== 'undefined' && Plaza.you) { const dt = Math.min(6000, now - Gold.at); wallet.coins = Math.floor(wallet.coins || 0) + Math.floor(dt * Gold.rate / 1000); }
   Gold.at = now;
   const e = document.getElementById('wgold'); if (e && wallet) e.textContent = Math.floor(wallet.coins || 0).toLocaleString('en-GB');
+  const pg = document.getElementById('ppgold'); if (pg && wallet) pg.textContent = Math.floor(wallet.coins || 0).toLocaleString('en-GB');
   const r = document.getElementById('wrate'); if (r) { r.textContent = '+' + Gold.rate.toLocaleString('en-GB') + '/s' + (Gold.boost ? ' · ' + Math.ceil((Gold.boost.until - now) / 1000) + 's' : ''); r.classList.toggle('hot', !!Gold.boost); }
 }
 setInterval(goldPaint, 200);
@@ -2843,7 +2844,7 @@ function profilePaint() {
     '<button class="ib pp-x" data-a="profclose" aria-label="Close">' + ico('x', 16) + '</button>' +
     '<div class="pp-char bg-' + bgOf(L2) + '"><canvas id="pchar"></canvas></div>' +
     '<div class="pp-info"><h2>' + esc(p.n) + '</h2><p class="pp-sub">' + handle + ' · ' + where + '</p>' +
-    '<div class="pp-badges"><div class="pworth"><small>Net worth</small><b><i class="gc"></i>' + (nw != null ? fmt(nw) : '…') + '</b></div><div class="pswag"><small>Swag</small><b>' + fmt(swag) + '</b></div></div>' +
+    '<div class="pp-badges">' + (p.self ? '<div class="pworth pgold"><small>Gold</small><b><i class="gc"></i><span id="ppgold">' + fmt(wallet.coins) + '</span></b></div>' : '') + '<div class="pworth"><small>Net worth</small><b><i class="gc"></i>' + (nw != null ? fmt(nw) : '…') + '</b></div><div class="pswag"><small>Swag</small><b>' + fmt(swag) + '</b></div></div>' +
     '<div class="plist">' + rows + '</div><div class="pbtns">' + btns + '</div></div></div>');
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && PROF && !modal) profileClose(); });

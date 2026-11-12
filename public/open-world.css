@@ -367,6 +367,9 @@ html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}
 #shopbig{font-size:46px!important}
 #goldtop #wrate{display:none!important}
 #wbar .wbtn.wzom{display:none!important}
+/* Gold lives on your profile now, not in the corner. */
+#goldtop{display:none!important}
+#fprofov .pp-badges .pgold{background:#fff!important}
 /*BG>*/
 .bg-b_cyber{background:repeating-linear-gradient(90deg,#19e3ff33 0 2px,transparent 2px 26px),repeating-linear-gradient(0deg,#ff2bd633 0 2px,transparent 2px 26px),linear-gradient(180deg,#0b1030,#1c375e,#87e9ff)}
 .bg-b_haunt{background:radial-gradient(circle at 72% 22%,#e9e0ff,transparent 14%),linear-gradient(180deg,#17132b,#373052,#b8a3e6)}
