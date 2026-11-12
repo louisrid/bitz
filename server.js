@@ -333,6 +333,24 @@ const ents = new Map(); let entSeq = 0, zMode = false, zBy = '';
 let zWave = 0, zLeft = 0, zBoss = false, zNext = 0;
 const WILD = [['w_goldpig', 26, 9.5], ['w_rainbowfox', 25, 11], ['w_crystaldeer', 20, 12], ['w_cosmiccat', 15, 12.5], ['w_phoenix', 10, 14], ['w_unicorn', 4, 16.5]];
 const ZOMBIE_PAY = 1000000, ZOMBIE_MAX = 14;
+/* strength: the admin picks how tough the mobs are; tougher kills pay more gold */
+const STR = [null, { n: 'Easy', hp: 0.6, dmg: 0.7, sp: 0.9, gold: 0.5 }, { n: 'Normal', hp: 1, dmg: 1, sp: 1, gold: 1 }, { n: 'Hard', hp: 1.8, dmg: 1.4, sp: 1.1, gold: 2.5 }, { n: 'Brutal', hp: 3.2, dmg: 2, sp: 1.2, gold: 6 }, { n: 'Nightmare', hp: 6, dmg: 3, sp: 1.35, gold: 15 }];
+let zStr = 2;
+const MOBPAY = { z0: 1000000, z1: 1000000, z2: 1000000, runner: 700000, brute: 2500000, boss: 5000000 };
+const mobPay = sub => Math.max(1000, Math.round((MOBPAY[sub] || ZOMBIE_PAY) * STR[zStr].gold / 1000) * 1000);
+const zInfo = () => ({ on: zMode, n: zBy, wave: zWave, str: zStr, name: STR[zStr].n, pay: mobPay('z0') });
+const edge = v => Math.max(-140, Math.min(140, v));
+function spawnMob(sub, t, d) {
+  const S = STR[zStr], a = Math.random() * Math.PI * 2, baseHp = 60 + (zWave - 1) * 12, spd = 3.6 + Math.min(2, zWave * 0.2);
+  const k = { runner: { hp: 0.5, sp: 1.7, dmg: 0.7 }, brute: { hp: 3, sp: 0.75, dmg: 1.8 } }[sub] || { hp: 1, sp: 1, dmg: 1 };
+  const hp = Math.round(baseHp * S.hp * k.hp);
+  return entAdd('zom', sub, edge(t.p[0] + Math.sin(a) * d), edge(t.p[2] + Math.cos(a) * d), { hp: hp, mh: hp, sp: spd * S.sp * k.sp, dmg: Math.round(12 * S.dmg * k.dmg), pay: mobPay(sub) });
+}
+function spawnBoss(t) {
+  zBoss = true; const S = STR[zStr], a = Math.random() * Math.PI * 2, hp = Math.round((450 + zWave * 200) * S.hp);
+  entAdd('zom', 'boss', edge(t.p[0] + Math.sin(a) * 32), edge(t.p[2] + Math.cos(a) * 32), { hp: hp, mh: hp, sp: 3.2 * S.sp, dmg: Math.round(30 * S.dmg), boss: 1, pay: mobPay('boss') });
+  plazaAll({ boss: { n: zWave, hp: hp, pay: mobPay('boss') } });
+}
 const entCard = e => [e.id, e.k, e.sub, Math.round(e.x * 100) / 100, Math.round(e.y * 100) / 100, Math.round(e.z * 100) / 100, Math.round(e.ry * 100) / 100, e.hp || 0, e.mh || 0];
 const people = () => [...plaza.values()].filter(q => q.i && !q.dead);
 function entAdd(k, sub, x, z, extra) { const e = Object.assign({ id: 'e' + (++entSeq), k: k, sub: sub, x: x, y: 0, z: z, ry: Math.random() * 6, t0: Date.now(), tx: x, tz: z }, extra || {}); ents.set(e.id, e); plazaAll({ ent: entCard(e) }); return e; }
@@ -361,7 +379,7 @@ function plazaTouch(q, ws, now) {
 }
 function zombieShot(q, dx, dz, W, now) {
   const hits = [];
-  ents.forEach(e => { if (e.k !== 'zom') return; const rx = e.x - q.p[0], rz = e.z - q.p[2], along = rx * dx + rz * dz; if (along < 0.2 || along > W.range || Math.abs(rx * dz - rz * dx) > W.rad + (e.boss ? 3 : 0.9)) return; hits.push([along, e]); });
+  ents.forEach(e => { if (e.k !== 'zom') return; const rx = e.x - q.p[0], rz = e.z - q.p[2], along = rx * dx + rz * dz; if (along < 0.2 || along > W.range || Math.abs(rx * dz - rz * dx) > W.rad + (e.boss ? 3 : e.sub === 'brute' ? 1.4 : 0.9)) return; hits.push([along, e]); });
   return hits;
 }
 setInterval(() => {
@@ -388,16 +406,14 @@ setInterval(() => {
   /* zombie waves: each wave is bigger; when the last zombie falls a boss comes; beat it for the next wave */
   if (zMode && ppl.length) {
     const zs = count('zom');
-    if (!zLeft && !zs && !zBoss && now > zNext && zNext) { zWave++; zLeft = 5 + zWave * 3; zNext = 0; plazaAll({ wave: { n: zWave, count: zLeft } }); }
+    if (!zLeft && !zs && !zBoss && now > zNext && zNext) { zWave++; zLeft = 5 + zWave * 3; zNext = 0; plazaAll({ wave: { n: zWave, count: zLeft, pay: mobPay('z0'), name: STR[zStr].n } }); }
     if (zLeft > 0 && zs < ZOMBIE_MAX && now > (global.nextZom || 0)) {
       global.nextZom = now + Math.max(500, 1300 - zWave * 80); zLeft--;
-      const t = ppl[Math.floor(Math.random() * ppl.length)], a = Math.random() * Math.PI * 2, d = 26 + Math.random() * 14, hp = 60 + (zWave - 1) * 12;
-      entAdd('zom', 'z' + Math.floor(Math.random() * 3), Math.max(-140, Math.min(140, t.p[0] + Math.sin(a) * d)), Math.max(-140, Math.min(140, t.p[2] + Math.cos(a) * d)), { hp: hp, mh: hp, sp: 3.6 + Math.min(2, zWave * 0.2), dmg: 12 });
+      const t = ppl[Math.floor(Math.random() * ppl.length)], r = Math.random(), sub = zWave >= 3 && r < 0.15 ? 'brute' : zWave >= 2 && r < 0.4 ? 'runner' : 'z' + Math.floor(Math.random() * 3);
+      spawnMob(sub, t, 26 + Math.random() * 14);
     }
     if (!zLeft && !zs && !zBoss && !zNext && zWave) {
-      zBoss = true; const t = ppl[0], a = Math.random() * Math.PI * 2, hp = 450 + zWave * 200;
-      entAdd('zom', 'boss', Math.max(-140, Math.min(140, t.p[0] + Math.sin(a) * 32)), Math.max(-140, Math.min(140, t.p[2] + Math.cos(a) * 32)), { hp: hp, mh: hp, sp: 3.2, dmg: 30, boss: 1 });
-      plazaAll({ boss: { n: zWave, hp: hp } });
+      spawnBoss(ppl[0]);
     }
   }
   ents.forEach(e => {
@@ -417,7 +433,7 @@ setInterval(() => {
       if (e.y > 0) e.y = Math.max(0, e.y - 6 * dt); else if (now - e.t0 > 150000) return entGone(e, 'gone');
     } else if (e.k === 'zom') {
       if (!near) return; const vx = near.p[0] - e.x, vz = near.p[2] - e.z, l = Math.hypot(vx, vz) || 1;
-      const reach = e.boss ? 4.6 : 2.6;
+      const reach = e.boss ? 4.6 : e.sub === 'brute' ? 3.4 : 2.6;
       if (l > reach - 0.5) { e.x += vx / l * (e.sp || 3.8) * dt; e.z += vz / l * (e.sp || 3.8) * dt; } e.ry = Math.atan2(vx, vz);
       if (l < reach && now - (e.bit || 0) > (e.boss ? 900 : 700)) { e.bit = now; plazaHurt(near, e.dmg || 12, null, now); }
     }
@@ -439,8 +455,8 @@ function plazaRay(q, dx, dz, W, wi, now) {
   plazaAll({ shot: [q.i, wi, q.p[0], q.p[2], Math.round((q.p[0] + dx * reach) * 100) / 100, Math.round((q.p[2] + dz * reach) * 100) / 100].concat(struck.map(h => h[1].i || h[1].id)) });
   struck.forEach(h => { const o = h[1];
     if (o.k === 'zom') { if (!ents.has(o.id)) return; o.hp -= W.dmg; if (o.hp > 0) return plazaAll({ ent: entCard(o) });
-      const w = account(q.id), pay = o.boss ? 5000000 : ZOMBIE_PAY; w.coins += pay; w.zkills = (w.zkills || 0) + 1; dirty = true; entGone(o, 'killed', q, { gold: pay, boss: o.boss ? 1 : 0 }); plazaSend(wsOf(q), { gold: w.coins, reward: { k: o.boss ? 'boss' : 'zom', gold: pay } });
-      if (o.boss) { zBoss = false; zNext = now + 7000; const seen = new Set(); plaza.forEach((x, xws) => { if (!x.i || seen.has(x.id)) return; seen.add(x.id); const xw = account(x.id); xw.coins += 500000; plazaSend(xws, { gold: xw.coins, reward: { k: 'wave', gold: 500000, n: zWave } }); }); plazaAll({ cleared: { n: zWave, by: q.n } }); }
+      const w = account(q.id), pay = o.pay || (o.boss ? 5000000 : ZOMBIE_PAY); w.coins += pay; w.zkills = (w.zkills || 0) + 1; dirty = true; entGone(o, 'killed', q, { gold: pay, boss: o.boss ? 1 : 0 }); plazaSend(wsOf(q), { gold: w.coins, reward: { k: o.boss ? 'boss' : 'zom', gold: pay } });
+      if (o.boss) { zBoss = false; zNext = now + 7000; const seen = new Set(); plaza.forEach((x, xws) => { if (!x.i || seen.has(x.id)) return; seen.add(x.id); const xw = account(x.id); const cb = Math.max(1000, Math.round(500000 * STR[zStr].gold / 1000) * 1000); xw.coins += cb; plazaSend(xws, { gold: xw.coins, reward: { k: 'wave', gold: cb, n: zWave } }); }); plazaAll({ cleared: { n: zWave, by: q.n } }); }
       return; }
     plazaHurt(o, W.dmg, q, now);
   });
@@ -509,7 +525,7 @@ function plazaJoin(ws, raw) {
     if (plaza.size > 80) { plazaSend(ws, { error: 'The plaza is full right now.' }); return ws.close(); }
     const back = Array.isArray(msg.at) && msg.at.length >= 3 && msg.at.slice(0, 3).every(Number.isFinite) ? [Math.max(-145, Math.min(145, msg.at[0])), 0, Math.max(-145, Math.min(145, msg.at[1])), msg.at[2] % 7, 0] : null;   // a reconnect puts you back where you stood
     Object.assign(q, who, { i: 'w' + (++plazaSeq), p: back || spawnAt(), moved: false, hp: 100, w: 0, dead: 0, safe: Date.now() + 2500, sw: core.swag(account(who.id)), nw: core.worth(account(who.id)) });
-    plazaSend(ws, { you: q.i, admin: isAdmin(q), world: world, all: [...plaza.values()].filter(o => o.i && o !== q).map(plazaCard), ents: [...ents.values()].map(entCard), zmode: { on: zMode, n: zBy, wave: zWave } });
+    plazaSend(ws, { you: q.i, admin: isAdmin(q), world: world, all: [...plaza.values()].filter(o => o.i && o !== q).map(plazaCard), ents: [...ents.values()].map(entCard), zmode: zInfo() });
     plazaAll({ join: plazaCard(q) }, ws);
     return;
   }
@@ -524,11 +540,14 @@ function plazaJoin(ws, raw) {
   } else if (msg.sprint) { /* sprint has no stamina now: the step limit above already allows it */
   } else if (msg.admin && typeof msg.admin === 'object') {
     if (!isAdmin(q)) return plazaSend(ws, { error: 'Only the admin can change that.' });
-    const k = msg.admin.k, on = !!msg.admin.on; if (!(k in world) || k === 'zom' || k === 'wild' || k === 'gift') return;   // zombies and rare creatures are gone
+    const k = msg.admin.k, on = !!msg.admin.on;
+    if (k === 'zstr') { zStr = Math.max(1, Math.min(5, msg.admin.v | 0 || 2)); zBy = q.n; return plazaAll({ zmode: zInfo() }); }
+    if (k === 'zboss') { if (!zMode) return plazaSend(ws, { error: 'Turn zombies on first.' }); if (zBoss || [...ents.values()].some(e => e.boss)) return plazaSend(ws, { error: 'A boss is already out there.' }); if (!zWave) zWave = 1; ents.forEach(e => { if (e.k === 'zom') entGone(e, 'poof'); }); zLeft = 0; spawnBoss(q); return; }
+    if (!(k in world) || k === 'wild' || k === 'gift') return;   // rare creatures and gift drops are gone
     world[k] = on;
     if (k === 'zom') { zMode = on; zBy = q.n; if (on) { zWave = 0; zNext = Date.now() + 1500; zLeft = 0; zBoss = false; } else ents.forEach(e => { if (e.k === 'zom') entGone(e, 'poof'); }); }
     if (!on && k !== 'zom') ents.forEach(e => { if (e.k === k) entGone(e, 'gone'); });
-    plazaAll({ world: world, zmode: { on: zMode, n: q.n, wave: zWave } });
+    plazaAll({ world: world, zmode: zInfo() });
   } else if (Array.isArray(msg.shoot)) { plazaShoot(q, msg.shoot, Date.now());
   } else if (msg.trade && typeof msg.trade === 'object') { plazaTrade(q, msg.trade, Date.now());
   } else if (Number.isInteger(msg.wpn) && msg.wpn >= 0 && msg.wpn < WEAPONS.length) { if (msg.wpn > 0 && account(q.id).own.indexOf(GUNIDS[msg.wpn]) < 0) return plazaSend(ws, { error: 'Buy that gun in the shop first.' }); q.w = msg.wpn; plazaAll({ wpn: [q.i, q.w] });

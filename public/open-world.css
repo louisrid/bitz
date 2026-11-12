@@ -402,6 +402,12 @@ html:has(#app:not([data-page=world])) #wzoom{display:none}
 }
 @media(min-width:901px) and (max-width:1360px){html:has(#app[data-page=shop]) #shopbig{display:none!important}}
 @media(min-width:901px) and (max-width:1270px){html:has(#app[data-screen=home]:not([data-page=world])) #shopbig{display:none!important}}
+
+/* admin: zombie strength picker */
+.admstr{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:2px 0 14px}
+.admstr .btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;width:auto;margin:0}
+.admstr .btn small{font:700 11px/1 'Space Grotesk',sans-serif;opacity:.75}
+.admstrow{border-bottom:0!important;padding-bottom:4px!important}
 /*BG>*/
 .bg-b_cyber{background:repeating-linear-gradient(90deg,#19e3ff33 0 2px,transparent 2px 26px),repeating-linear-gradient(0deg,#ff2bd633 0 2px,transparent 2px 26px),linear-gradient(180deg,#0b1030,#1c375e,#87e9ff)}
 .bg-b_haunt{background:radial-gradient(circle at 72% 22%,#e9e0ff,transparent 14%),linear-gradient(180deg,#17132b,#373052,#b8a3e6)}

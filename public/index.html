@@ -1605,8 +1605,8 @@ const B3 = (function () {
       else if (sub === 'gem') { P(0.34, 0.9, 0.34, 0x7ef9ff, 0, 0.45, 0, 'g'); P(0.24, 0.6, 0.24, 0xb388ff, 0.3, 0.3, 0.1, 'g'); P(0.2, 0.5, 0.2, 0x7ef9ff, -0.26, 0.25, -0.1, 'g'); P(0.9, 0.14, 0.8, 0x8d938a, 0, 0.07, 0); u.spark = 0x7ef9ff; }
       else { P(1.3, 0.7, 0.9, 0x7a4a26, 0, 0.35, 0); P(1.36, 0.3, 0.96, 0x5c3a1e, 0, 0.82, 0); P(1.4, 0.1, 0.12, 0xe8b830, 0, 0.6, 0.44, 's'); P(0.22, 0.26, 0.08, 0xe8b830, 0, 0.6, 0.5, 's'); [-0.62, 0.62].forEach(x => P(0.1, 1.0, 1.0, 0xe8b830, x, 0.5, 0, 's')); u.spark = 0xffd60a; }
     } else {
-      const boss = sub === 'boss', z = makeChar({ outfit: 'zombie', skin: 0 }, '#4f6b3d', 'bust'); z.scale.setScalar(CHAR); if (boss) { z.scale.setScalar(4.6); z.traverse(q => { if (q.isMesh && q.material && q.material.color && q.material.color.getHex() === 0x4f6b3d) q.material = L(0x4a2a6a); }); } g.add(z); u.z = z;
-      const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x3ddc84, depthWrite: false })); bar.scale.set(boss ? 6 : 2.4, boss ? 0.5 : 0.26, 1); bar.position.y = boss ? 16 : 8; bar.renderOrder = 6; g.add(bar); u.bar = bar; u.barW = boss ? 6 : 2.4;
+      const boss = sub === 'boss', z = makeChar({ outfit: 'zombie', skin: 0 }, '#4f6b3d', 'bust'); const brute = sub === 'brute', runner = sub === 'runner', tint = boss ? 0x4a2a6a : brute ? 0x2c4f7a : runner ? 0x9a3b2a : 0; z.scale.setScalar(boss ? 4.6 : brute ? CHAR * 1.5 : runner ? CHAR * 0.9 : CHAR); if (tint) z.traverse(q => { if (q.isMesh && q.material && q.material.color && q.material.color.getHex() === 0x4f6b3d) q.material = L(tint); }); g.add(z); u.z = z;
+      const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x3ddc84, depthWrite: false })); const bw = boss ? 6 : brute ? 3.6 : 2.4; bar.scale.set(bw, boss ? 0.5 : 0.26, 1); bar.position.y = boss ? 16 : brute ? 11.5 : 8; bar.renderOrder = 6; g.add(bar); u.bar = bar; u.barW = bw; if (brute) { const tg = label('BRUTE', '#7ec8ff'); tg.position.y = 12.9; g.add(tg); }
       if (boss) { const tg = label('BOSS', '#ff4b3e'); tg.position.y = 17.4; tg.scale.set(5, 1.25, 1); g.add(tg); u.beam = beacon(0xff4b3e, 40); g.add(u.beam); }
     }
     g.traverse(q => { q.castShadow = q.isMesh && !(q.material && q.material.transparent); });
@@ -3066,16 +3066,16 @@ function plazaGot(d) {
   if (d.entgone) { const g = d.entgone, mine = g.by === Plaza.you, who = mine ? 'You' : g.n || 'Someone';
     if (g.how === 'caught' && g.k === 'wild') { plazaFeed(who + ' caught the ' + (ITEMS[g.sub] ? ITEMS[g.sub][1] : 'creature') + '!'); Snd('boost'); }
     else if (g.how === 'caught') plazaFeed(who + ' grabbed a gift drop');
-    else if (g.how === 'killed') { plazaFeed(who + ' killed a zombie' + (mine ? ' (+1,000,000)' : '')); Snd('boom'); }
+    else if (g.how === 'killed') { plazaFeed(who + ' killed ' + (g.boss ? 'the BOSS' : g.sub === 'runner' ? 'a runner' : g.sub === 'brute' ? 'a brute' : 'a zombie') + (mine && g.gold ? ' (+' + fmt(g.gold) + ')' : '')); Snd('boom'); }
     else if (g.how === 'fled' && g.k === 'wild') plazaFeed('The ' + (ITEMS[g.sub] ? ITEMS[g.sub][1].toLowerCase() : 'creature') + ' got away');
     W.entGone(g); }
   if (d.news) { if (d.news.wild) { const nm = ITEMS[d.news.wild] ? ITEMS[d.news.wild][1] : 'A creature'; toast((d.news.wild === 'w_unicorn' ? 'SUPER RARE: ' : '') + 'A wild ' + nm + ' appeared. Catch it first! Double-tap W to sprint.'); Snd('turn'); } if (d.news.gift) { plazaFeed('A gift is falling from the sky'); Snd('coin'); } }
   if (d.you) { Zom.admin = !!d.admin; }
   if (d.world) Zom.world = d.world;
-  if (d.wave) { Zom.wave = d.wave.n; banner('WAVE ' + d.wave.n, d.wave.count + ' zombies incoming · 1,000,000 gold each', 'zw'); Snd('turn'); zomButton(); }
-  if (d.boss) { banner('BOSS', 'Wave ' + d.boss.n + ' boss · 5,000,000 gold to whoever finishes it', 'zb'); Snd('turn'); }
+  if (d.wave) { Zom.wave = d.wave.n; banner('WAVE ' + d.wave.n, d.wave.count + ' mobs incoming · ' + (d.wave.name || '') + ' · ' + fmt(d.wave.pay || 1000000) + ' gold a zombie', 'zw'); Snd('turn'); zomButton(); }
+  if (d.boss) { banner('BOSS', 'Wave ' + d.boss.n + ' boss · ' + fmt(d.boss.pay || 5000000) + ' gold to whoever finishes it', 'zb'); Snd('turn'); }
   if (d.cleared) banner('WAVE ' + d.cleared.n + ' CLEARED', d.cleared.by + ' beat the boss · everyone gets 500,000', 'zc');
-  if (d.zmode) { Zom.on = !!d.zmode.on; if (d.zmode.wave != null) Zom.wave = d.zmode.wave; zomButton(); if (d.zmode.n && !d.you && d.world) plazaFeed(Zom.on ? 'Zombie waves are ON: 1,000,000 gold a kill' : 'Zombies are off'); }
+  if (d.zmode) { Zom.on = !!d.zmode.on; if (d.zmode.wave != null) Zom.wave = d.zmode.wave; if (d.zmode.str) Zom.str = d.zmode.str; zomButton(); if (d.zmode.n && !d.you && d.world) plazaFeed(Zom.on ? 'Zombie waves are ON: 1,000,000 gold a kill' : 'Zombies are off'); }
   if (typeof d.gold === 'number') { goldSync(d); if (d.reward) worldReward(d.reward); if (d.got) { Snd('boost'); toast('Gold boost: x' + d.got + ' for ' + Math.round(d.boost.left / 1000) + ' seconds'); } if (d.bonus) plazaFeed('+' + fmt(d.bonus) + ' gold for the elimination'); return; }
   if (d.shot) { W.shot(d.shot); if (d.shot[0] !== Plaza.you) Snd(d.shot[1] ? 'boom' : 'zap'); }
   if (d.hp) { W.setHp(d.hp[0], d.hp[1]); if (d.hp[0] === Plaza.you) Snd('hurt'); }
@@ -3084,7 +3084,7 @@ function plazaGot(d) {
   if (d.wpn && d.wpn[0] !== Plaza.you) W.gun(d.wpn[0], d.wpn[1]);
   if (d.pads) W.pads(d.pads);
   if (d.took && d.took[0] !== Plaza.you) { const o = W.others.get(d.took[0]); if (o) plazaFeed(o.n + ' grabbed a x' + d.took[1] + ' gold boost'); }
-  if (d.you) { Zom.admin = !!d.admin; if (d.world) Zom.world = d.world; if (d.zmode) { Zom.on = !!d.zmode.on; Zom.wave = d.zmode.wave || 0; } zomButton(); if (d.ents) { W.entClear(); d.ents.forEach(W.entAdd); } Plaza.you = d.you; W.you = d.you; W.dead = false; W.hp = 100; if (W.me) W.me.g.rotation.x = 0; worldHud(); if (W.weapon) plazaSend({ wpn: W.weapon }); W.clear(); (d.all || []).forEach(o => W.add(o, plazaCol(o.n))); plazaCount(); if (d.all && d.all.length) plazaFeed(d.all.length === 1 ? d.all[0].n + ' is here' : d.all.length + ' people are here'); return; }
+  if (d.you) { Zom.admin = !!d.admin; if (d.world) Zom.world = d.world; if (d.zmode) { Zom.on = !!d.zmode.on; Zom.wave = d.zmode.wave || 0; if (d.zmode.str) Zom.str = d.zmode.str; } zomButton(); if (d.ents) { W.entClear(); d.ents.forEach(W.entAdd); } Plaza.you = d.you; W.you = d.you; W.dead = false; W.hp = 100; if (W.me) W.me.g.rotation.x = 0; worldHud(); if (W.weapon) plazaSend({ wpn: W.weapon }); W.clear(); (d.all || []).forEach(o => W.add(o, plazaCol(o.n))); plazaCount(); if (d.all && d.all.length) plazaFeed(d.all.length === 1 ? d.all[0].n + ' is here' : d.all.length + ' people are here'); return; }
   if (d.join) { W.add(d.join, plazaCol(d.join.n)); const nk = d.join.f || d.join.n, seenAt = Plaza.came[nk] || 0; Plaza.came[nk] = Date.now(); if (Date.now() - seenAt > 90000) { plazaFeed(d.join.n + ' joined'); Snd('hop', 9); } plazaCount(); }   // tabbing out and in is not news
   if (d.leave) { const o = W.others.get(d.leave); if (o) Plaza.came[o.f || o.n] = Date.now(); W.drop(d.leave); plazaCount(); }
   if (d.s) W.snap(d.s.filter(r => r[0] !== Plaza.you));
@@ -3104,14 +3104,17 @@ setInterval(() => {
 setInterval(() => { const ws = Plaza.ws; if (ws && ws.readyState === 1) { try { ws.send('ping'); } catch (e) {} } }, 25000);
 const plazaBack = () => { if (document.hidden) return; Plaza.tries = 0; if (!Plaza.ws || Plaza.ws.readyState > 1) { clearTimeout(Plaza.timer); plazaSync(); } try { loadFriends(); } catch (e) {} };
 document.addEventListener('visibilitychange', plazaBack); addEventListener('online', plazaBack); addEventListener('pageshow', plazaBack);
-const Zom = { on: false, admin: false, world: { zom: false, wild: true, gift: true, forage: true }, wave: 0 };
+const Zom = { on: false, admin: false, world: { zom: false, wild: true, gift: true, forage: true }, wave: 0, str: 2 };
+const ZSTR = [null, ['Easy', 0.5], ['Normal', 1], ['Hard', 2.5], ['Brutal', 6], ['Nightmare', 15]];
 function banner(big, small, cls) { const b = $('#wbanner'); if (!b) return; b.className = cls || ''; b.innerHTML = '<b>' + esc(big) + '</b>' + (small ? '<small>' + esc(small) + '</small>' : ''); b.hidden = false; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; clearTimeout(banner.t); banner.t = setTimeout(() => { b.hidden = true; }, 3200); }
-function adminHTML() { const W = Zom.world, row = (k, name, note) => '<div class="admrow"><span><b>' + name + '</b><small>' + note + '</small></span><button class="btn sm' + (W[k] ? ' ok' : '') + '" data-a="adminset" data-k="' + k + '" data-v="' + (W[k] ? '0' : '1') + '">' + (W[k] ? 'On' : 'Off') + '</button></div>'; return '<div class="mhead"><h2>Admin</h2>' + xBtn() + '</div><p class="fine">Switches for everyone in the world. Only you can see this.</p>'  + row('forage', 'Foraging', 'Mushrooms, gold nuggets, gems and chests'); }
+function adminHTML() { const W = Zom.world, row = (k, name, note) => '<div class="admrow"><span><b>' + name + '</b><small>' + note + '</small></span><button class="btn sm' + (W[k] ? ' ok' : '') + '" data-a="adminset" data-k="' + k + '" data-v="' + (W[k] ? '0' : '1') + '">' + (W[k] ? 'On' : 'Off') + '</button></div>'; return '<div class="mhead"><h2>Admin</h2>' + xBtn() + '</div><p class="fine">Switches for everyone in the world. Only you can see this.</p>' + row('zom', 'Zombies', 'Waves of zombies, runners and brutes, with a boss after each wave') +
+    '<div class="admrow admstrow"><span><b>Strength</b><small>Tougher mobs hit harder and pay more gold per kill</small></span></div><div class="admstr">' + [1, 2, 3, 4, 5].map(n => '<button class="btn sm' + (Zom.str === n ? ' ok' : '') + '" data-a="zstr" data-v="' + n + '">' + ZSTR[n][0] + '<small>x' + ZSTR[n][1] + ' gold</small></button>').join('') + '</div>' +
+    '<div class="admrow"><span><b>Boss</b><small>Clears the field and sends a boss now (zombies must be on)</small></span><button class="btn sm" data-a="zboss">Spawn boss</button></div>' + row('forage', 'Foraging', 'Mushrooms, gold nuggets, gems and chests'); }
 function zomButton() { const b = $('#wzom'), a = $('#wadm'); if (b) { b.hidden = true; b.textContent = Zom.on ? 'Zombies: ON' + (Zom.wave ? ' · wave ' + Zom.wave : '') : 'Zombies: off'; b.classList.toggle('on', Zom.on); } if (a) a.hidden = !Zom.admin; if (modal && modal.kind === 'admin') refreshModal(); }
 function worldReward(r) {
-  if (r.k === 'zom') { toast('+1,000,000 gold for the zombie'); return; }
-  if (r.k === 'boss') { toast('+5,000,000 gold for the boss!'); Snd('coin'); return; }
-  if (r.k === 'wave') { toast('Wave ' + r.n + ' cleared: +500,000 gold'); return; }
+  if (r.k === 'zom') { toast('+' + fmt(r.gold || 1000000) + ' gold'); Snd('coin'); return; }
+  if (r.k === 'boss') { toast('+' + fmt(r.gold || 5000000) + ' gold for the boss!'); Snd('coin'); return; }
+  if (r.k === 'wave') { toast('Wave ' + r.n + ' cleared: +' + fmt(r.gold || 500000) + ' gold'); return; }
   const what = r.item && ITEMS[r.item] ? ITEMS[r.item][1] : null;
   api('me').then(j => { loadProfile(j.wallet); fixLook(); rerender(); }).catch(() => {});
   if (r.k === 'wild' && r.item) { Snd('turn'); openModal('caught', () => '<div class="mhead"><h2>You caught it!</h2>' + xBtn() + '</div><div class="pstage solo r4"><span class="pwrap">' + pimg(r.item, 150) + '</span>' + burst() + '</div><div class="ptitle"><b>' + esc(what) + '</b><span class="rar r4">' + rarity(ITEMS[r.item][2])[1] + '</span></div><p class="pdesc">' + esc(DESC[r.item] || '') + '</p><button class="btn ok big" data-a="wear" data-k="pet" data-v="' + r.item + '">Take it along</button><button class="btn" data-a="close">Back to the world</button>'); return; }
@@ -3506,6 +3509,8 @@ document.addEventListener('click', async e => {
     case 'adminpanel': openModal('admin', adminHTML); break;
     case 'zoomin': B3.world.zoomBy(0.8); break;
     case 'zoomout': B3.world.zoomBy(1.25); break;
+    case 'zstr': plazaSend({ admin: { k: 'zstr', v: +el.dataset.v } }); break;
+    case 'zboss': plazaSend({ admin: { k: 'zboss' } }); toast('Boss incoming'); break;
     case 'adminset': plazaSend({ admin: { k: el.dataset.k, on: el.dataset.v === '1' } }); break;
     case 'acct': F.page = 'me'; F.sel = null; renderHome(true); hideTitle(); $('#side').scrollTop = 0; if (!authInfo.registered) setTimeout(() => { const u = $('#auth-username'); if (u) u.focus(); }, 80); break;
     case 'title': showTitle(true); break;
