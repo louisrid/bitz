@@ -42,7 +42,24 @@ try{
   const world=await page.evaluate(()=>({webgl:!!document.createElement('canvas').getContext('webgl'),running:typeof B3!=='undefined'&&B3.ok,world:typeof B3!=='undefined'&&!!B3.world}));
   console.log(name+' graphics: '+JSON.stringify(world));
   assert(world.world,'Character/world renderer missing');
-  if(world.webgl)assert(world.running,'WebGL available but world did not render');
+  if(world.webgl){
+    assert(world.running,'WebGL available but world did not render');
+    await page.waitForFunction(()=>B3.world?.on && B3.world?.me,{timeout:5000});
+    const gfx=await page.evaluate(()=>{
+      const s=document.getElementById('stage'),a=document.getElementById('app'),renderer=B3._r;
+      const bg={stage:getComputedStyle(s).backgroundColor,app:getComputedStyle(a).backgroundColor};
+      const gl=renderer.getContext(),px=new Uint8Array(4),unique=new Set(),w=gl.drawingBufferWidth,h=gl.drawingBufferHeight;
+      for(let x=2;x<=18;x++)for(let y=2;y<=13;y++){
+        gl.readPixels(Math.floor(w*x/20),Math.floor(h*y/15),1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);
+        unique.add(px.join(','));
+      }
+      return {background:bg,uniquePixels:unique.size,player:!!B3.world.me,worldActive:!!B3.world.on};
+    });
+    assert(/transparent|rgba\\(0, 0, 0, 0\\)/.test(gfx.background.stage) && /transparent|rgba\\(0, 0, 0, 0\\)/.test(gfx.background.app),'Opaque layers cover the 3D canvas: '+JSON.stringify(gfx));
+    assert(gfx.player&&gfx.worldActive,'Lobby character not active: '+JSON.stringify(gfx));
+    assert(gfx.uniquePixels>3,'World renderer appears blank: '+JSON.stringify(gfx));
+    console.log(name+' lobby render: '+JSON.stringify(gfx));
+  }
   await page.locator('#wbar [data-a=stuff]').click();
   await page.waitForSelector('#modal[data-kind=stuff]');
   assert.equal(await page.locator('#shopbig').isVisible(),false);

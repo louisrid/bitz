@@ -205,3 +205,18 @@ html:has(#fprofov:not([hidden])) #leveltop{
  #modal[data-kind="loot"] .bx-cost{font-size:12px!important}
  #b2-nographics{top:43%}
 }
+
+/* The 3D canvas is below #app in the stacking order. These layers MUST be
+   transparent or the real social lobby is hidden behind a blank white sheet.
+   This is a functional rendering rule, not decorative styling. */
+html #app[data-screen="home"],
+html #app[data-screen="home"] #stage,
+html #app[data-page="world"] #stage{background:transparent!important}
+/* Quiet, cohesive movement and camera controls (replaces old yellow). */
+html #app[data-screen="home"][data-page="world"] #wzoom button{
+  background:#fff!important;color:#000!important;border:2px solid #000!important;
+  border-radius:11px!important;box-shadow:2px 3px 0 #000!important;
+  width:43px!important;height:43px!important;font-size:25px!important
+}
+html #ftab{background:#e7e0ff!important;color:#000!important}
+html #wstick i{background:#c8b9ff!important}
