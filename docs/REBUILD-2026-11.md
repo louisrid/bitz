@@ -1,3 +1,5 @@
+> **Historical rebuild planning document.** The rebuild is already merged into `main`; this file describes an earlier stage. For current launch readiness, use [LAUNCH.md](LAUNCH.md).
+
 # BITZ rebuild, November 2026: what changed and where it stands
 
 Branch `wip/game-rebuild`. Nothing on `main` or the live site has been touched.
