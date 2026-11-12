@@ -2762,7 +2762,7 @@ function lootHTML(){
         '<button class="bx-btn" data-a="lootbuy">BUY ANOTHER</button>':'')+
       (it&&!worn?'<button class="bx-btn bx-close" data-a="close">NOT NOW</button>':'')+
       '</div>';
-    return '<div class="bx-shell">'+head+section+buttons+'</div>';
+    return '<div class="bx-shell">'+head+seasonRibbon()+section+buttons+'</div>';
   }
   const hero='<section class="bx-hero"><div class="bx-art"><span class="bx-ring"></span>'+
     '<div class="bx-chestpic">'+lootImg(240)+'</div></div>'+
@@ -2776,7 +2776,7 @@ function lootHTML(){
     '<button class="bx-cta" disabled>SEASON COMPLETE</button>';
   const price=n>0?'<span class="bx-cost">'+fmt(n)+' AVAILABLE</span>':
     remaining.length?'<span class="bx-cost">'+fmt(BOX_PRICE)+' GOLD</span>':'';
-  return '<div class="bx-shell">'+head+hero+bxOdds()+wheelHTML(st,col)+
+  return '<div class="bx-shell">'+head+seasonRibbon()+hero+bxOdds()+wheelHTML(st,col)+
     '<div class="bx-actions bx-base-actions">'+price+button+
     (busy?'':'<button class="bx-btn bx-browse" data-a="lootbrowse">VIEW REWARDS</button>')+'</div></div>';
 }
