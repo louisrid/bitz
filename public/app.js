@@ -90,7 +90,7 @@
 
   /* ---------------- state ---------------- */
   async function refresh() { const s = await api('state'); applyState(s); return s; }
-  function applyState(s) { BZ.state = s; if (BZ.me) BZ.me.coins = s.cash; BZ.code = s.code; paintAll(); if (globalThis.CARDS) CARDS.onState(s); }
+  function applyState(s) { BZ.state = s; if (BZ.me) BZ.me.coins = s.cash; BZ.code = s.code; paintAll(); if (s.progress && W.me) W.stat('me', s.nw && s.nw.total, s.progress.level); if (globalThis.CARDS) CARDS.onState(s); }
   async function act(body) {
     const j = await api('cards', body); if (j.state) { const s = Object.assign({}, BZ.state || {}, j.state, { cash: j.cash, progress: j.progress }); applyState(s); } if (j.progress && j.progress.rewards && j.progress.rewards.length && BZ.state) { /* level ups are reported through progress on the next state */ }
     if (j.xp && j.xp.rewards && j.xp.rewards.length) { j.xp.rewards.forEach(r => { toast('Level ' + r.level + '! +' + money(r.cash) + (r.item ? ' and a new collectible' : '')); sound('level'); }); }

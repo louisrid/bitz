@@ -58,11 +58,11 @@
       for (let i = 0; i < 9; i++) box(roof, 0.5, 0.1, 1.9, i % 2 ? 0xffffff : accent, -2.0 + i * 0.5, 0, 0, 0);
       box(roof, 4.6, 0.12, 2.0, DARK, 0, -0.08, 0, 0); for (let i = 0; i < 9; i++) box(roof, 0.5, 0.26, 0.08, i % 2 ? 0xffffff : accent, -2.0 + i * 0.5, -0.1, 0.98, 0);
     } else {
-      box(stand, 2.6, 1.0, 1.4, DARK, 0, 0.5, 0); box(stand, 2.8, 0.1, 1.6, 0x0b0b0f, 0, 1.02, 0, 0); box(stand, 2.4, 0.06, 1.2, 0x3b3650, 0, 1.08, 0, 0);
+      box(stand, 2.6, 1.0, 1.4, 0x3a3550, 0, 0.5, 0); box(stand, 2.8, 0.1, 1.6, 0x0b0b0f, 0, 1.02, 0, 0); box(stand, 2.4, 0.06, 1.2, 0x7a52ff, 0, 1.08, 0, 0); for (let i = 0; i < 4; i++) box(stand, 0.08, 0.9, 0.03, 0x7a52ff, -0.9 + i * 0.6, 0.5, 0.71, 0);
       const bag = new THREE.Group(); bag.position.set(0.1, 1.1, 0.05); stand.add(bag); box(bag, 1.3, 0.3, 0.9, 0x0b0b0f, 0, 0.15, 0); const lid = box(bag, 1.3, 0.9, 0.05, 0x0b0b0f, 0, 0.72, -0.44); lid.rotation.x = -0.25; box(bag, 1.1, 0.1, 0.7, 0x7a52ff, 0, 0.3, 0, 0);
       for (let i = 0; i < 4; i++) box(bag, 0.5, 0.02, 0.7, 0xffffff, -0.35 + i * 0.24, 0.33 + i * 0.03, 0.02, 0);
-      [-1.2, 1.2].forEach(x => cyl(stand, 0.08, 0.1, 4.0, 0x0b0b0f, x, 2.0, -0.7, 10, 0)); box(stand, 2.9, 0.9, 0.12, 0x0b0b0f, 0, 3.6, -0.7, 0);
-      const neon = label('RACES', { bg: '#0b0b0f', fg: '#c9b5ff', brand: true, size: 64, w: 2.6 }); neon.position.set(0, 3.6, -0.6); stand.add(neon);
+      [-1.2, 1.2].forEach(x => cyl(stand, 0.08, 0.1, 4.0, 0x0b0b0f, x, 2.0, -0.7, 10, 0)); box(stand, 2.9, 0.9, 0.12, 0xffffff, 0, 3.6, -0.7);
+      const neon = label('ORDERS & RACES', { bg: '#7a52ff', fg: '#ffffff', brand: true, size: 54, w: 3.4 }); neon.position.set(0, 3.65, -0.55); stand.add(neon);
       const clock = new THREE.Group(); clock.position.set(2.4, 3.3, -0.4); stand.add(clock); cyl(clock, 0.6, 0.6, 0.12, 0xffffff, 0, 0, 0, 32); const hand = box(clock, 0.06, 0.46, 0.04, 0x0b0b0f, 0, 0.2, 0.1, 0); hand.geometry.translate(0, -0.2, 0); const hand2 = box(clock, 0.06, 0.32, 0.04, 0x7a52ff, 0, 0.14, 0.12, 0); hand2.geometry.translate(0, -0.14, 0); clock.rotation.x = Math.PI / 2; clock.rotation.z = 0; const cg = clock; cg.rotation.set(Math.PI / 2, 0, 0); anim.push({ fn: t => { hand.rotation.z = -t * 0.8; hand2.rotation.z = -t * 0.07; } }); cyl(stand, 0.07, 0.09, 3.3, 0x0b0b0f, 2.4, 1.65, -0.4, 10, 0);
     }
     if (s.id === 'seller') {
@@ -78,7 +78,7 @@
       const sign = label('WE BUY CARDS', { bg: '#f2b705', brand: true, size: 54, w: 3.4 }); sign.position.set(0, 2.5, 0.9); stand.add(sign);
     }
     /* the NPC: a bigger, more characterful figure behind the counter */
-    const looks = { seller: { look: { skin: 2, hair: 'short', hc: 1, outfit: 'overalls', hat: 'cap', acc: '' }, col: '#7a52ff' }, buyer: { look: { skin: 1, hair: 'bun', hc: 0, outfit: 'tux', hat: 'tophat', acc: 'shades' }, col: '#0b0b0f' }, dealer: { look: { skin: 4, hair: 'none', hc: 0, outfit: 'hoodie', hat: '', acc: 'chain' }, col: '#0b0b0f' } }[s.id];
+    const looks = { seller: { look: { skin: 2, hair: 'short', hc: 1, outfit: 'overalls', hat: 'cap', acc: '' }, col: '#7a52ff' }, buyer: { look: { skin: 1, hair: 'bun', hc: 0, outfit: 'tux', hat: 'tophat', acc: 'shades' }, col: '#0b0b0f' }, dealer: { look: { skin: 4, hair: 'none', hc: 0, outfit: 'hoodie', hat: '', acc: 'chain' }, col: '#7a52ff' } }[s.id];
     const npc = AV.make(THREE, looks.look, looks.col); npc.position.set(0, 0, -2.75); npc.scale.setScalar(1.12); npc.rotation.y = Math.PI; g.add(npc);
     if (s.id === 'seller') { const apron = box(npc.userData.body, 0.46, 0.5, 0.03, 0x7a52ff, 0, 0.62, 0.17, 0); apron.renderOrder = 1; box(npc.userData.body, 0.3, 0.12, 0.04, 0xffffff, 0, 0.56, 0.19, 0); }
     if (s.id === 'dealer') { const h = npc.userData.head; box(h, 0.62, 0.1, 0.03, 0x0b0b0f, 0, 0.32, 0.31, 0); [-1, 1].forEach(sg => box(h, 0.22, 0.14, 0.03, 0x0b0b0f, sg * 0.15, 0.3, 0.31, 0)); box(npc.userData.body, 0.52, 0.2, 0.34, 0x0b0b0f, 0, 0.96, -0.05, 0); }
@@ -95,11 +95,11 @@
     const ring = new THREE.Mesh(new THREE.RingGeometry(c.r - 0.35, c.r, 96), new THREE.MeshBasicMaterial({ color })); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.02; g.add(ring);
     const ring2 = new THREE.Mesh(new THREE.RingGeometry(c.r - 0.55, c.r - 0.45, 96), new THREE.MeshBasicMaterial({ color: 0x0b0b0f, transparent: true, opacity: 0.6 })); ring2.rotation.x = -Math.PI / 2; ring2.position.y = 0.022; g.add(ring2);
     const inner = new THREE.Mesh(new THREE.RingGeometry(1.2, 1.5, 48), new THREE.MeshBasicMaterial({ color })); inner.rotation.x = -Math.PI / 2; inner.position.y = 0.024; g.add(inner);
-    const beam = new THREE.Mesh(new THREE.CylinderGeometry(c.r - 0.2, c.r - 0.2, 5, 48, 1, true), new THREE.MeshBasicMaterial({ color: pale, transparent: true, opacity: 0.1, side: THREE.DoubleSide, depthWrite: false })); beam.position.y = 2.5; g.add(beam);
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(c.r - 0.3, c.r - 0.3, 2.2, 48, 1, true), new THREE.MeshBasicMaterial({ color: pale, transparent: true, opacity: 0.045, side: THREE.DoubleSide, depthWrite: false })); beam.position.y = 1.1; g.add(beam);
     const N = 26, parts = new THREE.InstancedMesh(new THREE.BoxGeometry(0.16, 0.16, 0.16), new THREE.MeshBasicMaterial({ color }), N), d = new THREE.Object3D(), seeds = Array.from({ length: N }, () => [Math.random() * Math.PI * 2, 0.6 + Math.random() * (c.r - 1), Math.random() * 4, 0.5 + Math.random()]);
     g.add(parts); const pl = new THREE.PointLight(color, 0.7, 14, 2); pl.position.y = 1.5; g.add(pl);
     const glyph = label(c.id === 'gold' ? '×3 CASH' : 'FREE PACKS', { bg: c.id === 'gold' ? '#f2b705' : '#7a52ff', fg: c.id === 'gold' ? '#0b0b0f' : '#fff', brand: true, size: 56, w: 4 }); glyph.position.y = 3.6; g.add(glyph);
-    anim.push({ fn: t => { ring.scale.setScalar(1 + Math.sin(t * 2) * 0.012); inner.rotation.z = t * 0.6; disc.material.opacity = 0.14 + Math.sin(t * 2) * 0.04; beam.material.opacity = 0.08 + Math.sin(t * 1.4) * 0.03; glyph.position.y = 3.6 + Math.sin(t * 1.5) * 0.12;
+    anim.push({ fn: t => { ring.scale.setScalar(1 + Math.sin(t * 2) * 0.012); inner.rotation.z = t * 0.6; disc.material.opacity = 0.14 + Math.sin(t * 2) * 0.04; beam.material.opacity = 0.04 + Math.sin(t * 1.4) * 0.015; glyph.position.y = 3.6 + Math.sin(t * 1.5) * 0.12;
       for (let i = 0; i < N; i++) { const s = seeds[i], y = (s[2] + t * s[3]) % 4; d.position.set(Math.sin(s[0] + t * 0.3) * s[1], y, Math.cos(s[0] + t * 0.3) * s[1]); d.rotation.set(t, t * 0.7, 0); const k = 1 - y / 4; d.scale.setScalar(0.4 + k * 0.8); d.updateMatrix(); parts.setMatrixAt(i, d.matrix); } parts.instanceMatrix.needsUpdate = true; } });
   }
 
@@ -120,7 +120,7 @@
   function dispose(g) { g.traverse(q => { if (q.material && q.material.map && q.isSprite) q.material.map.dispose(); }); }
   function snap(rows) { const now = performance.now(); for (const r of rows) { const o = W.others.get(r[0]); if (!o) continue; o.tx = r[1]; o.ty = r[2]; o.tz = r[3]; o.try = r[4]; o.moving = !!r[5] || Math.hypot(o.tx - o.x, o.tz - o.z) > 0.05; o.lastAt = now; } }
   function emote(i, e) { const o = i === 'me' ? W.me : W.others.get(i); if (o && o.g) o.g.userData.av.userData.emote(e); }
-  function stat(i, nw, level) { const o = W.others.get(i); if (!o) return; o.nw = nw; o.level = level; o.g.userData.tag.userData.draw((o.n || 'Player') + '  ·  Lv ' + level); }
+  function stat(i, nw, level) { const o = i === 'me' ? W.me : W.others.get(i); if (!o || !o.g) return; o.nw = nw; o.level = level; W.level = i === 'me' ? level : W.level; o.g.userData.tag.userData.draw((i === 'me' ? o.name : o.n || 'Player') + '  ·  Lv ' + level); }
   function clear() { for (const i of [...W.others.keys()]) drop(i); }
   function setMe(look, name, pet, col) {
     const keep = W.me ? { x: W.me.x, y: W.me.y, z: W.me.z, ry: W.me.ry } : null;

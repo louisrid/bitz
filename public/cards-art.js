@@ -104,7 +104,7 @@
   function card(c, opt) {
     opt = opt || {};
     const ids = c.players || [c.player], P = ids.map(player).filter(Boolean), p = P[0] || { name: 'Unknown', pos: '', nation: '', club: '' }, cl = club(p.club), e = ed(c.ed), dual = P.length > 1 && e.dual;
-    const cls = ['bc', SET_CLASS[c.set] || 's-rh', 'r' + e.rank, opt.cls || '', opt.lock ? 'lockd' : '', opt.top ? 'topd' : '', opt.sel ? 'sel' : '', opt.dim ? 'dim' : '', opt.anim ? 'anim' : ''].filter(Boolean).join(' ');
+    const cls = ['bc', SET_CLASS[c.set] || 's-rh', 'r' + e.rank, e.name.length > 13 ? 'longed' : '', opt.cls || '', opt.lock ? 'lockd' : '', opt.top ? 'topd' : '', opt.sel ? 'sel' : '', opt.dim ? 'dim' : '', opt.anim ? 'anim' : ''].filter(Boolean).join(' ');
     const art = dual ? '<div class="pair">' + portrait(P[0].id, P[0].name) + portrait(P[1].id, P[1].name) + '</div>' : '<div class="port">' + portrait(p.id, p.name) + '</div>';
     const name = dual ? P.map(q => q.name.split(' ').slice(-1)[0]).join(' & ') : (p.name.length > 15 ? p.name.split(' ').slice(-1)[0] : p.name);
     const sig = e.auto ? '<div class="sig">' + signature(p.name, INK[c.set] || '#1b2a8f', c.uid) + (dual ? signature(P[1].name, INK[c.set] || '#1b2a8f', c.uid + 'b') : '') + '</div>' : '';
