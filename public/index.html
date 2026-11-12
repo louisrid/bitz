@@ -1555,11 +1555,8 @@ const B3 = (function () {
   const worldG = new THREE.Group(); worldG.visible = false; scene.add(worldG);
   const worldHidden=new Map();
   const socialEnvironment=STAKKZ_BUILD_WORLD(THREE,worldG); api._s = scene; api._wg = worldG; api._r = renderer;
-  const colliders = [];
-  setTimeout(() => {   // solid things in the city: anything taller than a person with a modest footprint
-    city.updateMatrixWorld(true);
-    city.children.forEach(o => { const b = new THREE.Box3().setFromObject(o), sz = b.getSize(new THREE.Vector3()); if (sz.y > 1.1 && sz.x < 14 && sz.z < 14 && b.max.y > 1.1) colliders.push([b.min.x, b.min.z, b.max.x, b.max.z]); });
-  }, 0);
+  /* BITZ 2.0: retired adventure-city collider scan.
+     The social lobby is collision-free. See legacy/index.adventure.html to restore. */
   const CHAR = 2;   // people in the world are drawn at twice the board size
   const WD = api.world = { on: false, me: null, others: new Map(), joy: { x: 0, y: 0 }, keys: {}, you: null, feed: null, cAz: 0, cEl: 0.34, cZ: 1 };
   function nameTag(text) {
@@ -1859,6 +1856,12 @@ const B3 = (function () {
     if ((fN2++ & 31) === 0) { const r = stage.getBoundingClientRect(); if (Math.abs(r.left + stage.clientLeft - rc.left) + Math.abs(r.top + stage.clientTop - rc.top) + Math.abs(stage.clientWidth - rc.width) + Math.abs(stage.clientHeight - rc.height) > 0.5 && r.width > 0) size(); }
     if (api.auto && !api.low) { const dt = now - fL; if (fL && dt < 400) { fN++; if (fN > 40) fT += dt; if (fN === 140) { if (fT / 100 > 40) api.quality('low'); api.auto = false; } } }
     fL = now;
+    /* Run only the social renderer. Previously the entire Monopoly/city scene
+       was animated every frame even while invisible; that work is now dormant.
+       Full original loop remains in legacy/index.adventure.html. */
+    if (WD.on) { worldFrame(now); if (WD.profileActive && api.showing) drawProfileChar(now); return; }
+    if (worldG.visible) worldOff();
+    if (api.home && !api.showing) { renderer.setClearColor(0xf9f9ff, 1); renderer.clear(); return; }
     for (let i = tw.length - 1; i >= 0; i--) { const a = tw[i], f = Math.min(1, (now - a.t0) / a.ms); a.fn(f); if (f >= 1) { tw.splice(i, 1); a.res(); } }
     if (api.showing && api.home && showChar && !api.world?.on) { drawShow(now); return; }
     const t = now / 1000, mv = still ? 0 : 1;
@@ -1912,8 +1915,9 @@ const B3 = (function () {
     logo3.rotation.y = t * 0.5 * mv;
     gift.rotation.z = Math.sin(t * 5) * 0.14 * mv; gift.rotation.y = t * 0.6 * mv; gift.position.y = 3 + Math.abs(Math.sin(t * 2.4)) * 0.6 * mv;
     sirenM.color.setHex(Math.floor(t * 3) % 2 ? 0xff4b3e : 0x3fa9ff);
-    if (WD.on) { worldFrame(now); if (WD.profileActive && api.showing) drawProfileChar(now); return; } else if (worldG.visible) worldOff();
-    if (api.home) { renderer.setClearColor(0x9fd8f0, 1); renderer.clear(); return; }
+    /* Legacy city/board animations below are only reachable when the old
+       board was deliberately restored. Normal lobby and Shop skip them. */
+    if (api.home) { renderer.setClearColor(0xf9f9ff, 1); renderer.clear(); return; }
     const asp = rc.width / rc.height, tv = Math.tan(cam.fov * Math.PI / 360), th = tv * asp;
     const kk = 1 - Math.exp(-Math.min(0.1, (now - (api.last || now)) / 1000) * 6); api.last = now;
     // the whole board is the resting view. The camera closes in on a player when their turn starts, while the dice
