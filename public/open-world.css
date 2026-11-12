@@ -489,3 +489,176 @@ html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}
 #whp b{position:absolute!important;inset:0!important;display:grid!important;place-items:center!important;z-index:1!important;font:400 18px/1 "Coolvetica",sans-serif!important;color:#101611!important;text-shadow:0 1px 0 #fff9!important;letter-spacing:0!important}
 #whp .heart{display:none!important}
 @media(max-width:600px){#whp{height:26px!important;width:min(180px,50vw)!important}#whp b{font-size:15px!important}}
+
+/* Shared BITZ player card and accessible trade overlay, Coolvetica Regular UI. */
+#veil:has(#modal[data-kind="trade"]),#veil:has(#modal[data-kind="traded"]){
+ z-index:240!important;display:grid!important;place-items:center!important;
+ padding:12px!important;background:rgba(4,13,13,.68)!important;backdrop-filter:blur(5px);
+ pointer-events:auto!important
+}
+#modal[data-kind="trade"],#modal[data-kind="traded"]{
+ position:relative!important;z-index:241!important;display:flex!important;
+ flex-direction:column!important;gap:12px!important;
+ width:min(890px,calc(100vw - 28px))!important;max-height:min(88dvh,850px)!important;
+ overflow-x:hidden!important;overflow-y:auto!important;
+ margin:auto!important;padding:17px 19px!important;
+ background:#fff!important;color:#000!important;
+ border:4px solid #000!important;border-radius:19px!important;
+ box-shadow:6px 8px 0 #000,0 16px 50px #0008!important;
+}
+#modal[data-kind="trade"] .mhead,#modal[data-kind="traded"] .mhead{
+ position:sticky;top:-17px;z-index:3;display:flex;align-items:center;justify-content:space-between;
+ padding:7px 0 13px!important;margin:0!important;
+ background:#fff!important;border-bottom:3px solid #000!important;
+}
+#modal[data-kind="trade"] .mhead h2,#modal[data-kind="traded"] .mhead h2{
+ font:400 clamp(26px,3.4vw,38px)/1 var(--ui)!important;letter-spacing:0
+}
+#modal[data-kind="trade"] .tgrid,#modal[data-kind="traded"] .tgrid{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;min-width:0
+}
+#modal[data-kind="trade"] .tside,#modal[data-kind="traded"] .tside{
+ min-width:0;min-height:130px;padding:12px!important;
+ background:#fff!important;border:3px solid #000;border-radius:14px;
+ box-shadow:2px 3px 0 #000
+}
+#modal[data-kind="trade"] .tside.ok{background:#efffed!important}
+#modal[data-kind="trade"] .tside h3,#modal[data-kind="traded"] .tside h3{
+ display:flex;justify-content:space-between;align-items:center;gap:8px;
+ font:400 24px/1 var(--ui)!important;margin:0 0 10px!important
+}
+#modal[data-kind="trade"] .tside .tlist{display:flex!important;flex-wrap:wrap;gap:7px;max-height:130px;overflow:auto}
+#modal[data-kind="trade"] .tinv{
+ display:grid!important;grid-template-columns:repeat(auto-fill,minmax(100px,1fr))!important;
+ gap:9px!important;max-height:215px!important;overflow-y:auto!important;
+ min-width:0!important;background:#fff!important;padding:4px!important;
+}
+#modal[data-kind="trade"] .titem{
+ display:grid!important;justify-items:center;gap:5px;min-width:0;min-height:95px;
+ padding:8px 4px!important;background:#fff!important;color:#000!important;
+ border:2px solid #000!important;border-radius:12px!important;
+ box-shadow:2px 3px 0 #000!important;
+}
+#modal[data-kind="trade"] .titem.on{background:#fff7b6!important;outline:2px solid #edc527}
+#modal[data-kind="trade"] .titem small{font:400 13px/1.1 var(--ui)!important;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:100%}
+#modal[data-kind="trade"] .tgold{
+ display:flex!important;align-items:center;flex-wrap:wrap;gap:8px!important;
+ padding:10px;border:2px solid #000;border-radius:12px;background:#fff!important;
+}
+#modal[data-kind="trade"] .tgold input{
+ min-width:85px;flex:1 1 120px;max-width:185px;border:2px solid #000!important;
+ border-radius:10px!important;background:#fff!important;font:400 16px var(--ui)!important
+}
+#modal[data-kind="trade"]>.row:last-child{
+ position:sticky!important;bottom:-17px;z-index:4;display:flex!important;align-items:center;
+ gap:9px;flex-wrap:wrap;margin-top:4px!important;padding:13px 0 2px!important;
+ background:#fff!important;border-top:3px solid #000!important;
+}
+#modal[data-kind="trade"]>.row:last-child .btn:first-child{flex:2 1 240px!important;min-height:50px}
+#modal[data-kind="trade"]>.row:last-child .btn:last-child{flex:1 1 140px!important}
+#modal[data-kind="trade"] .btn,#modal[data-kind="traded"] .btn,
+#wtrade,#wtrade .btn{font-family:var(--ui)!important;font-weight:400!important;letter-spacing:0!important}
+#wtrade{position:absolute!important;left:50%!important;top:101px!important;
+ transform:translateX(-50%)!important;z-index:215!important;
+ max-width:min(620px,calc(100vw - 28px))!important;
+ border:3px solid #000!important;background:#fff!important;box-shadow:4px 5px 0 #000!important}
+#fprofov{z-index:84!important}
+#fprofov .pp-card{
+ box-sizing:border-box!important;display:grid!important;position:relative!important;
+ grid-template-columns:minmax(260px,42%) minmax(0,58%)!important;
+ width:min(960px,calc(100% - 12px))!important;
+ height:min(82dvh,760px)!important;min-height:min(550px,85dvh)!important;
+ max-height:calc(100dvh - 35px)!important;gap:15px!important;padding:15px!important;
+ overflow:hidden!important;background:#fff!important;color:#000!important;
+ border:4px solid #000!important;border-radius:22px!important;
+ box-shadow:6px 8px 0 #000,0 20px 50px #0006!important;
+ animation:pp-card-open .42s cubic-bezier(.18,1.1,.23,1) both!important;
+ font-family:var(--ui)!important;font-weight:400!important;
+}
+#fprofov .pp-char{
+ display:block!important;position:relative!important;isolation:isolate;
+ min-height:0!important;height:100%!important;
+ overflow:hidden!important;border:3px solid #000!important;
+ border-radius:16px!important;background-size:180% 180%!important;
+ animation:pp-scene-flow 16s ease-in-out infinite alternate!important;
+}
+#fprofov .pp-char:before{
+ content:"";position:absolute;inset:-60%;z-index:0;opacity:.22;
+ background:repeating-conic-gradient(from 12deg,#fff7 0 2deg,transparent 2deg 24deg);
+ animation:pp-scene-rays 34s linear infinite;pointer-events:none;
+}
+#fprofov .pp-char:after{
+ content:"";position:absolute;bottom:8%;left:12%;width:76%;height:12%;z-index:1;
+ background:radial-gradient(ellipse,#0003 0%,transparent 72%);pointer-events:none;
+}
+#fprofov .pp-char canvas{position:absolute!important;inset:0!important;z-index:2!important;width:100%!important;height:100%!important;display:block!important}
+#fprofov .pp-scene-label{position:absolute;left:13px;top:13px;z-index:4;
+ background:#fff!important;color:#000;border:2px solid #000;border-radius:10px;
+ padding:5px 10px;font:400 14px/1 var(--ui)!important;box-shadow:2px 3px 0 #000}
+#fprofov .pp-pet-label{position:absolute;bottom:14px;left:13px;right:13px;z-index:4;
+ display:flex;align-items:center;justify-content:space-between;gap:7px;
+ background:#ffffffea;color:#000;border:2px solid #000;border-radius:10px;padding:9px 12px;
+ font:400 18px/1 var(--ui)!important;box-shadow:2px 3px 0 #000}
+#fprofov .pp-pet-label span{font:400 13px/1 var(--ui)!important;color:#333}
+#fprofov .pp-info{
+ display:flex!important;flex-direction:column!important;gap:10px!important;
+ min-width:0;min-height:0;overflow-y:auto!important;padding:7px 5px 8px 1px!important;
+ font-family:var(--ui)!important;
+}
+#fprofov .pp-info h2{font:400 clamp(29px,3vw,40px)/1 var(--ui)!important;letter-spacing:0!important}
+#fprofov .pp-sub,#fprofov .pp-badges small,#fprofov .prow small,
+#fprofov .prow .prar{font-family:var(--ui)!important;font-weight:400!important}
+#fprofov .pp-badges{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+#fprofov .pp-badges .pworth,#fprofov .pp-badges .pswag{
+ flex:none!important;min-width:0!important;padding:10px 9px!important;min-height:79px!important;
+ background:#fff!important;border:3px solid #000!important;border-radius:12px!important;
+ box-shadow:2px 3px 0 #000!important;transform:none!important
+}
+#fprofov .pp-badges .pswag{background:#fff01f!important}
+#fprofov .pp-badges .pworth b,#fprofov .pp-badges .pswag b{
+ font:400 clamp(17px,2vw,26px)/1 var(--ui)!important;
+ display:flex!important;align-items:center!important;white-space:nowrap;min-width:0;
+ overflow:hidden;text-overflow:ellipsis;margin-top:6px!important;letter-spacing:0!important
+}
+#fprofov .pp-badges .pworth .gc{width:17px!important;height:17px!important;flex:0 0 17px}
+#fprofov .pp-badges .pworth small,#fprofov .pp-badges .pswag small{
+ font:400 12px/1 var(--ui)!important;text-transform:uppercase;letter-spacing:.02em!important
+}
+#fprofov .pp-info .plist{flex:1 1 auto!important;display:grid!important;gap:7px!important;align-content:start}
+#fprofov .prow{
+ grid-template-columns:48px minmax(0,1fr) auto!important;gap:10px!important;
+ min-height:58px!important;padding:6px 9px!important;
+ background:#fff!important;border:2px solid #000!important;border-radius:12px!important
+}
+#fprofov .prow b{font:400 18px/1 var(--ui)!important}
+#fprofov .prow small{font-size:13px!important}
+#fprofov .pbtns{display:flex!important;gap:8px!important;flex-wrap:wrap;margin-top:auto!important;padding-top:4px!important}
+#fprofov .pbtns .btn{min-height:43px!important;flex:1 1 100px;font:400 19px/1 var(--ui)!important}
+#fprofov .pp-x{z-index:10!important}
+@keyframes pp-card-open{from{transform:translateY(14px) scale(.96);opacity:.2}to{transform:translateY(0) scale(1);opacity:1}}
+@keyframes pp-scene-flow{from{background-position:12% 30%}to{background-position:90% 68%}}
+@keyframes pp-scene-rays{to{transform:rotate(360deg)}}
+@media(max-width:740px){
+ #fprofov .pp-card{width:calc(100% - 4px)!important;height:min(86dvh,740px)!important;
+ grid-template-columns:1fr!important;grid-template-rows:minmax(180px,40%) minmax(0,60%)!important;
+ padding:10px!important;gap:9px!important}
+ #fprofov .pp-char{height:100%!important;min-height:0!important}
+ #fprofov .pp-info{padding:5px!important}
+ #fprofov .pp-info h2{font-size:26px!important}
+ #fprofov .pp-badges .pworth,#fprofov .pp-badges .pswag{min-height:60px!important;padding:6px!important;border-width:2px!important}
+ #fprofov .pp-badges .pworth b,#fprofov .pp-badges .pswag b{font-size:17px!important}
+ #fprofov .pp-badges .pworth small,#fprofov .pp-badges .pswag small{font-size:10px!important}
+ #fprofov .prow{min-height:42px!important;padding:3px 7px!important;grid-template-columns:36px minmax(0,1fr) auto!important}
+ #fprofov .prow b{font-size:14px!important}#fprofov .prow small{font-size:11px!important}
+ #fprofov .pbtns .btn{font-size:16px!important}
+ #modal[data-kind="trade"],#modal[data-kind="traded"]{width:calc(100vw - 12px)!important;
+ max-height:calc(100dvh - 12px)!important;padding:11px!important}
+ #modal[data-kind="trade"] .mhead,#modal[data-kind="traded"] .mhead{top:-11px}
+ #modal[data-kind="trade"] .tside{padding:8px!important;min-height:105px}
+ #modal[data-kind="trade"] .tside h3{font-size:18px!important}
+ #modal[data-kind="trade"] .tinv{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ #modal[data-kind="trade"]>.row:last-child{bottom:-11px}
+}
+@media(prefers-reduced-motion:reduce){
+ #fprofov .pp-card,#fprofov .pp-char,#fprofov .pp-char:before{animation:none!important}
+}
