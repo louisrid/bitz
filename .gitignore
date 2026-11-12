@@ -1,3 +1,6 @@
 node_modules/
+qa-screens/
 qa-screenshots/
 qa-3d-screenshots/
+data.json
+data.json.tmp

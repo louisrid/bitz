@@ -1,43 +1,81 @@
-# Stakkz
+# BITZ
 
-A 3D city property game for 2 to 5 players, with its own multiplayer server. No Claude, no accounts to sign up for.
+A multiplayer 3D football-card collecting game with its own server. Walk a flat white world, earn cash while you
+play, buy packs from the Pack Seller, open them anywhere, sell duplicates to the Card Buyer, fill the Dealer's orders,
+complete club albums, trade with friends and climb the live **net worth** leaderboard.
 
-## Put it online for free (about 10 minutes)
+Plain Node (20 or newer), two dependencies (`ws`, `postgres`), no build step.
 
-You need a free **GitHub** account and a free **Render** account (no card).
+## Run it
 
-1. **GitHub** – go to github.com → **New repository** → name it `stakkz` → **Create**.
-   On the new page choose **uploading an existing file**, drag in *everything inside this folder*
-   (not the folder itself), and press **Commit changes**.
-2. **Render** – go to render.com → **New +** → **Blueprint** → connect GitHub → pick the `stakkz` repository → **Apply**.
-   Render reads `render.yaml`, installs and starts the game.
-3. After a minute or two Render shows your address, like `https://stakkz-xxxx.onrender.com`. That is the game.
-4. Open it, press **Create party**, then **Copy invite**, and send the link to up to four friends.
+```bash
+npm install
+npm start            # http://localhost:3000
+```
 
-That is all. To update the game later, upload the changed files to the same GitHub repository; Render redeploys by itself.
+Environment:
 
-### What to expect on the free plan
-- The server sleeps after 15 minutes with nobody on it. The first visit after that takes up to a minute to wake it. It stays awake while anyone has the game open in a party.
-- Free servers do not keep files when they sleep. Parties in progress are lost then, but **coins, items and looks are not**: every browser holds a sealed copy of its own account, and the server restores it on the next visit. The seal cannot be forged or edited.
-- A player's account lives in the browser they play in. Clearing the site's data, or switching device, starts a new account.
+| Variable | Purpose |
+|---|---|
+| `PORT` | HTTP port (default 3000). |
+| `STAKKZ_DATABASE_URL` | Postgres connection string. Accounts, cards and the world are saved as one versioned snapshot. |
+| `STAKKZ_SECRET` | HMAC secret for the sealed wallet copies browsers hold. Keep it stable. |
+| `DATA_FILE` | JSON file used when no database is configured (local play). |
+| `BITZ_FILE_ACCOUNTS=1` | Allow sign-up with file persistence (local play and tests only; never on an ephemeral host). |
+| `STAKKZ_MOVED_TO` | Old address only: forward every visitor and their sign-in to the new address. |
 
-### Running it anywhere else
-It is a plain Node program: `npm install` then `npm start` (Node 20 or newer). It listens on `PORT` (default 3000).
-Any host that runs Node and allows WebSockets works (Railway, Fly.io, Koyeb, a small VPS, your own computer).
-Set `STAKKZ_SECRET` to any long random text so sealed accounts stay valid across restarts, and `DATA_FILE` to a path on a
-disk that is kept if your host has one.
-Netlify, Vercel and GitHub Pages cannot run it on their own: they host pages and short functions, not a server that
-holds a live connection, which is what lets everyone see each move the moment it happens.
+## The game in one page
 
-## What is in here
-- `public/index.html` – the whole game page.  `public/engine.js` – the rules.  `public/three.min.js` – the 3D library.
-- `server.js` – web server, live connections, storage.
-- `src/core.js` – what the server decides: every move (using the same rules file), dice, timers, coins, shop, loot boxes.
-- `src/shop.js` – item list and prices.
-- `render.yaml` – tells Render how to run it.
-- `tests/` – `rules_sim.cjs` plays 400 random games against the rules; `party_test.py` drives four real browsers against a running server.
+- **Earn**: $8,000 a minute while connected and active. ×3 inside the Gold Circle. Inside the Purple Circle cash
+  pauses and a free RED HOT pack arrives every 40 seconds. One connection per account earns; nothing accrues while
+  the tab is hidden, after ten idle minutes, or offline.
+- **Three collections**, each a 5-card pack and a 10-pack box at 9.5× the pack price:
+  RED HOT ($15,000), GOLDEN STAR ($35,000, an autograph in every pack, mostly from squad players),
+  EUROPEAN NIGHTS ($150,000, elite players only, higher minimum rarity). Every pack guarantees a Rare or better.
+  The best card is always revealed last. GOD PACK and the Welcome Pack are reward-only.
+- **265 players**: the custom Premier League 2026/27 roster (20 clubs × 11 main + 25 bonus) plus 20 Champions League
+  stars. Values come from one desirability number per player and one base per edition (`src/econ.js`).
+- **Net worth** = cash + book value of the cards you own now + 80% of unopened packs. Milestones at $50k, $250k,
+  $1m, $5m, $25m and $100m pay once, on verified peak net worth.
+- **Card Buyer** pays 65% of book value. Locked, showcased, numbered and signed cards are protected.
+- **The Dealer** keeps four standing orders that pay over the odds and calls live races (first valid hand-over wins).
+- **Collector book** remembers the best edition of every player you personally packed, even after you sell it.
+  Owning all 11 main players of a club at once pays a European Nights pack and the club scarf.
+- **1 of 1 tracker**: one card of each 1/1 edition exists per player, ever; serials are issued server-side.
 
-## How cheating is prevented
-Players send moves, never results. The server checks whose turn it is, rolls the dice, applies the rules and sends
-the new game to everyone. Coins and items are only ever changed by the server. Games against the computer or on one
-shared device are worked out in the browser, so what they pay is capped by the server.
+## Code map
+
+| Path | What it is |
+|---|---|
+| `server.js` | HTTP + WebSocket server, persistence, API, leaderboard, the one-time economy migration. |
+| `src/roster.js`, `src/catalogue.js` | The 265 players and 26 clubs, validated at import. |
+| `src/econ.js` | Every price, odds table, edition, value and timer. The simulator reads the same file. |
+| `src/cards.js` | Packs, guarantees, serials, the book, selling, trades, Top 5, clubs, milestones, net worth. |
+| `src/dealer.js` | Standing orders and live races. |
+| `src/friends.js`, `src/social.js`, `src/auth.js`, `src/core.js`, `src/progression.js`, `src/shop.js` | Friends, the live world and earnings, accounts, profiles, levels, cosmetics. |
+| `public/index.html`, `bitz.css`, `app.js` | The page, the design system, boot/HUD/menu/socket. |
+| `public/world.js`, `avatar.js`, `avatar-data.js`, `world-layout.js` | The 3D world, characters, pets, stands, circles. |
+| `public/cards-art.js`, `cards-ui.js` | Card, pack and box art; every card screen. |
+| `public/portraits/` | `placeholder.png` plus any real `<player-id>.png` you add later. Missing files redirect to the placeholder. |
+
+## Tests and tools
+
+```bash
+npm test                      # unit + integration (real server and socket)
+node tools/econ-sim.mjs 1500  # economy simulation with the real odds
+npm install --no-save playwright && npx playwright install chromium
+node tests/browser.mjs        # real Chrome, desktop + iPhone size; screenshots in qa-screens/
+PW_CHANNEL=chrome node tests/browser.mjs   # use an installed Google Chrome instead
+```
+
+## Portraits
+
+Drop a square PNG named after the player id (for example `public/portraits/erling-haaland.png`) and every card,
+pack reveal, book page, trade and profile shows it. Nothing else changes.
+
+## Deploying
+
+`render.yaml` runs `npm start`. Set `STAKKZ_DATABASE_URL` and `STAKKZ_SECRET` in the service. The first time an
+account is touched after deploying, its old balance, cards and packs are archived on the account record
+(`wallet.archive.v1`) and the new economy starts at $0 with a Welcome Pack. This happens once per account and never
+again. Take a database snapshot before deploying; see `docs/REBUILD-2026-11.md`.
