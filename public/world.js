@@ -336,11 +336,41 @@
   /* ---------------- input ---------------- */
   const K = {}; let touch = false, lastW = 0, ptr = new Map(), dragged = 0, downAt = 0, pinch0 = 0, zoom0 = 1;
   function bindInput() {
-    addEventListener('keydown', e => { if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return; const k = e.key.toLowerCase(); if (W.blocked && W.blocked()) { K.w = K.a = K.s = K.d = false; return; } W.touched();
-      if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' ', 'shift'].includes(k)) e.preventDefault();
-      K[k] = true; if (k === ' ') jump(); if (k === 'e' && W.prompt && W.onInteract) W.onInteract(W.prompt); if (k === 'shift') W.me && (W.me.running = true); });
-    addEventListener('keyup', e => { const k = e.key.toLowerCase(); K[k] = false; if (k === 'shift' && W.me) W.me.running = false; });
-    addEventListener('blur', () => { for (const k in K) K[k] = false; });
+    // Physical key codes work reliably across keyboard layouts, uppercase Shift and browser focus.
+    // Keyboard movement is disabled only when a visible modal or text editor has focus.
+    const keys = {KeyW:'w',KeyA:'a',KeyS:'s',KeyD:'d',ArrowUp:'arrowup',ArrowDown:'arrowdown',ArrowLeft:'arrowleft',ArrowRight:'arrowright',Space:' ',ShiftLeft:'shift',ShiftRight:'shift',KeyE:'e'};
+    const mapped = e => keys[e.code] || String(e.key || '').toLowerCase();
+    const editing = e => e.target && (
+      /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable
+    );
+    addEventListener('keydown', e => {
+      if (editing(e)) return;
+      const k = mapped(e), control = ['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright',' ','shift'].includes(k);
+      if (W.blocked && W.blocked()) {
+        for (const moveKey of ['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','shift']) K[moveKey]=false;
+        if (W.me) W.me.running=false;
+        return;
+      }
+      if (control) e.preventDefault();
+      if (control || k==='e') W.touched();
+      K[k]=true;
+      if (k===' ' && !e.repeat) jump();
+      if (k==='e' && !e.repeat && W.prompt && W.onInteract) W.onInteract(W.prompt);
+      if (k==='shift' && W.me) W.me.running=true;
+    }, {capture:true});
+    addEventListener('keyup', e => {
+      const k=mapped(e);
+      K[k]=false;
+      if (k==='shift' && W.me) W.me.running=false;
+    }, {capture:true});
+    const clearKeys=()=>{
+      for (const k in K) K[k]=false;
+      if (W.me) W.me.running=false;
+    };
+    addEventListener('blur',clearKeys);
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden)clearKeys();
+    });
     canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { touch = true; document.documentElement.classList.add('touch'); } ptr.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY }); dragged = 0; downAt = performance.now(); if (ptr.size === 2) { const p = [...ptr.values()]; pinch0 = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y); zoom0 = W.zoom; } canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId); W.touched(); });
     canvas.addEventListener('pointermove', e => { const p = ptr.get(e.pointerId); if (!p) return; const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY; dragged += Math.abs(dx) + Math.abs(dy);
       if (ptr.size === 1) { cAz -= dx * 0.0062; cEl = clamp(cEl + dy * 0.004, 0.12, 1.25); userHold = performance.now() + 1500; }
@@ -386,7 +416,7 @@
     const m = W.me, locked = !!(W.blocked && W.blocked());
     if (m) {
       let ix = 0, iz = 0;
-      if (!locked) { if (K.w || K.arrowup) iz -= 1; if (K.s || K.arrowdown) iz += 1; if (K.a || K.arrowleft) ix -= 1; if (K.d || K.arrowright) ix += 1; ix += W.joy.x; iz += W.joy.y; }
+      if (!locked) { if (K.w || K.arrowup) iz -= 1; if (K.s || K.arrowdown) iz += 1; if (K.a || K.arrowleft) ix -= 1; if (K.d || K.arrowright) ix += 1; ix += W.joy.x; iz += W.joy.y; } else { for(const k in K) K[k]=false; if(m.running)m.running=false; }
       const len = Math.hypot(ix, iz); if (len > 1) { ix /= len; iz /= len; }
       const moving = len > 0.08, running = moving && (m.running || len > 0.96 && touch && len > 0.98);
       if (moving) {
