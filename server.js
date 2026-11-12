@@ -120,7 +120,7 @@ const idOf = key => 'p_' + crypto.createHash('sha256').update('stakkz:' + key).d
 const account = id => { let w = accounts.get(id); if (!w) { w = core.freshWallet(); w.fresh = true; accounts.set(id, w); }
   if (!w.m1) { w.coins = (w.coins || 0) + 1000000; w.m1 = 1; dirty = true; }
   if (!w.m10) { w.coins = (w.coins || 0) + 10000000; w.m10 = 1; dirty = true; }   // one-off: 10,000,000 coins for everyone   // one-off: every player gets 1,000,000 coins for boxes
-  if (!w.e7) { w.coins = 1000000; w.e7 = 1; w.gt = 0; dirty = true; }   // economy reset, once: everyone restarts on exactly 1,000,000 gold; items are untouched
+  /* Legacy e7 balance-reset migration intentionally disabled to preserve every saved balance. */
   if (core.earn(w, Date.now())) dirty = true;
   return w; };
 /* Legacy board game functions are archived in legacy/server.adventure.js. */
@@ -206,8 +206,7 @@ async function api(req, res, parts) {
   if (parts[0] === 'heartbeat' && req.method === 'POST') return send(res, 200, { ok:true });
   if (parts[0] === 'friends' && req.method === 'GET') {
     /* everyone with an account is everyone's friend: name, look, where they are right now */
-    const inPlaza = new Set([...plaza.values()].filter(q => q.i).map(q => q.id)), inGame = new Set();
-    parties.forEach(p => { if (p.phase === 'play') p.players.forEach(x => { if (!x.out && !x.bot) inGame.add(x.id); }); });
+    const inPlaza = new Set([...plaza.values()].filter(q => q.i).map(q => q.id)), inGame = new Set(); /* Archived board games never mark players online. */
     const list = [], hidden=[]; const excluded=new Set(Array.isArray(w.hiddenFriends)?w.hiddenFriends:[]);
     auth.users.forEach(u => { const a = accounts.get(u.id); if (!a || u.id === id) return;
       const friend={f:u.id.slice(2,12),n:(a.name||u.username||'Player').slice(0,12),u:u.username,l:a.look||{},pet:a.pet||'',at:inGame.has(u.id)?'game':inPlaza.has(u.id)?'plaza':'',seen:lastSeen.get(u.id)||a.t||0,wins:a.wins||0,played:a.played||0,swag:core.swag(a),worth:core.worth(a),level:core.progressOf(a).level};

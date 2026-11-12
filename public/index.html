@@ -2072,8 +2072,8 @@ function rollLoot() {
 }
 /* the server opens the box and decides the prize */
 async function openLoot() {
-  if (wallet.boxes < 1) return null;
-  try { return (await api('shop', { op: 'open' })).prize || null; } catch (e) { toast(e.message); return null; }
+  if (bxCount()<1)return null;
+  try{return (await api('shop',{op:'open',item:bxTheme()})).prize||null;}catch(e){toast(e.message);return null;}
 }
 function wearItem(id) {
   const it = ITEMS[id]; if (!it || !owns(id)) return;
@@ -2576,14 +2576,18 @@ function wardrobeModal() {
   openModal('wardrobe', () => { const col = PC[Math.max(0, mine0())], t = tryLook(); return '<div class="whead"><span class="pv bg-' + bgOf(t.look) + '">' + fig(t.look, col, 104) + petImg(t.pet, 40) + '</span><div class="wside">' + '<span class="logo sm"><b>' + esc((G && me >= 0 && G.players[me] ? G.players[me].name : F.name) || 'You') + '</b>' + mark() + '</span>' + pick('wtab', '', [['style', 'Profile'], ['shop', 'Shop']], F.wtab) + '<button class="btn go" data-a="close">Done</button></div></div>' + wardrobeHTML(col); });
 }
 /* Premium exclusive reveal. The server chooses the reward before the reel animates. */
-function bxSeasonPool(){return BITZ_LOOT_RULES.eligible(ITEMS,[]);}
-function bxRemaining(){return BITZ_LOOT_RULES.eligible(ITEMS,wallet&&wallet.own||[]);}
+function bxTheme(){return lootSt&&lootSt.theme||'season';}
+function bxConfig(){return BITZ_LOOT_RULES.themeOf(bxTheme());}
+function bxCount(){const t=bxTheme();return t==='season'?wallet.boxes||0:wallet.themeBoxes&&wallet.themeBoxes[t]||0;}
+function bxThemePicker(){return '<nav class="bx-theme-picker" aria-label="Mystery box themes">'+Object.entries(BITZ_LOOT_RULES.themes).map(([id,t])=>'<button data-a="boxtheme" data-v="'+id+'" class="'+(id===bxTheme()?'on':'')+'">'+esc(t.name)+'</button>').join('')+'</nav>';}
+function bxSeasonPool(){return BITZ_LOOT_RULES.eligible(ITEMS,[],bxTheme());}
+function bxRemaining(){return BITZ_LOOT_RULES.eligible(ITEMS,wallet&&wallet.own||[],bxTheme());}
 function bxTier(id){return BITZ_LOOT_RULES.tier(id,ITEMS)||'epic';}
 function bxTierTag(id){const t=bxTier(id);return '<span class="bx-tier bx-'+t+'">'+t.toUpperCase()+'</span>';}
 function bxOdds(){
   const remaining=bxRemaining();
-  if(!remaining.length)return '<div class="bx-odds bx-complete">SEASON COMPLETE · EVERY REWARD COLLECTED</div>';
-  const rates=BITZ_LOOT_RULES.odds(remaining,ITEMS);
+  if(!remaining.length)return '<div class="bx-odds bx-complete">COLLECTION COMPLETE · EVERY REWARD COLLECTED</div>';
+  const rates=BITZ_LOOT_RULES.odds(remaining,ITEMS,bxTheme());
   return '<div class="bx-odds" aria-label="Current drop chances"><b>DROP CHANCES</b>'+
     BITZ_LOOT_RULES.order.map(t=>'<span class="bx-odd bx-'+t+'">'+t.toUpperCase()+' <strong>'+
       (Number.isInteger(rates[t])?rates[t]:rates[t].toFixed(1))+'%</strong></span>').join('')+'</div>';
@@ -2597,7 +2601,7 @@ function bxCard(id,col){
 }
 function wheelSlices(pz){
   const S=[],pool=[...new Set(bxRemaining().concat(pz.item?[pz.item]:[]))];
-  for(let i=0;i<36;i++)S.push({item:BITZ_LOOT_RULES.pick(pool,ITEMS,Math.random)||null});
+  for(let i=0;i<36;i++)S.push({item:BITZ_LOOT_RULES.pick(pool,ITEMS,Math.random,bxTheme())||null});
   const k=29;S[k]=pz.item?{item:pz.item}:{coins:pz.coins};
   return {S,k};
 }
@@ -2605,7 +2609,7 @@ function wheelHTML(st,col){
   const pool=bxRemaining();
   const cards=st.S||Array.from({length:10},()=>({item:BITZ_LOOT_RULES.pick(pool,ITEMS,Math.random)||null}));
   return '<section class="bx-roulette" aria-label="Single-line prize ticker">'+
-    '<div class="bx-reel-top"><strong>'+(st.phase==='spin'?'YOUR REWARD IS COMING':'POSSIBLE REWARDS')+'</strong><span>SEASON 1</span></div>'+
+    '<div class="bx-reel-top"><strong>'+(st.phase==='spin'?'YOUR REWARD IS COMING':'POSSIBLE REWARDS')+'</strong><span>'+esc(bxConfig().name.toUpperCase())+'</span></div>'+
     '<div id="bx-reel-viewport" class="bx-reel-viewport'+(st.phase==='spin'?' bx-moving':'')+'">'+
     '<div id="bx-reel-track" class="bx-reel-track">'+cards.map(x=>bxCard(x.item,col)).join('')+'</div><span class="bx-pointer" aria-hidden="true"></span></div>'+
     '</section>';
@@ -2624,13 +2628,13 @@ function seasonRibbon(){
   return '<div class="bx-season-ribbon" aria-label="Season 1 exclusive rewards">'+
     '<div class="bx-season-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>'+
     '<span class="bx-ribbon-emblem" aria-hidden="true">01</span>'+
-    '<span class="bx-ribbon-text"><strong>SEASON 1</strong><small>EXCLUSIVE DROPS</small></span>'+
+    '<span class="bx-ribbon-text"><strong>'+esc(bxConfig().name.toUpperCase())+'</strong><small>EXCLUSIVE DROPS</small></span>'+
     '<span class="bx-ribbon-signal" aria-hidden="true"><i></i><i></i><i></i></span>'+
     '</div>';
 }
 function lootGalleryHTML(st,col){
   const all=bxSeasonPool();
-  const featured=globalThis.STAKKZ_SEASON&&globalThis.STAKKZ_SEASON.ids||[];
+  const featured=bxTheme()==='season'&&globalThis.STAKKZ_SEASON&&globalThis.STAKKZ_SEASON.ids||[];
   const pool=[...new Set(featured.concat(all))].filter(id => exclusive(id) && ITEMS[id][0] === 'outfit');
   const owned=pool.filter(owns).length;
   const header='<header class="bx-head"><div class="bx-brand">'+logo('sm')+'</div><span class="bx-spacer"></span><span class="bx-stock">'+owned+' / '+pool.length+'</span>'+xBtn()+'</header>';
@@ -2684,7 +2688,7 @@ function exploreModal(){
   openModal('explore',()=>'<div class="mhead"><h2>Explore the World</h2>'+xBtn()+'</div><p class="fine">Travel to the caves or waterfall. Walk over chests to collect prizes.</p><div class="explore-list">'+entries+'</div>');
 }
 function lootModal() {
-  lootSt = {phase:'idle', prize:null};
+  lootSt = {phase:'idle',prize:null,theme:'season'};
   openModal('loot', lootHTML, {onClose:()=>{
     lootSt=null;
     if(V && V.phase==='over') setTimeout(()=>{if(V && V.phase==='over' && !modal) winnerModal();},0);
@@ -2692,7 +2696,7 @@ function lootModal() {
   }});
 }
 function lootHTML(){
-  const st=lootSt||{phase:'idle'},n=wallet.boxes,col=PC[Math.max(0,mine0())],pool=bxSeasonPool();
+  const st=lootSt||{phase:'idle'},n=bxCount(),col=PC[Math.max(0,mine0())],pool=bxSeasonPool();
   const owned=pool.filter(owns).length,total=pool.length,remaining=bxRemaining();
   const busy=['spin','opening','purchasing'].includes(st.phase),won=st.phase==='prize'&&st.prize;
   if(st.view==='collection')return lootGalleryHTML(st,col);
@@ -2718,24 +2722,24 @@ function lootHTML(){
   }
   const hero='<section class="bx-hero"><div class="bx-art"><span class="bx-ring"></span>'+
     '<div class="bx-chestpic">'+lootImg(240)+'</div></div>'+
-    '<div class="bx-detail"><span class="bx-eyebrow">SEASON 1</span>'+
+    '<div class="bx-detail"><span class="bx-eyebrow">'+esc(bxConfig().name.toUpperCase())+'</span>'+
     '<h2 class="bx-title">MYSTERY <em>BOX</em></h2>'+
     '<div class="bx-hero-line">RARE OUTFITS</div>'+
     '<div class="bx-current-progress">'+owned+' / '+total+' COLLECTED</div></div></section>';
   const button=busy?'<button class="bx-cta" disabled>OPENING...</button>':
     n>0?'<button class="bx-cta" data-a="lootopen">OPEN BOX</button>':
     remaining.length?'<button class="bx-cta" data-a="lootbuy">BUY &amp; OPEN</button>':
-    '<button class="bx-cta" disabled>SEASON COMPLETE</button>';
+    '<button class="bx-cta" disabled>COLLECTION COMPLETE</button>';
   const price=n>0?'<span class="bx-cost">'+fmt(n)+' AVAILABLE</span>':
-    remaining.length?'<span class="bx-cost">'+fmt(BOX_PRICE)+' GOLD PER BOX</span>':'';
-  return '<div class="bx-shell">'+head+seasonRibbon()+hero+bxOdds()+wheelHTML(st,col)+
+    remaining.length?'<span class="bx-cost">'+fmt(bxConfig().price)+' GOLD PER BOX</span>':'';
+  return '<div class="bx-shell">'+head+bxThemePicker()+seasonRibbon()+hero+bxOdds()+wheelHTML(st,col)+
     '<div class="bx-actions bx-base-actions">'+price+button+
     (busy?'':'<button class="bx-btn bx-browse" data-a="lootbrowse">VIEW REWARDS</button>')+'</div></div>';
 }
 async function spinLoot() {
   const st=lootSt;
   if(!st || st.phase!=='idle' && st.phase!=='prize')return;
-  if(wallet.boxes<1){toast('No loot boxes left.');return;}
+  if(bxCount()<1){toast('No mystery boxes left.');return;}
   st.phase='opening';
   refreshModal();
   const pz=await openLoot();
@@ -2755,14 +2759,14 @@ async function spinLoot() {
         track.getBoundingClientRect();
         requestAnimationFrame(()=>{
           if(lootSt!==st || !track.isConnected)return;
-          track.style.transition='transform 4.35s cubic-bezier(.10,.67,.05,1)';
+          track.style.transition='transform 2.1s cubic-bezier(.1,.65,.08,1)';
           track.style.transform='translate3d(-'+Math.max(0,offset)+'px,0,0)';
         });
       }
     }
-    const ticks=[480,850,1180,1510,1840,2170,2490,2810,3100,3400,3710,3970];
+    const ticks=[420,690,960,1230,1500,1800,2100];
     ticks.forEach(t=>setTimeout(()=>{if(lootSt===st && st.phase==='spin')Snd('tap');},t));
-    await wait(4550);
+    await wait(2350);
     if(view && view.isConnected)view.classList.add('bx-ended');
   }
   if(lootSt!==st){toast(pz.item?'You unlocked '+ITEMS[pz.item][1]+'.':'Gold has been added.');return;}
@@ -3055,7 +3059,7 @@ function stuffHTML() {
   const tabs = '<div class="stuff-tabs">' + STUFF_TABS.filter(t => t[0] === 'all' || counts[t[0]]).map(t => '<button class="' + (tab === t[0] ? 'on' : '') + '" data-a="stufftab" data-v="' + t[0] + '">' + t[1] + (t[0] === 'all' ? '' : ' ' + counts[t[0]]) + '</button>').join('') + '</div>';
   const tiles = list.map(id => { const it = ITEMS[id], ra = rarity(it[2]), worn = S.self && stuffWorn(id), inner = pimg(id, 104, PC[0]) + '<b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + '</small><span class="rar r' + ra[0] + '">' + ra[1] + '</span>' + (worn ? '<i class="sworn">On</i>' : '');
     return S.self ? '<button class="stile' + (worn ? ' worn' : '') + '" data-a="wear" data-k="' + it[0] + '" data-v="' + (worn ? '' : id) + '">' + inner + '<span class="st-action">' + (worn ? 'UNEQUIP' : 'EQUIP') + '</span></button>' : '<div class="stile">' + inner + '</div>'; }).join('');
-  return head + sum + tabs + (list.length ? '<div class="sgrid">' + tiles + '</div>' : '<p class="fine">' + (S.self ? 'Nothing here yet. Open a loot box or visit the shop.' : 'Nothing here.') + '</p>') + (S.self ? '<p class="fine">Tap something to wear it.</p>' + (Zom.admin ? '<button class="btn sm" data-a="grantall">Unlock every item (admin)</button>' : '') : '');
+  return head + sum + tabs + (list.length ? '<div class="sgrid">' + tiles + '</div>' : '<p class="fine">' + (S.self ? 'Nothing here yet. Open a loot box or visit the shop.' : 'Nothing here.') + '</p>') + (S.self ? '<p class="fine">Equip your favourite possessions to show them off.</p>' + (Zom.admin ? '<button class="btn sm" data-a="grantall">Unlock every item (admin)</button>' : '') : '');
 }
 function stuffOpen(o) {
   profileClose();
@@ -3083,7 +3087,7 @@ function profilePaint() {
   const handle = p.self ? (authInfo.registered && authInfo.username ? '@' + esc(authInfo.username) : 'Guest') : info.u ? '@' + esc(info.u) : 'Guest';
   const rows = worn.map(x => { const it = ITEMS[x[1]], ra = it[2] > 0 ? rarity(it[2]) : [0, 'Starter']; return '<button type="button" class="prow pr' + ra[0] + '" data-a="profitem" data-v="' + x[1] + '">' + pimg(x[1], 40, col) + '<span><b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + (exclusive(x[1]) ? ' · Exclusive' : '') + '</small></span><span class="prar">' + ra[1] + '</span></button>'; }).join('');
   const btns = p.self ? '<button class="btn go" data-a="customise">Customise</button><button class="btn" data-a="stuff">My Stuff</button><button class="btn" data-a="page" data-v="shop">Shop</button>'
-    : '<button class="btn go" data-a="stuff" data-f="' + esc(p.f || '') + '" data-n="' + esc(p.n || '') + '">Their stuff</button><button class="btn" data-a="tradeask" data-i="' + liveI + '"' + (live ? '' : ' disabled') + '>' + (live ? 'Trade' : 'Trade (not in the world)') + '</button>' + (fr ? '<button class="btn" data-a="fop" data-v="remove">Remove friend</button>' : hid ? '<button class="btn ok" data-a="fop" data-v="restore">Add friend back</button>' : '');
+    : '<button class="btn go" data-a="stuff" data-f="' + esc(p.f || '') + '" data-n="' + esc(p.n || '') + '">Their stuff</button>' + (fr ? '<button class="btn" data-a="fop" data-v="remove">Remove friend</button>' : hid ? '<button class="btn ok" data-a="fop" data-v="restore">Add friend back</button>' : '');
   patchHTML(ov, '<div class="pp-back" data-a="profclose"></div><div class="pp-card" role="dialog" aria-label="' + esc(p.n) + '">' +
     '<button class="ib pp-x" data-a="profclose" aria-label="Close">' + ico('x', 16) + '</button>' +
     '<div class="pp-char bg-' + bgOf(L2) + '"><span class="pp-scene-label">' + (p.self ? 'YOUR CHARACTER' : 'PLAYER CARD') + '</span><canvas id="pchar"></canvas><div class="pp-pet-label"><span>COMPANION</span><b>' + (ITEMS[p.pet] ? esc(ITEMS[p.pet][1]) : 'No pet equipped') + '</b></div></div>' +
@@ -3538,15 +3542,16 @@ document.addEventListener('click', async e => {
     case 'lootback':
       if(lootSt){lootSt.view='';lootSt.item='';refreshModal();}
       break;
-    case 'loot': lootModal(); if (el.dataset.v === 'go' && wallet.boxes > 0) await spinLoot(); break;
+    case 'loot': lootModal(); if (el.dataset.v === 'go' && bxCount()>0) await spinLoot(); break;
+    case 'boxtheme': if(lootSt&&lootSt.phase==='idle'){lootSt.theme=el.dataset.v;lootSt.item='';lootSt.page=0;refreshModal();}break;
     case 'lootbuy': {
       if(lootBuyBusy||lootSt&&['purchasing','opening','spin'].includes(lootSt.phase))break;
-      if(wallet.coins<BOX_PRICE){toast('Not enough gold. You need '+fmt(BOX_PRICE-wallet.coins)+' more.');break;}
-      if(!bxRemaining().length){toast('All Season 1 rewards collected.');break;}
+      if(wallet.coins<bxConfig().price){toast('Not enough gold. You need '+fmt(bxConfig().price-wallet.coins)+' more.');break;}
+      if(!bxRemaining().length){toast('All rewards in this collection are owned.');break;}
       lootBuyBusy=true;el.disabled=true;
       if(lootSt&&modal&&modal.kind==='loot'){lootSt.phase='purchasing';refreshModal();}
       try{
-        await api('shop',{op:'box'});Snd('buy');
+        await api('shop',{op:'box',item:bxTheme()});Snd('buy');
         if(!modal||modal.kind!=='loot')lootModal();
         else{lootSt.phase='idle';lootSt.prize=null;lootSt.S=null;lootSt.view='';}
         await spinLoot();
@@ -3624,7 +3629,7 @@ document.addEventListener('click', async e => {
     case 'customise': profileClose(); F.page = 'me'; renderHome(true); break;
     case 'fop': if (PROF) { try { await api('friends', { op: el.dataset.v, friend: PROF.f }); await loadFriends(); toast(el.dataset.v === 'remove' ? 'Removed from your friends.' : 'Back in your friends.'); } catch (e) { toast(e.message || 'That did not work.'); } } break;
     case 'frestore': try { await api('friends', { op: 'restore', friend: el.dataset.f }); await loadFriends(); } catch (e) { toast(e.message || 'That did not work.'); } break;
-    case 'tradeask': if (el.dataset.i) { plazaSend({ trade: { op: 'ask', to: el.dataset.i } }); profileClose(); } break;
+    case 'tradeask': break; // archived in legacy/index.adventure.html
     case 'tradeyes': tradeSend({ op: 'accept' }); break;
     case 'tradeno': if (Trade) { tradeSend({ op: Trade.phase === 'ask' ? 'decline' : 'cancel' }); } break;
     case 'tradeitem': if (Trade && Trade.me) { const id = el.dataset.v, it = Trade.me.items.slice(), k = it.indexOf(id); if (k >= 0) it.splice(k, 1); else it.push(id); tradeSend({ op: 'offer', items: it, gold: Trade.me.gold }); } break;
@@ -3632,12 +3637,12 @@ document.addEventListener('click', async e => {
     case 'tradegoldset': if (Trade && Trade.me) tradeSend({ op: 'offer', items: Trade.me.items, gold: Math.max(0, Math.floor(+($('#tgold') || {}).value || 0)) }); break;
     case 'tradeok': if (Trade) tradeSend({ op: 'confirm', v: Trade.v }); break;
     case 'emote': plazaEmote(el.dataset.v); break;
-    case 'wpn': B3.world.setWeapon(+el.dataset.v); break;
-    case 'wpnnext': { let n = B3.world.weapon; for (let i = 0; i < GUNIDS.length; i++) { n = (n + 1) % GUNIDS.length; if (gunOwned(n)) break; } B3.world.setWeapon(n); break; }
-    case 'zombies': plazaSend({ admin: { k: 'zom', on: !Zom.on } }); break;
+    case 'wpn': break; // no combat
+    case 'wpnnext': break; // no combat
+    case 'zombies': break; // archived
     case 'adminpanel': openModal('admin', adminHTML); break;
     case 'stuff': stuffOpen(el.dataset.f ? { f: el.dataset.f, n: el.dataset.n } : { self: true }); break;
-    case 'clans': clansModal();break;
+    case 'clans': break; // archived
     case 'clanrefresh': clansModal();break;
     case 'clancopy': try{await navigator.clipboard.writeText(el.dataset.v);toast('Clan code copied.');}catch(e){toast('Clan code: '+el.dataset.v);}break;
     case 'clanop': {
@@ -3651,7 +3656,7 @@ document.addEventListener('click', async e => {
       catch(er){if(ClanSt){ClanSt.loading=false;ClanSt.err=null;refreshModal();}toast(er.message||'Could not update clan.');}
       break;
     }
-    case 'explore': exploreModal();break;
+    case 'explore': break; // archived
     case 'worldgoto': if(!Plaza.you){toast('Connect to the world first.');break;} closeModal();F.page='world';renderHome(true);plazaSend({travel:el.dataset.v});break;
     case 'stufftab': if (StuffSt) { StuffSt.tab = el.dataset.v; refreshModal(); } break;
     case 'zoomin': B3.world.zoomBy(0.8); break;
