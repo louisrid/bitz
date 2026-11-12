@@ -430,3 +430,53 @@ html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}
 #flist .fr:not(.gone):hover{outline:1px solid #000;outline-offset:-1px}
 #fside .fr:not(.gone) .ava{background-color:#fff!important}
 /* Loot-specific styling is intentionally dark, unlike the neutral white panels. */
+
+/* Marketplace visual parity: white cards, stronger ink, restrained black accents. */
+#app[data-screen=home][data-page=shop] #side{width:min(690px,calc(100% - 28px))!important;padding:17px!important}
+#modal[data-kind=wardrobe]:has(.shophead){width:min(735px,calc(100vw - 30px))!important;max-height:92dvh!important;background:#fff!important}
+#app[data-page=shop] .shophead,#modal[data-kind=wardrobe] .shophead{
+ display:flex!important;gap:12px!important;align-items:center!important;min-height:57px!important;
+ margin:0 0 13px!important;padding:9px 13px!important;border:3px solid #000!important;
+ border-radius:14px!important;background:#fff!important;color:#000!important;
+ box-shadow:3px 4px 0 #000!important;
+}
+.shophead .shop-title{font:400 28px/1 "Coolvetica","Arial Black",sans-serif!important;color:#000}
+.shophead .lbl{margin-left:auto;font:700 11px/1 "Space Grotesk",sans-serif!important}
+.shophead .cn{font-size:17px!important}
+#app[data-page=shop] .loot,#modal[data-kind=wardrobe] .loot{
+ background:#10151c!important;border:3px solid #000!important;border-radius:15px!important;
+ box-shadow:4px 4px 0 #000!important;color:#fff!important;padding:11px 13px!important;margin-bottom:12px!important
+}
+#app[data-page=shop] .loot b,#modal[data-kind=wardrobe] .loot b{color:#fff!important;font-size:22px!important}
+#app[data-page=shop] .loot .btn,#modal[data-kind=wardrobe] .loot .btn{
+ background:#fff!important;color:#000!important;border:2px solid #000!important;
+ border-radius:10px!important;box-shadow:2px 2px 0 #eee!important;min-height:37px!important
+}
+#app[data-page=shop] .loot .btn.go,#modal[data-kind=wardrobe] .loot .btn.go{background:#FFF01F!important}
+#app[data-page=shop] .items,#modal[data-kind=wardrobe] .items{gap:10px!important}
+#app[data-page=shop] .item,#modal[data-kind=wardrobe] .item{
+ background:#fff!important;border:3px solid #000!important;border-radius:14px!important;
+ box-shadow:2px 3px 0 #000!important;padding:9px 7px 11px!important;gap:8px!important;
+}
+#app[data-page=shop] .item:hover,#modal[data-kind=wardrobe] .item:hover{
+ box-shadow:4px 5px 0 #000!important;transform:translateY(-2px)!important
+}
+#app[data-page=shop] .item .pic,#modal[data-kind=wardrobe] .item .pic{
+ background:#f8f8f8!important;border:2px solid #000!important;border-radius:10px!important
+}
+#app[data-page=shop] .item .pill,#modal[data-kind=wardrobe] .item .pill{
+ border:2px solid #000!important;background:#fff9af!important;color:#000!important;
+ border-radius:10px!important;min-height:25px!important;padding:3px 7px!important;
+}
+#app[data-page=shop] .item.own .pill,#modal[data-kind=wardrobe] .item.own .pill{background:#c8f5b8!important}
+#app[data-page=shop] .item b,#modal[data-kind=wardrobe] .item b{color:#000!important}
+#modal[data-kind=wardrobe] .pstage{border:3px solid #000!important;border-radius:15px!important;min-height:195px!important}
+#modal[data-kind=wardrobe] .ptitle{padding-top:7px!important}
+#modal[data-kind=wardrobe] .pbuy{border-top:2px solid #000!important;padding-top:12px!important}
+@media(max-width:680px){
+ #app[data-page=shop] #side{padding:10px!important;width:calc(100% - 16px)!important}
+ #app[data-page=shop] .shophead,#modal[data-kind=wardrobe] .shophead{min-height:46px!important;padding:6px 8px!important}
+ .shophead .shop-title{font-size:23px!important}
+ #app[data-page=shop] .loot .btn,#modal[data-kind=wardrobe] .loot .btn{min-height:32px!important;font-size:12px!important}
+ #app[data-page=shop] .item,#modal[data-kind=wardrobe] .item{padding:5px 3px 8px!important}
+}
