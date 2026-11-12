@@ -4,7 +4,8 @@
    Built almost entirely from instanced meshes, so a phone draws the whole field in a few dozen calls.
    Scale: a player stands about 2.4 units tall, so a tree is 7 to 11 units and a boulder reaches the waist. */
 (function () {
-  const SIZE = 460, FIELD = 150, ARENA = 15, RING = 16.4;
+  const MAP=globalThis.STAKKZ_WORLD_LAYOUT || {size:980,field:340,caves:[],waterfall:null};
+  const SIZE=MAP.size,FIELD=MAP.field,ARENA=15,RING=16.4;
 
   function build(THREE, root) {
     const world = new THREE.Group(); world.name = 'Stakkz Grassland'; root.add(world);
@@ -28,7 +29,7 @@
     const ground = new THREE.Mesh(box(SIZE, 2, SIZE), lam(0x2e6f3a)); ground.position.y = -1; ground.receiveShadow = true; world.add(ground);
 
     /* a grid of grass blocks over the walkable field, each one a slightly different green */
-    const TILE = 4, GREENS = [0x30753f, 0x2e7039, 0x337a43, 0x2c6f3c, 0x357f45, 0x2b6b38];
+    const TILE = 8, GREENS = [0x30753f, 0x2e7039, 0x337a43, 0x2c6f3c, 0x357f45, 0x2b6b38];
     const tiles = [];
     for (let x = -FIELD; x <= FIELD; x += TILE) for (let z = -FIELD; z <= FIELD; z += TILE) {
       const r = Math.hypot(x, z); if (r > FIELD) continue;
@@ -38,9 +39,11 @@
 
     /* tufts of longer grass, so the ground is not a flat sheet of colour */
     const tufts = [], TUFTC = [0x3f9150, 0x47a059, 0x368547];
-    for (let i = 0; i < 2600; i++) {
+    const landmarks=[...(MAP.caves||[]),...(MAP.waterfall?[MAP.waterfall]:[])];
+    const keepClear=(x,z,pad=0)=>landmarks.every(p=>Math.hypot(x-p.x,z-p.z)>23+pad);
+    for (let i = 0; i < 4400; i++) {
       const a = rand() * Math.PI * 2, r = 3 + Math.sqrt(rand()) * (FIELD - 6), x = Math.sin(a) * r, z = Math.cos(a) * r;
-      if (r < ARENA - 1) continue;
+      if (r < ARENA - 1 || !keepClear(x,z,2)) continue;
       tufts.push([x, 0.22, z, rand() * 3, 0.3 + rand() * 0.3, 0.42 + rand() * 0.4, 0.3 + rand() * 0.3, i]);
     }
     instanced(box(1, 1, 1), tufts, TUFTC);
@@ -65,8 +68,8 @@
     const trunks = [], leaves = [], bushes = [], rocks = [], flowers = [], logs = [];
     const TRUNKC = [0x6b4a2f, 0x5c4028, 0x74542f], LEAFC = [0x236139, 0x2a7342, 0x1d5531, 0x2f8048, 0x256a3c];
     const BUSHC = [0x2e8044, 0x266d3c, 0x35874a], ROCKC = [0x9aa095, 0x888f84, 0xa7ada1], FLOWERC = [0xffe14d, 0xff8ad8, 0xffffff, 0xff6b5a, 0xb388ff];
-    const outside = (x, z, pad) => Math.hypot(x, z) > RING + (pad || 0);
-    for (let i = 0; i < 620; i++) {
+    const outside = (x, z, pad) => Math.hypot(x, z) > RING + (pad || 0) && keepClear(x,z,pad||0);
+    for (let i = 0; i < 1080; i++) {
       const a = rand() * Math.PI * 2, r = (RING + 9) + Math.pow(rand(), 0.62) * (FIELD - RING - 14), x = Math.sin(a) * r, z = Math.cos(a) * r;
       if (!outside(x, z, 9)) continue;
       const s = 0.72 + rand() * 0.8, h = (4.3 + rand() * 2.6) * s, ry = rand() * 3;
@@ -77,26 +80,26 @@
         leaves.push([x, h + 0.35 + k * 0.95 * s, z, ry, w, 1.1 * s, w, (i + k)]);
       }
     }
-    for (let i = 0; i < 900; i++) {
+    for (let i = 0; i < 1420; i++) {
       const a = rand() * Math.PI * 2, r = (RING + 3) + Math.pow(rand(), 0.62) * (FIELD - RING - 6), x = Math.sin(a) * r, z = Math.cos(a) * r;
       if (!outside(x, z, 3)) continue;
       const s = 0.55 + rand() * 0.75;
       bushes.push([x, 0.42 * s, z, rand() * 3, 1.5 * s, 0.85 * s, 1.5 * s, i]);
       if (rand() > 0.55) bushes.push([x + (rand() - 0.5) * 1.6, 0.32 * s, z + (rand() - 0.5) * 1.6, rand() * 3, 1 * s, 0.62 * s, 1 * s, i + 1]);
     }
-    for (let i = 0; i < 380; i++) {
+    for (let i = 0; i < 680; i++) {
       const a = rand() * Math.PI * 2, r = (RING + 2) + Math.pow(rand(), 0.7) * (FIELD - RING - 4), x = Math.sin(a) * r, z = Math.cos(a) * r;
       if (!outside(x, z, 2)) continue;
       const s = 0.4 + rand() * 0.8;
       rocks.push([x, 0.26 * s, z, rand() * 3, 1.15 * s, 0.72 * s, 0.95 * s, i]);
     }
-    for (let i = 0; i < 950; i++) {
+    for (let i = 0; i < 1600; i++) {
       const a = rand() * Math.PI * 2, r = (RING + 1) + Math.pow(rand(), 0.6) * (FIELD - RING - 3), x = Math.sin(a) * r, z = Math.cos(a) * r;
       if (!outside(x, z, 1)) continue;
       flowers.push([x, 0.2, z, rand() * 3, 0.1, 0.34, 0.1, i]);
       flowers.push([x, 0.4, z, rand() * 3, 0.24, 0.16, 0.24, i]);
     }
-    for (let i = 0; i < 34; i++) {
+    for (let i = 0; i < 65; i++) {
       const a = rand() * Math.PI * 2, r = RING + 6 + rand() * (FIELD - RING - 20), x = Math.sin(a) * r, z = Math.cos(a) * r;
       logs.push([x, 0.38, z, rand() * 3, 2.8 + rand() * 1.8, 0.76, 0.76, i]);
     }
@@ -106,6 +109,42 @@
     instanced(box(1, 1, 1), rocks, ROCKC, true);
     instanced(box(1, 1, 1), flowers, FLOWERC);   // flowers sit on the ground: a stem and a small head
     instanced(box(1, 1, 1), logs, TRUNKC, true);
+
+    /* Caves have walk-through stone arches and dark tunnel walls, not just painted signs. */
+    const waterfallParts=[];
+    function part(g,w,h,d,c,x,y,z,glow){
+      const mat=glow?new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.78,depthWrite:false}):lam(c);
+      const m=new THREE.Mesh(box(w,h,d),mat);m.position.set(x,y,z);m.castShadow=!glow;m.receiveShadow=!glow;g.add(m);return m;
+    }
+    (MAP.caves||[]).forEach((c,i)=>{
+      const g=new THREE.Group();g.position.set(c.x,0,c.z);g.rotation.y=c.rot||0;world.add(g);
+      const shades=[[0x65788d,0x364051,0xa9e8ff],[0x48475d,0x272739,0xbc93ff],[0x94a7bf,0x485773,0xb9efff]][i%3];
+      part(g,15,.45,32,shades[1],0,.18,-3);
+      for(let j=0;j<5;j++){
+        const z=8-j*5;
+        part(g,3.1,6.6,4.5,shades[j%2],-6,3.3,z);
+        part(g,3.1,6.6,4.5,shades[(j+1)%2],6,3.3,z);
+        part(g,15,2.6,5.3,shades[j%2],0,7.8,z);
+        part(g,11,.16,4.5,0x222738,0,.27,z);
+        if(j<4){part(g,.65,2,.65,shades[2],-4.2,1,z-.8);part(g,.65,2,.65,shades[2],4.2,1,z-.8);}
+      }
+      part(g,12,7,.6,0x101326,0,3.5,-14.5);
+      part(g,12,.7,1.2,shades[2],0,9.1,8.6);
+    });
+    if(MAP.waterfall){
+      const g=new THREE.Group();g.position.set(MAP.waterfall.x,0,MAP.waterfall.z);world.add(g);
+      part(g,30,3,23,0x516b5f,0,1,1);
+      part(g,24,15,5,0x6f7f87,0,8,-8);
+      part(g,27,3,6,0x8d9eaa,0,16,-8);
+      part(g,22,13,3,0x45626f,0,8,-4);
+      const pond=new THREE.Mesh(new THREE.CylinderGeometry(15,15,.4,42),new THREE.MeshLambertMaterial({color:0x3bb8d7,transparent:true,opacity:.85}));pond.position.set(0,.34,8);g.add(pond);
+      for(let j=0;j<12;j++){
+        const x=-8.5+j*1.55,stream=part(g,1.38,11.8,.55,j%3===0?0xb8edff:0x53c9ed,x,9.6,-1.8,true);
+        waterfallParts.push({m:stream,phase:j*.7});
+        part(g,1.35,.3,2,0xd9fbff,x,.85,7+j%3);
+      }
+      for(let j=0;j<8;j++){const a=j*Math.PI*2/8;part(g,3.4,2,3.2,0x788b89,Math.cos(a)*16,1,8+Math.sin(a)*11);}
+    }
 
     /* ---- animals. They wander the field on their own and keep out of the fighting circle. ---- */
     const animals = [];
@@ -147,6 +186,7 @@
       world: world, arena: ARENA, ring: RING, field: FIELD, size: SIZE, animals: animals, pickups: [], boostPoints: [],
       animate(t) {
         const dt = Math.min(0.1, last ? t - last : 0); last = t;
+        waterfallParts.forEach(p=>{p.m.position.y=9.6+Math.sin(t*3.8+p.phase)*.38;p.m.material.opacity=.65+.15*Math.sin(t*4.5+p.phase);});
         animals.forEach(a => {
           if (a.wait > 0) { a.wait -= dt; a.sp = Math.max(0, a.sp - dt * 4); }
           else {
