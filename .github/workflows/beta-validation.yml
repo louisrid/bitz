@@ -54,6 +54,8 @@ jobs:
       - run: npm install --no-save playwright@1.56.1
       - name: Test desktop and mobile WebGL, menus and no overlap
         run: node tests/bitz2-browser.mjs
+      - name: Football card shop, pack ripping, album and mobile layouts
+        run: node tests/football-browser.mjs
       - name: Upload BITZ 2.0 UI screenshots
         if: always()
         uses: actions/upload-artifact@v4
