@@ -34,7 +34,7 @@
   if(url)return '<img class="fc-portrait" loading="lazy" referrerpolicy="no-referrer" alt="'+esc(player?.name||'Player')+'" src="'+esc(url)+'">';
   if(id)state.pending.add(id);
   const initials=String(player?.name||'?').split(' ').map(n=>n[0]).slice(0,2).join('');
-  return '<div class="fc-no-photo"><span>'+esc(initials)+'</span><small>PORTRAIT PENDING</small></div>';
+  return '<div class="fc-no-photo" data-player-id="'+esc(id)+'"><span>'+esc(initials)+'</span><small>NO LICENSED PHOTO</small></div>';
  }
  function frame(card,{small=false}={}){
   const id=card?.player||card?.players?.[0],player=byId.get(id),def=state.catalog?.variants?.[card?.variant]||{};
@@ -68,7 +68,9 @@
    const p=defs[id];if(!p)return '';return '<div class="fc-pack-product fc-theme-'+id+' '+(state.selected===id?'selected':'')+'" style="--pack-a:'+p.colors[0]+';--pack-b:'+p.colors[1]+'">'+
    '<button class="fc-pack-art" data-fc="choose-pack" data-v="'+id+'"><div class="fc-pack-shimmer"></div><span class="fc-pack-top">BITZ FOOTBALL</span><b>'+esc(p.name)+'</b><em>'+p.cards+' CARDS</em><small>2026/27 SERIES</small></button>'+
    '<div class="fc-pack-info"><b>'+esc(p.name)+'</b><span>'+gold(p.cost||0)+(p.questOnly?' • QUEST':' GOLD')+'</span></div>'+
-   '<p>'+esc(p.description)+'</p><div class="fc-pack-actions">'+(countPack(id)?button('OPEN ('+countPack(id)+')','open-select','data-v="'+id+'"','primary'):'')+
+   '<p>'+esc(p.description)+'</p><details class="fc-pack-odds"><summary>VIEW RARITY ODDS</summary><div>'+
+ Object.entries(p.odds).map(([key,n])=>'<span>'+esc(state.catalog.variants[key]?.name||key)+'</span><b>'+(n/100).toFixed(2)+'%</b>').join('')+
+ '</div></details><div class="fc-pack-actions">'+(countPack(id)?button('OPEN ('+countPack(id)+')','open-select','data-v="'+id+'"','primary'):'')+
    (!p.questOnly?button('BUY '+gold(p.cost)+' GOLD','buy','data-v="'+id+'"',''):button('EARN FROM TRADES','tab','data-v="trade"',''))+'</div></div>';
   }).join('')+'</div><p class="fc-disclaimer">All dollar prices on cards are fictional in-game valuations. No cash-out or real-money purchases.</p>';
  }
@@ -83,7 +85,7 @@
   const progress=state.self?.album?.find(c=>c.id===active.id);
   return '<div class="fc-section-head"><h2>COLLECTOR BOOK</h2><p>Every player fills their slot automatically. Claim your reward at 11/11.</p></div>'+
    '<div class="fc-album-tabs">'+button('20 PREMIER LEAGUE CLUBS','league','data-v="prem"',!state.europe?'on':'')+button('EUROPEAN STARS','league','data-v="europe"',state.europe?'on':'')+'</div>'+
-   '<div class="fc-book"><div class="fc-book-cover"><div class="fc-album-turn">'+button('‹','club-prev')+
+   '<div class="fc-book'+(Date.now()<(state.bookTurnUntil||0)?' turning':'')+'"><div class="fc-book-cover"><div class="fc-album-turn">'+button('‹','club-prev')+
    '<div><small>2026/27 COLLECTOR EDITION</small><h3>'+esc(active.name)+'</h3><span>'+found+' / '+players.length+' COLLECTED</span></div>'+button('›','club-next')+'</div>'+
    '<div class="fc-progress"><i style="width:'+Math.round(found/players.length*100)+'%"></i></div>'+
    '<div class="fc-album-claim">'+(state.europe?'<span>European superstar collection</span>':
@@ -204,8 +206,9 @@
  }
  async function unseal(){
   if(!state.open||state.open.phase!=='sealed')return;
-  const s=state.open;s.phase='loading';render();sound('rip');
-  const j=await mutate({op:'open',pack:s.pack});
+  const s=state.open;s.phase='tearing';const foil=$('#fc-rip');if(foil)foil.classList.add('fc-ripped');sound('rip');
+  await new Promise(done=>setTimeout(done,280));if(state.open!==s)return;
+  s.phase='loading';render();const j=await mutate({op:'open',pack:s.pack});
   if(!j){s.phase='sealed';render();return;}
   state.open={...s,phase:'reveal',cards:j.cards,index:0,bonusGold:j.bonusGold||0};
   sound(['legendary','masterpiece','dual'].includes(j.cards[0]?.variant)?'rare':'normal');render();
@@ -224,7 +227,7 @@
   },230);
  }
  function loadVisiblePhotos(root){
-  const ids=[...root.querySelectorAll('.fc-card .fc-no-photo')].slice(0,12).map(x=>x.closest('.fc-card')).filter(Boolean);
+
   // Licensed images sync into /football/portraits; resolve missing ones from
   // Wikimedia page thumbnails during this browser session for immediate display.
   const keys=[...state.pending].slice(0,12);state.pending.clear();
@@ -235,14 +238,17 @@
    try{
     const saved=sessionStorage.getItem('bitz-photo:'+id);
     if(saved){state.images.set(id,saved);refreshPhotos(id,saved);return;}
-    const url='https://en.wikipedia.org/w/api.php?format=json&action=query&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=640&origin=*&titles='+encodeURIComponent(p.name);
-    const r=await fetch(url,{signal:AbortSignal.timeout(5500)});
-    if(!r.ok)return;
-    const data=await r.json(),page=Object.values(data.query?.pages||{})[0];
-    const image=page?.thumbnail?.source;
-    if(image&&image.startsWith('https://upload.wikimedia.org/')){
-     state.images.set(id,image);sessionStorage.setItem('bitz-photo:'+id,image);refreshPhotos(id,image);
-    }
+    const url='https://en.wikipedia.org/w/api.php?format=json&action=query&redirects=1&prop=pageimages&piprop=name&origin=*&titles='+encodeURIComponent(p.name);
+    const r=await fetch(url,{signal:AbortSignal.timeout(5500)});if(!r.ok)return;
+    const data=await r.json(),page=Object.values(data.query?.pages||{})[0];if(!page?.pageimage)return;
+    const file='File:'+page.pageimage.replace(/^File:/,'');
+    const source='https://commons.wikimedia.org/w/api.php?format=json&action=query&prop=imageinfo&iiprop=url%7Cextmetadata&iiurlwidth=640&origin=*&titles='+encodeURIComponent(file);
+    const rr=await fetch(source,{signal:AbortSignal.timeout(5500)});if(!rr.ok)return;
+    const d=await rr.json(),info=Object.values(d.query?.pages||{})[0]?.imageinfo?.[0];
+    const licence=String(info?.extmetadata?.LicenseShortName?.value||info?.extmetadata?.UsageTerms?.value||'').toLowerCase();
+    if(/non.?commercial|no.?deriv|all rights reserved|unknown|cc-by-nc|cc-by-nd/.test(licence)||!/cc by|cc-by|cc0|public domain|pd-/.test(licence))return;
+    const image=info?.thumburl||info?.url;
+    if(image?.startsWith('https://upload.wikimedia.org/wikipedia/commons/')){state.images.set(id,image);sessionStorage.setItem('bitz-photo:'+id,image);refreshPhotos(id,image);}
    }catch(e){}
   });
  }
@@ -250,8 +256,7 @@
   if(!state.active)return;
   const player=byId.get(id);if(!player)return;
   [...document.querySelectorAll('#fc-overlay .fc-no-photo')].forEach(q=>{
-   const tag=q.closest('.fc-card'),c=tag?.querySelector('.fc-card-identity h3')?.textContent||'';
-   if(!c.includes(player.name))return;
+   if(q.dataset.playerId!==id)return;
    const img=document.createElement('img');img.className='fc-portrait';img.loading='lazy';img.alt=player.name;img.src=url;img.referrerPolicy='no-referrer';q.replaceWith(img);
   });
  }
@@ -296,7 +301,7 @@
    const arr=state.europe?state.catalog.europe:state.catalog.clubs;
    const idx=arr.findIndex(x=>x.id===state.club),diff=action==='club-next'?1:-1;
    state.club=arr[(idx+diff+arr.length)%arr.length].id;
-   const book=$('#fc-content .fc-book');if(book)book.classList.add('turning');render();return;
+   state.bookTurnUntil=Date.now()+350;render();return;
   }
   if(action==='claim'){const j=await mutate({op:'claim',club:v});if(j){sound('rare');render();}return;}
   if(action==='sell'){
