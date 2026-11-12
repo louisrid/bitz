@@ -20,11 +20,13 @@ jobs:
       - run: npm ci
       - name: Syntax-check every active module
         run: |
-          for f in server.js src/*.js public/*.js tools/econ-sim.mjs; do node --check "$f"; done
+          for f in server.js src/*.js public/*.js tools/*.mjs tests/*.mjs; do node --check "$f"; done
       - name: Roster, packs, odds, serials, book, trades, clubs, milestones, Dealer, friends
         run: node tests/cards-unit.mjs
       - name: Real server, socket earnings, stands, accounts, trades, persistence
         run: node tests/integration.mjs
+      - name: Portrait ID, manifest and attribution checks
+        run: node tools/sync-portraits.mjs --test && node tests/portraits.mjs
       - name: Economy simulation (short)
         run: node tools/econ-sim.mjs 200
   desktop-and-mobile:
