@@ -306,6 +306,7 @@ let plazaSeq = 0;
 const plazaCard = q => ({ i:q.i, f:q.id.slice(2,12), n:q.n, l:q.l, pet:q.pet, p:q.p, hp:q.hp, w:q.w, d:q.dead?1:0, sw:q.sw, nw:q.nw });
 /* weapons and gold boosts: the server holds health, decides every hit and hands out every boost */
 /* 1 Blaster, 2 Pulse (beam, hits everything in line), 3 Cannon (wide blast), 4 Scatter (five pellets), 5 Longshot (sniper) */
+const GUNIDS = ['g_blaster', 'g_pulse', 'g_cannon', 'g_scatter', 'g_longshot'];
 const WEAPONS = [{ dmg: 18, cd: 300, range: 34, rad: 1.1, all: false }, { dmg: 40, cd: 1100, range: 24, rad: 2.4, all: true }, { dmg: 58, cd: 1900, range: 24, rad: 3.4, all: true },
   { dmg: 15, cd: 800, range: 15, rad: 1.0, all: false, pellets: 5, spread: 0.22 }, { dmg: 95, cd: 2300, range: 75, rad: 0.8, all: false }];
 const BOOSTS = [{ x: 2, ms: 60000 }, { x: 3, ms: 30000 }, { x: 5, ms: 15000 }], PAD_REST = 45000;
@@ -325,7 +326,7 @@ function plazaHurt(o, dmg, by, now) {
    The server moves them, decides who touched or shot them first, and pays out. */
 const ADMINS = new Set(String(process.env.STAKKZ_ADMINS || 'louis').toLowerCase().split(',').map(x => x.trim()).filter(Boolean));
 const isAdmin = q => { const u = auth.username(q.id); return !!u && ADMINS.has(String(u).toLowerCase()); };
-const world = { zom: false, wild: true, gift: true, forage: true };
+const world = { zom: false, wild: false, gift: true, forage: true };   // rare creatures switched off for good
 const ents = new Map(); let entSeq = 0, zMode = false, zBy = '';
 let zWave = 0, zLeft = 0, zBoss = false, zNext = 0;
 const WILD = [['w_goldpig', 26, 9.5], ['w_rainbowfox', 25, 11], ['w_crystaldeer', 20, 12], ['w_cosmiccat', 15, 12.5], ['w_phoenix', 10, 14], ['w_unicorn', 4, 16.5]];
@@ -345,7 +346,7 @@ function plazaTouch(q, ws, now) {
   if (q.dead) return;
   for (const e of ents.values()) {
     if (e.k === 'zom' || (e.k === 'gift' && e.y > 0.05)) continue;
-    if (Math.hypot(q.p[0] - e.x, q.p[2] - e.z) > (e.k === 'gift' ? 2.4 : e.k === 'forage' ? 1.8 : 2.8)) continue;
+    if (Math.hypot(q.p[0] - e.x, q.p[2] - e.z) > (e.k === 'gift' ? 3.2 : e.k === 'forage' ? 2.6 : 3.6)) continue;
     const w = account(q.id); let prize = {};
     if (e.k === 'forage') {
       if (e.sub === 'chest' || (e.sub === 'gem' && Math.random() < 0.15)) prize = giftPrize(w);
@@ -358,7 +359,7 @@ function plazaTouch(q, ws, now) {
 }
 function zombieShot(q, dx, dz, W, now) {
   const hits = [];
-  ents.forEach(e => { if (e.k !== 'zom') return; const rx = e.x - q.p[0], rz = e.z - q.p[2], along = rx * dx + rz * dz; if (along < 0.2 || along > W.range || Math.abs(rx * dz - rz * dx) > W.rad + (e.boss ? 1.8 : 0.4)) return; hits.push([along, e]); });
+  ents.forEach(e => { if (e.k !== 'zom') return; const rx = e.x - q.p[0], rz = e.z - q.p[2], along = rx * dx + rz * dz; if (along < 0.2 || along > W.range || Math.abs(rx * dz - rz * dx) > W.rad + (e.boss ? 3 : 0.9)) return; hits.push([along, e]); });
   return hits;
 }
 setInterval(() => {
@@ -377,9 +378,10 @@ setInterval(() => {
     if (count('wild') < 2) { let r = Math.random() * 100, pick = WILD[0]; for (const w of WILD) { if (r < w[1]) { pick = w; break; } r -= w[1]; }
       const a = Math.random() * Math.PI * 2, d = 26 + Math.random() * 40; const e = entAdd('wild', pick[0], Math.sin(a) * d, Math.cos(a) * d, { sp: pick[2] }); plazaAll({ news: { wild: e.sub } }); }
   }
+  if (global.nextGift == null) global.nextGift = now + 90000;   // not straight away after a restart
   if (world.gift && ppl.length && now > (global.nextGift || 0)) {
-    global.nextGift = now + 45000 + Math.random() * 35000;
-    if (count('gift') < 3) { const a = Math.random() * Math.PI * 2, d = 6 + Math.random() * 34; entAdd('gift', 'drop', Math.sin(a) * d, Math.cos(a) * d, { y: 42 }); plazaAll({ news: { gift: 1 } }); }
+    global.nextGift = now + 180000 + Math.random() * 120000;   // a gift every three to five minutes
+    if (count('gift') < 1) { const a = Math.random() * Math.PI * 2, d = 6 + Math.random() * 34; entAdd('gift', 'drop', Math.sin(a) * d, Math.cos(a) * d, { y: 42 }); plazaAll({ news: { gift: 1 } }); }
   }
   /* zombie waves: each wave is bigger; when the last zombie falls a boss comes; beat it for the next wave */
   if (zMode && ppl.length) {
@@ -413,7 +415,7 @@ setInterval(() => {
       if (e.y > 0) e.y = Math.max(0, e.y - 6 * dt); else if (now - e.t0 > 150000) return entGone(e, 'gone');
     } else if (e.k === 'zom') {
       if (!near) return; const vx = near.p[0] - e.x, vz = near.p[2] - e.z, l = Math.hypot(vx, vz) || 1;
-      const reach = e.boss ? 2.8 : 1.8;
+      const reach = e.boss ? 4.6 : 2.6;
       if (l > reach - 0.5) { e.x += vx / l * (e.sp || 3.8) * dt; e.z += vz / l * (e.sp || 3.8) * dt; } e.ry = Math.atan2(vx, vz);
       if (l < reach && now - (e.bit || 0) > (e.boss ? 900 : 700)) { e.bit = now; plazaHurt(near, e.dmg || 12, null, now); }
     }
@@ -429,7 +431,7 @@ function plazaShoot(q, m, now) {
 }
 function plazaRay(q, dx, dz, W, wi, now) {
   const hits = []; let reach = W.range;
-  plaza.forEach(o => { if (!o.i || o === q || o.dead || o.safe > now) return; const rx = o.p[0] - q.p[0], rz = o.p[2] - q.p[2], along = rx * dx + rz * dz; if (along < 0.2 || along > W.range || Math.abs(rx * dz - rz * dx) > W.rad || o.p[1] > 3.2) return; hits.push([along, o]); });
+  plaza.forEach(o => { if (!o.i || o === q || o.dead || o.safe > now) return; const rx = o.p[0] - q.p[0], rz = o.p[2] - q.p[2], along = rx * dx + rz * dz; if (along < 0.2 || along > W.range || Math.abs(rx * dz - rz * dx) > W.rad + 0.6 || o.p[1] > 4.5) return; hits.push([along, o]); });
   zombieShot(q, dx, dz, W, now).forEach(h => hits.push(h));
   hits.sort((a, b) => a[0] - b[0]); const struck = W.all ? hits : hits.slice(0, 1); if (!W.all && struck.length) reach = struck[0][0];
   plazaAll({ shot: [q.i, wi, q.p[0], q.p[2], Math.round((q.p[0] + dx * reach) * 100) / 100, Math.round((q.p[2] + dz * reach) * 100) / 100].concat(struck.map(h => h[1].i || h[1].id)) });
@@ -512,21 +514,21 @@ function plazaJoin(ws, raw) {
     if (q.dead) return;
     const now = Date.now(), np = [Math.max(-145, Math.min(145, msg.p[0])), Math.max(0, Math.min(12, msg.p[1])), Math.max(-145, Math.min(145, msg.p[2])), msg.p[3] % 7, msg.p[4] | 0];
     /* nobody runs faster than 11 a second: a longer step is cut short, so nobody can teleport into range to shoot */
-    const step = Math.hypot(np[0] - q.p[0], np[2] - q.p[2]), most = (q.sprintUntil > now - 400 ? 30 : 13) * Math.min(2, Math.max(0.1, (now - (q.lastAt || now)) / 1000)) + 3;
+    const step = Math.hypot(np[0] - q.p[0], np[2] - q.p[2]), most = (q.sprintUntil > now - 400 ? 38 : 16) * Math.min(2, Math.max(0.1, (now - (q.lastAt || now)) / 1000)) + 3;
     if (q.lastAt && step > most) { const k = most / step; np[0] = q.p[0] + (np[0] - q.p[0]) * k; np[2] = q.p[2] + (np[2] - q.p[2]) * k; }
     const far = false;
     q.p = np; q.lastAt = now; q.moved = true; plazaTouch(q, ws, now);
   } else if (msg.sprint) { const now = Date.now(); if (now >= (q.sprintReady || 0) && !q.dead) { q.sprintUntil = now + 3000; q.sprintReady = now + 8000; }
   } else if (msg.admin && typeof msg.admin === 'object') {
     if (!isAdmin(q)) return plazaSend(ws, { error: 'Only the admin can change that.' });
-    const k = msg.admin.k, on = !!msg.admin.on; if (!(k in world)) return;
+    const k = msg.admin.k, on = !!msg.admin.on; if (!(k in world) || k === 'zom' || k === 'wild') return;   // zombies and rare creatures are gone
     world[k] = on;
     if (k === 'zom') { zMode = on; zBy = q.n; if (on) { zWave = 0; zNext = Date.now() + 1500; zLeft = 0; zBoss = false; } else ents.forEach(e => { if (e.k === 'zom') entGone(e, 'poof'); }); }
     if (!on && k !== 'zom') ents.forEach(e => { if (e.k === k) entGone(e, 'gone'); });
     plazaAll({ world: world, zmode: { on: zMode, n: q.n, wave: zWave } });
   } else if (Array.isArray(msg.shoot)) { plazaShoot(q, msg.shoot, Date.now());
   } else if (msg.trade && typeof msg.trade === 'object') { plazaTrade(q, msg.trade, Date.now());
-  } else if (Number.isInteger(msg.wpn) && msg.wpn >= 0 && msg.wpn < WEAPONS.length) { q.w = msg.wpn; plazaAll({ wpn: [q.i, q.w] });
+  } else if (Number.isInteger(msg.wpn) && msg.wpn >= 0 && msg.wpn < WEAPONS.length) { if (msg.wpn > 0 && account(q.id).own.indexOf(GUNIDS[msg.wpn]) < 0) return plazaSend(ws, { error: 'Buy that gun in the shop first.' }); q.w = msg.wpn; plazaAll({ wpn: [q.i, q.w] });
   } else if (msg.restyle) {
     const w = account(q.id); q.n = (w.name || auth.username(q.id) || 'Guest').slice(0, 12); q.l = w.look || {}; q.pet = w.pet || ''; q.sw = core.swag(w); q.nw = core.worth(w);
     plazaAll({ look: plazaCard(q) });

@@ -136,7 +136,7 @@
       g.userData.legs = legs; return g;
     }
     for (let i = 0; i < 30; i++) {
-      const k = KINDS[i % KINDS.length], g = makeAnimal(k);
+      const k = KINDS[i % KINDS.length], g = makeAnimal(k); g.scale.setScalar(1.6);   // in proportion with the bigger players
       const a = rand() * Math.PI * 2, r = RING + 6 + rand() * 70;
       const st = { g: g, k: k, x: Math.sin(a) * r, z: Math.cos(a) * r, ry: rand() * 6, tx: 0, tz: 0, wait: rand() * 4, sp: 0, ph: rand() * 9 };
       st.tx = st.x; st.tz = st.z; g.position.set(st.x, 0, st.z); world.add(g); animals.push(st);
