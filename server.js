@@ -9,6 +9,7 @@ import { WebSocketServer } from 'ws';
 import postgres from 'postgres';
 import * as core from './src/core.js';
 import './public/weapon-defs.js';
+import './public/world-layout.js';
 import { AccountAuth } from './src/auth.js';
 import { nextBotAction, isBot } from './src/bots.js';
 
@@ -355,15 +356,22 @@ let zStr = 2;
 const MOBPAY = { z0: 1000000, z1: 1000000, z2: 1000000, runner: 700000, brute: 2500000, boss: 5000000 };
 const mobPay = sub => Math.max(1000, Math.round((MOBPAY[sub] || ZOMBIE_PAY) * STR[zStr].gold / 1000) * 1000);
 const zInfo = () => ({ on: zMode, n: zBy, wave: zWave, str: zStr, name: STR[zStr].n, pay: mobPay('z0') });
-const edge = v => Math.max(-140, Math.min(140, v));
+const MAP=globalThis.STAKKZ_WORLD_LAYOUT;
+const edge=v=>Math.max(-MAP.limit,Math.min(MAP.limit,v));
+const caveChests=new Map();
 function spawnMob(sub, t, d) {
   const S = STR[zStr], a = Math.random() * Math.PI * 2, baseHp = 36 + (zWave - 1) * 7, spd = 3.6 + Math.min(2, zWave * 0.2);
   const k = { runner: { hp: 0.5, sp: 1.7, dmg: 0.7 }, brute: { hp: 3, sp: 0.75, dmg: 1.8 } }[sub] || { hp: 1, sp: 1, dmg: 1 };
-  const hp = Math.round(baseHp * S.hp * k.hp);
-  return entAdd('zom', sub, edge(t.p[0] + Math.sin(a) * d), edge(t.p[2] + Math.cos(a) * d), { hp: hp, mh: hp, sp: spd * S.sp * k.sp, dmg: Math.round(9 * S.dmg * k.dmg), pay: mobPay(sub) });
+  const cave=MAP.caves.find(c=>Math.hypot(t.p[0]-c.x,t.p[2]-c.z)<100);
+  const fromCave=!!cave&&sub!=='brute'&&Math.random()<.55;
+  const type=fromCave?'cave':sub,stats=fromCave?{hp:.78,sp:.92,dmg:.75}:k;
+  const hp=Math.max(12,Math.round(baseHp*S.hp*stats.hp));
+  const x=fromCave?cave.x+(Math.random()-.5)*14:t.p[0]+Math.sin(a)*d;
+  const z=fromCave?cave.z+12+(Math.random()-.5)*9:t.p[2]+Math.cos(a)*d;
+  return entAdd('zom',type,edge(x),edge(z),{hp:hp,mh:hp,sp:spd*S.sp*stats.sp,dmg:Math.round(9*S.dmg*stats.dmg),pay:mobPay(sub)});
 }
 function spawnBoss(t) {
-  zBoss = true; const S = STR[zStr], a = Math.random() * Math.PI * 2, hp = Math.round((240 + zWave * 100) * S.hp);
+  zBoss = true; const S = STR[zStr], a = Math.random() * Math.PI * 2, hp = Math.round((165 + zWave * 55) * S.hp);
   entAdd('zom', 'boss', edge(t.p[0] + Math.sin(a) * 32), edge(t.p[2] + Math.cos(a) * 32), { hp: hp, mh: hp, sp: 3.2 * S.sp, dmg: Math.round(22 * S.dmg), boss: 1, pay: mobPay('boss') });
   plazaAll({ boss: { n: zWave, hp: hp, pay: mobPay('boss') } });
 }
@@ -404,10 +412,10 @@ setInterval(() => {
   /* a rare creature roughly every minute, a gift every minute or so, zombies while zombie mode is on */
   const count = k => [...ents.values()].filter(e => e.k === k).length;
   /* foraging: things lying in the grass, always about 28 of them; picked ones come back elsewhere */
-  if (world.forage && count('forage') < 28 && now > (global.nextForage || 0)) {
-    global.nextForage = now + (count('forage') < 14 ? 150 : 4000);
+  if (world.forage && count('forage') < 66 && now > (global.nextForage || 0)) {
+    global.nextForage = now + (count('forage') < 30 ? 180 : 1700);
     const r = Math.random(), sub = r < 0.45 ? 'shroom' : r < 0.85 ? 'nugget' : r < 0.97 ? 'gem' : 'chest';
-    const a = Math.random() * Math.PI * 2, d = 20 + Math.sqrt(Math.random()) * 95; entAdd('forage', sub, Math.sin(a) * d, Math.cos(a) * d);
+    const a = Math.random() * Math.PI * 2, d = 22 + Math.sqrt(Math.random()) * 290; entAdd('forage', sub, Math.sin(a) * d, Math.cos(a) * d);
   }
   if (world.wild && ppl.length && now > (global.nextWild || 0)) {
     global.nextWild = now + 50000 + Math.random() * 25000;
@@ -419,6 +427,13 @@ setInterval(() => {
     global.nextGift = now + 180000 + Math.random() * 120000;   // a gift every three to five minutes
     if (count('gift') < 1) { const a = Math.random() * Math.PI * 2, d = 6 + Math.random() * 34; entAdd('gift', 'drop', Math.sin(a) * d, Math.cos(a) * d, { y: 42 }); plazaAll({ news: { gift: 1 } }); }
   }
+  /* Guaranteed, collectible treasure chests near every cave. Respawn after ninety seconds. */
+  if(world.forage) MAP.caves.forEach(c=>{
+    if(now<(caveChests.get(c.id)||0))return;
+    if([...ents.values()].some(e=>e.chestCave===c.id))return;
+    entAdd('forage','chest',c.x,c.z+5,{chestCave:c.id});
+    caveChests.set(c.id,now+90000);
+  });
   /* zombie waves: each wave is bigger; when the last zombie falls a boss comes; beat it for the next wave */
   if (zMode && ppl.length) {
     const zs = count('zom');
@@ -451,8 +466,11 @@ setInterval(() => {
       if (!near) return; const vx = near.p[0] - e.x, vz = near.p[2] - e.z, l = Math.hypot(vx, vz) || 1;
       const reach = e.boss ? 4.6 : e.sub === 'brute' ? 3.4 : 2.6;
       if(e.burnUntil>now&&now-(e.burnTick||0)>=1000){
-        e.burnTick=now;e.hp=Math.max(1,e.hp-(e.burnDamage||12));plazaAll({ent:entCard(e)});
+        e.burnTick=now;e.hp=Math.max(0,e.hp-(e.burnDamage||12));
+        if(!e.hp){const shooter=[...plaza.values()].find(p=>p.id===e.burnFrom&&p.i);if(shooter)zombieDamage(shooter,e,{dmg:0},1,now);else e.hp=1;}
+        if(ents.has(e.id))plazaAll({ent:entCard(e)});
       }
+      if(!ents.has(e.id))return;
       const slow=e.slowUntil>now?(e.boss?0.65:0.36):1;
       if (l > reach - 0.5) { e.x += vx / l * (e.sp || 3.8) * slow * dt; e.z += vz / l * (e.sp || 3.8) * slow * dt; } e.ry = Math.atan2(vx, vz);
       if (l < reach && now - (e.bit || 0) > (e.boss ? 900 : 700)) { e.bit = now; plazaHurt(near, e.dmg || 12, null, now); }
@@ -464,14 +482,18 @@ setInterval(() => {
 /* Boss/area weapon effects are validated and applied here, never from the browser. */
 function zombieDamage(q,o,W,scale,now){
   if(!ents.has(o.id))return;
-  const amount=W.dmg*(scale||1)*(o.boss?(W.bossMult||1):1);
+  const execute=W.execute&&o.mh&&o.hp/o.mh<.34?W.execute:1;
+  const amount=W.dmg*(scale||1)*(o.boss?(W.bossMult||1):1)*execute;
   o.hp-=amount;
   if(W.slowMs)o.slowUntil=Math.max(o.slowUntil||0,now+W.slowMs*(o.boss?.55:1));
+  if(W.knockback&&o.hp>0){const dx=o.x-q.p[0],dz=o.z-q.p[2],r=Math.hypot(dx,dz)||1;o.x=edge(o.x+dx/r*W.knockback*(o.boss?.24:1));o.z=edge(o.z+dz/r*W.knockback*(o.boss?.24:1));}
   if(W.burnMs){
     o.burnUntil=now+W.burnMs;
     o.burnDamage=Math.max(o.burnDamage||0,W.burnDamage||10);
+    o.burnFrom=q.id;
   }
   if(o.hp>0){plazaAll({ent:entCard(o)});return;}
+  if(W.healOnKill){q.hp=Math.min(100,(q.hp||0)+W.healOnKill);plazaAll({hp:[q.i,q.hp]});}
   const w=account(q.id),pay=o.pay||(o.boss?5000000:ZOMBIE_PAY);
   w.coins+=pay;w.zkills=(w.zkills||0)+1;dirty=true;
   entGone(o,'killed',q,{gold:pay,boss:o.boss?1:0});
@@ -601,7 +623,7 @@ function plazaJoin(ws, raw) {
     if (typeof msg.hello !== 'string') return;
     const who = plazaWho(msg.hello); if (!who) { plazaSend(ws, { error: 'Sign in again to enter the plaza.' }); return ws.close(); }
     if (plaza.size > 80) { plazaSend(ws, { error: 'The plaza is full right now.' }); return ws.close(); }
-    const back = Array.isArray(msg.at) && msg.at.length >= 3 && msg.at.slice(0, 3).every(Number.isFinite) ? [Math.max(-145, Math.min(145, msg.at[0])), 0, Math.max(-145, Math.min(145, msg.at[1])), msg.at[2] % 7, 0] : null;   // a reconnect puts you back where you stood
+    const back = Array.isArray(msg.at) && msg.at.length >= 3 && msg.at.slice(0, 3).every(Number.isFinite) ? [edge(msg.at[0]), 0, edge(msg.at[1]), msg.at[2] % 7, 0] : null;   // a reconnect puts you back where you stood
     Object.assign(q, who, { i: 'w' + (++plazaSeq), p: back || spawnAt(), moved: false, hp: 100, w: 0, dead: 0, safe: Date.now() + 2500, sw: core.swag(account(who.id)), nw: core.worth(account(who.id)) });
     plazaSend(ws, { you: q.i, admin: isAdmin(q), world: world, all: [...plaza.values()].filter(o => o.i && o !== q).map(plazaCard), ents: [...ents.values()].map(entCard), zmode: zInfo() });
     plazaAll({ join: plazaCard(q) }, ws);
@@ -609,7 +631,7 @@ function plazaJoin(ws, raw) {
   }
   if (Array.isArray(msg.p) && msg.p.length === 5 && msg.p.every(Number.isFinite)) {
     if (q.dead) return;
-    const now = Date.now(), np = [Math.max(-145, Math.min(145, msg.p[0])), Math.max(0, Math.min(12, msg.p[1])), Math.max(-145, Math.min(145, msg.p[2])), msg.p[3] % 7, msg.p[4] | 0];
+    const now = Date.now(), np = [edge(msg.p[0]), Math.max(0, Math.min(12, msg.p[1])), edge(msg.p[2]), msg.p[3] % 7, msg.p[4] | 0];
     /* nobody runs faster than 11 a second: a longer step is cut short, so nobody can teleport into range to shoot */
     const step = Math.hypot(np[0] - q.p[0], np[2] - q.p[2]), most = 38 * Math.min(2, Math.max(0.1, (now - (q.lastAt || now)) / 1000)) + 3;
     if (q.lastAt && step > most) { const k = most / step; np[0] = q.p[0] + (np[0] - q.p[0]) * k; np[2] = q.p[2] + (np[2] - q.p[2]) * k; }
@@ -626,6 +648,12 @@ function plazaJoin(ws, raw) {
     if (k === 'zom') { zMode = on; zBy = q.n; if (on) { zWave = 0; zNext = Date.now() + 1500; zLeft = 0; zBoss = false; } else ents.forEach(e => { if (e.k === 'zom') entGone(e, 'poof'); }); }
     if (!on && k !== 'zom') ents.forEach(e => { if (e.k === k) entGone(e, 'gone'); });
     plazaAll({ world: world, zmode: zInfo() });
+  } else if (typeof msg.travel === 'string') {
+    const now=Date.now(),dest=MAP.destinations.find(p=>p.id===msg.travel);
+    if(!dest||q.dead||now-(q.travelAt||0)<3500)return;
+    q.travelAt=now;q.p=[edge(dest.x),0,edge(dest.z),q.p[3],0];q.lastAt=now;q.moved=true;
+    plazaSend(ws,{warp:[q.p[0],q.p[2]],destination:dest.name});
+    plazaAll({spawn:[q.i,q.p[0],q.p[2]]},ws);plazaTouch(q,ws,now);
   } else if (Array.isArray(msg.shoot)) { plazaShoot(q, msg.shoot, Date.now());
   } else if (msg.trade && typeof msg.trade === 'object') { plazaTrade(q, msg.trade, Date.now());
   } else if (Number.isInteger(msg.wpn) && msg.wpn >= 0 && msg.wpn < WEAPONS.length) { if (msg.wpn > 0 && account(q.id).own.indexOf(GUNIDS[msg.wpn]) < 0) return plazaSend(ws, { error: 'Buy that gun in the shop first.' }); q.w = msg.wpn; plazaAll({ wpn: [q.i, q.w] });
