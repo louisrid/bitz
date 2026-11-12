@@ -68,10 +68,25 @@ node tests/browser.mjs        # real Chrome, desktop + iPhone size; screenshots 
 PW_CHANNEL=chrome node tests/browser.mjs   # use an installed Google Chrome instead
 ```
 
-## Portraits
+## Footballer portraits
 
-Drop a square PNG named after the player id (for example `public/portraits/erling-haaland.png`) and every card,
-pack reveal, book page, trade and profile shows it. Nothing else changes.
+All 265 player names are validated by the catalogue tests. BITZ reads individual player photos through
+`public/portraits/manifest.js`. The images are local, cached, and mapped to stable player IDs. Every
+card, pack reveal, collection page, trade, profile, and card inspection uses the same portrait resolver.
+
+`tools/sync-portraits.mjs` imports images from explicitly identified Wikidata footballers and checks
+Wikimedia Commons licences before caching an image. Selected player-specific Commons photos are also
+included for names that cannot safely be matched automatically. It records original file pages and
+authors in `public/portraits/credits.json`, with a public list at
+`/portraits/credits.html`. See `public/portraits/report.json` for the current coverage and any players
+still missing photographs. Unresolved players use `public/portraits/placeholder.png`, never a random face.
+
+To refresh: run `node tools/sync-portraits.mjs`, or the **Import licensed footballer portraits**
+GitHub Action. Then run `node tests/portraits.mjs` and `node tests/portrait-visual.mjs`
+(Playwright Chromium required). The latter captures actual player cards in desktop and mobile layouts.
+
+Player photo licences are not necessarily endorsements or releases of publicity rights.
+Game autograph artwork is fictional, not an authentic player signature.
 
 ## Deploying
 

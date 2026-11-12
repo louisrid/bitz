@@ -20,11 +20,13 @@ jobs:
       - run: npm ci
       - name: Syntax-check every active module
         run: |
-          for f in server.js src/*.js public/*.js tools/econ-sim.mjs; do node --check "$f"; done
+          for f in server.js src/*.js public/*.js tools/*.mjs tests/*.mjs; do node --check "$f"; done
       - name: Roster, packs, odds, serials, book, trades, clubs, milestones, Dealer, friends
         run: node tests/cards-unit.mjs
       - name: Real server, socket earnings, stands, accounts, trades, persistence
         run: node tests/integration.mjs
+      - name: Portrait ID, manifest and attribution checks
+        run: node tools/sync-portraits.mjs --test && node tests/portraits.mjs
       - name: Economy simulation (short)
         run: node tools/econ-sim.mjs 200
   desktop-and-mobile:
@@ -38,6 +40,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - name: Real player photographs in actual card designs at desktop and mobile widths
+        run: node tests/portrait-visual.mjs
       - name: "Desktop and iPhone-sized Chrome: loading, world, packs, book, buyer, profiles, no overlaps"
         run: node tests/browser.mjs
       - name: Upload screenshots

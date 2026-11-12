@@ -178,6 +178,69 @@ input.t:focus { box-shadow: 0 0 0 3px var(--purple-2); }
 .bc.tilt.r4 .holo, .bc.tilt.r5 .holo, .bc.tilt.r6 .holo, .bc.tilt.r7 .holo, .bc.tilt.r8 .holo, .bc.tilt.r9 .holo { opacity: .7; }
 .bc .foil { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: repeating-linear-gradient(calc(120deg + var(--ry, 0deg)), rgba(255,255,255,0) 0 6px, rgba(255,255,255,.25) 7px 8px); }
 .bc.r3 .foil, .bc.r5 .foil, .bc.r6 .foil { opacity: .6; }
+
+/* Photo-specific card refinement. The core game UI and pack designs remain unchanged. */
+.bc .port img.photo, .bc .pair img.photo {
+  object-fit: cover;
+  object-position: 50% 12%;
+  border: 0;
+  border-radius: calc(var(--w) * .035);
+  background: transparent;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 76%, rgba(0,0,0,.75) 86%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 76%, rgba(0,0,0,.75) 86%, transparent 100%);
+}
+.bc .port img.fallback, .bc .pair img.fallback { object-fit: contain; object-position: center; background: rgba(255,255,255,.36); }
+.bc .pair { gap: 2.5%; left: 6%; right: 6%; }
+.bc .pair img { min-width: 0; flex: 1 1 0; width: 48.75%; }
+.bc .sig {
+  top: 49%; height: 18%; left: 9%; right: 9%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4% 3%;
+  border: 1px solid rgba(94,88,94,.33);
+  border-radius: calc(var(--w) * .022);
+  background: linear-gradient(123deg, rgba(255,255,255,.94), rgba(233,236,244,.86) 45%, rgba(255,255,255,.96));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.45), 0 1px 5px rgba(0,0,0,.14);
+  overflow: hidden;
+}
+.bc .sig::before { content:""; position:absolute; inset:0; pointer-events:none; background: repeating-linear-gradient(112deg,transparent 0 16px,rgba(81,113,174,.055) 17px 18px); }
+.bc .sig .sign-one { position: relative; width: 100%; height: 100%; min-width: 0; display: flex; align-items: center; justify-content: center; }
+.bc .sig.dual { top: 46%; height: 22%; left: 6%; right: 6%; gap: 2%; }
+.bc .sig.dual .sign-one { width: 49%; }
+.bc .sig.dual .sign-one + .sign-one { border-left: 1px solid rgba(50,67,119,.26); padding-left: 2%; }
+.bc .sig svg.autograph { display: block; width: 100%; height: 100%; overflow: hidden; filter: drop-shadow(0 1px 0 rgba(15,45,105,.13)); }
+.bc .sig svg.autograph text { font-family: 'Caveat','Brush Script MT','Segoe Script',cursive; font-weight: 700; }
+.bc .sig .sig-cert { position: absolute; left: 0; right: 0; bottom: 2%; text-align: center; letter-spacing: .13em; font: 700 calc(var(--w) * .022)/1 var(--ui); color: #5f718f; }
+.bc.anim .sig svg.autograph text { animation: signature-reveal 1.05s ease-out both; }
+.bc.anim .sig svg.autograph .ink-sweep { stroke-dasharray: 230; stroke-dashoffset: 230; animation: ink-sweep 1.2s .35s ease-out forwards; }
+@keyframes signature-reveal { from { opacity: .05; filter: blur(3px); } to { opacity: 1; filter: blur(0); } }
+@keyframes ink-sweep { to { stroke-dashoffset: 0; } }
+.bc.anim.r8, .bc.anim.r9 { animation: collector-glint 2.8s ease-in-out infinite alternate; }
+@keyframes collector-glint { from { filter: saturate(1); } to { filter: saturate(1.22) brightness(1.08); } }
+@media(prefers-reduced-motion:reduce) {
+ .bc.anim.r8,.bc.anim.r9,.bc.anim .sig svg.autograph text,.bc.anim .sig svg.autograph .ink-sweep { animation: none; }
+ .bc.anim .sig svg.autograph .ink-sweep { stroke-dashoffset: 0; }
+}
+
+
+/* Card typography and photo legibility: signatures are collectible details, never the only readable name. */
+.bc.s-rh .plate, .bc.s-gs .plate { color: #111015; }
+.bc.s-rh .plate .nm b, .bc.s-gs .plate .nm b { color: #111015; }
+.bc.s-rh .plate .nm span, .bc.s-gs .plate .nm span { color: #605b61; }
+.bc.s-gs.has-auto .plate {
+  background: #17171d;
+  color: #fff1b6;
+  border-color: #9d813a;
+}
+.bc.s-gs.has-auto .plate .nm b { color: #fff1b6; }
+.bc.s-gs.has-auto .plate .nm span { color: #cfb978; }
+.bc.s-en .plate .nm b { color: #f7f8ff; }
+.bc.photo-card .foil { opacity: .14; }
+.bc.photo-card .holo { opacity: .18; }
+.bc.photo-card.tilt .holo { opacity: .30; }
+.bc.photo-card .port img, .bc.photo-card .pair img { filter: contrast(1.025) saturate(1.08); }
+.bc.has-auto .sig { z-index: 1; }
+.bc .plate { z-index: 2; }
+
 /* RED HOT */
 .bc.s-rh .art { --bg: linear-gradient(170deg, #fff 0%, #fff 55%, #ffe3d6 100%); }
 .bc.s-rh .foot { color: #a12d0b; }
@@ -223,7 +286,7 @@ input.t:focus { box-shadow: 0 0 0 3px var(--purple-2); }
 .bc.s-en.r9 .art { --bg: radial-gradient(circle at 50% 110%, #fff 0, #9db4ff 18%, #0b1230 60%); }
 .bc.s-en .lights { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 15% 0%, rgba(255,255,255,.55), transparent 40%), radial-gradient(ellipse at 85% 0%, rgba(255,255,255,.55), transparent 40%); }
 .bc.s-en.r4 .lights, .bc.s-en.r5 .lights, .bc.s-en.r7 .lights, .bc.s-en.r8 .lights, .bc.s-en.r9 .lights { opacity: 1; }
-.bc.s-en.r5 .port img, .bc.s-en.r8 .port img, .bc.s-en.r9 .port img { height: 66%; top: 2%; }
+.bc.s-en.r5 .port img, .bc.s-en.r8 .port img, .bc.s-en.r9 .port img { height: 100%; object-position: 50% 12%; }
 .bc.s-en.r9 { border-color: #cfe0ff; box-shadow: 0 calc(var(--w) * .035) 0 #26407a, 0 0 32px rgba(150,180,255,.7); }
 .bc.r9 .one { position: absolute; left: 50%; top: 2%; transform: translateX(-50%); padding: 2px 10px; border-radius: 0 0 10px 10px; background: var(--ink); color: #fff; font-family: var(--brand); font-size: calc(var(--w) * .09); letter-spacing: .1em; }
 .bc .back { position: absolute; inset: 0; background: var(--ink); display: grid; place-items: center; backface-visibility: hidden; }
