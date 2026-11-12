@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
 import postgres from 'postgres';
 import * as core from './src/core.js';
+import './public/weapon-defs.js';
 import { AccountAuth } from './src/auth.js';
 import { nextBotAction, isBot } from './src/bots.js';
 
@@ -308,9 +309,8 @@ let plazaSeq = 0;
 const plazaCard = q => ({ i:q.i, f:q.id.slice(2,12), n:q.n, l:q.l, pet:q.pet, p:q.p, hp:q.hp, w:q.w, d:q.dead?1:0, sw:q.sw, nw:q.nw });
 /* weapons and gold boosts: the server holds health, decides every hit and hands out every boost */
 /* 1 Blaster, 2 Pulse (beam, hits everything in line), 3 Cannon (wide blast), 4 Scatter (five pellets), 5 Longshot (sniper) */
-const GUNIDS = ['g_blaster', 'g_pulse', 'g_cannon', 'g_scatter', 'g_longshot'];
-const WEAPONS = [{ dmg: 18, cd: 300, range: 34, rad: 1.1, all: false }, { dmg: 40, cd: 1100, range: 24, rad: 2.4, all: true }, { dmg: 58, cd: 1900, range: 24, rad: 3.4, all: true },
-  { dmg: 15, cd: 800, range: 15, rad: 1.0, all: false, pellets: 5, spread: 0.22 }, { dmg: 95, cd: 2300, range: 75, rad: 0.8, all: false }];
+const GUNIDS=BITZ_WEAPONS.map(w=>w.id);
+const WEAPONS=BITZ_WEAPONS;
 const BOOSTS = [{ x: 2, ms: 60000 }, { x: 3, ms: 30000 }, { x: 5, ms: 15000 }], PAD_REST = 45000;
 /* three boosts only, out on the grass well clear of the fighting circle */
 const pads = [].map((q, i) => ({ id: i, x: q[0], z: q[1], k: i % 3, at: 0 }));
@@ -434,31 +434,93 @@ setInterval(() => {
     } else if (e.k === 'zom') {
       if (!near) return; const vx = near.p[0] - e.x, vz = near.p[2] - e.z, l = Math.hypot(vx, vz) || 1;
       const reach = e.boss ? 4.6 : e.sub === 'brute' ? 3.4 : 2.6;
-      if (l > reach - 0.5) { e.x += vx / l * (e.sp || 3.8) * dt; e.z += vz / l * (e.sp || 3.8) * dt; } e.ry = Math.atan2(vx, vz);
+      if(e.burnUntil>now&&now-(e.burnTick||0)>=1000){
+        e.burnTick=now;e.hp=Math.max(1,e.hp-(e.burnDamage||12));plazaAll({ent:entCard(e)});
+      }
+      const slow=e.slowUntil>now?(e.boss?0.65:0.36):1;
+      if (l > reach - 0.5) { e.x += vx / l * (e.sp || 3.8) * slow * dt; e.z += vz / l * (e.sp || 3.8) * slow * dt; } e.ry = Math.atan2(vx, vz);
       if (l < reach && now - (e.bit || 0) > (e.boss ? 900 : 700)) { e.bit = now; plazaHurt(near, e.dmg || 12, null, now); }
     }
     if (e.x !== ox || e.z !== oz || e.y !== oy) moved.push([e.id, Math.round(e.x * 100) / 100, Math.round(e.y * 100) / 100, Math.round(e.z * 100) / 100, Math.round(e.ry * 100) / 100]);
   });
   if (moved.length) plazaAll({ e: moved });
 }, 100).unref();
-function plazaShoot(q, m, now) {
-  const wi = Math.max(0, Math.min(WEAPONS.length - 1, q.w | 0)), W = WEAPONS[wi]; if (q.dead || !W || now - (q.shotAt || 0) < W.cd * 0.85) return;
-  let dx0 = Number(m[1]), dz0 = Number(m[2]); const l0 = Math.hypot(dx0, dz0); if (!Number.isFinite(l0) || l0 < 0.01) return; dx0 /= l0; dz0 /= l0; q.shotAt = now; q.safe = 0;
-  const base = Math.atan2(dx0, dz0), n = W.pellets || 1;
-  for (let k = 0; k < n; k++) { const a = base + (n > 1 ? (k / (n - 1) - 0.5) * 2 * W.spread : 0); plazaRay(q, Math.sin(a), Math.cos(a), W, wi, now); }
+/* Boss/area weapon effects are validated and applied here, never from the browser. */
+function zombieDamage(q,o,W,scale,now){
+  if(!ents.has(o.id))return;
+  const amount=W.dmg*(scale||1)*(o.boss?(W.bossMult||1):1);
+  o.hp-=amount;
+  if(W.slowMs)o.slowUntil=Math.max(o.slowUntil||0,now+W.slowMs*(o.boss?.55:1));
+  if(W.burnMs){
+    o.burnUntil=now+W.burnMs;
+    o.burnDamage=Math.max(o.burnDamage||0,W.burnDamage||10);
+  }
+  if(o.hp>0){plazaAll({ent:entCard(o)});return;}
+  const w=account(q.id),pay=o.pay||(o.boss?5000000:ZOMBIE_PAY);
+  w.coins+=pay;w.zkills=(w.zkills||0)+1;dirty=true;
+  entGone(o,'killed',q,{gold:pay,boss:o.boss?1:0});
+  plazaSend(wsOf(q),{gold:w.coins,reward:{k:o.boss?'boss':'zom',gold:pay}});
+  if(o.boss){
+    zBoss=false;zNext=now+7000;
+    const seen=new Set();
+    plaza.forEach((x,xws)=>{
+      if(!x.i||seen.has(x.id))return;seen.add(x.id);
+      const xw=account(x.id);
+      const bonus=Math.max(1000,Math.round(500000*STR[zStr].gold/1000)*1000);
+      xw.coins+=bonus;
+      plazaSend(xws,{gold:xw.coins,reward:{k:'wave',gold:bonus,n:zWave}});
+    });
+    plazaAll({cleared:{n:zWave,by:q.n}});
+  }
 }
-function plazaRay(q, dx, dz, W, wi, now) {
-  const hits = []; let reach = W.range;
-  plaza.forEach(o => { if (!o.i || o === q || o.dead || o.safe > now) return; const rx = o.p[0] - q.p[0], rz = o.p[2] - q.p[2], along = rx * dx + rz * dz; if (along < 0.2 || along > W.range || Math.abs(rx * dz - rz * dx) > W.rad + 0.6 || o.p[1] > 4.5) return; hits.push([along, o]); });
-  zombieShot(q, dx, dz, W, now).forEach(h => hits.push(h));
-  hits.sort((a, b) => a[0] - b[0]); const struck = W.all ? hits : hits.slice(0, 1); if (!W.all && struck.length) reach = struck[0][0];
-  plazaAll({ shot: [q.i, wi, q.p[0], q.p[2], Math.round((q.p[0] + dx * reach) * 100) / 100, Math.round((q.p[2] + dz * reach) * 100) / 100].concat(struck.map(h => h[1].i || h[1].id)) });
-  struck.forEach(h => { const o = h[1];
-    if (o.k === 'zom') { if (!ents.has(o.id)) return; o.hp -= W.dmg; if (o.hp > 0) return plazaAll({ ent: entCard(o) });
-      const w = account(q.id), pay = o.pay || (o.boss ? 5000000 : ZOMBIE_PAY); w.coins += pay; w.zkills = (w.zkills || 0) + 1; dirty = true; entGone(o, 'killed', q, { gold: pay, boss: o.boss ? 1 : 0 }); plazaSend(wsOf(q), { gold: w.coins, reward: { k: o.boss ? 'boss' : 'zom', gold: pay } });
-      if (o.boss) { zBoss = false; zNext = now + 7000; const seen = new Set(); plaza.forEach((x, xws) => { if (!x.i || seen.has(x.id)) return; seen.add(x.id); const xw = account(x.id); const cb = Math.max(1000, Math.round(500000 * STR[zStr].gold / 1000) * 1000); xw.coins += cb; plazaSend(xws, { gold: xw.coins, reward: { k: 'wave', gold: cb, n: zWave } }); }); plazaAll({ cleared: { n: zWave, by: q.n } }); }
-      return; }
-    plazaHurt(o, W.dmg, q, now);
+function plazaShoot(q,m,now){
+  const wi=Math.max(0,Math.min(WEAPONS.length-1,q.w|0)),W=WEAPONS[wi];
+  if(q.dead||!W||now-(q.shotAt||0)<W.cd*.85)return;
+  if(wi>0&&account(q.id).own.indexOf(GUNIDS[wi])<0){q.w=0;return;}
+  let dx0=Number(m[1]),dz0=Number(m[2]),length=Math.hypot(dx0,dz0);
+  if(!Number.isFinite(length)||length<.01)return;
+  dx0/=length;dz0/=length;q.shotAt=now;q.safe=0;
+  const base=Math.atan2(dx0,dz0),n=W.pellets||1;
+  for(let k=0;k<n;k++){
+    const angle=base+(n>1?(k/(n-1)-.5)*2*W.spread:0);
+    plazaRay(q,Math.sin(angle),Math.cos(angle),W,wi,now);
+  }
+}
+function plazaRay(q,dx,dz,W,wi,now){
+  const hits=[];let reach=W.range;
+  plaza.forEach(o=>{
+    if(!o.i||o===q||o.dead||o.safe>now)return;
+    const rx=o.p[0]-q.p[0],rz=o.p[2]-q.p[2],along=rx*dx+rz*dz;
+    if(along<.2||along>W.range||Math.abs(rx*dz-rz*dx)>W.rad+.6||o.p[1]>4.5)return;
+    hits.push([along,o,1]);
+  });
+  zombieShot(q,dx,dz,W,now).forEach(h=>hits.push([h[0],h[1],1]));
+  hits.sort((a,b)=>a[0]-b[0]);
+  const direct=W.all?hits:hits.slice(0,1);
+  if(!W.all&&direct.length)reach=direct[0][0];
+  const targets=direct.slice(),seen=new Set(direct.map(h=>h[1]));
+  const centre=direct.find(h=>h[1].k==='zom');
+  const impact=centre?[centre[1].x,centre[1].z]:
+    [q.p[0]+dx*reach,q.p[2]+dz*reach];
+  if(W.splash){
+    ents.forEach(e=>{
+      if(e.k!=='zom'||seen.has(e))return;
+      const dist=Math.hypot(e.x-impact[0],e.z-impact[1]);
+      if(dist<=W.splash+(e.boss?2:0)){targets.push([reach,e,Math.max(.3,1-dist/(W.splash*1.5))]);seen.add(e);}
+    });
+  }
+  if(W.chain&&centre){
+    const others=[...ents.values()].filter(e=>e.k==='zom'&&!seen.has(e)&&Math.hypot(e.x-impact[0],e.z-impact[1])<=11)
+      .sort((a,b)=>Math.hypot(a.x-impact[0],a.z-impact[1])-Math.hypot(b.x-impact[0],b.z-impact[1])).slice(0,W.chain);
+    for(const e of others){targets.push([reach,e,.6]);seen.add(e);}
+  }
+  plazaAll({shot:[q.i,wi,q.p[0],q.p[2],
+    Math.round((q.p[0]+dx*reach)*100)/100,
+    Math.round((q.p[2]+dz*reach)*100)/100].concat(targets.map(h=>h[1].i||h[1].id))});
+  targets.forEach(h=>{
+    const o=h[1];
+    if(o.k==='zom')zombieDamage(q,o,W,h[2],now);
+    else plazaHurt(o,wi>=5?Math.min(55,W.dmg*h[2]):W.dmg*h[2],q,now);
   });
 }
 /* trading: two people in the world put up items and gold; nothing moves until both confirm the same version of the offer */
