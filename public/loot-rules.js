@@ -2,7 +2,7 @@
 (function(root){
   'use strict';
   const order=['epic','legendary','mythical','secret'];
-  const base=Object.freeze({epic:50,legendary:34,mythical:13,secret:3});
+  const base=Object.freeze({epic:20,legendary:35,mythical:35,secret:10});
   const secret=new Set(['x_sun','x_void','x_glitch']);
   const legendary=new Set(['x_volt','x_ghost','x_alien','x_mafia','x_ninja','x_reaper','x_storm','x_frost']);
   function tier(id,items){
