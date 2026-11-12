@@ -482,3 +482,10 @@ html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}
  #app[data-page=shop] .loot .btn,#modal[data-kind=wardrobe] .loot .btn{min-height:32px!important;font-size:12px!important}
  #app[data-page=shop] .item,#modal[data-kind=wardrobe] .item{padding:5px 3px 8px!important}
 }
+
+/* Simple, readable health meter; no floating red cross or duplicated weapon text. */
+#whp{width:min(260px,55vw)!important;height:29px!important;border:3px solid #000!important;border-radius:12px!important;background:#fff!important;overflow:hidden!important;box-shadow:3px 4px 0 #000!important;position:relative!important}
+#whp i{display:block!important;position:absolute!important;inset:0 auto 0 0!important;width:100%;background:#49df75;transition:width .2s ease,background .2s ease}
+#whp b{position:absolute!important;inset:0!important;display:grid!important;place-items:center!important;z-index:1!important;font:400 18px/1 "Coolvetica",sans-serif!important;color:#101611!important;text-shadow:0 1px 0 #fff9!important;letter-spacing:0!important}
+#whp .heart{display:none!important}
+@media(max-width:600px){#whp{height:26px!important;width:min(180px,50vw)!important}#whp b{font-size:15px!important}}
