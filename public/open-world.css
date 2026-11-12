@@ -377,6 +377,31 @@ html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}
 #modal .mhead{position:sticky;top:-24px;z-index:3;background:#fff;padding-top:4px}
 #newver{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:200;background:#FFF01F;color:#000;border:3px solid #000;border-radius:14px;padding:12px 20px;font:400 20px/1 'Coolvetica','Arial Black',sans-serif;box-shadow:4px 6px 0 #000;cursor:pointer}
 #newver:active{transform:translate(calc(-50% + 3px),4px);box-shadow:1px 2px 0 #000}
+
+/* ---- release 3: more empty sky above the buttons, smaller Shop button, the panel never covers the Shop button or the trade banner ---- */
+#wzoom{position:absolute;right:18px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:8}
+#wzoom button{width:54px;height:54px;border-radius:15px;background:#FFF01F;color:#000;border:3px solid #000;box-shadow:3px 5px 0 #000;font:400 34px/1 'Coolvetica','Arial Black',sans-serif;cursor:pointer;padding:0;display:grid;place-items:center}
+#wzoom button:active{transform:translate(2px,4px);box-shadow:1px 1px 0 #000}
+@media(pointer:coarse){#wzoom{bottom:318px;right:14px}#wzoom button{width:46px;height:46px;font-size:28px}}
+html:has(#app:not([data-page=world])) #wzoom{display:none}
+#wtrade{top:112px!important;z-index:97!important}
+@media(min-width:901px){
+  :root{--topgap:7vh}
+  html.fopen #fside{top:calc(12px + var(--topgap))!important}
+  html #app[data-screen="home"] #wbar{top:calc(12px + var(--topgap))!important}
+  html #shopbig{top:calc(12px + var(--topgap))!important;min-height:67px!important;padding:7px 27px 7px 22px!important;font-size:41px!important;gap:11px!important;border-width:3px!important;border-radius:16px!important;box-shadow:4.5px 7px 0 #000!important}
+  html #shopbig .sbi svg{width:32px!important;height:32px!important}
+  html #shopbig .sale{font-size:11px!important;padding:4px 8px!important;top:-12px!important;right:-14px!important}
+  html #wtrade{top:calc(112px + var(--topgap))!important}
+  html:has(#app[data-screen=home]:not([data-page=world])){--pw:min(600px,calc(100vw - 28px))}
+  html:has(#app[data-screen=home][data-page=shop]){--pw:min(690px,calc(100vw - 28px))}
+  html #app[data-screen=home]:not([data-page=world]) #side{top:0!important;bottom:0!important;right:0!important;height:auto!important;max-height:none!important;border-radius:0!important;border-width:0 0 0 4px!important;box-shadow:-12px 0 36px rgba(0,0,0,.3)!important}
+  html:has(#app[data-screen=home]:not([data-page=world])) #shopbig{left:auto!important;right:calc(var(--pw) + 28px)!important;transform:none!important}
+  html:has(#app[data-screen=home]:not([data-page=world])) #shopbig:active{transform:translate(3px,5px)!important}
+  html:has(#app[data-screen=home]:not([data-page=world])) #wtrade{left:auto!important;right:calc(var(--pw) + 28px)!important;transform:none!important}
+}
+@media(min-width:901px) and (max-width:1360px){html:has(#app[data-page=shop]) #shopbig{display:none!important}}
+@media(min-width:901px) and (max-width:1270px){html:has(#app[data-screen=home]:not([data-page=world])) #shopbig{display:none!important}}
 /*BG>*/
 .bg-b_cyber{background:repeating-linear-gradient(90deg,#19e3ff33 0 2px,transparent 2px 26px),repeating-linear-gradient(0deg,#ff2bd633 0 2px,transparent 2px 26px),linear-gradient(180deg,#0b1030,#1c375e,#87e9ff)}
 .bg-b_haunt{background:radial-gradient(circle at 72% 22%,#e9e0ff,transparent 14%),linear-gradient(180deg,#17132b,#373052,#b8a3e6)}
