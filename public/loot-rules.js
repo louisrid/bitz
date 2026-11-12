@@ -6,8 +6,8 @@
  const base=Object.freeze({epic:70,legendary:22,mythical:7,secret:1});
  const themes=Object.freeze({
   season:Object.freeze({name:'Season One',price:2000000,odds:base,ids:null}),
-  cosmic:Object.freeze({name:'Cosmic',price:2500000,odds:Object.freeze({epic:62,legendary:24,mythical:12,secret:2}),ids:Object.freeze(['x_cosmic','x_sun','x_void','x_abyss','x_starforge','x_prism','x_glitch'])}),
-  legends:Object.freeze({name:'Legends',price:1800000,odds:Object.freeze({epic:74,legendary:20,mythical:5,secret:1}),ids:Object.freeze(['x_volt','x_ghost','x_alien','x_mafia','x_ninja','x_reaper','x_storm','x_frost','x_samurai','x_pharaoh','x_crystal'])})
+  cosmic:Object.freeze({name:'Cosmic',price:2500000,odds:Object.freeze({epic:62,legendary:24,mythical:12,secret:2}),ids:Object.freeze(['x_cosmic','x_sun','x_void','x_abyss','x_starforge','x_prism','x_alien'])}),
+  legends:Object.freeze({name:'Legends',price:1800000,odds:Object.freeze({epic:74,legendary:20,mythical:5,secret:1}),ids:Object.freeze(['x_volt','x_ghost','x_mafia','x_ninja','x_reaper','x_storm','x_frost','x_samurai','x_pharaoh','x_crystal','x_kaiju','x_glitch'])})
  });
  const secret=new Set(['x_sun','x_void','x_glitch']);
  const legendary=new Set(['x_volt','x_ghost','x_alien','x_mafia','x_ninja','x_reaper','x_storm','x_frost']);

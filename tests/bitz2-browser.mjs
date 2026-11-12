@@ -26,7 +26,7 @@ try{
  let ready=false;for(let n=0;n<120;n++){if(app.exitCode!==null)throw Error('Server exited: '+logs);
   try{if((await fetch('http://127.0.0.1:'+port+'/api/ping')).ok){ready=true;break;}}catch(e){}await delay(100);
  }assert.ok(ready,'Server not listening: '+logs);
- browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox','--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+ browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-gpu-sandbox']});
  for(const {name,options} of [{name:'desktop',options:{viewport:{width:1440,height:900},deviceScaleFactor:1}},{name:'phone',options:devices['iPhone 13']}]){
   const {defaultBrowserType,...opts}=options,context=await browser.newContext(opts),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
@@ -37,8 +37,10 @@ try{
   assert.equal(await page.locator('#wbar [data-a=stuff]').count(),1);
   assert.equal(await page.locator('#wui #wfire').isVisible(),false);
   assert.equal(await page.locator('#wui #whp').isVisible(),false);
+  assert.equal(await page.locator('#goldtop').isVisible(),true,'Gold balance must be visible in lobby');
   await page.screenshot({path:path.join(out,name+'-world.png'),animations:'disabled'});
   const world=await page.evaluate(()=>({webgl:!!document.createElement('canvas').getContext('webgl'),running:typeof B3!=='undefined'&&B3.ok,world:typeof B3!=='undefined'&&!!B3.world}));
+  console.log(name+' graphics: '+JSON.stringify(world));
   assert(world.world,'Character/world renderer missing');
   if(world.webgl)assert(world.running,'WebGL available but world did not render');
   await page.locator('#wbar [data-a=stuff]').click();
@@ -52,18 +54,20 @@ try{
   const odds=await page.locator('#modal .bx-odds').innerText();
   assert(odds.includes('EPIC')&&odds.includes('LEGENDARY')&&odds.includes('MYTHICAL')&&odds.includes('SECRET'),'Rarity odds absent: '+odds);
   await page.locator('#modal .bx-theme-picker [data-v=cosmic]').click();
+  await page.waitForTimeout(150);
+  if(name==='phone'){const visible=await page.locator('#modal .bx-cta').first().evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+2;});assert(visible,'Mystery-box Buy/Open button is below the visible phone viewport');}
   assert((await page.locator('#modal .bx-cost').innerText()).includes('2,500,000'),'Theme price did not update');
   assert.equal(await page.locator('#shopbig').isVisible(),false);
   await page.screenshot({path:path.join(out,name+'-mystery-box.png'),animations:'disabled'});
+  await page.locator('#modal [data-a=close]').first().click();
+  await page.locator('#leveltop').click();
+  await page.waitForSelector('#modal[data-kind=level]');
   await page.locator('#modal [data-a=close]').first().click();
   await page.locator('#shopbig').click();
   await page.waitForSelector('#app[data-page=shop] #side .items',{timeout:15000});
   assert((await page.locator('#side').innerText()).includes('Shop'),'Shop not visible');
   await page.screenshot({path:path.join(out,name+'-shop.png'),animations:'disabled'});
-  await page.locator('#leveltop').click();
-  await page.waitForSelector('#modal[data-kind=level]');
-  assert.equal(await page.locator('#shopbig').isVisible(),false);
-  await page.locator('#modal [data-a=close]').first().click();
+  assert.equal(await page.locator('#leveltop').isVisible(),false,'Level HUD must not cover the Shop');
   const layout=await page.evaluate(()=>{
    const html=document.documentElement,r=(id)=>{const x=document.getElementById(id);if(!x||getComputedStyle(x).display==='none')return null;const a=x.getBoundingClientRect();return {x:a.x,y:a.y,width:a.width,height:a.height};};
    const overlap=(a,b)=>!!(a&&b&&a.x<b.x+b.width&&b.x<a.x+a.width&&a.y<b.y+b.height&&b.y<a.y+a.height);
