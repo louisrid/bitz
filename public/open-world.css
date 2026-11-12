@@ -411,3 +411,22 @@ html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}
 .bg-b_gum{background:radial-gradient(#ffffff 6px,transparent 7px) 0 0/30px 30px,linear-gradient(135deg,#ff8ad8,#FFF01F)}
 .bg-b_blackgold{background:repeating-linear-gradient(45deg,#FFF01F55 0 3px,transparent 3px 26px),linear-gradient(180deg,#0a0a0a,#2a2208)}
 /*<BG*/
+
+
+/* Neutral interface surfaces: pure white instead of grey. */
+:root{--mist:#fff!important}
+#fside,#fside .fhead,#fside .fnote,
+#flist .fr:not(.gone),#flist .fr:not(.gone):hover,
+#app[data-screen="home"] #side,
+#modal:not([data-kind="loot"]),
+#fprofov .pcard2,#fprofov .prow,
+#wtrade,#wtrade .tside,.tside,
+.account-box,.advanced,.mecard,
+.opts .opt.more,.sws.wide button.more,
+.seg button:not(.on),.ib.off,
+.pill:not(.hot):not(.swagpill),.r0{
+  background-color:#fff!important;
+}
+#flist .fr:not(.gone):hover{outline:1px solid #000;outline-offset:-1px}
+#fside .fr:not(.gone) .ava{background-color:#fff!important}
+#modal[data-kind="loot"],#modal[data-kind="loot"] .bx-shell{background-color:#fff!important}
