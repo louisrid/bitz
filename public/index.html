@@ -652,7 +652,7 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><button class="wbtn wzom" data-a="zombies" id="wzom" hidden>Zombies: off</button><button class="wbtn wadm" data-a="adminpanel" id="wadm" hidden>Admin</button><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="stuff">My Stuff</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><button class="wbtn wzom" data-a="zombies" id="wzom" hidden>Zombies: off</button><button class="wbtn wadm" data-a="adminpanel" id="wadm" hidden>Admin</button><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
 <div id="title" class="bg-paper" hidden></div><div id="goldtop" aria-label="Your gold"><i class="gc"></i><span><em id="wgold">...</em><small id="wrate">+1,000,000/min</small></span></div><button id="shopbig" data-a="page" data-v="shop"><span class="sbi"></span><b>Shop</b><i class="sale">Sale</i></button><div id="bload" aria-label="Loading BITZ"><canvas id="blc"></canvas><div class="bl-vig"></div><div class="bl-scan"></div><div class="bl-hud"><i></i><i></i><i></i><i></i><span>BITZ</span><span>Loading</span></div><p class="bl-sr">Loading BITZ</p></div><script>(function(){
 var host=document.getElementById('bload'),cv=document.getElementById('blc');if(!host||!cv||!cv.getContext)return;
@@ -2186,7 +2186,7 @@ function styleChanged() {
 }
 function rerender() {
   if (lootSt && lootSt.phase === 'spin') return;
-  if (modal && (modal.kind === 'wardrobe' || modal.kind === 'loot')) refreshModal();
+  if (modal && (modal.kind === 'wardrobe' || modal.kind === 'loot' || modal.kind === 'stuff')) refreshModal();
   else if ($('#app').dataset.screen === 'home') renderHome(true);
   else if (V && V.phase !== 'lobby' && !busy) renderActions();
 }
@@ -3087,6 +3087,30 @@ function friendModal(i) {
 /* ================= full-screen profiles =================
    Tap a friend or a character in the world: their character fills the world area in front of their own scene. */
 let PROF = null;
+/* ---- stuff: your inventory, and anyone else's from their profile ---- */
+let StuffSt = null;
+const STUFF_TABS = [['all', 'All'], ['outfit', 'Outfits'], ['hat', 'Hats'], ['acc', 'Extras'], ['pet', 'Pets'], ['bg', 'Scenes'], ['gun', 'Guns'], ['dye', 'Dyes']];
+const stuffWorn = id => { const it = ITEMS[id]; if (!it) return false; const L = F.look || {}; return L.outfit === id || L.hat === id || L.acc === id || L.bg === id || L.dye === id || F.pet === id || (it[0] === 'gun' && typeof GUNIDS !== 'undefined' && B3.world && GUNIDS[B3.world.weapon] === id); };
+function stuffHTML() {
+  const S = StuffSt; if (!S) return '<button class="btn" data-a="close">Close</button>';
+  const all = (S.self ? (wallet.own || []) : S.items).filter(id => ITEMS[id] && ITEMS[id][2] > 0).sort((a, b) => ITEMS[b][2] - ITEMS[a][2]);
+  const tab = S.tab || 'all', list = tab === 'all' ? all : all.filter(id => ITEMS[id][0] === tab), worth = S.self ? worthOf(wallet.own, wallet.coins) : S.worth;
+  const counts = {}; all.forEach(id => { counts[ITEMS[id][0]] = (counts[ITEMS[id][0]] || 0) + 1; });
+  const head = '<div class="mhead"><h2>' + (S.self ? 'My Stuff' : esc(S.n) + '’s stuff') + '</h2>' + xBtn() + '</div>';
+  if (!S.self && S.loading) return head + '<p class="fine">Opening their bag…</p>';
+  if (S.err) return head + '<p class="fine">' + esc(S.err) + '</p><button class="btn" data-a="close">Close</button>';
+  const sum = '<div class="stuff-sum"><span>' + all.length + ' item' + (all.length === 1 ? '' : 's') + '</span>' + (worth != null ? '<span class="stuff-worth">' + coin(fmt(worth)) + ' net worth</span>' : '') + '</div>';
+  const tabs = '<div class="stuff-tabs">' + STUFF_TABS.filter(t => t[0] === 'all' || counts[t[0]]).map(t => '<button class="' + (tab === t[0] ? 'on' : '') + '" data-a="stufftab" data-v="' + t[0] + '">' + t[1] + (t[0] === 'all' ? '' : ' ' + counts[t[0]]) + '</button>').join('') + '</div>';
+  const tiles = list.map(id => { const it = ITEMS[id], ra = rarity(it[2]), worn = S.self && stuffWorn(id), inner = pimg(id, 64, PC[0]) + '<b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + '</small><span class="rar r' + ra[0] + '">' + ra[1] + '</span>' + (worn ? '<i class="sworn">On</i>' : '');
+    return S.self ? '<button class="stile' + (worn ? ' worn' : '') + '" data-a="wear" data-k="' + it[0] + '" data-v="' + id + '">' + inner + '</button>' : '<div class="stile">' + inner + '</div>'; }).join('');
+  return head + sum + tabs + (list.length ? '<div class="sgrid">' + tiles + '</div>' : '<p class="fine">' + (S.self ? 'Nothing here yet. Open a loot box or visit the shop.' : 'Nothing here.') + '</p>') + (S.self ? '<p class="fine">Tap something to wear it.</p>' : '');
+}
+function stuffOpen(o) {
+  profileClose();
+  const st = StuffSt = Object.assign({ tab: 'all', items: [], n: 'Player' }, o.self ? { self: true } : { self: false, loading: true, n: o.n || 'Player', f: o.f });
+  openModal('stuff', stuffHTML, { onClose: () => { if (StuffSt === st) StuffSt = null; } });
+  if (!o.self) api('inv/' + encodeURIComponent(o.f)).then(r => { if (StuffSt !== st) return; st.items = r.own || []; st.worth = r.worth; st.n = r.n || st.n; st.loading = false; refreshModal(); }).catch(e => { if (StuffSt !== st) return; st.loading = false; st.err = (e && e.message) || 'Could not open it.'; refreshModal(); });
+}
 const worthOf = (own, coins) => Math.floor(coins || 0) + (own || []).reduce((a, id) => a + (ITEMS[id] && ITEMS[id][2] > 0 ? ITEMS[id][2] : 0), 0);
 function profileOpen(p) {
   if (!p) return; if (modal) closeModal();
@@ -3106,8 +3130,8 @@ function profilePaint() {
   ov.hidden = false;
   const handle = p.self ? (authInfo.registered && authInfo.username ? '@' + esc(authInfo.username) : 'Guest') : info.u ? '@' + esc(info.u) : 'Guest';
   const rows = worn.map(x => { const it = ITEMS[x[1]], ra = it[2] > 0 ? rarity(it[2]) : [0, 'Starter']; return '<div class="prow pr' + ra[0] + '">' + pimg(x[1], 40, col) + '<span><b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + (exclusive(x[1]) ? ' · Exclusive' : '') + '</small></span><span class="prar">' + ra[1] + '</span></div>'; }).join('');
-  const btns = p.self ? '<button class="btn go" data-a="customise">Customise</button><button class="btn" data-a="page" data-v="shop">Shop</button>'
-    : '<button class="btn go" data-a="tradeask" data-i="' + liveI + '"' + (live ? '' : ' disabled') + '>' + (live ? 'Trade' : 'Trade (not in the world)') + '</button>' + (fr ? '<button class="btn" data-a="fop" data-v="remove">Remove friend</button>' : hid ? '<button class="btn ok" data-a="fop" data-v="restore">Add friend back</button>' : '');
+  const btns = p.self ? '<button class="btn go" data-a="customise">Customise</button><button class="btn" data-a="stuff">My Stuff</button><button class="btn" data-a="page" data-v="shop">Shop</button>'
+    : '<button class="btn go" data-a="stuff" data-f="' + esc(p.f || '') + '" data-n="' + esc(p.n || '') + '">Their stuff</button><button class="btn" data-a="tradeask" data-i="' + liveI + '"' + (live ? '' : ' disabled') + '>' + (live ? 'Trade' : 'Trade (not in the world)') + '</button>' + (fr ? '<button class="btn" data-a="fop" data-v="remove">Remove friend</button>' : hid ? '<button class="btn ok" data-a="fop" data-v="restore">Add friend back</button>' : '');
   patchHTML(ov, '<div class="pp-back" data-a="profclose"></div><div class="pp-card" role="dialog" aria-label="' + esc(p.n) + '">' +
     '<button class="ib pp-x" data-a="profclose" aria-label="Close">' + ico('x', 16) + '</button>' +
     '<div class="pp-char bg-' + bgOf(L2) + '"><span class="pp-scene-label">' + (p.self ? 'YOUR CHARACTER' : 'PLAYER CARD') + '</span><canvas id="pchar"></canvas><div class="pp-pet-label"><span>COMPANION</span><b>' + (ITEMS[p.pet] ? esc(ITEMS[p.pet][1]) : 'No pet equipped') + '</b></div></div>' +
@@ -3653,6 +3677,8 @@ document.addEventListener('click', async e => {
     case 'wpnnext': { let n = B3.world.weapon; for (let i = 0; i < GUNIDS.length; i++) { n = (n + 1) % GUNIDS.length; if (gunOwned(n)) break; } B3.world.setWeapon(n); break; }
     case 'zombies': plazaSend({ admin: { k: 'zom', on: !Zom.on } }); break;
     case 'adminpanel': openModal('admin', adminHTML); break;
+    case 'stuff': stuffOpen(el.dataset.f ? { f: el.dataset.f, n: el.dataset.n } : { self: true }); break;
+    case 'stufftab': if (StuffSt) { StuffSt.tab = el.dataset.v; refreshModal(); } break;
     case 'zoomin': B3.world.zoomBy(0.8); break;
     case 'zoomout': B3.world.zoomBy(1.25); break;
     case 'zstr': plazaSend({ admin: { k: 'zstr', v: +el.dataset.v } }); break;

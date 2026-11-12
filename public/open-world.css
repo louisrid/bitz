@@ -401,6 +401,22 @@ html:has(#app:not([data-page=world])) #wzoom{display:none}
 .admstrow{border-bottom:0!important;padding-bottom:4px!important}
 /* a pop-up or profile card is open: the Shop button, zoom buttons and trade banner step out of the way */
 html:has(#veil:not([hidden])) #shopbig,html:has(#veil:not([hidden])) #wzoom,html:has(#veil:not([hidden])) #wtrade,html:has(#fprofov:not([hidden])) #shopbig,html:has(#fprofov:not([hidden])) #wzoom{display:none!important}
+
+/* My Stuff: everyone's inventory */
+.stuff-sum{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:2px 0 12px;font:700 15px/1.2 'Space Grotesk',sans-serif}
+.stuff-worth{display:inline-flex;align-items:center;gap:6px}
+.stuff-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.stuff-tabs button{background:#fff;color:#000;border:3px solid #000;border-radius:12px;padding:8px 12px;font:400 17px/1 'Coolvetica','Arial Black',sans-serif;box-shadow:2px 3px 0 #000;cursor:pointer}
+.stuff-tabs button.on{background:#FFF01F}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:11px;max-height:54vh;overflow:auto;padding:3px 6px 8px 3px}
+.stile{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px 9px;background:#fff;color:#000;border:3px solid #000;border-radius:15px;box-shadow:3px 4px 0 #000;font:700 14px/1.15 'Space Grotesk',sans-serif;text-align:center}
+button.stile{cursor:pointer}
+button.stile:active{transform:translate(2px,3px);box-shadow:1px 1px 0 #000}
+.stile.worn{background:#FFF01F}
+.stile .pim,.stile .bgsw{width:68px;height:68px;border-radius:10px}
+.stile small{opacity:.6;font-size:11px;font-weight:700}
+.stile .rar{font-size:10px;padding:3px 7px}
+.sworn{position:absolute;top:-9px;right:-9px;background:#000;color:#FFF01F;border-radius:999px;padding:4px 9px;font:700 11px/1 'Space Grotesk',sans-serif;font-style:normal;letter-spacing:.06em;text-transform:uppercase}
 /*BG>*/
 .bg-b_cyber{background:repeating-linear-gradient(90deg,#19e3ff33 0 2px,transparent 2px 26px),repeating-linear-gradient(0deg,#ff2bd633 0 2px,transparent 2px 26px),linear-gradient(180deg,#0b1030,#1c375e,#87e9ff)}
 .bg-b_haunt{background:radial-gradient(circle at 72% 22%,#e9e0ff,transparent 14%),linear-gradient(180deg,#17132b,#373052,#b8a3e6)}

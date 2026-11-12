@@ -225,6 +225,15 @@ async function api(req, res, parts) {
     list.sort((a, b) => (b.at ? 1 : 0) - (a.at ? 1 : 0) || b.seen - a.seen);
     return send(res, 200, { friends:list.slice(0,200),hidden:hidden.slice(0,200),now });
   }
+  /* anyone's stuff: what a player owns, shown from their profile */
+  if (parts[0] === 'inv' && req.method === 'GET') {
+    const f = String(parts[1] || '').replace(/[^a-zA-Z0-9]/g, '').slice(0, 12);
+    if (f.length < 6) return send(res, 400, { message: 'Who is that?' });
+    let hit = null; for (const [aid, a] of accounts) { if (aid.slice(2, 12) === f) { hit = [aid, a]; break; } }
+    if (!hit) return send(res, 404, { message: 'No player found.' });
+    const a = hit[1], un = auth.username(hit[0]);
+    return send(res, 200, { n: (a.name || un || 'Player').slice(0, 12), u: un || '', own: (a.own || []).filter(x => core.ITEMS[x]).slice(0, 2000), worth: core.worth(a), swag: core.swag(a) });
+  }
   if (parts[0] === 'my-party' && req.method === 'GET') {
     const found = [...parties.values()].find(s => s.phase !== 'over' && s.players.some(p => p.id === id && !p.out));
     return send(res, 200, { code:found ? found.code:null });
