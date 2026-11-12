@@ -102,3 +102,13 @@ html.fopen #hx{left:calc(var(--fw,280px) + 16px)}
   .hxm-tile,.hxm-hub .hxm-tile{font-size:19px;min-height:104px;padding:12px}.hxm-tile svg{width:30px;height:30px;margin-bottom:4px}
 }
 @media (max-width:370px){.hx-btn svg{display:none}}
+.hxm-lede{font:500 15px/1.4 'Space Grotesk',system-ui,sans-serif;color:#4a4560;margin:0 0 14px}
+
+/* every pop-up in the game uses the same card: white, thick black outline, offset shadow */
+html body #veil{background:rgba(18,12,36,.5)!important}
+html body #modal{border:3px solid #0d0c12!important;border-radius:22px!important;box-shadow:0 7px 0 #0d0c12!important}
+html body #modal .mhead h2{font-family:var(--font)!important;font-weight:400!important;font-size:30px!important;letter-spacing:-.01em}
+html body #modal .ib[data-a=close]{width:46px!important;height:46px!important;background:#fff!important;border:3px solid #0d0c12!important;border-radius:14px!important;box-shadow:0 4px 0 #0d0c12!important;color:#0d0c12!important}
+html body #modal .ib[data-a=close]:active{transform:translateY(3px);box-shadow:0 1px 0 #0d0c12!important}
+html body #modal .btn{border:3px solid #0d0c12!important;border-radius:14px!important;box-shadow:0 4px 0 #0d0c12!important;font-family:var(--font)!important;font-weight:400!important}
+html body #modal .btn.go{background:var(--vio)!important;color:#fff!important}

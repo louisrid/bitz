@@ -660,8 +660,8 @@ html.fopen #ftab{display:none}
 
 <script src="three.min.js"></script>
 <script src="engine.js"></script>
-<script src="world-layout.js?v=exploration1"></script>
-<script src="voxel-world.js?v=exploration1"></script>
+<script src="world-layout.js?v=hub1"></script>
+<script src="voxel-world.js?v=hub1"></script>
 <script src="loot-rules.js?v=better-odds3"></script>
 <script src="weapon-defs.js?v=weapons24a"></script>
 <script>
@@ -1791,7 +1791,7 @@ const B3 = (function () {
     const dt = Math.min(0.1, (now - (WD.last || now)) / 1000), t = now / 1000; WD.last = now;socialEnvironment.animate(t);
     if(!worldG.visible){
       scene.children.forEach(o=>{if(o!==worldG&&!o.isLight){worldHidden.set(o,o.visible);o.visible=false;}});
-      worldG.visible=true;scene.background=new THREE.Color(0xf9f9ff);scene.fog=new THREE.Fog(0xf9f9ff,74,130);
+      worldG.visible=true;scene.background=socialEnvironment.sky||new THREE.Color(0xf9f9ff);scene.fog=socialEnvironment.fog||new THREE.Fog(0xf9f9ff,74,130);
       el=0.34;zoom=1;az=WD.me?WD.me.ry+Math.PI:0;WD.cAz=az;WD.cEl=el;WD.cZ=1;cT.set(WD.me?WD.me.x:0,3.1,WD.me?WD.me.z:0);
     }
     Object.keys(tokens).forEach(k=>{tokens[k].visible=false;});Object.keys(pets).forEach(k=>{pets[k].visible=false;});
@@ -1817,6 +1817,10 @@ const B3 = (function () {
       /* the camera puts itself behind you whenever you move or turn; drag to look around, and a moment after you let go it settles back */
 
       m.g.position.set(m.x, m.y + (WD.dead ? 0.5 : 0), m.z); if (!(m.emoT > now && m.emo === 'dance')) m.g.rotation.y = m.ry; m.g.scale.setScalar(m.hitT > now ? 1.14 : 1);
+      /* portals: step onto a pad to go to that game (only on the way in, never again until you step off) */
+      { let inside = null; for (const d of ((globalThis.STAKKZ_WORLD_LAYOUT || {}).destinations || [])) { const l = Math.hypot(d.x, d.z) || 1, px = d.x - d.x / l * 1.6, pz = d.z - d.z / l * 1.6; if (Math.hypot(m.x - px, m.z - pz) < d.r + 0.6) inside = d.id; }
+        if (inside !== WD.portalIn) { const was = WD.portalIn; WD.portalIn = inside; if (inside && !lock && was === null && WD.portalArmed && window.hubEnter) { WD.keys = {}; WD.joy.x = WD.joy.y = 0; window.hubEnter(inside); } }
+        if (!inside && !WD.portalArmed) WD.portalArmed = true; }
       animate(m, m.g.userData, m.sp, m.y > 0.05, now, t);
     }
     const ease = 1 - Math.exp(-dt * 12);
@@ -3355,6 +3359,14 @@ function hxMenu() {
     '<div class="hxm-sec">PLAY</div><div class="hxm-hub">' + t('cards', 'ball', 'Football Cards', 'Packs, album and trading', 'vio') + t('monopoly', 'dice', 'Monopoly', 'Board game against bots') + t('boxes', 'box', 'Mystery Boxes', 'Unlock rare cosmetics') + t('shop', 'bag', 'Shop', 'Outfits, pets and more') + '</div>' +
     '<div class="hxm-sec">YOU</div><div class="hxm-grid">' + t('daily', 'gift', 'Daily reward', dailyReady() ? 'Ready to claim' : 'Claimed today', dailyReady() ? 'hot' : '', dailyReady() ? 'NEW' : '') + t('profile', 'user', 'Profile', 'Level, gold and cards') + t('stuff', 'stuff', 'My Stuff', 'Everything you own') + t('me', 'brush', 'Customise', 'Change your look') + t('friends', 'pals', 'Friends', 'Who is online') + t('settings', 'gear', 'Settings', 'Account and sound') + '</div>');
 }
+/* the hub's portals and the menu both arrive here */
+window.hubEnter = function (id) {
+  if (id === 'cards') { if (window.BITZ_FOOTBALL) BITZ_FOOTBALL.open('packs'); }
+  else if (id === 'boxes') lootModal();
+  else if (id === 'shop') { F.page = 'shop'; F.sel = null; renderHome(true); }
+  else if (id === 'monopoly') openModal('mono', () => '<div class="mhead"><h2>Monopoly</h2>' + xBtn() + '</div><p class="hxm-lede">Buy streets, build towers, bankrupt the bots.</p><div class="hxm-hub">' +
+    [3, 5].map(n => '<button class="hxm-tile ' + (n === 3 ? 'vio' : '') + '" data-a="monoplay" data-v="' + n + '">' + HXI.dice + '<span>' + n + ' bots</span><small>' + (n === 3 ? 'Quick game' : 'Full table') + '</small></button>').join('') + '</div>');
+};
 function hxDaily() {
   const d = wallet && wallet.daily || {}, today = dayKey(), y = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
   const streak = d.day === today ? (d.streak || 1) : d.day === y ? Math.min(7, (d.streak || 0) + 1) : 1, ready = dailyReady(), gold = 400000 + 150000 * (Math.min(7, streak) - 1);
@@ -3595,9 +3607,10 @@ document.addEventListener('click', async e => {
     case 'rules': rulesModal(); break;
     case 'settings': settingsModal(); break;
     case 'hxmenu': hxMenu(); break;
+    case 'monoplay': closeModal(); F.cpu = true; F.lc = Math.max(1, Math.min(5, Number(el.dataset.v) || 3)); startLocal(); break;
     case 'hxdaily': hxDaily(); break;
     case 'hxgo': { const v = el.dataset.v; closeModal(); if (typeof BITZ_FOOTBALL !== 'undefined' && BITZ_FOOTBALL.close) BITZ_FOOTBALL.close();
-      if (v === 'cards') BITZ_FOOTBALL.open('packs'); else if (v === 'monopoly') { F.cpu = true; F.lc = 3; startLocal(); } else if (v === 'boxes') lootModal(); else if (v === 'shop' || v === 'me') { F.page = v; F.sel = null; renderHome(true); }
+      if (v === 'cards') BITZ_FOOTBALL.open('packs'); else if (v === 'monopoly') window.hubEnter('monopoly'); else if (v === 'boxes') lootModal(); else if (v === 'shop' || v === 'me') { F.page = v; F.sel = null; renderHome(true); }
       else if (v === 'profile') profileOpen({ self: true }); else if (v === 'stuff') stuffOpen({ self: true }); else if (v === 'friends') { if (!document.documentElement.classList.contains('fopen')) friendsToggle(); } else if (v === 'daily') hxDaily(); else if (v === 'settings') settingsModal(); else if (v === 'lobby') { F.page = 'world'; F.sel = null; renderHome(true); }
       break; }
     case 'daily': { el.disabled = true; try { const j = await api('daily', {}); Snd('buy'); toast('+' + fmt(j.daily.gold) + ' gold. Day ' + j.daily.streak + ' streak!'); if (j.progress && j.progress.rewards) levelSync(j.progress); } catch (er) { toast(er.message); } goldPaint(); refreshModal(); break; }
