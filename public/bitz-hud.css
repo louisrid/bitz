@@ -112,3 +112,17 @@ html body #modal .ib[data-a=close]{width:46px!important;height:46px!important;ba
 html body #modal .ib[data-a=close]:active{transform:translateY(3px);box-shadow:0 1px 0 #0d0c12!important}
 html body #modal .btn{border:3px solid #0d0c12!important;border-radius:14px!important;box-shadow:0 4px 0 #0d0c12!important;font-family:var(--font)!important;font-weight:400!important}
 html body #modal .btn.go{background:var(--vio)!important;color:#fff!important}
+
+/* the Shop / Customise drawer sits under the game bar, in the same card style */
+html body #app[data-screen=home]:not([data-page=world]) #side{top:calc(var(--hx-top) + 78px)!important;right:16px!important;bottom:16px!important;border:3px solid #0d0c12!important;border-radius:22px!important;box-shadow:0 7px 0 #0d0c12!important}
+html body #app[data-screen=home] #side .seg.nav,html body #app[data-screen=home] #side .shophead{display:none!important}
+html body #app[data-screen=home] #side .ph{font-family:var(--font)!important;font-weight:400!important;font-size:34px!important;letter-spacing:-.01em}
+html body #app[data-screen=home] #side .ib{background:#fff!important;border:3px solid #0d0c12!important;border-radius:14px!important;box-shadow:0 4px 0 #0d0c12!important;color:#0d0c12!important}
+html body #app[data-screen=home] #side .seg.dense{border:0!important;background:none!important;gap:7px;flex-wrap:wrap;box-shadow:none!important}
+html body #app[data-screen=home] #side .seg.dense button{flex:none!important;height:38px;padding:0 14px!important;border:2.5px solid #0d0c12!important;border-radius:11px!important;background:#fff!important;color:#0d0c12!important;font-family:var(--font)!important;font-weight:400!important;box-shadow:none!important}
+html body #app[data-screen=home] #side .seg.dense button.on{background:#0d0c12!important;color:#fff!important}
+@media (max-width:760px){html body #app[data-screen=home]:not([data-page=world]) #side{top:calc(var(--hx-top) + 128px)!important;right:8px!important;left:8px!important;width:auto!important;bottom:8px!important}}
+/* drawer header: just the close button; sound and settings live in the Menu */
+html body #app[data-screen=home] #side .hd .whoami,html body #app[data-screen=home] #side .hd .tools .ib{display:none!important}
+html body #app[data-screen=home] #side .hd{position:absolute!important;top:14px;right:14px;z-index:3;padding:0!important;border:0!important;background:none!important;min-height:0!important}
+html body #app[data-screen=home] #side .bigx{width:46px!important;height:46px!important;background:#fff!important;border:3px solid #0d0c12!important;border-radius:14px!important;box-shadow:0 4px 0 #0d0c12!important;color:#0d0c12!important;font-size:20px!important}
