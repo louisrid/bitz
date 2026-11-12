@@ -1,10 +1,19 @@
 {
-  "name": "stakkz",
+  "name": "bitz",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Stakkz: a 3D city property game for 2 to 5 players, with its own multiplayer server",
-  "scripts": { "start": "node server.js" },
-  "engines": { "node": ">=20" },
-  "dependencies": { "postgres": "3.4.9", "ws": "^8.18.0" }
+  "description": "BITZ: a multiplayer 3D football-card collecting game with its own server",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/cards-unit.mjs && node tests/integration.mjs",
+    "sim": "node tools/econ-sim.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "postgres": "3.4.9",
+    "ws": "^8.18.0"
+  }
 }

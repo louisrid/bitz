@@ -1,16 +1,16 @@
-name: BITZ 2.0 validation
+name: BITZ validation
 on:
   push:
-    branches: [feature/bitz-2-minimal-social, feature/football-cards-collections]
+    branches: [wip/game-rebuild]
   pull_request:
     branches: [main]
 concurrency:
-  group: bitz2-${{ github.ref }}
+  group: bitz-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   core-and-api:
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,32 +18,18 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - name: Syntax-check all active server and gameplay modules
+      - name: Syntax-check every active module
         run: |
-          node --check server.js
-          node --check src/core.js
-          node --check src/social.js
-          node --check src/progression.js
-          node --check src/shop.js
-          node --check src/auth.js
-          node --check public/voxel-world.js
-          node --check public/world-layout.js
-          node --check public/loot-rules.js
-          node --check src/football.js
-          node --check src/football-catalogue.js
-          node --check public/football-ui.js
-          node --check scripts/sync-football-media.mjs
-      - name: Economy, levels, loot fairness and archived-feature protection
-        run: node tests/bitz2-unit.mjs
-      - name: Football album, guaranteed packs, quests, trades and rarity tests
-        run: node tests/football-unit.mjs
-      - name: Live multiplayer, signup, friends, buying and persistence
-        run: node tests/bitz2-integration.mjs
-      - name: Football cards API, offers, and account persistence
-        run: node tests/football-integration.mjs
+          for f in server.js src/*.js public/*.js tools/econ-sim.mjs; do node --check "$f"; done
+      - name: Roster, packs, odds, serials, book, trades, clubs, milestones, Dealer, friends
+        run: node tests/cards-unit.mjs
+      - name: Real server, socket earnings, stands, accounts, trades, persistence
+        run: node tests/integration.mjs
+      - name: Economy simulation (short)
+        run: node tools/econ-sim.mjs 200
   desktop-and-mobile:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 14
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -51,17 +37,15 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npm install --no-save playwright@1.56.1
-      - name: Test desktop and mobile WebGL, menus and no overlap
-        run: node tests/bitz2-browser.mjs
-      - name: Football card shop, pack ripping, album and mobile layouts
-        run: node tests/football-browser.mjs
-      - name: Upload BITZ 2.0 UI screenshots
+      - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - name: Desktop and iPhone-sized Chrome: loading, world, packs, book, buyer, profiles, no overlaps
+        run: node tests/browser.mjs
+      - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bitz2-browser-layouts
-          path: qa-bitz2/*.png
+          name: bitz-browser-screens
+          path: qa-screens/*.png
           if-no-files-found: ignore
           retention-days: 7
   postgres-preservation:
@@ -90,7 +74,7 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - name: Test Postgres persistence through rolling deploy
+      - name: Postgres persistence through a rolling deploy
         run: node tests/postgres-rollover.mjs
-      - name: Test overlapping writers cannot destroy newer accounts
+      - name: Overlapping writers cannot destroy newer accounts
         run: node tests/postgres-overlap.mjs
