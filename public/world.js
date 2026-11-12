@@ -243,6 +243,7 @@
     const edge = new THREE.Mesh(new THREE.RingGeometry(L.limit + 0.3, L.limit + 0.8, 128), new THREE.MeshBasicMaterial({ color: 0x0b0b0f, transparent: true, opacity: 0.12 })); edge.rotation.x = -Math.PI / 2; edge.position.y = 0.01; scene.add(edge);
     buildPlaza(); bindInput(); resize(); addEventListener('resize', resize);
     document.addEventListener('visibilitychange', () => { hidden = document.hidden; });
+    W.zoom = innerHeight > innerWidth ? 1.25 : 1;   // portrait phones see a little more of the plaza
     t0 = performance.now(); last = t0; W.ok = true; requestAnimationFrame(frame);
     return true;
   }

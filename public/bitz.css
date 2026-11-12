@@ -51,6 +51,7 @@ h1 { font-size: 34px; } h2 { font-size: 26px; } h3 { font-size: 20px; }
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
 #hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
 #hud > * { pointer-events: auto; }
+.ui-open #hud { visibility: hidden; }   /* every screen carries its own header, so the world HUD steps aside */
 #hud-tl { position: absolute; top: calc(10px + var(--safe-t)); left: calc(10px + var(--safe-l)); display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .panel { background: #fff; border: var(--bw) solid var(--ink); border-radius: var(--r2); box-shadow: var(--shadow-sm); }
 #hud-cash { display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 10px; font-size: 26px; line-height: 1; }
@@ -87,6 +88,7 @@ h1 { font-size: 34px; } h2 { font-size: 26px; } h3 { font-size: 20px; }
 .touch #stick, .touch #btn-jump { display: block; }
 .touch #btn-act b { display: none; }
 #feed { position: absolute; left: 50%; top: calc(12px + var(--safe-t)); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; width: min(520px, 70vw); pointer-events: none; }
+@media (max-width: 760px) { #feed { top: calc(108px + var(--safe-t)); width: min(420px, 92vw); } }
 #feed .line { padding: 8px 14px; border: var(--bw) solid var(--ink); border-radius: 14px; background: #fff; font-size: 13px; box-shadow: var(--shadow-sm); animation: feedin .3s; max-width: 100%; text-align: center; }
 #feed .line.purple { background: var(--purple); color: #fff; } #feed .line.gold { background: var(--gold); } #feed .line.ink { background: var(--ink); color: #fff; }
 #feed .line.out { opacity: 0; transition: opacity .4s, transform .4s; transform: translateY(-8px); }
