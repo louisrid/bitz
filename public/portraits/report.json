@@ -1,8 +1,8 @@
 {
   "total": 265,
-  "imported": 248,
-  "downloadedNow": 6,
-  "missing": 17,
+  "imported": 250,
+  "downloadedNow": 2,
+  "missing": 15,
   "missingPlayers": [
     {
       "id": "adam-smith",
@@ -50,16 +50,6 @@
       "reason": "No verified footballer P18 photograph"
     },
     {
-      "id": "julio-enciso",
-      "name": "Julio Enciso",
-      "reason": "No unambiguous footballer identity on Wikidata"
-    },
-    {
-      "id": "junior-kroupi",
-      "name": "Junior Kroupi",
-      "reason": "No unambiguous footballer identity on Wikidata"
-    },
-    {
       "id": "lewis-miley",
       "name": "Lewis Miley",
       "reason": "No verified footballer P18 photograph"
@@ -91,5 +81,5 @@
     }
   ],
   "source": "Wikidata P18 / Wikimedia Commons",
-  "generatedAt": "2026-11-12T19:58:24.377Z"
+  "generatedAt": "2026-11-12T19:59:11.401Z"
 }

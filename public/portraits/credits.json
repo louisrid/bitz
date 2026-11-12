@@ -1420,6 +1420,28 @@
     "attribution": "Wikimedia Commons",
     "adapted": false
   },
+  "julio-enciso": {
+    "file": "julio-enciso.jpg",
+    "player": "Julio Enciso",
+    "wikidata": "Commons-verified-julio-enciso",
+    "source": "https://commons.wikimedia.org/wiki/File:Enciso_220826.jpg",
+    "artist": "COYB123",
+    "licence": "CC BY 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+    "attribution": "Wikimedia Commons",
+    "adapted": false
+  },
+  "junior-kroupi": {
+    "file": "junior-kroupi.jpg",
+    "player": "Junior Kroupi",
+    "wikidata": "Commons-verified-junior-kroupi",
+    "source": "https://commons.wikimedia.org/wiki/File:Eli_Junior_Kroupi_(cropped).jpg",
+    "artist": "Timmy96",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attribution": "Wikimedia Commons",
+    "adapted": false
+  },
   "jurrien-timber": {
     "file": "jurrien-timber.jpg",
     "player": "Jurrien Timber",
