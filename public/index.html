@@ -1490,7 +1490,8 @@ const B3 = (function () {
   const ptr = new Map(); let moved = 0, t0 = 0, pinch = 0, userHold = 0;
   const took = () => { if (chasing) az = cA; fUntil = 0; userHold = performance.now() + 2500; };
   stage.addEventListener('contextmenu', e => { if (WD.on) e.preventDefault(); });
-  stage.addEventListener('pointerdown', e => { if (WD.on && e.button === 2) { e.preventDefault(); WD.fire(); return; } stage.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]); if (ptr.size === 1) { moved = 0; t0 = performance.now(); } pinch = 0; });
+  stage.addEventListener('pointerdown', e => { if (e.target !== stage && e.target.closest && e.target.closest('button,a,input,select,textarea,label,[data-a],#fprofov,#side,#wtrade,#wbanner')) return;   // taps on buttons and pop-ups are theirs, not the camera's
+    if (WD.on && e.button === 2) { e.preventDefault(); WD.fire(); return; } stage.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]); if (ptr.size === 1) { moved = 0; t0 = performance.now(); } pinch = 0; });
   stage.addEventListener('pointermove', e => {
     const p = ptr.get(e.pointerId); if (!p) return;
     if (ptr.size === 1) { const dx = e.clientX - p[0], dy = e.clientY - p[1]; moved += Math.abs(dx) + Math.abs(dy); if (moved > 6) took(); az -= dx * (WD.on ? 0.0042 : 0.006); el = WD.on ? Math.max(0.16, Math.min(1.05, el + dy * 0.0035)) : Math.max(0.35, Math.min(1.45, el + dy * 0.005)); }
@@ -2523,7 +2524,7 @@ function lootModal() {
 }
 function lootHTML() {
   const st = lootSt || { phase: 'idle' }, n = wallet.boxes, col = PC[Math.max(0, mine0())];
-  const head = '<div class="mhead">' + logo('sm') + '<span class="pill">' + lootImg(18) + n + (n === 1 ? ' box' : ' boxes') + '</span></div>';
+  const head = '<div class="mhead">' + logo('sm') + '<span class="pill">' + lootImg(18) + n + (n === 1 ? ' box' : ' boxes') + '</span>' + (st.phase === 'spin' ? '' : xBtn()) + '</div>';
   if (st.phase === 'spin') return head + wheelHTML(st, col) + '<h2 class="c">Spinning…</h2>';
   if (st.phase === 'prize' && st.prize) {
     const pz = st.prize, it = pz.item ? ITEMS[pz.item] : null, ra = it ? rarity(it[2]) : [0, ''];
@@ -2847,7 +2848,7 @@ function profilePaint() {
     '<div class="pp-badges">' + (p.self ? '<div class="pworth pgold"><small>Gold</small><b><i class="gc"></i><span id="ppgold">' + fmt(wallet.coins) + '</span></b></div>' : '') + '<div class="pworth"><small>Net worth</small><b><i class="gc"></i>' + (nw != null ? fmt(nw) : '…') + '</b></div><div class="pswag"><small>Swag</small><b>' + fmt(swag) + '</b></div></div>' +
     '<div class="plist">' + rows + '</div><div class="pbtns">' + btns + '</div></div></div>');
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && PROF && !modal) profileClose(); });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (modal && FORCED.indexOf(modal.kind) < 0 && !(lootSt && lootSt.phase === 'spin')) closeModal(); else if (PROF) profileClose(); else if (F.page && F.page !== 'world' && $('#app').dataset.screen === 'home') { F.page = 'world'; renderHome(true); } });
 /* ================= trading ================= */
 let Trade = null;
 function tradeBanner() {
