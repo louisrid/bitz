@@ -639,7 +639,7 @@ html.fopen #ftab{display:none}
 </style>
 
 <div id="bd" class="bg-paper"></div>
-<link rel="stylesheet" href="open-world.css?v=pastel-return1"><link rel="stylesheet" href="loot-polish.css?v=bluepurple4"><link rel="stylesheet" href="interface-polish.css?v=world1"><link rel="stylesheet" href="bitz2.css?v=2"><link rel="stylesheet" href="football-ui.css?v=1">
+<link rel="stylesheet" href="open-world.css?v=pastel-return1"><link rel="stylesheet" href="loot-polish.css?v=bluepurple4"><link rel="stylesheet" href="interface-polish.css?v=world1"><link rel="stylesheet" href="bitz2.css?v=2"><link rel="stylesheet" href="football-ui.css?v=2"><link rel="stylesheet" href="bitz-hud.css?v=1">
 
 <canvas id="gl" aria-hidden="true"></canvas>
 <aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="b2invite" data-a="invitefriend" aria-label="Invite people to the lobby">Invite</button><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div><div id="flogo" aria-label="BITZ"><span>B</span><span>I</span><span>T</span><span>Z</span></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
@@ -652,9 +652,9 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="BITZ social lobby. Walk with WASD, jump with Space, click players to inspect their possessions."><div id="b2-nographics" hidden role="status"><strong>3D VIEW UNAVAILABLE</strong><span>Your browser could not start 3D graphics. You can still browse your collection and the Shop.</span></div><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar" aria-label="Game menu"><button class="wbtn active" data-a="page" data-v="world">Lobby</button><button class="wbtn" data-a="stuff">My Stuff</button><button class="wbtn" data-a="page" data-v="me">Customise</button><button class="wbtn" data-a="loot">Mystery Boxes</button><button class="wbtn" data-a="football">Football Cards</button></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="BITZ social lobby. Walk with WASD, jump with Space, click players to inspect their possessions."><div id="b2-nographics" hidden role="status"><strong>3D VIEW UNAVAILABLE</strong><span>Your browser could not start 3D graphics. You can still browse your collection and the Shop.</span></div><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
-<div id="title" class="bg-paper" hidden></div><button id="leveltop" data-a="levelinfo" aria-label="Your level and experience"><b>LVL <span id="my-level">1</span></b><span class="b2xp"><i id="my-xp"></i></span></button><div id="goldtop" aria-label="Your gold"><i class="gc"></i><span><em id="wgold">...</em><small id="wrate">+500,000/min</small></span></div><button id="shopbig" data-a="page" data-v="shop"><span class="sbi"></span><b>Shop</b><i class="sale">Sale</i></button><div id="bload" aria-label="Loading BITZ"><div class="b2loader"><b>BITZ<span>.</span></b><p>YOUR WORLD. YOUR COLLECTION.</p><div class="b2loadbar"><i></i></div></div></div>
+<div id="title" class="bg-paper" hidden></div><header id="hx" aria-label="Game bar"><button id="hx-level" data-a="levelinfo" aria-label="Your level and experience"><span class="hx-lv"><small>LVL</small><b id="my-level">1</b></span><span class="hx-xp"><span class="hx-xpbar"><i id="my-xp"></i></span><small class="hx-xptext" id="my-xptext">0 / 100 XP</small></span></button><nav id="hx-nav" aria-label="Main"><button class="hx-btn hx-shop" data-a="page" data-v="shop"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 11h18l-1.6 15.2a2 2 0 0 1-2 1.8H10.6a2 2 0 0 1-2-1.8z" fill="#fff" stroke="#0d0c12" stroke-width="2.6" stroke-linejoin="round"/><path d="M11.5 13V9.5a4.5 4.5 0 0 1 9 0V13" fill="none" stroke="#0d0c12" stroke-width="2.6" stroke-linecap="round"/></svg><span>Shop</span></button><button class="hx-btn hx-cards" data-a="football"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4.5" y="7" width="14" height="19" rx="2.5" transform="rotate(-12 11 16)" fill="#d6c8ff" stroke="#0d0c12" stroke-width="2.4"/><rect x="12" y="5" width="15" height="21" rx="2.5" fill="#fff" stroke="#0d0c12" stroke-width="2.6"/><path d="M19.5 10.5l1.5 3 3.2.4-2.4 2.2.7 3.2-3-1.6-3 1.6.7-3.2-2.4-2.2 3.2-.4z" fill="#7a52ff" stroke="#0d0c12" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Cards</span></button><button class="hx-btn hx-menu" data-a="hxmenu"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="2.5" fill="#fff" stroke="#0d0c12" stroke-width="2.6"/><rect x="18" y="5" width="9" height="9" rx="2.5" fill="#d6c8ff" stroke="#0d0c12" stroke-width="2.6"/><rect x="5" y="18" width="9" height="9" rx="2.5" fill="#d6c8ff" stroke="#0d0c12" stroke-width="2.6"/><rect x="18" y="18" width="9" height="9" rx="2.5" fill="#fff" stroke="#0d0c12" stroke-width="2.6"/></svg><span>Menu</span><i class="hx-dot" id="hx-mdot" hidden>1</i></button></nav><div id="hx-gold" data-a="hxdaily" role="button" aria-label="Your gold"><i class="hx-coin"></i><span class="hx-gv"><small>GOLD</small><b id="wgold">0</b></span></div></header><div id="bload" aria-label="Loading BITZ"><div class="b2loader"><b>BITZ<span>.</span></b><p>YOUR WORLD. YOUR COLLECTION.</p><div class="b2loadbar"><i></i></div></div></div>
 <div id="veil" hidden><div id="modal" class="card" role="dialog" aria-modal="true"></div></div>
 <div id="confetti" hidden></div>
 
@@ -1983,7 +1983,7 @@ function newWallet(o) {
 let wallet = newWallet(store.get('bigrent-wallet')), wchain = Promise.resolve(), wT = 0, pendingStyle = null, lootSt = null;
 let LEVEL={level:wallet.level||1,xp:wallet.xp||0,levelXp:0,nextXp:100,percent:0};
 function levelSync(p){if(!p)return;LEVEL={...LEVEL,...p};levelPaint();}
-function levelPaint(){const l=$('#my-level'),w=$('#wlevel'),b=$('#my-xp');if(l)l.textContent=LEVEL.level||1;if(w)w.textContent=LEVEL.level||1;if(b)b.style.width=Math.max(0,Math.min(100,Number(LEVEL.percent)||0))+'%';}
+function levelPaint(){const t=$('#my-xptext');if(t)t.textContent=fmt(LEVEL.levelXp||0)+' / '+fmt(LEVEL.nextXp||100)+' XP';const l=$('#my-level'),w=$('#wlevel'),b=$('#my-xp');if(l)l.textContent=LEVEL.level||1;if(w)w.textContent=LEVEL.level||1;if(b)b.style.width=Math.max(0,Math.min(100,Number(LEVEL.percent)||0))+'%';}
 function loadProfile(o) { if (!o) return; if(o.level||o.xp)levelSync({level:o.level||1,xp:o.xp||0}); if (typeof o.name === 'string' && o.name) F.name = o.name.slice(0, 12); if (o.look && typeof o.look === 'object') Object.assign(F.look, o.look); if (typeof o.pet === 'string') F.pet = o.pet; }
 const owns = id => !!ITEMS[id] && (ITEMS[id][2] === 0 || wallet.own.indexOf(id) >= 0);
 function fixLook() {
@@ -2021,13 +2021,14 @@ const Gold = { rate: 500000 / 60, at: Date.now(), boost: null, live: false, carr
 let MYSWAG = -100;
 function goldSync(j) { if (typeof j.gold === 'number' && wallet) wallet.coins = j.gold; if (j.rate) Gold.rate = j.rate; Gold.boost = j.boost ? { x: j.boost.x, until: Date.now() + j.boost.left } : null; Gold.at = Date.now(); Gold.carry=0; Gold.live = true; goldPaint(); }
 function goldPaint() {
-  const now = Date.now(); if (Gold.boost && Gold.boost.until <= now) { Gold.boost = null; Gold.rate = 500000 / 60; }
-  if (wallet && Gold.live && typeof Plaza !== 'undefined' && Plaza.you) { const dt = Math.min(6000, now - Gold.at); const exact=(dt*Gold.rate/1000)+(Gold.carry||0);const add=Math.floor(exact);Gold.carry=exact-add;wallet.coins=Math.floor(wallet.coins||0)+add; }
-  Gold.at = now;
-  const e = document.getElementById('wgold'); if (e && wallet) e.textContent = Math.floor(wallet.coins || 0).toLocaleString('en-GB');
-  const pg = document.getElementById('ppgold'); if (pg && wallet) pg.textContent = Math.floor(wallet.coins || 0).toLocaleString('en-GB');
-  const r = document.getElementById('wrate'); if (r) { r.textContent = '+' + Math.round(Gold.rate*60).toLocaleString('en-GB') + '/min' + (Gold.boost ? ' · ' + Math.ceil((Gold.boost.until - now) / 1000) + 's' : ''); r.classList.toggle('hot', !!Gold.boost); }
+  /* no passive income: the number only changes when the server says so */
+  const v = wallet ? Math.floor(wallet.coins || 0) : 0, e = document.getElementById('wgold');
+  if (e && e.textContent !== v.toLocaleString('en-GB')) { const was = Number(String(e.textContent).replace(/[^0-9]/g, '')) || 0; e.textContent = v.toLocaleString('en-GB'); if (v > was && was) { const g = document.getElementById('hx-gold'); if (g) { g.classList.remove('bump'); void g.offsetWidth; g.classList.add('bump'); } } }
+  const pg = document.getElementById('ppgold'); if (pg && wallet) pg.textContent = v.toLocaleString('en-GB');
+  const dot = document.getElementById('hx-mdot'); if (dot) dot.hidden = !dailyReady();
 }
+const dayKey = () => new Date().toISOString().slice(0, 10);
+const dailyReady = () => !!wallet && (!wallet.daily || wallet.daily.day !== dayKey());
 setInterval(goldPaint, 200);
 /* a new release went live: say so, but never reload anybody's page for them (only you refresh your own game) */
 (function watchBuild() {
@@ -3016,7 +3017,7 @@ function renderActions() {
 let autoV = -1, nudgeV = -1, autoEndV = -1;
 /* ================= friends: everyone with an account, always on the left ================= */
 let FRIENDS = [];
-(function () { let min = null; try { min = localStorage.getItem('stakkz-fmin'); } catch (e) {} document.documentElement.classList.toggle('fopen', min === null ? innerWidth > 1400 : min !== '1'); })();
+(function () { let min = null; try { min = localStorage.getItem('stakkz-fmin'); } catch (e) {} document.documentElement.classList.toggle('fopen', min === '0'); })();
 function friendsToggle() {
   const open = !document.documentElement.classList.contains('fopen'); document.documentElement.classList.toggle('fopen', open);
   try { localStorage.setItem('stakkz-fmin', open ? '0' : '1'); } catch (e) {}
@@ -3335,6 +3336,33 @@ function tick() {
 /* ================= modals ================= */
 let modal = null, TB = null;
 const FORCED = ['buy', 'offer', 'winner', 'auction'];
+/* ---------- the menu: the hub's destinations, then your own things ---------- */
+const HXI = {
+  ball: '<svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="13.5" fill="#fff" stroke="#0d0c12" stroke-width="2.6"/><path d="M17 10.5l5.2 3.8-2 6.1h-6.4l-2-6.1z" fill="#0d0c12"/><path d="M17 3.5v7M22.2 14.3l6.6-2.2M20.2 20.4l4 5.6M13.8 20.4l-4 5.6M11.8 14.3l-6.6-2.2" stroke="#0d0c12" stroke-width="2"/></svg>',
+  dice: '<svg viewBox="0 0 34 34"><rect x="5" y="5" width="24" height="24" rx="6" fill="#fff" stroke="#0d0c12" stroke-width="2.6"/><circle cx="12" cy="12" r="2.4" fill="#0d0c12"/><circle cx="17" cy="17" r="2.4" fill="#0d0c12"/><circle cx="22" cy="22" r="2.4" fill="#0d0c12"/></svg>',
+  box: '<svg viewBox="0 0 34 34"><path d="M5 12h24v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z" fill="#ffe27a" stroke="#0d0c12" stroke-width="2.6" stroke-linejoin="round"/><path d="M3.5 8h27v5h-27z" fill="#fff" stroke="#0d0c12" stroke-width="2.6" stroke-linejoin="round"/><path d="M17 8v21" stroke="#0d0c12" stroke-width="2.6"/></svg>',
+  bag: '<svg viewBox="0 0 34 34"><path d="M7 12h20l-1.7 15.4a2 2 0 0 1-2 1.8H10.7a2 2 0 0 1-2-1.8z" fill="#fff" stroke="#0d0c12" stroke-width="2.6" stroke-linejoin="round"/><path d="M12 14v-4a5 5 0 0 1 10 0v4" fill="none" stroke="#0d0c12" stroke-width="2.6" stroke-linecap="round"/></svg>',
+  user: '<svg viewBox="0 0 34 34"><circle cx="17" cy="12" r="6" fill="#fff" stroke="#0d0c12" stroke-width="2.6"/><path d="M6 29c1.5-6 6-9 11-9s9.5 3 11 9" fill="#d6c8ff" stroke="#0d0c12" stroke-width="2.6" stroke-linejoin="round"/></svg>',
+  stuff: '<svg viewBox="0 0 34 34"><rect x="5" y="9" width="24" height="19" rx="3" fill="#fff" stroke="#0d0c12" stroke-width="2.6"/><path d="M5 15h24M13 9V6h8v3" fill="none" stroke="#0d0c12" stroke-width="2.6"/></svg>',
+  brush: '<svg viewBox="0 0 34 34"><path d="M24 4l6 6-12 12-6-6z" fill="#d6c8ff" stroke="#0d0c12" stroke-width="2.6" stroke-linejoin="round"/><path d="M12 16c-4 0-7 3-7 7 0 2-1 4-2 5 5 1 13 0 13-6z" fill="#fff" stroke="#0d0c12" stroke-width="2.6" stroke-linejoin="round"/></svg>',
+  pals: '<svg viewBox="0 0 34 34"><circle cx="12" cy="13" r="5" fill="#fff" stroke="#0d0c12" stroke-width="2.6"/><circle cx="23" cy="13" r="5" fill="#d6c8ff" stroke="#0d0c12" stroke-width="2.6"/><path d="M3 28c1-5 4.5-7.5 9-7.5s8 2.5 9 7.5M14 28c1-5 4.5-7.5 9-7.5s8 2.5 9 7.5" fill="none" stroke="#0d0c12" stroke-width="2.6" stroke-linecap="round"/></svg>',
+  gift: '<svg viewBox="0 0 34 34"><rect x="5" y="13" width="24" height="16" rx="2" fill="#ffe27a" stroke="#0d0c12" stroke-width="2.6"/><rect x="3.5" y="9" width="27" height="6" rx="2" fill="#fff" stroke="#0d0c12" stroke-width="2.6"/><path d="M17 9v20M17 9c-2-5-8-5-8-1s6 1 8 1c2 0 8 3 8-1s-6-4-8 1" fill="none" stroke="#0d0c12" stroke-width="2.6"/></svg>',
+  gear: '<svg viewBox="0 0 34 34"><path d="M17 4l3 3.6 4.6-.8.9 4.6 4.1 2.2-1.8 4.4 1.8 4.4-4.1 2.2-.9 4.6-4.6-.8L17 32l-3-3.6-4.6.8-.9-4.6-4.1-2.2L6.2 18 4.4 13.6l4.1-2.2.9-4.6 4.6.8z" fill="#fff" stroke="#0d0c12" stroke-width="2.4" stroke-linejoin="round"/><circle cx="17" cy="18" r="4.5" fill="#d6c8ff" stroke="#0d0c12" stroke-width="2.4"/></svg>'
+};
+function hxMenu() {
+  const t = (v, ico, name, sub, cls, badge) => '<button class="hxm-tile ' + (cls || '') + '" data-a="hxgo" data-v="' + v + '">' + HXI[ico] + (badge ? '<i class="hxm-badge">' + badge + '</i>' : '') + '<span>' + name + '</span><small>' + sub + '</small></button>';
+  openModal('hxmenu', () => '<div class="mhead"><h2>Menu</h2>' + xBtn() + '</div>' +
+    '<div class="hxm-sec">PLAY</div><div class="hxm-hub">' + t('cards', 'ball', 'Football Cards', 'Packs, album and trading', 'vio') + t('monopoly', 'dice', 'Monopoly', 'Board game against bots') + t('boxes', 'box', 'Mystery Boxes', 'Unlock rare cosmetics') + t('shop', 'bag', 'Shop', 'Outfits, pets and more') + '</div>' +
+    '<div class="hxm-sec">YOU</div><div class="hxm-grid">' + t('daily', 'gift', 'Daily reward', dailyReady() ? 'Ready to claim' : 'Claimed today', dailyReady() ? 'hot' : '', dailyReady() ? 'NEW' : '') + t('profile', 'user', 'Profile', 'Level, gold and cards') + t('stuff', 'stuff', 'My Stuff', 'Everything you own') + t('me', 'brush', 'Customise', 'Change your look') + t('friends', 'pals', 'Friends', 'Who is online') + t('settings', 'gear', 'Settings', 'Account and sound') + '</div>');
+}
+function hxDaily() {
+  const d = wallet && wallet.daily || {}, today = dayKey(), y = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const streak = d.day === today ? (d.streak || 1) : d.day === y ? Math.min(7, (d.streak || 0) + 1) : 1, ready = dailyReady(), gold = 400000 + 150000 * (Math.min(7, streak) - 1);
+  openModal('daily', () => '<div class="mhead"><h2>Daily reward</h2>' + xBtn() + '</div><div class="hxd">' +
+    '<div class="hxd-days">' + [1, 2, 3, 4, 5, 6, 7].map(n => '<span class="' + (n < streak || (!ready && n === streak) ? 'done' : n === streak ? 'now' : '') + '">DAY<br>' + n + '</span>').join('') + '</div>' +
+    '<big>' + fmt(ready ? gold : 0) + '</big><p>' + (ready ? 'Gold waiting for you. Come back every day for a bigger streak.' : 'Claimed. Come back tomorrow for day ' + Math.min(7, streak + 1) + '.') + '</p>' +
+    (ready ? '<button class="btn go" data-a="daily">Claim ' + fmt(gold) + ' gold</button>' : '') + '</div>');
+}
 function openModal(kind, render, opt) {
   if (modal && modal.onClose && modal.kind !== kind) { const f = modal.onClose; modal = null; f(); }
   modal = Object.assign({ kind: kind, render: render }, opt || {});
@@ -3492,7 +3520,7 @@ document.addEventListener('click', async e => {
   switch (a) {
     case 'levelinfo': openModal('level',()=>'<div class="mhead"><h2>Level '+LEVEL.level+'</h2>'+xBtn()+'</div><p>Collect items and join in to earn XP.</p><div class="b2levelbar"><i style="width:'+LEVEL.percent+'%"></i></div><p>'+fmt(LEVEL.levelXp)+' / '+fmt(LEVEL.nextXp)+' XP</p><p>Earn 75,000 gold each level. Special milestone levels reward collectibles.</p>');break;
     case 'page': {
-      if (F.page === el.dataset.v) { if (F.page !== 'world' && $('#app').dataset.screen === 'home' && el.closest('#shopbig,#wbar')) { F.page = 'world'; F.sel = null; renderHome(true); } break; }   // press Shop again and it closes
+      if (F.page === el.dataset.v) { if (F.page !== 'world' && $('#app').dataset.screen === 'home' && el.closest('#shopbig,#wbar,#hx')) { F.page = 'world'; F.sel = null; renderHome(true); } break; }   // press Shop again and it closes
       F.page = el.dataset.v; F.sel = null;
       renderHome(true); $('#side').scrollTop=0;
       break;
@@ -3566,6 +3594,13 @@ document.addEventListener('click', async e => {
     case 'view': settings.follow = settings.follow === false; applySettings(); break;
     case 'rules': rulesModal(); break;
     case 'settings': settingsModal(); break;
+    case 'hxmenu': hxMenu(); break;
+    case 'hxdaily': hxDaily(); break;
+    case 'hxgo': { const v = el.dataset.v; closeModal(); if (typeof BITZ_FOOTBALL !== 'undefined' && BITZ_FOOTBALL.close) BITZ_FOOTBALL.close();
+      if (v === 'cards') BITZ_FOOTBALL.open('packs'); else if (v === 'monopoly') { F.cpu = true; F.lc = 3; startLocal(); } else if (v === 'boxes') lootModal(); else if (v === 'shop' || v === 'me') { F.page = v; F.sel = null; renderHome(true); }
+      else if (v === 'profile') profileOpen({ self: true }); else if (v === 'stuff') stuffOpen({ self: true }); else if (v === 'friends') { if (!document.documentElement.classList.contains('fopen')) friendsToggle(); } else if (v === 'daily') hxDaily(); else if (v === 'settings') settingsModal(); else if (v === 'lobby') { F.page = 'world'; F.sel = null; renderHome(true); }
+      break; }
+    case 'daily': { el.disabled = true; try { const j = await api('daily', {}); Snd('buy'); toast('+' + fmt(j.daily.gold) + ' gold. Day ' + j.daily.streak + ' streak!'); if (j.progress && j.progress.rewards) levelSync(j.progress); } catch (er) { toast(er.message); } goldPaint(); refreshModal(); break; }
     case 'menu': menuModal(); break;
     case 'authregister': case 'authlogin': {
       const username = ($('#auth-username') || {}).value, password = ($('#auth-password') || {}).value;
@@ -3792,6 +3827,6 @@ B3.onPick = i => {
   });
 })();
 </script>
-<script src="football-ui.js?v=1"></script>
+<script src="cards-art.js?v=1"></script><script src="football-ui.js?v=2"></script>
 
 </body></html>

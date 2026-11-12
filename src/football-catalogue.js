@@ -10,3 +10,6 @@ export const PLAYERS=FOOTBALL_SEED.players;
 export const PLAYER_BY_ID=new Map(PLAYERS.map(p=>[p.id,p]));
 export const CLUB_BY_ID=new Map([...FOOTBALL_SEED.clubs,...FOOTBALL_SEED.europe].map(c=>[c.id,c]));
 export const RIVALS=Object.freeze({"man-city":"man-united","man-united":"man-city","arsenal":"tottenham","tottenham":"arsenal","liverpool":"everton","everton":"liverpool","chelsea":"arsenal","newcastle":"sunderland","sunderland":"newcastle","real-madrid":"barcelona","barcelona":"real-madrid","bayern":"dortmund","dortmund":"bayern","inter":"milan","milan":"inter"});
+/* BITZ League: fictional clubs and players shown on every card (IDs unchanged) */
+import {applyFiction} from './football-fiction.js';
+applyFiction(FOOTBALL_SEED);
