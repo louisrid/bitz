@@ -2,6 +2,8 @@
    Never modify existing cosmetic or account keys. Card records retain historic
    player IDs even if rosters are refreshed in a later season. */
 import crypto from 'node:crypto';
+import {awardXP} from './progression.js';
+import {ITEMS} from './shop.js';
 import {FOOTBALL_SEASON,FOOTBALL_SEED,PACKS,VARIANTS,PLAYERS,CLUBS,CLUB_BY_ID,PLAYER_BY_ID,RIVALS} from './football-catalogue.js';
 
 const MAX_CARDS=3000, GOLD_PER_VIRTUAL_CENT=1000;
@@ -115,6 +117,7 @@ export function createFootballService({accounts,serials,offers,markDirty,resolve
    const reward=VARIANTS[card.variant]?.bonusGold||0;if(reward)bonus.push({uid:card.uid,gold:reward});
   }
   const gold=bonus.reduce((s,x)=>s+x.gold,0);w.coins=Math.floor(w.coins||0)+gold;
+  awardXP(w,Math.min(180,made.length*20),ITEMS);
   touch();return {cards:made,bonusGold:gold,bonuses:bonus,pack:id,newAlbum:album(w)};
  }
  function sell(w,uid,id){
@@ -134,7 +137,7 @@ export function createFootballService({accounts,serials,offers,markDirty,resolve
   const f=ensure(w),key=FOOTBALL_SEASON+':'+clubId;
   if(f.claimed[key])refuse('This season reward has already been claimed.');
   if(uniquePlayerCount(f,clubId)<11)refuse('Collect all eleven different players before claiming.');
-  f.claimed[key]=Date.now();f.packs['elite-vault']=(Number(f.packs['elite-vault'])||0)+1;touch();
+  f.claimed[key]=Date.now();f.packs['elite-vault']=(Number(f.packs['elite-vault'])||0)+1;awardXP(w,160,ITEMS);touch();
   return {claimed:clubId,reward:'elite-vault',album:album(w)};
  }
  function publicCard(w,ident){
@@ -160,7 +163,7 @@ export function createFootballService({accounts,serials,offers,markDirty,resolve
   if(daily>=5)return false;
   if(f.objectiveHistory.some(x=>x.id===obj.id))return false;
   f.objectiveHistory.push({id:obj.id,otherId,day,at:now});f.objectiveHistory=f.objectiveHistory.slice(-120);
-  f.questAt[otherId]=now;f.packs.god=(Number(f.packs.god)||0)+1;f.objective=randomObjective();touch();
+  f.questAt[otherId]=now;f.packs.god=(Number(f.packs.god)||0)+1;f.objective=randomObjective();awardXP(w,75,ITEMS);touch();
   return true;
  }
  function offer(fromId,targetCode,give,take){

@@ -165,3 +165,28 @@ body:has(#fc-overlay:not([hidden])) #shopbig,body:has(#fc-overlay:not([hidden]))
  .fc-reveal-heading h2{font-size:23px}
 }
 @media(prefers-reduced-motion:reduce){.fc-pack-shimmer,.fc-foil-pack:before,.fc-card-stack.fc-chase{animation:none!important}.fc-btn{transition:none}}
+
+/* Final pack identities, card-toss motion, and a safe top-row Shop position.
+   On desktops the Shop cannot sit over the newly added Cards navigation item. */
+@media(min-width:681px){
+  html body:has(#app[data-screen="home"][data-page="world"]) #shopbig{
+    position:fixed!important;top:12px!important;right:510px!important;left:auto!important;
+    transform:none!important
+  }
+}
+.fc-theme-first-xi .fc-pack-art{border-color:#d0b15f;box-shadow:inset 0 0 0 4px #fff8d9}
+.fc-theme-electric-nights .fc-pack-art{background:repeating-linear-gradient(125deg,transparent 0 18px,#99d5ff24 18px 21px),radial-gradient(ellipse at center,#5035d9,#160f4b 72%)}
+.fc-theme-blackout .fc-pack-art{background:linear-gradient(125deg,#111,#38363c 52%,#08090d);color:#e5c17b;border-color:#947a56}
+.fc-theme-crown-glory .fc-pack-art{background:radial-gradient(ellipse at top,#edc56d,#6c337a 50%,#28102e);border-color:#a68b4e}
+.fc-theme-derby-day .fc-pack-art{background:linear-gradient(110deg,#175ba1 0 47%,#fff 49% 51%,#ac1734 54%);border-color:#b1bfdd}
+.fc-theme-god .fc-pack-art{background:radial-gradient(circle,#ffecbf,#bd93ed 31%,#35247f 71%,#0a0d22)}
+.fc-theme-signature .fc-pack-art{background:radial-gradient(ellipse at top,#fff4c7,#ba96e7 46%,#31155d)}
+.fc-theme-triple-auto .fc-pack-art{background:repeating-linear-gradient(135deg,#16121d 0 30px,#262432 31px 50px);border-color:#d8b777}
+.fc-theme-elite-vault .fc-pack-art{background:radial-gradient(circle at 50% 35%,#f7dca0,#665088 58%,#100d1e)}
+.fc-card.fc-tossed{animation:fc-toss .23s ease-in forwards!important}
+@keyframes fc-toss{to{transform:translateX(120%) translateY(-8%) rotate(21deg) scale(.8);opacity:0}}
+.fc-chase .fc-portrait-wrap:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background:linear-gradient(135deg,#060411f5,#3c1b8ae3);animation:fc-unveil 1.7s ease-in forwards}
+@keyframes fc-unveil{0%,18%{opacity:.95}100%{opacity:0}}
+.fc-chase .fc-serial{animation:fc-serial-pop 1.7s ease-out both}
+@keyframes fc-serial-pop{0%,66%{opacity:0;transform:scale(.75)}100%{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.fc-chase .fc-portrait-wrap:after,.fc-chase .fc-serial,.fc-card.fc-tossed{animation:none!important}}

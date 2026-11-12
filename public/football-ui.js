@@ -65,7 +65,7 @@
   const defs=state.catalog.packs;const ids=['first-xi','electric-nights','blackout','crown-glory','derby-day','god','signature','triple-auto','elite-vault'];
   return '<div class="fc-section-head"><h2>PACKS & BOXES</h2><p>Collect every day. Chase the extraordinary.</p></div>'+
   '<div class="fc-pack-grid">'+ids.map(id=>{
-   const p=defs[id];if(!p)return '';return '<div class="fc-pack-product '+(state.selected===id?'selected':'')+'" style="--pack-a:'+p.colors[0]+';--pack-b:'+p.colors[1]+'">'+
+   const p=defs[id];if(!p)return '';return '<div class="fc-pack-product fc-theme-'+id+' '+(state.selected===id?'selected':'')+'" style="--pack-a:'+p.colors[0]+';--pack-b:'+p.colors[1]+'">'+
    '<button class="fc-pack-art" data-fc="choose-pack" data-v="'+id+'"><div class="fc-pack-shimmer"></div><span class="fc-pack-top">BITZ FOOTBALL</span><b>'+esc(p.name)+'</b><em>'+p.cards+' CARDS</em><small>2026/27 SERIES</small></button>'+
    '<div class="fc-pack-info"><b>'+esc(p.name)+'</b><span>'+gold(p.cost||0)+(p.questOnly?' • QUEST':' GOLD')+'</span></div>'+
    '<p>'+esc(p.description)+'</p><div class="fc-pack-actions">'+(countPack(id)?button('OPEN ('+countPack(id)+')','open-select','data-v="'+id+'"','primary'):'')+
@@ -159,7 +159,7 @@
   const content=$('#fc-content');if(!content)return;
   content.innerHTML=header()+(state.open?stageView():navigation()+
    (state.tab==='packs'?packs():state.tab==='album'?album():state.tab==='collection'?collection():tradeView()));
-  if(!state.open)loadVisiblePhotos(content);
+  loadVisiblePhotos(content);
  }
  async function getCatalog(){
   if(state.catalog)return;
@@ -210,11 +210,18 @@
   state.open={...s,phase:'reveal',cards:j.cards,index:0,bonusGold:j.bonusGold||0};
   sound(['legendary','masterpiece','dual'].includes(j.cards[0]?.variant)?'rare':'normal');render();
  }
+ let tossing=false;
  function next(){
-  if(!state.open||state.open.phase!=='reveal')return;
-  const s=state.open;
-  if(s.index>=s.cards.length-1){s.phase='summary';render();return;}
-  s.index++;sound(['legendary','masterpiece','dual','blackInk'].includes(s.cards[s.index].variant)?'rare':'normal');render();
+  if(!state.open||state.open.phase!=='reveal'||tossing)return;
+  tossing=true;
+  const card=$('#fc-flick .fc-card');if(card)card.classList.add('fc-tossed');
+  setTimeout(()=>{
+   tossing=false;
+   if(!state.open||state.open.phase!=='reveal')return;
+   const s=state.open;
+   if(s.index>=s.cards.length-1){s.phase='summary';render();return;}
+   s.index++;sound(['legendary','masterpiece','dual','blackInk'].includes(s.cards[s.index].variant)?'rare':'normal');render();
+  },230);
  }
  function loadVisiblePhotos(root){
   const ids=[...root.querySelectorAll('.fc-card .fc-no-photo')].slice(0,12).map(x=>x.closest('.fc-card')).filter(Boolean);
