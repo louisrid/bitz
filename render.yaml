@@ -3,9 +3,11 @@ services:
     name: stakkz
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm ci
     startCommand: npm start
     healthCheckPath: /api/ping
     envVars:
       - key: STAKKZ_SECRET
         generateValue: true
+      - key: NODE_VERSION
+        value: 22.16.0

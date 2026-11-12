@@ -1,7 +1,7 @@
 name: BITZ validation
 on:
   push:
-    branches: [wip/game-rebuild]
+    branches: [main, wip/game-rebuild]
   pull_request:
     branches: [main]
 concurrency:

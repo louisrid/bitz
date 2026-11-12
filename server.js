@@ -114,7 +114,7 @@ const handoffs = new Map();
 process.on('uncaughtException', e => { console.error('uncaught', e && e.stack || e); });
 process.on('unhandledRejection', e => { console.error('unhandled', e && e.stack || e); });
 const BUILD = String(process.env.RENDER_GIT_COMMIT || 'dev').slice(0, 12);
-const send = (res, code, o) => { const buf = Buffer.from(JSON.stringify(o)); res.writeHead(code, { 'Content-Type': 'application/json', 'Content-Length': buf.length, 'Cache-Control': 'no-store' }); res.end(buf); };
+const send = (res, code, o) => { const buf = Buffer.from(JSON.stringify(o)); res.writeHead(code, { 'Content-Type': 'application/json', 'Content-Length': buf.length, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(buf); };
 const read = req => new Promise((ok, no) => { let n = 0; const parts = []; req.on('data', c => { n += c.length; if (n > 60000) { no(new Error('big')); req.destroy(); } else parts.push(c); }); req.on('end', () => { try { ok(JSON.parse(Buffer.concat(parts).toString('utf8') || '{}')); } catch (e) { no(e); } }); req.on('error', no); });
 
 /* ---- the world, the Dealer, friends and the leaderboard ---- */
@@ -139,6 +139,7 @@ const CATALOGUE = { ...PUBLIC_CATALOGUE, sets: SETS, editions: EDITIONS, boxes: 
 async function api(req, res, parts) {
   const now = Date.now();
   if (parts[0] === 'ping') return send(res, 200, { ok: true, now, online: plaza.online().length, persistent, build: BUILD, season: SEASON });
+  if (parts[0] === 'ready') return send(res, persistent ? 200 : 503, { ok: persistent, persistent, build: BUILD, season: SEASON });
   if (parts[0] === 'handoff') {
     const OLD = process.env.STAKKZ_OLD_ORIGIN || 'https://stakkz.onrender.com', cors = { 'Access-Control-Allow-Origin': OLD, 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type', 'Vary': 'Origin' };
     if (req.method === 'OPTIONS') { res.writeHead(204, cors); return res.end(); }
@@ -250,7 +251,7 @@ const server = http.createServer((req, res) => {
   const m = /\/api\/(.*)$/.exec(url.pathname);
   if (m) return api(req, res, m[1].split('/')).catch(e => { console.error(e); try { send(res, 500, { message: 'The server hit a problem.' }); } catch (x) {} });
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); return res.end(); }
-  let rel = decodeURIComponent(url.pathname); if (rel.endsWith('/')) rel += 'index.html';
+  let rel; try { rel = decodeURIComponent(url.pathname); } catch (e) { res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('Bad URL'); } if (rel.endsWith('/')) rel += 'index.html';
   const full = path.normalize(path.join(PUB, rel));
   if (!full.startsWith(PUB + path.sep)) { res.writeHead(403); return res.end(); }
   fs.readFile(full, (err, buf) => {
@@ -259,7 +260,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(404, { 'Content-Type': 'text/plain' }); return res.end('Not found');
     }
     const long = /\.(otf|woff2|png|jpg|webp|mp3)$/.test(full) || /three\.min\.js$/.test(full);
-    res.writeHead(200, { 'Content-Type': TYPES[path.extname(full)] || 'application/octet-stream', 'Content-Length': buf.length, 'Cache-Control': long ? 'public, max-age=604800' : 'no-cache', 'X-Content-Type-Options': 'nosniff' });
+    res.writeHead(200, { 'Content-Type': TYPES[path.extname(full)] || 'application/octet-stream', 'Content-Length': buf.length, 'Cache-Control': long ? 'public, max-age=604800' : 'no-cache', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'X-Frame-Options': 'DENY', 'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()' });
     res.end(req.method === 'HEAD' ? undefined : buf);
   });
 });
