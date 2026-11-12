@@ -642,7 +642,7 @@ html.fopen #ftab{display:none}
 <link rel="stylesheet" href="open-world.css?v=pastel-return1"><link rel="stylesheet" href="loot-polish.css?v=bluepurple4"><link rel="stylesheet" href="interface-polish.css?v=world1"><link rel="stylesheet" href="bitz2.css?v=2">
 
 <canvas id="gl" aria-hidden="true"></canvas>
-<aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div><div id="flogo" aria-label="BITZ"><span>B</span><span>I</span><span>T</span><span>Z</span></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
+<aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="b2invite" data-a="invitefriend" aria-label="Invite people to the lobby">Invite</button><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div><div id="flogo" aria-label="BITZ"><span>B</span><span>I</span><span>T</span><span>Z</span></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
 <div id="app" data-screen="home">
   <aside id="side" class="panel"></aside>
   <aside id="hud" class="panel" hidden>
@@ -2649,7 +2649,7 @@ function lootGalleryHTML(st,col){
     pimg(id,110,col)+bxTierTag(id)+'<strong>'+esc(ITEMS[id][1])+'</strong>'+
     '<small class="'+(owns(id)?'bx-owned':'bx-new')+'">'+(owns(id)?'OWNED':'LOCKED')+'</small></button>').join('');
   return '<div class="bx-shell">'+header+seasonRibbon()+
-    '<div class="bx-collection"><div class="bx-collection-head"><h2>ALL SEASON 1 REWARDS</h2><span>'+owned+' / '+pool.length+' OWNED</span></div>'+
+    '<div class="bx-collection"><div class="bx-collection-head"><h2>'+esc(bxConfig().name.toUpperCase())+' REWARDS</h2><span>'+owned+' / '+pool.length+' OWNED</span></div>'+
     '<div class="bx-collection-grid">'+cards+'</div>'+
     '<div class="bx-collection-foot">'+(page>0?'<button class="bx-btn" data-a="lootpage" data-v="'+(page-1)+'">PREVIOUS</button>':'')+
     (page<Math.ceil(pool.length/12)-1?'<button class="bx-btn" data-a="lootpage" data-v="'+(page+1)+'">NEXT</button>':'')+
@@ -3087,12 +3087,12 @@ function profilePaint() {
   const handle = p.self ? (authInfo.registered && authInfo.username ? '@' + esc(authInfo.username) : 'Guest') : info.u ? '@' + esc(info.u) : 'Guest';
   const rows = worn.map(x => { const it = ITEMS[x[1]], ra = it[2] > 0 ? rarity(it[2]) : [0, 'Starter']; return '<button type="button" class="prow pr' + ra[0] + '" data-a="profitem" data-v="' + x[1] + '">' + pimg(x[1], 40, col) + '<span><b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + (exclusive(x[1]) ? ' · Exclusive' : '') + '</small></span><span class="prar">' + ra[1] + '</span></button>'; }).join('');
   const btns = p.self ? '<button class="btn go" data-a="customise">Customise</button><button class="btn" data-a="stuff">My Stuff</button><button class="btn" data-a="page" data-v="shop">Shop</button>'
-    : '<button class="btn go" data-a="stuff" data-f="' + esc(p.f || '') + '" data-n="' + esc(p.n || '') + '">Their stuff</button>' + (fr ? '<button class="btn" data-a="fop" data-v="remove">Remove friend</button>' : hid ? '<button class="btn ok" data-a="fop" data-v="restore">Add friend back</button>' : '');
+    : '<button class="btn go" data-a="stuff" data-f="' + esc(p.f || '') + '" data-n="' + esc(p.n || '') + '">Their stuff</button>' + (Plaza.experimental && liveI ? '<button class="btn b2test" data-a="testbetrayal" data-i="'+esc(liveI)+'">Test betrayal (no loss)</button>' : '') + (fr ? '<button class="btn" data-a="fop" data-v="remove">Remove friend</button>' : hid ? '<button class="btn ok" data-a="fop" data-v="restore">Add friend back</button>' : '');
   patchHTML(ov, '<div class="pp-back" data-a="profclose"></div><div class="pp-card" role="dialog" aria-label="' + esc(p.n) + '">' +
     '<button class="ib pp-x" data-a="profclose" aria-label="Close">' + ico('x', 16) + '</button>' +
     '<div class="pp-char bg-' + bgOf(L2) + '"><span class="pp-scene-label">' + (p.self ? 'YOUR CHARACTER' : 'PLAYER CARD') + '</span><canvas id="pchar"></canvas><div class="pp-pet-label"><span>COMPANION</span><b>' + (ITEMS[p.pet] ? esc(ITEMS[p.pet][1]) : 'No pet equipped') + '</b></div></div>' +
     '<div class="pp-info"><h2>' + esc(p.n) + '</h2><p class="pp-sub">' + handle + ' · ' + where + '</p>' +
-    '<div class="pp-badges">' + (p.self ? '<div class="pworth pgold"><small>Gold</small><b><i class="gc"></i><span id="ppgold">' + fmt(wallet.coins) + '</span></b></div>' : '<div class="pworth pp-online"><small>Status</small><b>' + (live || info.at ? 'Online' : 'Offline') + '</b></div>') + '<div class="pworth"><small>Net worth</small><b><i class="gc"></i>' + (nw != null ? fmt(nw) : '…') + '</b></div><div class="pswag"><small>Swag</small><b>' + fmt(swag) + '</b></div></div>' +
+    '<div class="pp-badges">' + (p.self ? '<div class="pworth pgold"><small>Gold</small><b><i class="gc"></i><span id="ppgold">' + fmt(wallet.coins) + '</span></b></div>' : '<div class="pworth pp-online"><small>Status</small><b>' + (live || info.at ? 'Online' : 'Offline') + '</b></div>') + '<div class="pworth"><small>Net worth</small><b><i class="gc"></i>' + (nw != null ? fmt(nw) : '…') + '</b></div><div class="pswag"><small>Swag</small><b>' + fmt(swag) + '</b></div><div class="pworth b2playerlevel"><small>Level</small><b>' + (p.self ? LEVEL.level : live && live.level || info.level || p.level || 1) + '</b></div></div>' +
     '<div class="plist">' + rows + '</div><div class="pbtns">' + btns + '</div></div></div>');
 }
 document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (modal && FORCED.indexOf(modal.kind) < 0 && !(lootSt && lootSt.phase === 'spin')) closeModal(); else if (PROF) profileClose(); else if (F.page && F.page !== 'world' && $('#app').dataset.screen === 'home') { F.page = 'world'; renderHome(true); } });
@@ -3136,7 +3136,7 @@ function tradeHTML() {
 /* ================= the plaza connection =================
    Everyone outside a match is in one shared world. The page joins it on arrival and in lobbies, leaves it when a
    match starts (so players in a game disappear from the plaza) and rejoins when they come home. */
-const Plaza = { ws: null, you: null, tries: 0, timer: 0, sent: null, sentAt: 0, sig: '', restyleT: 0, clearT: 0, came: {} };
+const Plaza = { ws: null, you: null, tries: 0, timer: 0, sent: null, sentAt: 0, sig: '', restyleT: 0, clearT: 0, came: {}, experimental:false };
 const plazaCol = n => PC[[...String(n || '')].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) % PC.length];
 const PLAZA_ON = true;    // the shared world ships switched off until it is tested live
 function plazaWanted() { return PLAZA_ON && !!(Net.ready && Net.db && B3.ok) && $('#app').dataset.screen !== 'game'; }
@@ -3161,7 +3161,7 @@ function plazaOpen() {
   Plaza.ws = ws; Plaza.sent = null;
   ws.onopen = () => { Plaza.tries = 0; try { const me = B3.world && B3.world.me; ws.send(JSON.stringify(me ? { hello: activeKey || KEY, at: [Math.round(me.x * 100) / 100, Math.round(me.z * 100) / 100, Math.round(me.ry * 100) / 100] } : { hello: activeKey || KEY })); } catch (e) {} };
   ws.onmessage = e => { if (e.data === 'pong') return; let d; try { d = JSON.parse(e.data); } catch (x) { return; } plazaGot(d); };
-  ws.onclose = () => { if (Plaza.ws !== ws) return; Plaza.ws = null; Plaza.you = null; if (Trade) tradeDrop('The trade was cancelled.'); clearTimeout(Plaza.clearT); Plaza.clearT = setTimeout(() => { if (!Plaza.you) { B3.world.clear(); plazaCount(); } }, 12000); if (plazaWanted()) Plaza.timer = setTimeout(plazaSync, Math.min(10000, 800 * Math.pow(1.7, Plaza.tries++))); };
+  ws.onclose = () => { if (Plaza.ws !== ws) return; Plaza.ws = null; Plaza.you = null; Plaza.experimental=false; if (Trade) tradeDrop('The trade was cancelled.'); clearTimeout(Plaza.clearT); Plaza.clearT = setTimeout(() => { if (!Plaza.you) { B3.world.clear(); plazaCount(); } }, 12000); if (plazaWanted()) Plaza.timer = setTimeout(plazaSync, Math.min(10000, 800 * Math.pow(1.7, Plaza.tries++))); };
   ws.onerror = () => { try { ws.close(); } catch (x) {} };
 }
 function plazaClose() { const ws = Plaza.ws; Plaza.ws = null; Plaza.you = null; clearTimeout(Plaza.timer); clearTimeout(Plaza.clearT); try { ws && ws.close(); } catch (e) {} B3.world.clear(); plazaCount(); }
@@ -3200,7 +3200,7 @@ function plazaGot(d) {
   if (d.wpn && d.wpn[0] !== Plaza.you) W.gun(d.wpn[0], d.wpn[1]);
   if (d.pads) W.pads(d.pads);
   if (d.took && d.took[0] !== Plaza.you) { const o = W.others.get(d.took[0]); if (o) plazaFeed(o.n + ' grabbed a x' + d.took[1] + ' gold boost'); }
-  if (d.you) { Zom.admin = !!d.admin; if (d.world) Zom.world = d.world; if (d.zmode) { Zom.on = !!d.zmode.on; Zom.wave = d.zmode.wave || 0; if (d.zmode.str) Zom.str = d.zmode.str; } zomButton(); if (d.ents) { W.entClear(); d.ents.forEach(W.entAdd); } Plaza.you = d.you; W.you = d.you; W.dead = false; W.hp = 100; if (W.me) W.me.g.rotation.x = 0; worldHud(); if (W.weapon) plazaSend({ wpn: W.weapon }); W.clear(); (d.all || []).forEach(o => W.add(o, plazaCol(o.n))); plazaCount(); if (d.all && d.all.length) plazaFeed(d.all.length === 1 ? d.all[0].n + ' is here' : d.all.length + ' people are here'); return; }
+  if (d.you) { Plaza.experimental=!!d.testBetrayal;Zom.admin=!!d.admin; if (d.world) Zom.world = d.world; if (d.zmode) { Zom.on = !!d.zmode.on; Zom.wave = d.zmode.wave || 0; if (d.zmode.str) Zom.str = d.zmode.str; } zomButton(); if (d.ents) { W.entClear(); d.ents.forEach(W.entAdd); } Plaza.you = d.you; W.you = d.you; W.dead = false; W.hp = 100; if (W.me) W.me.g.rotation.x = 0; worldHud(); if (W.weapon) plazaSend({ wpn: W.weapon }); W.clear(); (d.all || []).forEach(o => W.add(o, plazaCol(o.n))); plazaCount(); if (d.all && d.all.length) plazaFeed(d.all.length === 1 ? d.all[0].n + ' is here' : d.all.length + ' people are here'); return; }
   if (d.join) { W.add(d.join, plazaCol(d.join.n)); const nk = d.join.f || d.join.n, seenAt = Plaza.came[nk] || 0; Plaza.came[nk] = Date.now(); if (Date.now() - seenAt > 90000) { plazaFeed(d.join.n + ' joined'); Snd('hop', 9); } plazaCount(); }   // tabbing out and in is not news
   if (d.leave) { const o = W.others.get(d.leave); if (o) Plaza.came[o.f || o.n] = Date.now(); W.drop(d.leave); plazaCount(); }
   if (d.s) W.snap(d.s.filter(r => r[0] !== Plaza.you));
@@ -3281,7 +3281,7 @@ function worldHud(kind) {
   $('#wdead').hidden = !W.dead;
   if (kind === 'hit' || kind === 'ko') { const st = $('#stage'); st.classList.remove('hurt'); void st.offsetWidth; st.classList.add('hurt'); setTimeout(() => st.classList.remove('hurt'), 320); }
 }
-if (B3.world) { B3.world.send = m => plazaSend(m); B3.world.onHud = () => {}; B3.world.onFire = () => {}; B3.world.canUse = () => false; B3.world.onLocked = n => { toast('Buy the ' + ITEMS[GUNIDS[n]][1] + ' in the shop to use it.'); F.filt = 'gun'; };
+if (B3.world) { B3.world.send = m => plazaSend(m); B3.world.onHud = () => {}; B3.world.onFire = () => {}; B3.world.canUse = () => false; B3.world.onLocked = () => {};
 B3.world.blocked = () => !!modal || !!PROF || (F.page && F.page !== 'world'); B3.world.onPick = (o, i) => i === 'me' ? profileOpen({ self: true }) : profileOpen({ f: o.f, n: o.n, l: o.l, pet: o.pet, swag: o.sw, nw: o.nw, level:o.level }); }
 function plazaEmote(e) { if (!B3.world || !B3.world.on) return; B3.world.emote('me', e); if (e === 'jump') B3.world.jump(); plazaSend({ emote: e }); }
 /* touch: a thumb stick on the left, a jump button on the right */
@@ -3298,10 +3298,7 @@ function plazaEmote(e) { if (!B3.world || !B3.world.on) return; B3.world.emote('
   $('#wui').addEventListener('pointerdown', e => { if (e.target.closest('button')) e.stopPropagation(); });
   document.addEventListener('keydown', e => { if (!B3.world || !B3.world.on || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return; const m = { 1: 'wave', 2: 'dance', 3: 'cheer' }[e.key]; if (m) plazaEmote(m); });
 })();
-/* It is your turn and you have not rolled: an alarm repeats until you do. */
-setInterval(() => {
-  try { if (G && V && V.phase === 'play' && me >= 0 && E.cur(V) === me && V.stage === 'roll' && !busy && pending === 0 && !V.trade && !document.hidden) { Snd('turn'); window.__alarms = (window.__alarms || 0) + 1; } } catch (e) {}
-}, 2600);
+/* Disabled BITZ 1.x board-game turn alarm. Source: legacy/index.adventure.html. */
 function tick() {
   const s = V; if (!s || s.phase !== 'play') return;
   const now = Date.now() + skew, tb = $('#tmbar'), ck = $('#clock'), chaosTag=$('#chaosTag');
@@ -3325,14 +3322,8 @@ function tick() {
   }
   if (mode === 'online' && !s.timer && !busy && me >= 0 && me !== E.cur(s) && now - (s.t || now) > 90000 && nudgeV !== s.v) { nudgeV = s.v; renderActions(); }
 }
-setInterval(tick, 300);
-/* Presence heartbeat informs the server when a device is still actively viewing
-   a game. Hidden/backgrounded devices stop checking in; seats are preserved. */
-setInterval(() => {
-  if (Net.acct && !document.hidden && G && mode==='online') api('heartbeat',{}).catch(()=>{});
-}, 20000);
-/* now and then, a bird, a far-off horn or a tram bell */
-(function city() { setTimeout(() => { if (V && V.phase === 'play' && !document.hidden) Snd('city', Math.floor(Math.random() * 3)); city(); }, 9000 + Math.random() * 14000); })();
+/* Disabled old 300ms board-game timer. Original: legacy/index.adventure.html. */
+/* Legacy board heartbeat and city ambience loops archived in legacy/index.adventure.html. */
 
 /* ================= modals ================= */
 let modal = null, TB = null;
@@ -3623,6 +3614,16 @@ document.addEventListener('click', async e => {
       else { wardrobeModal(); if (tab === 'shop') { F.wtab = 'shop'; refreshModal(); } }
       renderActions(); break; }
     case 'tile': tileModal(i); break;
+    case 'invitefriend': {
+      const link=new URL('./',location.href).href;
+      try{
+        if(navigator.share)await navigator.share({title:'BITZ',text:'Join me in the BITZ lobby',url:link});
+        else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(link);toast('Lobby invite link copied.');}
+        else toast('Share this lobby link: '+link);
+      }catch(err){if(err?.name!=='AbortError')toast('Share this lobby link: '+link);}
+      break;
+    }
+    case 'testbetrayal': if(Plaza.experimental && el.dataset.i)plazaSend({testBetrayal:{target:el.dataset.i}}); break;
     case 'fmin': friendsToggle(); break;
     case 'friend': profileOpen(FRIENDS[+el.dataset.i]); break;
     case 'profclose': profileClose(); break;

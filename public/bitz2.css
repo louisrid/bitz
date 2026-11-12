@@ -131,3 +131,9 @@ html:has(#veil:not([hidden])) #shopbig,html:has(#fprofov:not([hidden])) #shopbig
  #modal[data-kind="loot"] .bx-reward-text{padding:5px 0!important}
 }
 @media(prefers-reduced-motion:reduce){#bload .b2loadbar i{animation:none!important;transform:none!important}}
+
+/* Lobby invitations, and disabled-by-default admin experiment. */
+#fside .fhead .b2invite{border:2px solid #000;border-radius:8px;background:#e7e0ff;color:#000;padding:4px 8px;font:400 13px/1 "Coolvetica",sans-serif;cursor:pointer}
+#fside .fhead .b2invite:hover{background:#d1c6ff}
+#fside .fhead .b2invite:focus-visible{outline:3px solid #6c55c9}
+#fprofov .pbtns .b2test{background:#f2edff;border-color:#000;color:#000}
