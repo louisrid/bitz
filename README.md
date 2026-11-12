@@ -1,7 +1,7 @@
 # BITZ
 
-A multiplayer 3D football-card collecting game with its own server. Walk a flat white world, earn cash while you
-play, buy packs from the Pack Seller, open them anywhere, sell duplicates to the Card Buyer, fill the Dealer's orders,
+A multiplayer 3D football-card collecting game with its own server. Walk a textured voxel-grass world, earn cash while you
+play, enter detailed timber shops to buy packs from the Pack Seller, open them anywhere, sell duplicates to the Card Buyer, fill the Dealer's orders,
 complete club albums, trade with friends and climb the live **net worth** leaderboard.
 
 Plain Node (20 or newer), two dependencies (`ws`, `postgres`), no build step.

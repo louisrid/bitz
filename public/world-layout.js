@@ -1,5 +1,5 @@
 /* BITZ world layout, shared by the page and the server: where the three stands and two circles are, how far anyone
-   can walk, how fast, and how close you must be to use a stand. A flat white world; everything is seconds from spawn. */
+   can walk, how fast, and how close you must be to use a stand. A voxel-grass market world with real shop entrances; everything is seconds from spawn. */
 (function (root) {
   const spots = Object.freeze({
     seller: Object.freeze({ id: 'seller', name: 'PACK SELLER', who: 'Marco', x: -22, z: -18, r: 6.5, face: 0.88 }),

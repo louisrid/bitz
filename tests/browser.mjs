@@ -1,4 +1,4 @@
-/* BITZ browser test: real Chrome, desktop and iPhone sizes. Loading screen, the white world, the welcome pack, buying
+/* BITZ browser test: real Chrome, desktop and iPhone sizes. Loading screen, voxel grass world and enterable shops, welcome pack, buying
    at the Pack Seller, bulk opening with skip, the book, selling at the Card Buyer, menus, profiles and overlaps.
    Screenshots land in qa-screens/.   Needs: npm install --no-save playwright && npx playwright install chromium */
 import assert from 'node:assert/strict';
@@ -43,13 +43,34 @@ try {
   const broken = await d.evaluate(async () => { const imgs = [...document.images]; await Promise.all(imgs.map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; }))); return imgs.filter(i => !i.naturalWidth).length; }); assert.equal(broken, 0, 'no broken images'); log('desktop: placeholder portraits load, no broken images');
   await sleep(600); await shot(d, 'desktop-05-world');
   const px = await d.evaluate(() => new Promise(res => requestAnimationFrame(() => { const c = document.getElementById('gl'); const g = c.getContext('webgl2') || c.getContext('webgl'); const b = new Uint8Array(4); g.readPixels(Math.floor(c.width / 2), Math.floor(c.height * 0.8), 1, 1, g.RGBA, g.UNSIGNED_BYTE, b); res([...b]); }))).catch(() => null);
-  if (px) assert(px[0] > 200 && px[1] > 200 && px[2] > 200, 'the world is white, not black: ' + px); log('desktop: the world renders white (' + px + ')');
+  const grass = await d.evaluate(() => {
+    const tex = BZWORLD.ground()?.material?.map;
+    if (!tex?.image) return { tile: false };
+    const cv = tex.image, data = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+    const tones = new Set(), samples = [];
+    for (let i = 0; i < data.length; i += 128) {
+      const rgb = [data[i], data[i + 1], data[i + 2]];
+      tones.add(rgb.join(','));
+      samples.push(rgb[1] > rgb[0] + 18 && rgb[1] > rgb[2]);
+    }
+    return { tile: true, tones: tones.size, greenRatio: samples.filter(Boolean).length / samples.length };
+  });
+  assert(grass.tile && grass.tones >= 5 && grass.greenRatio > 0.7, 'voxel grass needs distinct earthy green tiles: ' + JSON.stringify(grass));
+  assert(px && px.some(v => v > 60), 'world should draw real terrain and shops, not black: ' + px);
+  log('desktop: pixel grass terrain renders (' + grass.tones + ' colours, '+ Math.round(grass.greenRatio * 100) + '% green)');
   await noOverlap(d, ['#hud-tl', '#hud-tr', '#hud-bottom']); log('desktop: HUD panels do not overlap');
   /* earn: gold circle */
   await walk(d, L.circles.gold.x, L.circles.gold.z); await d.waitForFunction(() => BZ.zone === 'gold'); await sleep(2600); const zoneText = await d.$eval('#hud-zone', e => e.textContent); assert(/GOLD/.test(zoneText)); log('desktop: Gold Circle recognised on the HUD');
   await walk(d, L.circles.purple.x, L.circles.purple.z); await d.waitForFunction(() => BZ.zone === 'purple'); await d.waitForFunction(() => (BZ.state.packs || {})['red-hot'] >= 1, null, { timeout: 15000 }); log('desktop: Purple Circle delivered a Red Hot pack');
   /* seller */
-  await walk(d, L.spots.seller.x + Math.sin(L.spots.seller.face) * 2.5, L.spots.seller.z + Math.cos(L.spots.seller.face) * 2.5); await d.waitForSelector('#btn-act:not([hidden])'); await sleep(400); await shot(d, 'desktop-06-at-seller');
+  await walk(d, L.spots.seller.x + Math.sin(L.spots.seller.face) * 7.7, L.spots.seller.z + Math.cos(L.spots.seller.face) * 7.7);
+  await d.waitForFunction(() => !BZWORLD.prompt);
+  assert.equal(await d.evaluate(() => BZWORLD.insideShop('seller', BZWORLD.me.x, BZWORLD.me.z)), false, 'shop unavailable from outside');
+  await walk(d, L.spots.seller.x + Math.sin(L.spots.seller.face) * 2.5, L.spots.seller.z + Math.cos(L.spots.seller.face) * 2.5);
+  await d.waitForFunction(() => BZWORLD.prompt?.id === 'seller');
+  assert.equal(await d.evaluate(() => BZWORLD.insideShop('seller', BZWORLD.me.x, BZWORLD.me.z)), true, 'seller must be entered');
+  await d.waitForSelector('#btn-act:not([hidden])'); await sleep(400); await shot(d, 'desktop-06-at-seller');
+  log('desktop: player walks into an actual shop before it can be used');
   await d.keyboard.press('e'); await d.waitForSelector('.setcard'); await sleep(300); await shot(d, 'desktop-07-seller');
   assert.equal(await d.$$eval('.setcard', e => e.length), 3); log('desktop: Pack Seller shows exactly three collections');
   await d.click('[data-odds="golden-star"]'); await d.waitForSelector('.odds'); await shot(d, 'desktop-08-odds'); await d.click('.sheet [data-a="close"]'); await sleep(250);
