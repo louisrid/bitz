@@ -14,7 +14,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const log = (...a) => console.log('PASS', ...a);
 const server = spawn(process.execPath, ['server.js'], { env: { ...process.env, PORT, DATA_FILE: path.join(dir, 'data.json'), NODE_ENV: 'test', BITZ_FAST_TIMERS: '1', BITZ_FILE_ACCOUNTS: '1', BITZ_TEST_CASH: '2000000', STAKKZ_SECRET: 'browser-test' }, stdio: ['ignore', 'pipe', 'pipe'] });
 let slog = ''; server.stdout.on('data', d => { slog += d; }); server.stderr.on('data', d => { slog += d; });
-for (let i = 0; i < 100; i++) { try { if ((await fetch(BASE + '/api/ping')).ok) break; } catch (e) {} await sleep(100); }
+for (let i = 0; i < 300; i++) { try { if ((await fetch(BASE + '/api/ping')).ok) break; } catch (e) {} await sleep(100); }
 const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL, args: ['--ignore-gpu-blocklist'] } : { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });   // locally: PW_CHANNEL=chrome uses the installed Google Chrome
 const errors = [];
 async function page(viewport, mobile) {
@@ -96,4 +96,4 @@ try {
   const bad = errors.filter(e => !/favicon|fonts.googleapis|ERR_INTERNET|net::ERR/.test(e)); assert.deepEqual(bad, [], 'console errors: ' + bad.join(' | ')); log('no console or page errors on desktop or mobile');
   console.log('BITZ browser validation complete. Screens in', OUT);
 } catch (e) { console.error('server log tail:', slog.slice(-800)); throw e; }
-finally { await browser.close(); server.kill('SIGTERM'); fs.rmSync(dir, { recursive: true, force: true }); }
+finally { await browser.close(); const gone = new Promise(r => { if (server.exitCode !== null) return r(); server.once('exit', r); setTimeout(r, 4000); }); server.kill('SIGTERM'); await gone; fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); }

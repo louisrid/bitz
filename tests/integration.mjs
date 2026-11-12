@@ -16,7 +16,7 @@ let server;
 async function start() {
   server = spawn(process.execPath, ['server.js'], { env: { ...process.env, PORT, DATA_FILE: DATA, NODE_ENV: 'test', BITZ_FAST_TIMERS: '1', BITZ_FILE_ACCOUNTS: '1', STAKKZ_SECRET: 'test-secret' }, stdio: ['ignore', 'pipe', 'pipe'] });
   let out = ''; server.stdout.on('data', d => { out += d; }); server.stderr.on('data', d => { out += d; });
-  for (let i = 0; i < 100; i++) { try { const r = await fetch(BASE + '/api/ping'); if (r.ok) return out; } catch (e) {} await sleep(100); }
+  for (let i = 0; i < 300; i++) { try { const r = await fetch(BASE + '/api/ping'); if (r.ok) return out; } catch (e) {} if (server.exitCode !== null) break; await sleep(100); }   // up to 30 s: CI runners can be slow
   throw new Error('server did not start: ' + out);
 }
 const stop = () => new Promise(r => { if (!server || server.exitCode !== null) return r(); server.once('exit', r); server.kill('SIGTERM'); });
@@ -83,4 +83,4 @@ try {
   const again = await api(tA, 'state'); assert.equal(again.cards.length, st.cards.length); assert.equal(again.cash, st.cash); assert.deepEqual(again.book, st.book); assert.equal(again.top.length, Math.min(5, st.cards.length)); assert.equal((await api(tA, 'friends')).friends[0].code, codeB); log('restart: cards, cash, book, Top 5 and friends persisted');
   const saved = JSON.parse(fs.readFileSync(DATA, 'utf8')); assert(saved.accounts && saved.footballSerials && saved.world); log('snapshot contains accounts, serials and world');
   console.log('BITZ integration complete');
-} finally { await stop(); fs.rmSync(dir, { recursive: true, force: true }); }
+} finally { await stop(); fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); }
