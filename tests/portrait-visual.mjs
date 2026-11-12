@@ -34,9 +34,9 @@ try{
   for(const [label,w,h,dpr] of [['desktop',1600,1130,1],['mobile',390,844,2]]){
     const page=await browser.newPage({viewport:{width:w,height:h},deviceScaleFactor:dpr,hasTouch:label==='mobile'});
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
-    await page.goto(base+'/portraits/credits.html',{waitUntil:'domcontentloaded'});
+    await page.goto(base+'/portraits/manifest.js',{waitUntil:'domcontentloaded'});
     const style='<style>html,body{height:auto;overflow:auto;user-select:auto;background:#f2f0f4;touch-action:auto}body{padding:24px 14px 48px}.qa{max-width:1460px;margin:0 auto}h1{font-size:32px;margin-bottom:6px}.sub{margin:0 0 22px;color:#555;font-size:14px}.cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:24px 14px;justify-items:center}.entry{width:100%;min-width:0;display:flex;flex-direction:column;align-items:center;gap:8px}.entry .bc{--w:min(100%,185px)}.label{font:800 13px system-ui;text-align:center}.entry .status{font:12px system-ui;color:#444}@media(max-width:650px){body{padding:16px 8px 32px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 6px}.entry .bc{--w:min(100%,164px)}}</style>';
-    const html='<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="'+base+'/bitz.css">'+style+'</head><body><main class="qa"><h1>BITZ portrait QA</h1><p class="sub">RED HOT · GOLDEN STAR · EUROPEAN NIGHTS</p><div id="cards" class="cards"></div></main></body></html>';
+    const html='<!doctype html><html><head><meta charset="utf-8"><base href="'+base+'/"><link rel="stylesheet" href="'+base+'/bitz.css">'+style+'</head><body><main class="qa"><h1>BITZ portrait QA</h1><p class="sub">RED HOT · GOLDEN STAR · EUROPEAN NIGHTS</p><div id="cards" class="cards"></div></main></body></html>';
     await page.setContent(html,{waitUntil:'domcontentloaded'});
     await page.addScriptTag({url:base+'/portraits/manifest.js'});
     await page.addScriptTag({url:base+'/cards-art.js'});
@@ -55,6 +55,7 @@ try{
     }));
     if(errors.length)throw Error('Page errors: '+errors.join('; '));
     if(inspected.some(x=>!x.loaded||x.placeholder||x.rendered[0]<70||x.rendered[1]<70))throw Error('Image rendering failed: '+JSON.stringify(inspected));
+    const signatures=await page.evaluate(()=>[...document.querySelectorAll('.bc.has-auto')].map(x=>({text:x.querySelector('svg.autograph text')?.textContent,zone:x.querySelector('.sig')?.getBoundingClientRect().height}))); if(!signatures.length||signatures.some(s=>!s.text||s.zone<12))throw Error('Signature treatment did not render: '+JSON.stringify(signatures));
     const outfile=path.join(OUT,'portrait-'+label+'.png');
     await page.screenshot({path:outfile,fullPage:true,animations:'disabled'});
     console.log(label.toUpperCase(),JSON.stringify(inspected),'\nScreenshot:',outfile);
