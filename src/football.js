@@ -6,7 +6,12 @@ import {awardXP} from './progression.js';
 import {ITEMS} from './shop.js';
 import {FOOTBALL_SEASON,FOOTBALL_SEED,PACKS,VARIANTS,PLAYERS,CLUBS,CLUB_BY_ID,PLAYER_BY_ID,RIVALS} from './football-catalogue.js';
 
-const MAX_CARDS=3000, GOLD_PER_VIRTUAL_CENT=1000;
+/* Virtual quick-sell exchange: 400 gold per valuation cent.
+   Do not use 1,000: First XI and Electric Nights would then have positive
+   expected resale returns, enabling unlimited gold from buy/open/sell loops.
+   Card-facing USD valuations remain unchanged and are never cash-out funds. */
+const MAX_CARDS=3000;
+export const GOLD_PER_VIRTUAL_CENT=400;
 const TIERS=['Base','Bronze','Silver','Gold','Holographic','Legendary','Signature','Mythical','Masterpiece'];
 const score={base:0,bronze:1,silver:2,gold:3,holo:4,legendary:5,signature:6,goldInk:7,blackInk:7,dual:7,numbered99:4,numbered25:6,numbered5:8,masterpiece:9};
 const refuse=m=>{throw new CardError(m);};
