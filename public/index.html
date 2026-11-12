@@ -2916,7 +2916,7 @@ function renderHome(soft=false) {
   $('#app').dataset.page=F.page;
   if(F.page==='world'){
     $('#side').replaceChildren();
-    B3.show(null);plazaSync();return;
+    if(B3.ok) B3.show(null);plazaSync();return;
   }
   const off = Net.ready && !Net.db ? '<p class="note">Parties need a connection to the game server. Play works without one.</p>' : Net.ready && !Net.canWrite ? '<p class="note">Your access is view-only. Ask the owner of this page to make you a Contributor.</p>' : '';
   let h = '<header class="hd"><span class="whoami">' + ava(F.look, PC[0], 40) + '<span><b>' + esc(F.name || 'You') + '</b><small><i class="coin"></i>' + fmt(wallet.coins) + '</small></span></span><div class="tools">' + (F.page !== 'world' ? '<button class="bigx" data-a="page" data-v="world" aria-label="Close">&#x2715;</button>' : '') + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button><button class="ib" data-a="settings" aria-label="Settings">' + ico('gear', 20) + '</button></div></header>' +
