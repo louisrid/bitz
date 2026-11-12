@@ -2561,6 +2561,14 @@ function bxConfetti() {
     Array.from({length:14},(_,i)=>'<i style="--bx-x:'+(3+i*31%96)+'%;--bx-col:'+(i%4===0?'#f69bfc':i%4===1?'#ffdc45':i%4===2?'#a4eeff':'#fff0b2')+';--bx-dur:'+(1.2+(i%6)*.17)+'s;--bx-delay:'+(i%7)*.06+'s"></i>').join('')+'</div>';
 }
 /* Collectable Season 01 gallery. Only the actual server loot pool is listed. */
+function seasonRibbon(){
+  return '<div class="bx-season-ribbon" aria-label="Season 1 exclusive rewards">'+
+    '<div class="bx-season-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>'+
+    '<span class="bx-ribbon-emblem" aria-hidden="true">01</span>'+
+    '<span class="bx-ribbon-text"><strong>SEASON 1</strong><small>EXCLUSIVE DROPS</small></span>'+
+    '<span class="bx-ribbon-signal" aria-hidden="true"><i></i><i></i><i></i></span>'+
+    '</div>';
+}
 function lootGalleryHTML(st,col){
   const all=bxSeasonPool();
   const featured=globalThis.STAKKZ_SEASON&&globalThis.STAKKZ_SEASON.ids||[];
@@ -2569,7 +2577,7 @@ function lootGalleryHTML(st,col){
   const header='<header class="bx-head"><div class="bx-brand">'+logo('sm')+'</div><span class="bx-spacer"></span><span class="bx-stock">'+owned+' / '+pool.length+'</span>'+xBtn()+'</header>';
   if(st.item&&ITEMS[st.item]){
     const id=st.item,it=ITEMS[id];
-    return '<div class="bx-shell">'+header+'<div class="bx-collect-preview">'+bxPrizeArt(id,col)+
+    return '<div class="bx-shell">'+header+seasonRibbon()+'<div class="bx-collect-preview">'+bxPrizeArt(id,col)+
       '<div><span class="bx-eyebrow">SEASON 01</span>'+bxTierTag(id)+'<h2>'+esc(it[1])+'</h2><p>'+(owns(id)?'OWNED':'NOT COLLECTED')+'</p></div></div>'+
       '<div class="bx-actions"><button class="bx-btn" data-a="lootgallery">BACK TO DROPS</button><button class="bx-btn" data-a="lootback">LOOT BOX</button></div></div>';
   }
@@ -2577,7 +2585,7 @@ function lootGalleryHTML(st,col){
   const cards=current.map(id=>'<button class="bx-collect-card bx-'+bxTier(id)+'" data-a="lootselect" data-v="'+id+'" aria-label="View '+esc(ITEMS[id][1])+'">'+
     pimg(id,110,col)+bxTierTag(id)+'<strong>'+esc(ITEMS[id][1])+'</strong>'+
     '<small class="'+(owns(id)?'bx-owned':'bx-new')+'">'+(owns(id)?'OWNED':'LOCKED')+'</small></button>').join('');
-  return '<div class="bx-shell">'+header+
+  return '<div class="bx-shell">'+header+seasonRibbon()+
     '<div class="bx-collection"><div class="bx-collection-head"><h2>SEASON 01</h2><span>'+owned+'/'+pool.length+' COLLECTED</span></div>'+
     '<div class="bx-collection-grid">'+cards+'</div>'+
     '<div class="bx-collection-foot">'+(page>0?'<button class="bx-btn" data-a="lootpage" data-v="'+(page-1)+'">PREVIOUS</button>':'')+
@@ -2619,7 +2627,7 @@ function lootHTML() {
       '<div class="bx-more-drops"><span class="bx-more-title">ALSO IN THIS SEASON</span>'+
         '<div class="bx-mini-strip">'+others.map(x=>'<button class="bx-mini-skin bx-'+bxTier(x)+'" data-a="lootselect" data-v="'+x+'" aria-label="Preview '+esc(ITEMS[x][1])+'">'+pimg(x,90,col)+'</button>').join('')+
         '<button class="bx-mini-more" data-a="lootbrowse">VIEW ALL '+total+'</button></div></div></section>';
-    return '<div class="bx-shell">'+head+reward+
+    return '<div class="bx-shell">'+head+seasonRibbon()+reward+
       '<div class="bx-actions bx-result-actions">'+action+
       (it&&!wearing(id)?'<button class="bx-btn bx-wear" data-a="lootwear">WEAR</button>':'')+
       '<button class="bx-btn" data-a="lootbrowse">COLLECTION</button><button class="bx-btn bx-close" data-a="close">DONE</button></div></div>';
@@ -2634,7 +2642,7 @@ function lootHTML() {
     '<div class="bx-hero-line">FULL-BODY COSTUMES ONLY</div>'+
     '<div class="bx-featured-skins">'+heroIds.map(id=>'<button class="bx-featured-skin bx-'+bxTier(id)+'" data-a="lootselect" data-v="'+id+'" aria-label="Preview '+esc(ITEMS[id][1])+'">'+pimg(id,100,col)+'</button>').join('')+'</div>'+
     '</div></section>';
-  return '<div class="bx-shell">'+head+top+wheelHTML(st,col)+
+  return '<div class="bx-shell">'+head+seasonRibbon()+top+wheelHTML(st,col)+
     '<div class="bx-actions bx-base-actions">'+action+(busy?'':'<button class="bx-btn bx-browse" data-a="lootbrowse">VIEW ALL '+total+' DROPS</button>')+'</div></div>';
 }
 async function spinLoot() {
