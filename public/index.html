@@ -1391,6 +1391,7 @@ const B3 = (function () {
   api.figure = (look, col) => shot('f' + col + JSON.stringify(look), () => makeChar(look, col, 'fig'), 224, { az: 0.5, el: 0.16, shadow: true });
   api.product = (id, col) => { if (ITEMS[id] && ITEMS[id][0] === 'gun') return shot('i' + id, () => { const g = new THREE.Group(), m = gunMesh(GUNIDS.indexOf(id)); m.rotation.x = Math.PI / 2; m.scale.setScalar(4); g.add(m); return g; }, 208, { az: 0.9, el: 0.3, shadow: true }); const it = ITEMS[id], team = it[0] === 'outfit' && OUTC[id] && OUTC[id][0] === 'team'; return shot('i' + id + (team ? col : ''), () => it[0] === 'pet' ? makePet(id) : it[0] === 'dye' ? makeDye() : makeChar({ [it[0]]: id }, col, it[0]), 208, { az: 0.6, el: 0.26, shadow: true }); };
   api.loot = () => shot('loot', makeBox, 448, { az: 0.6, el: 0.3, shadow: true });
+  api.lootPrize = (id, col) => shot('loot-prize-'+id, () => makeChar({skin:0,hair:'none',hc:0,outfit:id,hat:'',acc:'',bg:'paper'},col||'#B983FF','fig'), 420, {az:0.6,el:0.26,shadow:true});
 
   const showScene = new THREE.Scene(); let showKey = '', showChar = null, showPet = null;
   showScene.add(new THREE.HemisphereLight(0xffffff, 0xcfd8f0, 0.78)); { const dl = new THREE.DirectionalLight(0xffffff, 0.62); dl.position.set(-5, 9, 8); showScene.add(dl); }
@@ -2533,6 +2534,11 @@ function wheelHTML(st, col) {
     '<span class="bx-pointer" aria-hidden="true"></span><div id="bx-reel-viewport" class="bx-reel-viewport' + (st.phase === 'spin' ? ' bx-moving' : '') + '"><div id="bx-reel-track" class="bx-reel-track">' +
     cards.map(x=>bxCard(x.item,col)).join('') + '</div></div></section>';
 }
+function bxPrizeArt(id,col) {
+  if(!id || !ITEMS[id])return '<i class="coin big"></i>';
+  const image=B3.ok && B3.lootPrize ? B3.lootPrize(id,col) : '';
+  return image ? '<img src="'+image+'" width="236" height="236" alt="'+esc(ITEMS[id][1])+'" decoding="async">' : pimg(id,230,col);
+}
 function bxConfetti() {
   return '<div class="bx-confetti" aria-hidden="true">' +
     Array.from({length:32},(_,i)=>'<i style="--bx-x:'+(3+i*31%96)+'%;--bx-col:'+(i%4===0?'#f69bfc':i%4===1?'#ffdc45':i%4===2?'#a4eeff':'#fff0b2')+';--bx-dur:'+(1.2+(i%6)*.17)+'s;--bx-delay:'+(i%7)*.06+'s"></i>').join('')+'</div>';
@@ -2554,7 +2560,7 @@ function lootHTML() {
   if(won) {
     const id=st.prize.item, it=id && ITEMS[id], tier=bxTier(id), desc=it ? DESC[id] || 'A rare collectible, only found in loot boxes.' : 'Added to your gold balance.';
     const view='<section class="bx-reward bx-'+tier+'" role="status" aria-live="polite">'+bxConfetti()+
-      '<div class="bx-reward-image">'+(it ? pimg(id,230,col) : '<i class="coin big"></i>')+'</div>'+
+      '<div class="bx-reward-image">'+(it ? bxPrizeArt(id,col) : '<i class="coin big"></i>')+'</div>'+
       '<div class="bx-reward-text"><span class="bx-eyebrow">YOU UNLOCKED</span>'+(it?bxTierTag(id):'<span class="bx-tier bx-legendary">BONUS</span>')+
       '<strong>'+(it?esc(it[1]):'+'+fmt(st.prize.coins||0)+' gold')+'</strong><p>'+esc(desc)+'</p></div></section>';
     const equip=it && !wearing(id) ? '<button class="bx-cta" data-a="lootwear">WEAR IT NOW <span aria-hidden="true">&#10095;</span></button>' : '';
