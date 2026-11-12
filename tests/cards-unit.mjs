@@ -53,8 +53,8 @@ check('welcome pack: five cards, a Rare-or-better, real names, best card last, b
   assert.throws(() => svc.open(a, A, 'welcome', 1, 'Alpha'), CardError);
 });
 check('buying: price, boxes of ten, no cash shortcuts', () => {
-  a.coins = 15000 * 2 + boxPrice('red-hot'); svc.buy(a, 'red-hot', 'pack'); svc.buy(a, 'red-hot', 'box');
-  assert.equal(a.cards.packs['red-hot'], 11); assert.equal(a.coins, 15000);
+  a.coins = SETS['red-hot'].price * 2 + boxPrice('red-hot'); svc.buy(a, 'red-hot', 'pack'); svc.buy(a, 'red-hot', 'box');
+  assert.equal(a.cards.packs['red-hot'], 11); assert.equal(a.coins, SETS['red-hot'].price);
   assert.throws(() => svc.buy(a, 'european-nights', 'pack'), CardError); assert.throws(() => svc.buy(a, 'god', 'pack'), CardError);
 });
 check('odds: 6000 Red Hot packs match the published per-pack chances and the Rare guarantee always holds', () => {

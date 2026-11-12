@@ -23,10 +23,10 @@ export const ECON = Object.freeze({
 
 /* ---- sets: the three collections, the welcome pack and the God pack ---- */
 export const SETS = Object.freeze({
-  'red-hot': { name: 'RED HOT', short: 'Red Hot', price: 15000, n: 5, shop: true, theme: 'fire', blurb: 'Fire, magma and the next generation.' },
+  'red-hot': { name: 'RED HOT', short: 'Red Hot', price: 14000, n: 5, shop: true, theme: 'fire', blurb: 'Fire, magma and the next generation.' },
   'golden-star': { name: 'GOLDEN STAR', short: 'Golden Star', price: 35000, n: 5, shop: true, theme: 'gold', blurb: 'A guaranteed autograph in every pack.' },
   'european-nights': { name: 'EUROPEAN NIGHTS', short: 'European Nights', price: 150000, n: 5, shop: true, theme: 'night', blurb: 'Elite players only. Far less filler.' },
-  'welcome': { name: 'WELCOME PACK', short: 'Welcome', price: 0, listed: 15000, n: 5, shop: false, theme: 'fire', earned: true, blurb: 'Your first five cards.' },
+  'welcome': { name: 'WELCOME PACK', short: 'Welcome', price: 0, listed: 14000, n: 5, shop: false, theme: 'fire', earned: true, blurb: 'Your first five cards.' },
   'god': { name: 'GOD PACK', short: 'God Pack', price: 0, listed: 180000, n: 5, shop: false, theme: 'god', earned: true, blurb: 'The best of all three collections.' }
 });
 export const BOX_PACKS = 10, BOX_MULT = 9.5;   // a box is ten packs for 9.5x the pack price
@@ -116,16 +116,48 @@ export function dualPartners(set, ed, first) {
 }
 
 /* ---- values ---- */
-const dShape = d => Math.pow(d, 0.85);          // compresses the very top so one icon card does not dwarf an entire collection
+// One consistent, transparent guide for ALL card prices. Every card of the same
+// footballer and edition follows the same rules, without hidden market randomness.
+// The edition's base includes its artwork and signature premium; player demand and
+// actual print limits then determine how much higher or lower it is worth.
+export const VALUE_BALANCE = Object.freeze({
+  editionScale: Object.freeze({ 'red-hot': 1.07, 'golden-star': 1.23, 'european-nights': 1.47 }),
+  playerPower: 0.72,         // memorable stars are worth more, without multiplying values 40x
+  numberedPower: 0.58,       // rarity drives numbered cards; celebrity status still matters
+  oneOfOnePower: 0.46,       // a unique lesser-known card stays valuable, without a $30m superstar
+  dualSignaturePremium: 1.5,
+  firstSerialPremium: 1.25,
+  finalSerialPremium: 1.1
+});
+const roundValue = v => {
+  const step = v >= 1000000 ? 1000 : v >= 100000 ? 500 : v >= 10000 ? 100 : 10;
+  return Math.max(10, Math.round(v / step) * step);
+};
+const playerDemand = (d, ed) => Math.pow(
+  Math.max(0.5, Number(d) || 0.5),
+  ed.serialMax === 1 ? VALUE_BALANCE.oneOfOnePower :
+    ed.serialMax > 0 && ed.serialMax <= 25 ? VALUE_BALANCE.numberedPower :
+      VALUE_BALANCE.playerPower
+);
 export function cardValue(card) {
   const e = edOf(card.ed), ids = card.players || [card.player];
   const p1 = PLAYER_BY_ID.get(ids[0]), p2 = ids[1] ? PLAYER_BY_ID.get(ids[1]) : null;
   if (!p1) return 0;
-  if (e.dual && p2) return Math.round(e.base * Math.sqrt(dShape(p1.d) * dShape(p2.d)) * 1.5);
-  let v = e.base * dShape(p1.d);
-  if (card.serial && e.serialMax > 1) v *= card.serial === 1 ? 1.25 : card.serial === e.serialMax ? 1.1 : 1;   // first and last serials carry a small premium
-  return Math.round(v);
+  const scale = VALUE_BALANCE.editionScale[e.set] || 1;
+  let v = e.base * scale * playerDemand(p1.d, e);
+  // A true dual autograph is worth the geometric mean of BOTH footballers,
+  // plus an explicit joint-signed-card premium, never twice one superstar's price.
+  if (e.dual && p2) v = e.base * scale *
+    Math.sqrt(playerDemand(p1.d, e) * playerDemand(p2.d, e)) * VALUE_BALANCE.dualSignaturePremium;
+  if (card.serial && e.serialMax > 1) {
+    if (card.serial === 1) v *= VALUE_BALANCE.firstSerialPremium;
+    else if (card.serial === e.serialMax) v *= VALUE_BALANCE.finalSerialPremium;
+  }
+  return roundValue(v);
 }
+export const comparePulls = (a, b) =>
+  cardValue(a) - cardValue(b) || rankOf(a.ed) - rankOf(b.ed) ||
+  String(a.uid || '').localeCompare(String(b.uid || ''));
 export const sellPrice = value => Math.floor(value * ECON.sellRate);
 export const dayKey = now => new Date(now).toISOString().slice(0, 10);
 
