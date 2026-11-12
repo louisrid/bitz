@@ -194,7 +194,9 @@ async function main() {
     'joao-gomes': 'Joao Gomes.png',
     'sven-botman': 'Sven Botman 24052026 (6) (cropped).jpg',
     'murillo': 'Murillo and Tony Loughlan 22122025 (1) (Murillo Santiago Costa dos Santos).jpg',
-    'rayan': 'Rayan 2026.png'
+    'rayan': 'Rayan 2026.png',
+    'julio-enciso': 'Enciso 220826.jpg',
+    'junior-kroupi': 'Eli Junior Kroupi (cropped).jpg'
   };
   for (const p of lookup) {
     if (!curated[p.id]) continue;
