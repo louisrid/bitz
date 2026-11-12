@@ -2623,7 +2623,7 @@ function productHTML(id, col) {
   return '<div class="prod"><div class="shophead"><button class="btn sm" data-a="item" data-v="">' + ico('back', 14) + 'Shop</button>' + coin(wallet.coins) + '</div>' +
     (slot === 'bg' ? '<div class="pstage solo bg-' + id + '"><span class="pwrap">' + fig(F.look, col, 150) + '</span></div>' : '<div class="pstage r' + ra[0] + (slot === 'pet' ? ' solo' : '') + '"><span class="pwrap">' + pimg(id, 136, col) + '</span>' + (slot === 'pet' ? '' : '<span class="onyou">' + fig(t.look, col, 88) + '<small>On you</small></span>') + '</div>') +
     '<div class="ptitle"><b>' + it[1] + '</b><span class="rar r' + ra[0] + '">' + ra[1] + '</span></div><p class="pdesc">' + DESC[id] + '</p>' +
-    '<div class="pbuy"><span class="lbl">' + SLOTN[slot] + '</span>' + cta + '</div></div>';
+    '<div class="pbuy"><span class="lbl">' + SLOTN[slot] + '</span>' + (Zom.admin && !own && it[2] > 0 ? '<button class="btn go" data-a="equip">Take it free · admin</button>' : cta) + '</div></div>';
 }
 const lootBanner=()=>'<div class="loot r3"><span class="loot-pic">'+lootImg(66)+'</span>'+
   '<b>SEASON 1 BOX</b><div class="acts"><button class="btn sm" data-a="lootbrowse">VIEW REWARDS</button>'+
@@ -3103,7 +3103,7 @@ function stuffHTML() {
   const tabs = '<div class="stuff-tabs">' + STUFF_TABS.filter(t => t[0] === 'all' || counts[t[0]]).map(t => '<button class="' + (tab === t[0] ? 'on' : '') + '" data-a="stufftab" data-v="' + t[0] + '">' + t[1] + (t[0] === 'all' ? '' : ' ' + counts[t[0]]) + '</button>').join('') + '</div>';
   const tiles = list.map(id => { const it = ITEMS[id], ra = rarity(it[2]), worn = S.self && stuffWorn(id), inner = pimg(id, 64, PC[0]) + '<b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + '</small><span class="rar r' + ra[0] + '">' + ra[1] + '</span>' + (worn ? '<i class="sworn">On</i>' : '');
     return S.self ? '<button class="stile' + (worn ? ' worn' : '') + '" data-a="wear" data-k="' + it[0] + '" data-v="' + id + '">' + inner + '</button>' : '<div class="stile">' + inner + '</div>'; }).join('');
-  return head + sum + tabs + (list.length ? '<div class="sgrid">' + tiles + '</div>' : '<p class="fine">' + (S.self ? 'Nothing here yet. Open a loot box or visit the shop.' : 'Nothing here.') + '</p>') + (S.self ? '<p class="fine">Tap something to wear it.</p>' : '');
+  return head + sum + tabs + (list.length ? '<div class="sgrid">' + tiles + '</div>' : '<p class="fine">' + (S.self ? 'Nothing here yet. Open a loot box or visit the shop.' : 'Nothing here.') + '</p>') + (S.self ? '<p class="fine">Tap something to wear it.</p>' + (Zom.admin ? '<button class="btn sm" data-a="grantall">Unlock every item (admin)</button>' : '') : '');
 }
 function stuffOpen(o) {
   profileClose();
@@ -3129,7 +3129,7 @@ function profilePaint() {
   const nw = p.self ? worthOf(wallet.own, wallet.coins) : info.worth != null ? info.worth : live && live.nw != null ? live.nw : p.nw;
   ov.hidden = false;
   const handle = p.self ? (authInfo.registered && authInfo.username ? '@' + esc(authInfo.username) : 'Guest') : info.u ? '@' + esc(info.u) : 'Guest';
-  const rows = worn.map(x => { const it = ITEMS[x[1]], ra = it[2] > 0 ? rarity(it[2]) : [0, 'Starter']; return '<div class="prow pr' + ra[0] + '">' + pimg(x[1], 40, col) + '<span><b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + (exclusive(x[1]) ? ' · Exclusive' : '') + '</small></span><span class="prar">' + ra[1] + '</span></div>'; }).join('');
+  const rows = worn.map(x => { const it = ITEMS[x[1]], ra = it[2] > 0 ? rarity(it[2]) : [0, 'Starter']; return '<button type="button" class="prow pr' + ra[0] + '" data-a="profitem" data-v="' + x[1] + '">' + pimg(x[1], 40, col) + '<span><b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + (exclusive(x[1]) ? ' · Exclusive' : '') + '</small></span><span class="prar">' + ra[1] + '</span></button>'; }).join('');
   const btns = p.self ? '<button class="btn go" data-a="customise">Customise</button><button class="btn" data-a="stuff">My Stuff</button><button class="btn" data-a="page" data-v="shop">Shop</button>'
     : '<button class="btn go" data-a="stuff" data-f="' + esc(p.f || '') + '" data-n="' + esc(p.n || '') + '">Their stuff</button><button class="btn" data-a="tradeask" data-i="' + liveI + '"' + (live ? '' : ' disabled') + '>' + (live ? 'Trade' : 'Trade (not in the world)') + '</button>' + (fr ? '<button class="btn" data-a="fop" data-v="remove">Remove friend</button>' : hid ? '<button class="btn ok" data-a="fop" data-v="restore">Add friend back</button>' : '');
   patchHTML(ov, '<div class="pp-back" data-a="profclose"></div><div class="pp-card" role="dialog" aria-label="' + esc(p.n) + '">' +
@@ -3267,7 +3267,7 @@ const ZSTR = [null, ['Easy', 0.5], ['Normal', 1], ['Hard', 2.5], ['Brutal', 6], 
 function banner(big, small, cls) { const b = $('#wbanner'); if (!b) return; b.className = cls || ''; b.innerHTML = '<b>' + esc(big) + '</b>' + (small ? '<small>' + esc(small) + '</small>' : ''); b.hidden = false; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; clearTimeout(banner.t); banner.t = setTimeout(() => { b.hidden = true; }, 3200); }
 function adminHTML() { const W = Zom.world, row = (k, name, note) => '<div class="admrow"><span><b>' + name + '</b><small>' + note + '</small></span><button class="btn sm' + (W[k] ? ' ok' : '') + '" data-a="adminset" data-k="' + k + '" data-v="' + (W[k] ? '0' : '1') + '">' + (W[k] ? 'On' : 'Off') + '</button></div>'; return '<div class="mhead"><h2>Admin</h2>' + xBtn() + '</div><p class="fine">Switches for everyone in the world. Only you can see this.</p>' + row('zom', 'Zombies', 'Waves of zombies, runners and brutes, with a boss after each wave') +
     '<div class="admrow admstrow"><span><b>Strength</b><small>Tougher mobs hit harder and pay more gold per kill</small></span></div><div class="admstr">' + [1, 2, 3, 4, 5].map(n => '<button class="btn sm' + (Zom.str === n ? ' ok' : '') + '" data-a="zstr" data-v="' + n + '">' + ZSTR[n][0] + '<small>x' + ZSTR[n][1] + ' gold</small></button>').join('') + '</div>' +
-    '<div class="admrow"><span><b>Boss</b><small>Clears the field and sends a boss now (zombies must be on)</small></span><button class="btn sm" data-a="zboss">Spawn boss</button></div>' + row('forage', 'Foraging', 'Mushrooms, gold nuggets, gems and chests'); }
+    '<div class="admrow"><span><b>Boss</b><small>Clears the field and sends a boss now (zombies must be on)</small></span><button class="btn sm" data-a="zboss">Spawn boss</button></div><div class="admrow"><span><b>Unlock everything</b><small>Every outfit, hat, extra, pet, scene and gun, free, for your account only</small></span><button class="btn sm" data-a="grantall">Unlock all</button></div>' + row('forage', 'Foraging', 'Mushrooms, gold nuggets, gems and chests'); }
 function zomButton() { const b = $('#wzom'), a = $('#wadm'); if (b) { b.hidden = true; b.textContent = Zom.on ? 'Zombies: ON' + (Zom.wave ? ' · wave ' + Zom.wave : '') : 'Zombies: off'; b.classList.toggle('on', Zom.on); } if (a) a.hidden = !Zom.admin; if (modal && modal.kind === 'admin') refreshModal(); }
 function worldReward(r) {
   if (r.k === 'zom') { toast('+' + fmt(r.gold || 1000000) + ' gold'); Snd('coin'); return; }
@@ -3561,9 +3561,12 @@ document.addEventListener('click', async e => {
     case 'item': { const v = el.dataset.v; F.sel = v || null; if (v && ITEMS[v]) { F.filt = filtOf(v); F.wtab = 'shop'; if (!modal) F.page = 'shop'; } rerender(); break; }
     case 'buy': if (modal && modal.kind === 'buy') { act({ t: 'buy' }); break; } // falls through to the shop purchase
     case 'equip': { const id = F.sel, it = ITEMS[id]; if (!it) break;
+      if (!owns(id) && Zom.admin && it[2] > 0) { el.disabled = true; try { await api('shop', { op: 'grant', item: id }); } catch (er) { toast(er.message); el.disabled = false; break; } Snd('buy'); toast('Unlocked the ' + it[1].toLowerCase() + ' (admin).'); }
       if (!owns(id)) { if (wallet.coins < it[2]) { toast('You need ' + fmt(it[2] - wallet.coins) + ' more coins.'); break; } el.disabled = true; try { await syncAcct(); await api('shop', { op: 'buy', item: id }); } catch (er) { toast(er.message); el.disabled = false; break; } Snd('buy'); toast('The ' + it[1].toLowerCase() + ' is yours.'); }
       wearItem(id); styleChanged(); break; }
     case 'wardrobe': wardrobeModal(); break;
+    case 'grantall': { if (!Zom.admin) break; el.disabled = true; try { const j = await api('shop', { op: 'grant', item: 'all' }); Snd('buy'); toast(j.granted ? 'Unlocked ' + j.granted + ' items.' : 'You already have every item.'); } catch (er) { toast(er.message); } rerender(); break; }
+    case 'profitem': { const v = el.dataset.v, it = ITEMS[v]; if (!it) break; const mine = !!(PROF && PROF.self); profileClose(); if (mine && it[0] !== 'gun') { F.cat = CATS.some(c => c[0] === it[0]) ? it[0] : 'outfit'; F.page = 'me'; F.sel = null; renderHome(true); } else { F.sel = v; F.filt = filtOf(v); F.wtab = 'shop'; F.page = 'shop'; renderHome(true); } break; }
     case 'lootbrowse':
       if(!modal||modal.kind!=='loot')lootModal();
       if(lootSt){lootSt.view='collection';lootSt.item='';lootSt.page=0;refreshModal();}

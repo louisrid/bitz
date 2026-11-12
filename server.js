@@ -263,6 +263,13 @@ async function api(req, res, parts) {
       if (w.fresh && b.wallet && typeof b.seal === 'string' && b.seal === seal(id, b.wallet)) { Object.keys(w).forEach(k => delete w[k]); Object.assign(w, core.freshWallet(), b.wallet); core.setProfile(w, {}); touch(); }
       return send(res, 200, mine());
     }
+    /* admin only: take any item (or all of them) for free, checked against the signed-in username, never the page */
+    if (parts[0] === 'shop' && req.method === 'POST' && b.op === 'grant') {
+      if (!isAdmin({ id })) return send(res, 403, { message: 'Only the admin can do that.' });
+      const ids = b.item === 'all' ? Object.keys(core.ITEMS) : [String(b.item || '')]; let n = 0;
+      for (const x of ids) { const it = core.ITEMS[x]; if (it && it[2] > 0 && w.own.indexOf(x) < 0) { w.own.push(x); n++; } }
+      core.setProfile(w, {}); touch(); return send(res, 200, mine({ granted: n }));
+    }
     if (parts[0] === 'shop' && req.method === 'POST') { const out = core.shop(w, b.op, b.item); core.setProfile(w, {}); touch(); return send(res, 200, mine(out)); }
     if (parts[0] === 'party' && req.method === 'POST') {
       const user = { id: id, name: w.name, look: w.look, pet: w.pet };

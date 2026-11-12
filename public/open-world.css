@@ -417,6 +417,9 @@ button.stile:active{transform:translate(2px,3px);box-shadow:1px 1px 0 #000}
 .stile small{opacity:.6;font-size:11px;font-weight:700}
 .stile .rar{font-size:10px;padding:3px 7px}
 .sworn{position:absolute;top:-9px;right:-9px;background:#000;color:#FFF01F;border-radius:999px;padding:4px 9px;font:700 11px/1 'Space Grotesk',sans-serif;font-style:normal;letter-spacing:.06em;text-transform:uppercase}
+#fprofov button.prow{font:inherit;color:inherit;text-align:left;width:100%;cursor:pointer;transition:transform .08s,box-shadow .08s}
+#fprofov button.prow:hover{background:#fffbd0;transform:translateY(-1px);box-shadow:0 3px 0 #000}
+#fprofov button.prow:active{transform:translateY(1px);box-shadow:none}
 /*BG>*/
 .bg-b_cyber{background:repeating-linear-gradient(90deg,#19e3ff33 0 2px,transparent 2px 26px),repeating-linear-gradient(0deg,#ff2bd633 0 2px,transparent 2px 26px),linear-gradient(180deg,#0b1030,#1c375e,#87e9ff)}
 .bg-b_haunt{background:radial-gradient(circle at 72% 22%,#e9e0ff,transparent 14%),linear-gradient(180deg,#17132b,#373052,#b8a3e6)}
