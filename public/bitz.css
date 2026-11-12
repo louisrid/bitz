@@ -220,6 +220,26 @@ input.t:focus { box-shadow: 0 0 0 3px var(--purple-2); }
  .bc.anim .sig svg.autograph .ink-sweep { stroke-dashoffset: 0; }
 }
 
+
+/* Card typography and photo legibility: signatures are collectible details, never the only readable name. */
+.bc.s-rh .plate, .bc.s-gs .plate { color: #111015; }
+.bc.s-rh .plate .nm b, .bc.s-gs .plate .nm b { color: #111015; }
+.bc.s-rh .plate .nm span, .bc.s-gs .plate .nm span { color: #605b61; }
+.bc.s-gs.has-auto .plate {
+  background: #17171d;
+  color: #fff1b6;
+  border-color: #9d813a;
+}
+.bc.s-gs.has-auto .plate .nm b { color: #fff1b6; }
+.bc.s-gs.has-auto .plate .nm span { color: #cfb978; }
+.bc.s-en .plate .nm b { color: #f7f8ff; }
+.bc.photo-card .foil { opacity: .14; }
+.bc.photo-card .holo { opacity: .18; }
+.bc.photo-card.tilt .holo { opacity: .30; }
+.bc.photo-card .port img, .bc.photo-card .pair img { filter: contrast(1.025) saturate(1.08); }
+.bc.has-auto .sig { z-index: 1; }
+.bc .plate { z-index: 2; }
+
 /* RED HOT */
 .bc.s-rh .art { --bg: linear-gradient(170deg, #fff 0%, #fff 55%, #ffe3d6 100%); }
 .bc.s-rh .foot { color: #a12d0b; }

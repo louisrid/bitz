@@ -55,6 +55,18 @@ try{
     }));
     if(errors.length)throw Error('Page errors: '+errors.join('; '));
     if(inspected.some(x=>!x.loaded||x.placeholder||x.rendered[0]<70||x.rendered[1]<70))throw Error('Image rendering failed: '+JSON.stringify(inspected));
+
+    const visibleNames=await page.evaluate(()=>[...document.querySelectorAll('.bc .plate')].map(plate=>{
+      const text=plate.querySelector('.nm b'), parent=getComputedStyle(plate), fg=getComputedStyle(text).color, bg=parent.backgroundColor;
+      return {name:text.textContent,fg,bg};
+    }));
+    if(visibleNames.some(v=>!v.name.trim()))throw Error('Missing visible footballer name in card nameplates');
+    const sample=await page.evaluate(()=>[...document.querySelectorAll('.bc')].map(c=>({
+      plate:c.querySelector('.plate')?.getBoundingClientRect().toJSON(),
+      label:c.querySelector('.nm b')?.getBoundingClientRect().toJSON()
+    })));
+    if(sample.some(p=>p.plate.width<70||p.label.width<30))throw Error('Unreadably small card nameplate');
+
     const signatures=await page.evaluate(()=>[...document.querySelectorAll('.bc.has-auto')].map(x=>({text:x.querySelector('svg.autograph text')?.textContent,zone:x.querySelector('.sig')?.getBoundingClientRect().height}))); if(!signatures.length||signatures.some(s=>!s.text||s.zone<12))throw Error('Signature treatment did not render: '+JSON.stringify(signatures));
     const outfile=path.join(OUT,'portrait-'+label+'.png');
     await page.screenshot({path:outfile,fullPage:true,animations:'disabled'});
