@@ -14,7 +14,7 @@
   function cyl(par, rt, rb, h, c, x, y, z, seg, ol) { const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 24), typeof c === 'object' ? c : lam(c)); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; if (ol !== 0) { const o = new THREE.Mesh(m.geometry, OUT()); o.scale.set(1.06, 1.03, 1.06); o.castShadow = false; m.add(o); } par.add(m); return m; }
   function label(text, opts) {
     opts = opts || {}; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const tex = new THREE.CanvasTexture(c); tex.anisotropy = 4;
-    const draw = (txt) => { const k = c.getContext('2d'); k.clearRect(0, 0, 512, 128); k.font = (opts.brand ? '400 ' + (opts.size || 56) + 'px Coolvetica, Nunito, sans-serif' : '800 ' + (opts.size || 44) + 'px Nunito, system-ui, sans-serif'); const w = Math.min(500, k.measureText(txt).width + 54), h = opts.h || 86, y = 64 - h / 2;
+    const draw = (txt) => { const k = c.getContext('2d'); k.clearRect(0, 0, 512, 128); k.font = (opts.brand ? '900 ' + (opts.size || 56) + 'px "Barlow Condensed", Coolvetica, sans-serif' : '800 ' + (opts.size || 44) + 'px "Plus Jakarta Sans", system-ui, sans-serif'); const w = Math.min(500, k.measureText(txt).width + 54), h = opts.h || 86, y = 64 - h / 2;
       k.fillStyle = '#0b0b0f'; rr(k, 256 - w / 2 + 3, y + 6, w, h, 22); k.fill(); k.fillStyle = opts.bg || '#fff'; rr(k, 256 - w / 2, y, w, h, 22); k.fill(); k.lineWidth = 6; k.strokeStyle = '#0b0b0f'; k.stroke();
       k.fillStyle = opts.fg || '#0b0b0f'; k.textAlign = 'center'; k.textBaseline = 'middle'; k.fillText(txt, 256, 64, 460); tex.needsUpdate = true; };
     draw(text); if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => draw(text));
@@ -123,51 +123,161 @@
     const flags = [[0xff4d1c, 'RED HOT'], [0xf2b705, 'GOLDEN STAR'], [0x0d1b3d, 'EUROPEAN NIGHTS']];
     flags.forEach((f, i) => { const s = L.spots.seller, grp = new THREE.Group(), a = s.face + Math.PI / 2; grp.position.set(s.x + Math.sin(a) * (i - 1) * 2.4 - Math.sin(s.face) * 5.4, 0, s.z + Math.cos(a) * (i - 1) * 2.4 - Math.cos(s.face) * 5.4); /* a row of three flags behind the stand */ grp.rotation.y = s.face; cyl(grp, 0.07, 0.09, 5.6, 0x0b0b0f, 0, 2.8, 0, 10, 0); const fl = box(grp, 1.6, 1.0, 0.06, f[0], 0.85, 5.0, 0); fl.userData.flag = i; anim.push({ fn: t => { fl.rotation.y = Math.sin(t * 2.2 + i) * 0.18; fl.scale.x = 1 + Math.sin(t * 4 + i) * 0.04; } }); g.add(grp); });
   }
+  /* Shop rooms share one lightweight timber structure. The open entry is at local +Z.
+     Front half of roof is uncovered so third-person cameras can look inside. */
   function buildStand(s) {
-    const g = new THREE.Group(); g.position.set(s.x, 0, s.z); g.rotation.y = s.face; worldG.add(g); W.spots[s.id] = g;
-    const pad = new THREE.Mesh(new THREE.CircleGeometry(s.r - 0.8, 48), new THREE.MeshLambertMaterial({ color: 0xf1f0f6 })); pad.rotation.x = -Math.PI / 2; pad.position.y = 0.012; pad.receiveShadow = true; g.add(pad);
-    const padRing = new THREE.Mesh(new THREE.RingGeometry(s.r - 0.85, s.r - 0.6, 64), new THREE.MeshBasicMaterial({ color: 0x0b0b0f, transparent: true, opacity: 0.85 })); padRing.rotation.x = -Math.PI / 2; padRing.position.y = 0.018; g.add(padRing);
-    const WOOD = 0xb07a4a, WOOD2 = 0x8c5a33, DARK = 0x2a2733, accent = s.id === 'seller' ? 0x7a52ff : s.id === 'buyer' ? 0xf2b705 : 0x0b0b0f;
-    const stand = new THREE.Group(); stand.position.z = -1.6; g.add(stand);
-    if (s.id !== 'dealer') {
-      box(stand, 4.0, 1.15, 1.3, WOOD, 0, 0.58, 0); for (let i = 0; i < 6; i++) box(stand, 0.08, 1.1, 0.03, WOOD2, -1.7 + i * 0.68, 0.58, 0.66, 0);
-      box(stand, 4.4, 0.16, 1.7, WOOD2, 0, 1.24, 0); box(stand, 4.4, 0.08, 0.2, accent, 0, 1.36, 0.78, 0);
-      [-1.85, 1.85].forEach(x => box(stand, 0.2, 4.3, 0.2, DARK, x, 2.15, -0.9));
-      const roof = new THREE.Group(); roof.position.set(0, 4.3, -0.3); roof.rotation.x = 0.22; stand.add(roof);
-      for (let i = 0; i < 9; i++) box(roof, 0.5, 0.1, 1.9, i % 2 ? 0xffffff : accent, -2.0 + i * 0.5, 0, 0, 0);
-      box(roof, 4.6, 0.12, 2.0, DARK, 0, -0.08, 0, 0); for (let i = 0; i < 9; i++) box(roof, 0.5, 0.26, 0.08, i % 2 ? 0xffffff : accent, -2.0 + i * 0.5, -0.1, 0.98, 0);
-    } else {
-      box(stand, 2.6, 1.0, 1.4, 0x3a3550, 0, 0.5, 0); box(stand, 2.8, 0.1, 1.6, 0x0b0b0f, 0, 1.02, 0, 0); box(stand, 2.4, 0.06, 1.2, 0x7a52ff, 0, 1.08, 0, 0); for (let i = 0; i < 4; i++) box(stand, 0.08, 0.9, 0.03, 0x7a52ff, -0.9 + i * 0.6, 0.5, 0.71, 0);
-      const bag = new THREE.Group(); bag.position.set(0.1, 1.1, 0.05); stand.add(bag); box(bag, 1.3, 0.3, 0.9, 0x0b0b0f, 0, 0.15, 0); const lid = box(bag, 1.3, 0.9, 0.05, 0x0b0b0f, 0, 0.72, -0.44); lid.rotation.x = -0.25; box(bag, 1.1, 0.1, 0.7, 0x7a52ff, 0, 0.3, 0, 0);
-      for (let i = 0; i < 4; i++) box(bag, 0.5, 0.02, 0.7, 0xffffff, -0.35 + i * 0.24, 0.33 + i * 0.03, 0.02, 0);
-      [-1.2, 1.2].forEach(x => cyl(stand, 0.08, 0.1, 4.0, 0x0b0b0f, x, 2.0, -0.7, 10, 0)); box(stand, 2.9, 0.9, 0.12, 0xffffff, 0, 3.6, -0.7);
-      const neon = label('ORDERS & RACES', { bg: '#7a52ff', fg: '#ffffff', brand: true, size: 54, w: 3.4 }); neon.position.set(0, 3.65, -0.55); stand.add(neon);
-      const clock = new THREE.Group(); clock.position.set(2.4, 3.3, -0.4); stand.add(clock); cyl(clock, 0.6, 0.6, 0.12, 0xffffff, 0, 0, 0, 32); const hand = box(clock, 0.06, 0.46, 0.04, 0x0b0b0f, 0, 0.2, 0.1, 0); hand.geometry.translate(0, -0.2, 0); const hand2 = box(clock, 0.06, 0.32, 0.04, 0x7a52ff, 0, 0.14, 0.12, 0); hand2.geometry.translate(0, -0.14, 0); clock.rotation.x = Math.PI / 2; clock.rotation.z = 0; const cg = clock; cg.rotation.set(Math.PI / 2, 0, 0); anim.push({ fn: t => { hand.rotation.z = -t * 0.8; hand2.rotation.z = -t * 0.07; } }); cyl(stand, 0.07, 0.09, 3.3, 0x0b0b0f, 2.4, 1.65, -0.4, 10, 0);
+    const g=new THREE.Group(); g.position.set(s.x,0,s.z); g.rotation.y=s.face;
+    worldG.add(g); W.spots[s.id]=g;
+    const isSeller=s.id==='seller',isBuyer=s.id==='buyer';
+    const accent=isSeller?0x825cf5:isBuyer?0xf1bd42:0x29243a;
+    const wood=0x9c734c,lightWood=0xd7ab70,darkWood=0x513a31,stone=0xe6dfcb,deep=0x1c1b22;
+    const interior=new THREE.Group(); g.add(interior);
+
+    // Coloured stone floor and individual square pavers.
+    box(interior,9.5,0.12,8.8,stone,0,0,-0.60,0);
+    for(let x=-4;x<=4;x++) for(let z=-4;z<=3;z++){
+      const odd=(x+z+32)%3===0, colour=odd?0xd5cbb0:((x+z)%2===0?0xe7ddc3:0xeee7d3);
+      box(interior,.94,.012,.94,colour,x,0.068,z,0);
     }
-    if (s.id === 'seller') {
-      const sets = [[0xc81e0a, 0xffb13d], [0xf3cf5a, 0xfff6c8], [0x0e1f5a, 0xcfe0ff]];
-      sets.forEach((c, i) => { for (let k = 0; k < 3; k++) { const p = box(stand, 0.46, 0.7, 0.08, c[0], -1.2 + i * 1.2 + k * 0.06, 1.68 + k * 0.02, -0.1 - k * 0.12, 0); p.rotation.x = -0.12; box(p, 0.46, 0.12, 0.02, c[1], 0, 0.22, 0.045, 0); } });
-      box(stand, 0.6, 0.4, 0.5, 0xffffff, 1.6, 1.52, 0.3); box(stand, 0.5, 0.06, 0.4, 0xf2b705, 1.6, 1.74, 0.3, 0);
-      const lamp = new THREE.Group(); lamp.position.set(-1.85, 3.1, 0.6); stand.add(lamp); box(lamp, 0.3, 0.4, 0.3, new THREE.MeshBasicMaterial({ color: 0xfff0b8 }), 0, 0, 0, 0); box(lamp, 0.36, 0.06, 0.36, 0x0b0b0f, 0, 0.23, 0, 0); const pl = new THREE.PointLight(0xffd27a, 0.5, 9, 2); pl.position.y = -0.2; lamp.add(pl);
+    const mat=box(interior,4.3,.045,1.05,accent,0,.09,2.85,0);
+    mat.receiveShadow=true;
+
+    // Substantial timber shell: side/back walls, framing and an open front door.
+    for(const sign of [-1,1]){
+      box(interior,.34,2.35,8.2,wood,sign*4.65,1.24,-.65,0);
+      box(interior,.54,5.8,.55,darkWood,sign*4.62,2.9,3.36);
+      box(interior,.54,5.8,.55,darkWood,sign*4.62,2.9,-4.75);
+      box(interior,.22,.26,8.6,lightWood,sign*4.64,2.55,-.65,0);
+      for(const z of [-3.45,-1.55,.45,2.45])box(interior,.26,2.1,.26,darkWood,sign*4.62,1.40,z,0);
+      // Two proper front sections, leaving an easy-to-see 4.8-unit door opening.
+      box(interior,2.18,2.05,.36,wood,sign*3.55,1.09,3.4,0);
+      box(interior,2.22,.24,.40,lightWood,sign*3.55,2.26,3.4,0);
+      // Shop-window sill and glass high above the low wall.
+      const pane=new THREE.Mesh(new THREE.PlaneGeometry(5.2,1.28),new THREE.MeshBasicMaterial({color:0xdff4e3,transparent:true,opacity:.27,side:THREE.DoubleSide,depthWrite:false}));
+      pane.position.set(sign*4.40,3.38,-.6);pane.rotation.y=Math.PI/2;interior.add(pane);
     }
-    if (s.id === 'buyer') {
-      const sc = new THREE.Group(); sc.position.set(-1.3, 1.32, 0.1); stand.add(sc); cyl(sc, 0.08, 0.1, 1.0, 0x0b0b0f, 0, 0.5, 0, 10, 0); box(sc, 1.4, 0.06, 0.06, 0x0b0b0f, 0, 1.0, 0, 0); [-0.6, 0.6].forEach(x => { const plate = cyl(sc, 0.3, 0.3, 0.05, 0xf2b705, x, 0.55, 0, 20, 0); plate.userData.x = x; anim.push({ fn: t => { plate.position.y = 0.55 + Math.sin(t * 1.5) * 0.08 * Math.sign(x); } }); });
-      for (let k = 0; k < 5; k++) box(stand, 0.55, 0.03, 0.8, k % 2 ? 0xffffff : 0xefeef5, 1.2 + k * 0.03, 1.34 + k * 0.03, 0.15, 0);
-      box(stand, 0.7, 0.5, 0.5, 0x0b0b0f, 0.1, 1.57, -0.2); box(stand, 0.5, 0.3, 0.05, 0xf2b705, 0.1, 1.6, 0.06, 0);
-      const sign = label('WE BUY CARDS', { bg: '#f2b705', brand: true, size: 54, w: 3.4 }); sign.position.set(0, 2.5, 0.9); stand.add(sign);
+    box(interior,9.4,2.6,.37,wood,0,1.33,-4.90,0);
+    box(interior,9.5,.28,.55,darkWood,0,2.73,-4.90,0);
+    box(interior,9.8,.5,.62,darkWood,0,5.60,3.35);
+    box(interior,9.8,.35,.68,darkWood,0,5.52,-4.80);
+    for(const z of [-4.7,-2.8,-.9,1.0,3.35])box(interior,9.8,.20,.42,lightWood,0,5.4,z,0);
+    for(const x of [-3.45,-1.15,1.15,3.45])box(interior,.22,.20,8.4,darkWood,x,5.50,-.72,0);
+    // Partial tiled roof only above the counter, leaving the entry visible to the camera.
+    for(let i=0;i<8;i++){
+      const x=-4.13+i*1.18;
+      box(interior,1.10,.13,3.5,i%2?0x795542:0x9d7459,x,5.73,-3.05,0);
     }
-    /* the NPC: a bigger, more characterful figure behind the counter */
-    const looks = { seller: { look: { skin: 2, hair: 'short', hc: 1, outfit: 'overalls', hat: 'cap', acc: '' }, col: '#7a52ff' }, buyer: { look: { skin: 1, hair: 'bun', hc: 0, outfit: 'tux', hat: 'tophat', acc: 'shades' }, col: '#0b0b0f' }, dealer: { look: { skin: 4, hair: 'none', hc: 0, outfit: 'hoodie', hat: '', acc: 'chain' }, col: '#7a52ff' } }[s.id];
-    const npc = AV.make(THREE, looks.look, looks.col); npc.position.set(0, 0, -2.75); npc.scale.setScalar(1.12); npc.rotation.y = Math.PI; g.add(npc);
-    if (s.id === 'seller') { const apron = box(npc.userData.body, 0.46, 0.5, 0.03, 0x7a52ff, 0, 0.62, 0.17, 0); apron.renderOrder = 1; box(npc.userData.body, 0.3, 0.12, 0.04, 0xffffff, 0, 0.56, 0.19, 0); }
-    if (s.id === 'dealer') { const h = npc.userData.head; box(h, 0.62, 0.1, 0.03, 0x0b0b0f, 0, 0.32, 0.31, 0); [-1, 1].forEach(sg => box(h, 0.22, 0.14, 0.03, 0x0b0b0f, sg * 0.15, 0.3, 0.31, 0)); box(npc.userData.body, 0.52, 0.2, 0.34, 0x0b0b0f, 0, 0.96, -0.05, 0); }
-    const name = label(s.who + ' · ' + s.name, { brand: true, size: 50, w: 5.2 }); name.position.set(0, 5.6, -2.0); g.add(name);
-    const bubble = label('', { w: 7, size: 40, h: 90 }); bubble.position.set(0, 4.6, -1.6); bubble.visible = false; g.add(bubble); bubbles.push(bubble);
-    W.npcs[s.id] = { g, npc, bubble, until: 0, nearT: 0, waveAt: 0 };
-    anim.push({ fn: (t, dt) => { const n = W.npcs[s.id], me = W.me, near = me ? Math.hypot(me.x - s.x, me.z - s.z) < s.r + 2 : false; n.npc.userData.anim(t, dt, {});
-      if (near && t > n.waveAt) { n.waveAt = t + 9; n.npc.userData.emote('wave'); } if (n.bubble.visible && t > n.until) n.bubble.visible = false;
-      if (me && near) { const dx = me.x - s.x, dz = me.z - s.z; const want = Math.atan2(dx, dz) - s.face; n.npc.rotation.y += (Math.atan2(Math.sin(want - n.npc.rotation.y), Math.cos(want - n.npc.rotation.y))) * 0.08; } else n.npc.rotation.y += (Math.atan2(Math.sin(Math.PI - n.npc.rotation.y), Math.cos(Math.PI - n.npc.rotation.y))) * 0.04; } });
+    // Visible, oversized sign and entry invitation.
+    const sign=label(isSeller?'THE PACK SHOP':isBuyer?'CARD BUYER':'THE DEALER',{
+      bg:isSeller?'#825cf5':isBuyer?'#f1bd42':'#17151d',fg:isBuyer?'#141217':'#ffffff',brand:true,size:66,w:7.8
+    });
+    sign.position.set(0,6.13,3.75);g.add(sign);
+    const sub=label('WALK INSIDE  •  PRESS E',{bg:'#fff7e8',fg:'#2d2420',size:35,w:5.6});
+    sub.position.set(0,4.78,3.57);g.add(sub);
+    // A weathered timber welcome board hangs to one side of the door.
+    box(interior,.45,3.0,.45,darkWood,-2.45,1.5,3.55,0);
+    box(interior,.45,3.0,.45,darkWood,2.45,1.5,3.55,0);
+    box(interior,5.30,.35,.45,lightWood,0,3.12,3.55,0);
+
+    // Counter, shelving, crates and lighting make it a genuine interior.
+    box(interior,5.9,1.12,1.0,lightWood,0,.67,-2.30);
+    box(interior,6.35,.25,1.3,darkWood,0,1.35,-2.30,0);
+    box(interior,6.20,.10,.28,accent,0,1.52,-1.65,0);
+    for(const x of [-2.35,-1.4,-.45,.45,1.4,2.35]) box(interior,.085,.95,.08,wood,x,.61,-1.79,0);
+    for(const side of [-1,1]){
+      // Side-wall stock shelving, deliberately outside the central walking aisle.
+      for(const y of [1.02,2.16,3.30]){
+        box(interior,1.55,.18,3.2,darkWood,side*3.65,y,-.75,0);
+        for(const z of [-1.65,-.60,.46]){
+          const shade=isSeller?(y>2.2?0x182d62:0xcc3d2c):isBuyer?0xecc34d:0x574179;
+          box(interior,.53,.48,.45,shade,side*3.65,y+.32,z,0);
+          box(interior,.45,.06,.04,0xfff0d5,side*3.65,y+.29,z+.24,0);
+        }
+      }
+      box(interior,.22,2.9,.24,darkWood,side*3.65,1.45,1.35,0);
+      // Warm lantern with decorative square gold housing, no expensive extra dynamic shadow.
+      box(interior,.20,.82,.22,deep,side*3.0,4.57,1.55,0);
+      const glass=box(interior,.48,.55,.48,new THREE.MeshBasicMaterial({color:0xffe2a3}),side*3,4.01,1.55,0);
+      box(interior,.55,.12,.55,deep,side*3,4.33,1.55,0);
+      glass.castShadow=false;
+    }
+    const labels={seller:['RED HOT','GOLDEN STAR','EUROPEAN NIGHTS'],buyer:['SELL CARDS','CASH PAID','SAFE TRADES'],dealer:['STANDING ORDERS','LIVE RACES','BIG REWARDS']};
+    labels[s.id].forEach((txt,i)=>{
+      const c=isSeller?['#b52b14','#c19222','#182b63'][i]:isBuyer?'#f0d16e':'#6550a2';
+      const plate=label(txt,{bg:c,fg:isSeller&&i!==1?'#ffffff':'#15131a',brand:true,size:42,w:3.25});
+      plate.position.set((i-1)*2.85,3.65,-4.49);g.add(plate);
+    });
+    // Different shop contents give the rooms character without separate systems.
+    if(isSeller){
+      const colours=[0xc82c1b,0xe8b631,0x203b7a];
+      colours.forEach((c,i)=>{
+        for(let k=0;k<3;k++){
+          const p=box(interior,.54,.85,.13,c,(i-1)*1.75+k*.15,1.98,-2.05-k*.06,0);
+          p.rotation.x=-.12;
+          box(interior,.45,.12,.025,0xfaf0dc,(i-1)*1.75+k*.15,2.00,-1.94-k*.06,0);
+        }
+      });
+      box(interior,1.40,.80,.65,0x221e2a,3.37,.62,1.45,0);
+      box(interior,1.05,.15,.40,0xe5c455,3.37,1.08,1.45,0);
+    }else if(isBuyer){
+      // Golden brass trading scale, stacks of penny sleeves and vault cases.
+      cyl(interior,.08,.1,.86,0x30303a,-1.35,1.83,-2.00,10,0);
+      box(interior,1.25,.11,.12,0xe2b94c,-1.35,2.20,-2.00,0);
+      for(const x of [-1.75,-.95])cyl(interior,.38,.38,.055,0xf1c247,x,1.85,-2.0,20,0);
+      for(let k=0;k<4;k++)box(interior,.85,.05,.65,k%2?0xfff8e8:0xd6c49c,1.30,1.57+k*.06,-2.0,0);
+      box(interior,1.20,.92,.82,0x27242b,3.3,.52,1.50,0);
+      box(interior,.94,.14,.18,0xf1c247,3.3,1.02,1.91,0);
+    }else{
+      const clipboard=box(interior,4.45,2.20,.17,0x292331,0,3.28,-4.53);
+      box(clipboard,4.02,1.78,.035,0xe6d9be,0,0,0.105,0);
+      for(let i=0;i<4;i++){
+        box(interior,3.37,.10,.07,i===0?0x7b58e3:0x5f5349,0,3.87-i*.34,-4.39,0);
+        box(interior,.23,.18,.07,0xf1bf54,-1.74,3.87-i*.34,-4.28,0);
+      }
+      // Countdown clock, open pack and a pile of completed request cards.
+      cyl(interior,.55,.55,.14,0xf6e9bc,3.4,3.8,-4.42,24,0);
+      box(interior,.07,.37,.06,0x211e23,3.4,3.85,-4.29,0);
+      for(let i=0;i<5;i++)box(interior,.65,.09,.85,i%2?0x32263f:0x9f8ab6,-1.25+i*.15,1.62+i*.07,-2.05,0);
+    }
+
+    // NPC stays in the shop, behind its counter.
+    const looks={
+      seller:{look:{skin:2,hair:'short',hc:1,outfit:'overalls',hat:'cap',acc:''},col:'#825cf5'},
+      buyer:{look:{skin:1,hair:'bun',hc:0,outfit:'tux',hat:'tophat',acc:'shades'},col:'#0b0b0f'},
+      dealer:{look:{skin:4,hair:'none',hc:0,outfit:'hoodie',hat:'',acc:'chain'},col:'#825cf5'}
+    }[s.id];
+    const npc=AV.make(THREE,looks.look,looks.col);npc.position.set(0,0,-3.42);npc.scale.setScalar(1.2);npc.rotation.y=Math.PI;g.add(npc);
+    if(isSeller){box(npc.userData.body,.46,.50,.035,accent,0,.62,.17,0);box(npc.userData.body,.30,.1,.04,0xffffff,0,.56,.19,0);}
+    if(s.id==='dealer'){box(npc.userData.head,.62,.1,.04,0x0b0b0f,0,.32,.31,0);box(npc.userData.body,.53,.17,.35,0x0b0b0f,0,.92,-.05,0);}
+    const bubble=label('',{w:7,size:40,h:90});bubble.position.set(0,4.05,-2.82);bubble.visible=false;g.add(bubble);bubbles.push(bubble);
+    W.npcs[s.id]={g,npc,bubble,until:0,nearT:0,waveAt:0};
+    anim.push({fn:(t,dt)=>{
+      const n=W.npcs[s.id],me=W.me,near=me&&Math.hypot(me.x-s.x,me.z-s.z)<s.r+2;
+      n.npc.userData.anim(t,dt,{});
+      if(near&&t>n.waveAt){n.waveAt=t+9;n.npc.userData.emote('wave');}
+      if(n.bubble.visible&&t>n.until)n.bubble.visible=false;
+      if(me&&near){
+        const dx=me.x-s.x,dz=me.z-s.z,want=Math.atan2(dx,dz)-s.face;
+        n.npc.rotation.y+=Math.atan2(Math.sin(want-n.npc.rotation.y),Math.cos(want-n.npc.rotation.y))*.08;
+      }else n.npc.rotation.y+=Math.atan2(Math.sin(Math.PI-n.npc.rotation.y),Math.cos(Math.PI-n.npc.rotation.y))*.04;
+    }});
   }
+  function insideShop(s,x,z){
+    if(!s)return false;
+    const dx=x-s.x,dz=z-s.z,cs=Math.cos(s.face),sn=Math.sin(s.face);
+    const rx=cs*dx-sn*dz,rz=sn*dx+cs*dz;
+    return Math.abs(rx)<4.35&&rz>-4.35&&rz<3.05;
+  }
+  function shopWall(s,x,z){
+    const dx=x-s.x,dz=z-s.z,cs=Math.cos(s.face),sn=Math.sin(s.face);
+    const rx=cs*dx-sn*dz,rz=sn*dx+cs*dz,ax=Math.abs(rx);
+    // The entrance is open for ±2.3 units, but the front side walls are solid.
+    return (ax>4.34&&ax<5.02&&rz>-4.85&&rz<3.63)||
+      (rz< -4.65&&rz>-5.21&&ax<4.86)||
+      (rz>3.12&&rz<3.70&&ax>2.3&&ax<4.95)||
+      (rz>-2.83&&rz<-1.69&&ax<3.12);
+  }
+
   function buildCircle(c, color, pale) {
     const g = new THREE.Group(); g.position.set(c.x, 0, c.z); worldG.add(g);
     const disc = new THREE.Mesh(new THREE.CircleGeometry(c.r, 64), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.16 })); disc.rotation.x = -Math.PI / 2; disc.position.y = 0.014; g.add(disc);
@@ -237,7 +347,7 @@
     const hits = raycaster.intersectObjects(targets, true); if (!hits.length) return;
     let obj = hits[0].object; while (obj && !targets.includes(obj)) obj = obj.parent; if (!obj) return;
     for (const o of W.others.values()) if (o.g === obj) { W.onPick(o); return; }
-    for (const id in W.npcs) if (W.npcs[id].npc === obj) { const s = L.spots[id], me = W.me; if (me && Math.hypot(me.x - s.x, me.z - s.z) <= s.r + 1 && W.onInteract) W.onInteract(s); else W.say(id, 'Come closer!', 2); return; }
+    for (const id in W.npcs) if (W.npcs[id].npc === obj) { const s = L.spots[id], me = W.me; if (me && insideShop(s,me.x,me.z) && W.onInteract) W.onInteract(s); else W.say(id, 'Come closer!', 2); return; }
   }
   W.touched = () => { W.lastInput = performance.now(); };
   W.say = (id, text, secs) => { const n = W.npcs[id]; if (!n) return; n.bubble.userData.draw(text); n.bubble.visible = true; n.until = (performance.now() - t0) / 1000 + (secs || 3); };
@@ -270,11 +380,13 @@
       const moving = len > 0.08, running = moving && (m.running || len > 0.96 && touch && len > 0.98);
       if (moving) {
         const sp = (running ? L.run : L.speed) * Math.min(1, len), fx2 = Math.sin(cAz) * -iz + Math.cos(cAz) * ix, fz2 = Math.cos(cAz) * -iz - Math.sin(cAz) * ix;
+        const prevX=m.x,prevZ=m.z;
         m.x = clamp(m.x + fx2 * sp * dt, -L.limit, L.limit); m.z = clamp(m.z + fz2 * sp * dt, -L.limit, L.limit);
         const want = Math.atan2(fx2, fz2); m.ry += Math.atan2(Math.sin(want - m.ry), Math.cos(want - m.ry)) * Math.min(1, dt * 14);
-        /* keep out of the stands themselves: a rectangle behind each counter, in the stand's own frame */
-        for (const s of Object.values(L.spots)) { const lx = m.x - s.x, lz = m.z - s.z, c = Math.cos(s.face), sn = Math.sin(s.face), rx = c * lx - sn * lz; let rz = sn * lx + c * lz;
-          if (Math.abs(rx) < 2.6 && rz < -0.5 && rz > -4.6) { rz = rz > -2.5 ? -0.5 : -4.6; m.x = s.x + rx * c + rz * sn; m.z = s.z - rx * sn + rz * c; } }
+        /* solid shop walls and counters, with a central entrance that players walk through */
+        if(Object.values(L.spots).some(s=>shopWall(s,m.x,m.z))){
+          m.x=prevX;m.z=prevZ;
+        }
         W.touched();
       }
       m.moving = moving; m.runningNow = running;
@@ -284,7 +396,7 @@
       m.g.userData.av.userData.anim(t, dt, { moving, running, speed: running ? 1.5 : 1, jumping: !m.grounded });
       if (m.g.userData.pet) petFollow(m.g, m, t, dt, moving, m.g.userData.excited > t);
       /* prompt and zone */
-      let best = null, bd = 1e9; for (const s of Object.values(L.spots)) { const d = Math.hypot(m.x - s.x, m.z - s.z); if (d <= s.r && d < bd) { bd = d; best = s; } }
+      let best = null, bd = 1e9; for (const s of Object.values(L.spots)) { const d = Math.hypot(m.x - s.x, m.z - s.z); if (insideShop(s,m.x,m.z) && d < bd) { bd = d; best = s; } }
       if ((best && best.id) !== (W.prompt && W.prompt.id)) { W.prompt = best; if (W.onPrompt) W.onPrompt(best); }
       const zone = Math.hypot(m.x - L.circles.gold.x, m.z - L.circles.gold.z) <= L.circles.gold.r ? 'gold' : Math.hypot(m.x - L.circles.purple.x, m.z - L.circles.purple.z) <= L.circles.purple.r ? 'purple' : '';
       if (zone !== W.zone) { W.zone = zone; if (W.onZone) W.onZone(zone); }
@@ -327,6 +439,6 @@
     t0 = performance.now(); last = t0; W.ok = true; requestAnimationFrame(frame);
     return true;
   }
-  Object.assign(W, { init, add, drop, snap, emote, stat, clear, setMe, spawnAt, pose, jump, celebrate, flash, setOrbit, L, camera: () => cam, renderer: () => renderer });
+  Object.assign(W, { init, add, drop, snap, emote, stat, clear, setMe, spawnAt, pose, jump, celebrate, flash, setOrbit, L, insideShop: (id,x,z)=>insideShop(L.spots[id],x,z), ground: ()=>ground, camera: () => cam, renderer: () => renderer });
   globalThis.BZWORLD = W;
 })();
