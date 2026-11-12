@@ -12,6 +12,7 @@ import './public/world-layout.js';
 import { AccountAuth } from './src/auth.js';
 import { isBot } from './src/bots.js';
 import { mountSocial } from './src/social.js';
+import { createFootballService, CardError } from './src/football.js';
 
 /* the old address after a move: forward everyone, run nothing else */
 if (process.env.STAKKZ_MOVED_TO) { await import('./moved.js'); await new Promise(() => {}); }
@@ -30,6 +31,7 @@ const PG_URL = (process.env.STAKKZ_DATABASE_URL || '').trim().replace(/^["']+|["
 const pg = PG_URL ? postgres(PG_URL, { max: 2, idle_timeout: 15, connect_timeout: 12, prepare: false }) : null;
 const persistent = !!(pg || cloud);
 let dirty = false, saved = {}, saveChain = Promise.resolve(), dbVersion = 0;
+const footballSerials=new Map(),footballOffers=new Map();
 const lastSeen = new Map();
 // Always two minutes in real deployments. A short test-only interval lets CI
 // verify reconnect and eviction timing without waiting two wall-clock minutes.
@@ -37,6 +39,8 @@ const RECONNECT_GRACE_MS = process.env.NODE_ENV === 'test'
   ? Math.max(2000, Math.min(120000, Number(process.env.STAKKZ_TEST_GRACE_MS) || 120000))
   : 120000;
 try { saved = JSON.parse(fs.readFileSync(DATA, 'utf8')); Object.entries(saved.parties || {}).forEach(([k, v]) => parties.set(k, v)); Object.entries(saved.accounts || {}).forEach(([k, v]) => accounts.set(k, v)); console.log('loaded', parties.size, 'parties and', accounts.size, 'accounts'); } catch (e) {}
+Object.entries(saved.footballSerials||{}).forEach(([k,v])=>footballSerials.set(k,v));
+Object.entries(saved.footballOffers||{}).forEach(([k,v])=>footballOffers.set(k,v));
 /* Accounts are also handed back to each browser sealed with this secret, so if a free host wipes the disk
    a returning player's coins and items can be restored and cannot be forged. Set STAKKZ_SECRET to keep it stable. */
 let SECRET = process.env.STAKKZ_SECRET || saved.secret || crypto.randomBytes(32).toString('hex');
@@ -49,7 +53,7 @@ const BOOTED = Date.now(), dropped = new Set();
 const watchDrops = (map, tag) => { if (map.__watched) return; const del = map.delete.bind(map); map.delete = k => { dropped.add(tag + k); return del(k); }; map.__watched = true; };
 const watchAll = () => { watchDrops(parties, 'p'); watchDrops(accounts, 'a'); watchDrops(auth.users, 'u'); watchDrops(auth.sessions, 's'); };
 watchAll();
-const snapshot = () => ({ secret: SECRET, writer: BOOTED, parties: Object.fromEntries(parties), accounts: Object.fromEntries(accounts), auth: auth.export() });
+const snapshot = () => ({ secret: SECRET, writer: BOOTED, parties: Object.fromEntries(parties), accounts: Object.fromEntries(accounts), auth: auth.export(),footballSerials:Object.fromEntries(footballSerials),footballOffers:Object.fromEntries(footballOffers) });
 async function mergeNewer() {
   if (shutdownStarted) return false;
   const rows = await pg`select state, version from stakkz_state where id = 'main' limit 1`;
@@ -64,6 +68,8 @@ async function mergeNewer() {
   add(accounts, remote.accounts, 'a');
   add(auth.users, remote.auth?.users, 'u');
   add(auth.sessions, remote.auth?.sessions, 's');
+  add(footballSerials, remote.footballSerials,'serial:',(mine,theirs)=>Number(theirs)>Number(mine));
+  add(footballOffers, remote.footballOffers,'offer:',(mine,theirs)=>Number(theirs?.acceptedAt||theirs?.createdAt||0)>Number(mine?.acceptedAt||mine?.createdAt||0));
   parties.forEach(room => (room.players || []).forEach(p => { if (!isBot(p) && !p.out && !lastSeen.has(p.id)) lastSeen.set(p.id, Date.now()); }));
   dbVersion = Number(rows[0].version) || 0;
   console.warn('An older instance saved during a deploy; merged its new records and saving again.');
@@ -116,6 +122,9 @@ async function save(force = false) {
 setInterval(save, 4000).unref();
 /* Archived board-party records are retained for rollback; no game timers or cleanup. */
 
+const football=createFootballService({accounts,serials:footballSerials,offers:footballOffers,
+  markDirty:()=>{dirty=true;},
+  resolvePlayer:code=>[...accounts.keys()].find(x=>x.slice(2,12)===code||x===code)});
 const idOf = key => 'p_' + crypto.createHash('sha256').update('stakkz:' + key).digest('hex').slice(0, 24);
 const account = id => { let w = accounts.get(id); if (!w) { w = core.freshWallet(); w.fresh = true; accounts.set(id, w); }
   if (!w.m1) { w.coins = (w.coins || 0) + 1000000; w.m1 = 1; dirty = true; }
@@ -223,6 +232,23 @@ async function api(req, res, parts) {
     const a = hit[1], un = auth.username(hit[0]);
     return send(res, 200, { n: (a.name || un || 'Player').slice(0, 12), u: un || '', own: (a.own || []).filter(x => core.ITEMS[x]).slice(0, 2000), worth: core.worth(a), swag: core.swag(a),level:core.progressOf(a).level });
   }
+  if (parts[0]==='cards' && req.method==='GET' && parts[1]==='catalogue')
+    return send(res,200,football.catalogue());
+  if (parts[0]==='cards' && req.method==='GET' && parts[1]==='inventory'){
+    const fragment=String(parts[2]||'').replace(/[^a-zA-Z0-9]/g,'').slice(0,12);
+    const other=[...accounts.entries()].find(([aid])=>aid.slice(2,12)===fragment);
+    if(!other)return send(res,404,{message:'Collector not found.'});
+    const c=football.self(other[1],other[0]);
+    return send(res,200,{id:fragment,name:other[1].name||'Player',cards:c.cards.slice(0,3000),favorites:c.favorites});
+  }
+  if (parts[0]==='cards' && req.method==='GET' && parts[1]==='profile'){
+    const fragment=String(parts[2]||'').replace(/[^a-zA-Z0-9]/g,'').slice(0,12);
+    const other=[...accounts.entries()].find(([aid])=>aid.slice(2,12)===fragment);
+    if(!other)return send(res,404,{message:'Collector not found.'});
+    return send(res,200,football.publicCard(other[1],other[0].slice(2,12)));
+  }
+  if (parts[0]==='cards' && req.method==='GET' && !parts[1])
+    return send(res,200,{...football.self(w,id),gold:w.coins});
   if(parts[0]==='my-party') return send(res,200,{code:null});
   if (parts[0] === 'auth' && parts[1] === 'me' && req.method === 'GET')
     return send(res, 200, { username:auth.username(id), registered:!!auth.username(id), persistent, id });
@@ -244,6 +270,12 @@ async function api(req, res, parts) {
       w.hiddenFriends=[...hidden].slice(-500);touch();
       return send(res,200,{ok:true,now});
     }
+    if(parts[0]==='cards'&&req.method==='POST'){
+      const result=football.move(String(b.op||''),w,id,b);
+      touch();
+      if(persistent&&!(await save(true)))return send(res,503,{message:'Card change could not be saved safely. Do not retry until your account refreshes.'});
+      return send(res,200,{...result,gold:w.coins,progress:core.progressOf(w)});
+    }
     if (parts[0] === 'me') { if (req.method === 'POST') { core.setProfile(w, b); touch(); } return send(res, 200, mine({swag:core.swag(w)})); }
     if (parts[0] === 'restore' && req.method === 'POST') {
       // a sealed copy this server issued earlier, for an account it no longer has
@@ -260,13 +292,14 @@ async function api(req, res, parts) {
     if (parts[0] === 'shop' && req.method === 'POST') { const out = core.shop(w, b.op, b.item); core.setProfile(w, {}); touch(); return send(res, 200, mine(out)); }
     /* Board-party operations are disabled, not deleted from Git history. */
   } catch (e) {
+    if (e instanceof CardError) return send(res, 400, {message:e.message,now});
     if (e instanceof core.Refused) return send(res, 400, { message: e.message, state: parts[0] === 'party' && parts[1] ? parties.get(parts[1]) || null : undefined, now });
     console.error(e); return send(res, 500, { message: 'The server hit a problem. Try again.' });
   }
   send(res, 404, { message: 'Not found.' });
 }
 
-const TYPES = { '.css': 'text/css; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8' };
+const TYPES = { '.css': 'text/css; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8' };
 const server = http.createServer((req, res) => {
   let url; try { url = new URL(req.url, 'http://x'); } catch (e) { res.writeHead(400); return res.end(); }
   const m = /\/api\/(.*)$/.exec(url.pathname);
@@ -312,6 +345,9 @@ async function bootstrap() {
       parties.clear(); accounts.clear();
       Object.entries(saved.parties || {}).forEach(([k,v])=>parties.set(k,v));
       Object.entries(saved.accounts || {}).forEach(([k,v])=>accounts.set(k,v));
+      footballSerials.clear();footballOffers.clear();
+      Object.entries(saved.footballSerials||{}).forEach(([k,v])=>footballSerials.set(k,v));
+      Object.entries(saved.footballOffers||{}).forEach(([k,v])=>footballOffers.set(k,v));
       auth = new AccountAuth(saved.auth, () => {dirty=true;}); watchAll();
       if (!process.env.STAKKZ_SECRET && saved.secret) SECRET = saved.secret;
     }
