@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import {FOOTBALL_SEED,PACKS,VARIANTS,PLAYER_BY_ID} from '../src/football-catalogue.js';
-import {createFootballService,CardError} from '../src/football.js';
+import {createFootballService,CardError,GOLD_PER_VIRTUAL_CENT} from '../src/football.js';
 import * as core from '../src/core.js';
 const check=(name,fn)=>{fn();console.log('PASS',name);};
 const first='p_'+'a'.repeat(24),second='p_'+'b'.repeat(24);
@@ -14,6 +14,20 @@ check('exactly 20 Premier League clubs, each 11 players, and curated Europe',()=
  for(const club of FOOTBALL_SEED.clubs)assert.equal(FOOTBALL_SEED.players.filter(p=>p.club===club.id).length,11);
  assert.equal(FOOTBALL_SEED.players.filter(p=>p.league==='Premier League').length,220);
  assert(FOOTBALL_SEED.europe.length>=5);
+});
+check('quick-sell exchange prevents basic-pack gold printing',()=>{
+ assert.equal(GOLD_PER_VIRTUAL_CENT,400);
+ const baseSale=VARIANTS.base.valueCents*GOLD_PER_VIRTUAL_CENT;
+ assert(baseSale>0&&baseSale*5<PACKS['first-xi'].cost,
+   'Five 50-cent Base cards must be worth less gold than the pack price');
+ for(const [id,pack] of Object.entries(PACKS)){
+  if(pack.questOnly)continue;
+  const avg=Object.entries(pack.odds).reduce((sum,[variant,chance])=>{
+   const v=VARIANTS[variant];
+   return sum+chance/10000*(v.valueCents*GOLD_PER_VIRTUAL_CENT+(v.bonusGold||0));
+  },0)*pack.cards;
+  assert(avg<pack.cost,'Expected buy/open/quick-sell return exceeds paid cost for '+id);
+ }
 });
 check('five collections plus God and premium guaranteed autograph packs',()=>{
  for(const id of ['first-xi','electric-nights','blackout','crown-glory','derby-day','god','signature','triple-auto','elite-vault']){
