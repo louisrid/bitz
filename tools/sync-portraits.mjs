@@ -14,8 +14,38 @@ const DIR = path.join(ROOT, 'public', 'portraits');
 const API = 'https://www.wikidata.org/w/api.php';
 const COMMONS = 'https://commons.wikimedia.org/w/api.php';
 const UA = 'BITZFootballPortraitImport/1.0 (https://github.com/louisrid/bitz; licensed Wikimedia attribution import)';
-const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[øØ]/g, 'o').replace(/[łŁ]/g, 'l').replace(/[ß]/g, 'ss').replace(/[æÆ]/g, 'ae').replace(/[œŒ]/g, 'oe').replace(/[ıİ]/g, 'i').replace(/[đĐðÐ]/g, 'd').replace(/[^a-z0-9]+/g, ' ').trim();
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* Explicit identities verified against Wikidata records, not fuzzy name matching.
+   This prevents using the wrong Alex Scott, Joao Pedro or similar-name footballer. */
+const VERIFIED_QID = Object.freeze({
+  'alex-scott':'Q106778648',
+  'andrew-robertson':'Q15915040',
+  'antonin-kinsky':'Q124647398',
+  'diego-gomez':'Q115978703',
+  'estevao-willian':'Q115332579',
+  'gabriel-magalhaes':'Q25175970',
+  'joao-pedro':'Q64005114',
+  'jorgen-strand-larsen':'Q28933132',
+  'matheus-cunha':'Q35831063',
+  'nico-gonzalez':'Q106625792',
+  'pascal-gross':'Q509489',
+  'raphinha':'Q28861547',
+  'wesley-fofana':'Q65029821'
+});
+const SEARCH_ALIASES = Object.freeze({
+  'martin-odegaard': ['Martin Ødegaard'],
+  'jorgen-strand-larsen': ['Jørgen Strand Larsen'],
+  'pascal-gross': ['Pascal Groß'],
+  'ferdi-kadioglu': ['Ferdi Kadıoğlu'],
+  'antonin-kinsky': ['Antonín Kinský'],
+  'mohamed-belloumi': ['Mohamed Belloumi'],
+  'junior-kroupi': ['Eli Junior Kroupi'],
+  'andrew-robertson': ['Andy Robertson'],
+  'gonzalo-garcia': ['Gonzalo García Torres'],
+  'geovany-quenda': ['Geovany Quenda']
+});
 const hints = {
   ENG: ['english','british'], SCO: ['scottish','british'], WAL: ['welsh','british'], NIR: ['northern irish','british'],
   BRA: ['brazilian'], ESP: ['spanish'], FRA: ['french'], GER: ['german'], ITA: ['italian'], NED: ['dutch'],
@@ -122,8 +152,19 @@ async function main() {
   console.log('Portraits:', list.length, 'already present:', Object.keys(entries).length, 'to resolve:', lookup.length);
   const proposed = [];
   await parallel(lookup, async p => {
-    const found = await request(wikidataUrl({action:'wbsearchentities',search:p.name,language:'en',limit:'8',type:'item'}));
-    const scored = (found.search || []).map(r=>({...r,score:score(r,p)})).filter(r=>r.score>=65).sort((a,b)=>b.score-a.score);
+    if (VERIFIED_QID[p.id]) { proposed.push({p,entity:VERIFIED_QID[p.id]}); return; }
+    const all = new Map();
+    const queries = [p.name, ...(SEARCH_ALIASES[p.id] || [])];
+    for (const name of queries) {
+      try {
+        const found = await request(wikidataUrl({action:'wbsearchentities',search:name,language:'en',limit:'15',type:'item'}));
+        for (const r of found.search || []) {
+          const n = score(r,p), prior = all.get(r.id);
+          if (!prior || prior.score<n) all.set(r.id,{...r,score:n});
+        }
+      } catch(e) { console.warn('Lookup',p.name,String(e)); }
+    }
+    const scored = [...all.values()].filter(r=>r.score>=65).sort((a,b)=>b.score-a.score);
     if (!scored.length || (scored[1] && scored[0].score-scored[1].score<10)) {
       unresolved.push({id:p.id,name:p.name,reason:'No unambiguous footballer identity on Wikidata'}); return;
     }
