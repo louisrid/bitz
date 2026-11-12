@@ -114,7 +114,7 @@ try{
   const overflow=await page.evaluate(()=>{const c=document.getElementById('fc-window');return c.scrollWidth-c.clientWidth;});
   assert(overflow<=5,'Football menu horizontally overflows: '+overflow);
   await page.locator('#fc-overlay .fc-top [data-fc=close]').click();
-  await page.waitForSelector('#fc-overlay[hidden]');
+  await page.locator('#fc-overlay').waitFor({state:'hidden'});
   await page.evaluate(()=>profileOpen({self:true}));
   await page.waitForSelector('#fc-profile-favorites .fc-profile-grid .fc-card',{timeout:12000});
   assert.equal(await page.locator('#fc-profile-favorites .fc-card').count(),1);
