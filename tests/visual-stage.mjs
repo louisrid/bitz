@@ -37,9 +37,13 @@ try {
     const errors=[];
     page.on('pageerror',e=>errors.push(e.message));
     await page.goto(url,{waitUntil:'domcontentloaded'});
-    await page.waitForSelector('#title .tgo [data-v=create]');
-    await page.locator('#title .tgo [data-v=create]').click();
-    await sleep(1200);
+    await page.waitForSelector('#app[data-screen=home] #wbar [data-v=world]');
+    await sleep(1500);
+    await page.screenshot({path:path.join(output,config.name+'-expanded-world.png'),animations:'disabled'});
+    await page.evaluate(()=>document.querySelector('#bload')?.remove());
+    await page.locator('#wbar [data-a=page][data-v=me]').click();
+    await page.locator('#side .seg.nav [data-a=page][data-v=create]').click();
+    await sleep(700);
     const ok=await page.evaluate(()=>typeof B3!=='undefined'&&B3.ok);
     assert(ok,config.name+' WebGL 3D renderer unavailable on GitHub runner');
     const r=await page.evaluate(()=>{
