@@ -22,6 +22,88 @@
   }
   function rr(k, x, y, w, h, r) { k.beginPath(); k.moveTo(x + r, y); k.arcTo(x + w, y, x + w, y + h, r); k.arcTo(x + w, y + h, x, y + h, r); k.arcTo(x, y + h, x, y, r); k.arcTo(x, y, x + w, y, r); k.closePath(); }
 
+  /* ---------------- pixel grass landscape ----------------
+     A small hand-built, nearest-neighbour grass tile and instanced plants.
+     No external terrain assets, no terrain collision changes, and no per-frame plant work. */
+  function grassTexture() {
+    const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128;
+    const ctx = cv.getContext('2d'), greens = ['#548a42','#619449','#477f40','#6b9c4e','#78a65b','#4a8442','#5c9250','#719c51'];
+    let seed = 14329; const rand = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+      ctx.fillStyle = greens[Math.floor(rand() * greens.length)];
+      ctx.fillRect(x * 8, y * 8, 8, 8);
+      if (rand() < 0.54) { ctx.fillStyle = rand() > 0.5 ? '#83a961' : '#3e783b'; ctx.fillRect(x * 8 + (rand() > .5 ? 4 : 1), y * 8 + (rand() > .5 ? 1 : 5), 3, 2); }
+    }
+    const tex = new THREE.CanvasTexture(cv);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(L.size / 4, L.size / 4);
+    tex.magFilter = THREE.NearestFilter;
+    tex.minFilter = THREE.NearestMipmapNearestFilter;
+    tex.colorSpace = THREE.SRGBColorSpace || tex.colorSpace;
+    tex.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
+    return tex;
+  }
+  function landscape() {
+    // A textured green carpet with a restrained, blocky palette: intentionally not a plain green plane.
+    ground.material = new THREE.MeshLambertMaterial({ map: grassTexture(), color: 0xffffff });
+    const seed = 57031, hash = n => { let a = Math.sin(n * 123.567 + seed) * 43758.5453; return a - Math.floor(a); };
+    const clear = (x, z) => {
+      if (Math.hypot(x, z) < 9) return true;
+      for (const p of Object.values(L.spots)) if (Math.hypot(x - p.x, z - p.z) < 10) return true;
+      for (const c of Object.values(L.circles)) if (Math.hypot(x - c.x, z - c.z) < c.r + 2) return true;
+      for (const p of [...Object.values(L.spots), ...Object.values(L.circles)]) {
+        let tx = p.x, tz = p.z;
+        if (p.face != null) { tx += Math.sin(p.face) * 3.5; tz += Math.cos(p.face) * 3.5; }
+        const t = clamp((x * tx + z * tz) / (tx * tx + tz * tz), 0, 1);
+        if (Math.hypot(x - t * tx, z - t * tz) < 2.5) return true;
+      }
+      return false;
+    };
+    const tufts = new THREE.InstancedMesh(new THREE.BoxGeometry(0.09, 0.23, 0.12), new THREE.MeshLambertMaterial({color:0xffffff, side:THREE.DoubleSide}), 1350);
+    const dummy = new THREE.Object3D(), tint = new THREE.Color(), tcols = [0x317539,0x477f40,0x69a34f,0x79a959,0x4c8e47];
+    let used = 0;
+    for (let n = 0; n < 3200 && used < tufts.count; n++) {
+      const x = (hash(n*4+1)-.5)*152, z = (hash(n*4+2)-.5)*152;
+      if (clear(x,z)) continue;
+      dummy.position.set(x,0.11,z); dummy.rotation.set(0,hash(n*4+3)*6.28318,0);
+      const h = .6 + hash(n*4+4)*1.1; dummy.scale.set(.75,h,.8); dummy.updateMatrix();
+      tufts.setMatrixAt(used,dummy.matrix); tufts.setColorAt(used,tint.setHex(tcols[n%tcols.length])); used++;
+    }
+    tufts.count = used; tufts.instanceMatrix.needsUpdate = true; worldG.add(tufts);
+    const stems = new THREE.InstancedMesh(new THREE.BoxGeometry(0.085,0.35,0.085),lam(0x427b3c),86);
+    const heads = new THREE.InstancedMesh(new THREE.BoxGeometry(0.30,0.20,0.30),new THREE.MeshLambertMaterial({color:0xffffff}),86);
+    const petals=[0xf7e3a2,0xf6f0e8,0x9476d6,0xf1b6c5,0xf6d56e];
+    let flowers=0;
+    for(let n=0;n<420 && flowers<86;n++){
+      const x=(hash(7000+n*5)-.5)*130,z=(hash(7001+n*5)-.5)*130;
+      if(clear(x,z))continue;
+      dummy.rotation.set(0,hash(7003+n*5)*Math.PI,0);dummy.scale.setScalar(1);
+      dummy.position.set(x,0.18,z);dummy.updateMatrix();stems.setMatrixAt(flowers,dummy.matrix);
+      dummy.position.y=.40;dummy.updateMatrix();heads.setMatrixAt(flowers,dummy.matrix);
+      heads.setColorAt(flowers,tint.setHex(petals[n%petals.length]));flowers++;
+    }
+    stems.count=heads.count=flowers;stems.instanceMatrix.needsUpdate=true;heads.instanceMatrix.needsUpdate=true;
+    worldG.add(stems,heads);
+  }
+  function steppingPaths() {
+    const dest = [...Object.values(L.spots), ...Object.values(L.circles)];
+    const pieces=[];
+    dest.forEach(target=>{
+      const tx=target.x+(target.face===undefined?0:Math.sin(target.face)*3.1);
+      const tz=target.z+(target.face===undefined?0:Math.cos(target.face)*3.1);
+      const len=Math.hypot(tx,tz), steps=Math.floor((len-4.5)/1.48);
+      for(let n=0;n<steps;n++){
+        const t=(3.8+n*1.48)/len; if(t>=1)break;
+        const x=tx*t,z=tz*t;
+        for(let side=-1;side<=1;side++)pieces.push([x+Math.cos(Math.atan2(tx,tz))*side*1.4,z-Math.sin(Math.atan2(tx,tz))*side*1.4,n,side]);
+      }
+    });
+    const stones=new THREE.InstancedMesh(new THREE.BoxGeometry(1.41,0.09,1.43),new THREE.MeshLambertMaterial({color:0xffffff}),pieces.length);
+    const d=new THREE.Object3D(),col=new THREE.Color(),shades=[0xccc6ad,0xdad3b9,0xbeb69a,0xe4d7bc];
+    pieces.forEach((p,i)=>{d.position.set(p[0],0.045,p[1]);d.rotation.set(0,0,0);d.scale.setScalar(1);d.updateMatrix();stones.setMatrixAt(i,d.matrix);stones.setColorAt(i,col.setHex(shades[(p[2]+p[3]+8)%4]));});
+    stones.instanceMatrix.needsUpdate=true;stones.receiveShadow=true;worldG.add(stones);
+  }
+
   /* ---------------- building the plaza ---------------- */
   const anim = [];   // {fn(t,dt)}
   function buildPlaza() {
@@ -29,11 +111,8 @@
     /* spawn pad: a black ring, a purple centre and the BITZ mark */
     const ring = new THREE.Mesh(new THREE.RingGeometry(3.3, 3.7, 64), new THREE.MeshBasicMaterial({ color: 0x0b0b0f })); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.02; g.add(ring);
     const centre = new THREE.Mesh(new THREE.CircleGeometry(1.1, 48), new THREE.MeshBasicMaterial({ color: 0x7a52ff })); centre.rotation.x = -Math.PI / 2; centre.position.y = 0.021; g.add(centre);
-    /* dotted paths from spawn to each place */
-    const dots = []; const targets = [...Object.values(L.spots), ...Object.values(L.circles)];
-    for (const tgt of targets) { const len = Math.hypot(tgt.x, tgt.z), n = Math.floor((len - 9) / 2.2); for (let i = 0; i < n; i++) { const k = (4.2 + i * 2.2) / len; if (len * (1 - k) < (tgt.r || 5) + 0.5) break; dots.push([tgt.x * k, tgt.z * k]); } }
-    const dotM = new THREE.InstancedMesh(new THREE.CircleGeometry(0.22, 16), new THREE.MeshBasicMaterial({ color: 0x0b0b0f, transparent: true, opacity: 0.18 }), dots.length), d = new THREE.Object3D();
-    dots.forEach((p, i) => { d.position.set(p[0], 0.015, p[1]); d.rotation.set(-Math.PI / 2, 0, 0); d.updateMatrix(); dotM.setMatrixAt(i, d.matrix); }); g.add(dotM);
+    /* warm stone paths lead to each actual shop entrance and both circles */
+    steppingPaths();
     /* stands */
     for (const s of Object.values(L.spots)) buildStand(s);
     buildCircle(L.circles.gold, 0xf2b705, 0xffe08a); buildCircle(L.circles.purple, 0x7a52ff, 0xc9b5ff);
@@ -219,7 +298,7 @@
       o.g.position.set(o.x, o.y, o.z); o.g.rotation.y = o.ry; o.g.userData.av.userData.anim(t, dt, { moving: o.moving, speed: 1 }); if (o.g.userData.pet) petFollow(o.g, o, t, dt, o.moving, false); });
     for (const a of anim) a.fn(t, dt);
     for (let i = fx.length - 1; i >= 0; i--) { const f = fx[i]; f.t += dt; const g = 18; f.parts.forEach((p, k) => { p.vy -= g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; if (p.y < 0.05) { p.y = 0.05; p.vy = 0; p.vx *= 0.9; p.vz *= 0.9; } p.r += p.rs * dt; f.d.position.set(p.x, p.y, p.z); f.d.rotation.set(p.r, p.r * 0.7, 0); f.d.scale.setScalar(Math.max(0.01, 1 - Math.max(0, f.t - f.life + 0.6) / 0.6)); f.d.updateMatrix(); f.mesh.setMatrixAt(k, f.d.matrix); }); f.mesh.instanceMatrix.needsUpdate = true; if (f.t > f.life) { worldG.remove(f.mesh); fx.splice(i, 1); } }
-    if (flashCol) { const k = Math.max(0, flashUntil - t); scene.background.copy(new THREE.Color(0xffffff)).lerp(flashCol, Math.min(1, k) * 0.7); scene.fog.color.copy(scene.background); if (k <= 0) flashCol = null; }
+    if (flashCol) { const k = Math.max(0, flashUntil - t); scene.background.copy(new THREE.Color(0xd8e8e9)).lerp(flashCol, Math.min(1, k) * 0.7); scene.fog.color.copy(scene.background); if (k <= 0) flashCol = null; }
     renderer.render(scene, cam);
   }
   function petFollow(g, o, t, dt, moving, excited) {
@@ -232,14 +311,15 @@
     THREE = window.THREE; if (!THREE) return false; canvas = cv;
     try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' }); } catch (e) { return false; }
     const small = Math.min(innerWidth, innerHeight) < 700;
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, small ? 2 : 2)); renderer.setClearColor(0xffffff, 1); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    scene = new THREE.Scene(); scene.background = new THREE.Color(0xffffff); scene.fog = new THREE.Fog(0xffffff, 70, 210);
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, small ? 2 : 2)); renderer.setClearColor(0xd8e8e9, 1); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    scene = new THREE.Scene(); scene.background = new THREE.Color(0xd8e8e9); scene.fog = new THREE.Fog(0xd8e8e9, 78, 235);
     cam = new THREE.PerspectiveCamera(42, 1, 0.5, 500); raycaster = new THREE.Raycaster();
-    hemi = new THREE.HemisphereLight(0xffffff, 0xe6e3f0, 0.9); scene.add(hemi);
+    hemi = new THREE.HemisphereLight(0xf9f6eb, 0x769368, 1.05); scene.add(hemi);
     sun = new THREE.DirectionalLight(0xffffff, 0.78); sun.position.set(26, 48, 20); sun.castShadow = true; sun.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048);
     Object.assign(sun.shadow.camera, { left: -44, right: 44, top: 44, bottom: -44, near: 1, far: 160 }); sun.shadow.camera.updateProjectionMatrix(); sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3; scene.add(sun); scene.add(sun.target);
     worldG = new THREE.Group(); scene.add(worldG);
     ground = new THREE.Mesh(new THREE.PlaneGeometry(L.size * 2, L.size * 2), new THREE.MeshLambertMaterial({ color: 0xffffff })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+    landscape();
     const edge = new THREE.Mesh(new THREE.RingGeometry(L.limit + 0.3, L.limit + 0.8, 128), new THREE.MeshBasicMaterial({ color: 0x0b0b0f, transparent: true, opacity: 0.12 })); edge.rotation.x = -Math.PI / 2; edge.position.y = 0.01; scene.add(edge);
     buildPlaza(); bindInput(); resize(); addEventListener('resize', resize);
     document.addEventListener('visibilitychange', () => { hidden = document.hidden; });
