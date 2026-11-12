@@ -2477,7 +2477,8 @@ function productHTML(id, col) {
     '<div class="ptitle"><b>' + it[1] + '</b><span class="rar r' + ra[0] + '">' + ra[1] + '</span></div><p class="pdesc">' + DESC[id] + '</p>' +
     '<div class="pbuy"><span class="lbl">' + SLOTN[slot] + '</span>' + cta + '</div></div>';
 }
-const lootBanner = () => '<div class="loot r3">' + lootImg(60) + '<b>Loot boxes</b><div class="acts"><button class="btn sm' + (wallet.boxes ? ' go' : '') + '" data-a="loot" data-v="' + (wallet.boxes ? 'go' : '') + '">' + (wallet.boxes ? 'Spin (' + wallet.boxes + ')' : 'What’s inside') + '</button><button class="btn sm" data-a="lootbuy">Buy ' + coin(BOX_PRICE) + '</button></div></div>';
+const lootBanner=()=>'<div class="loot r3"><span class="loot-pic">'+lootImg(66)+'</span><b>SEASON 01 BOX</b><div class="acts"><button class="btn sm" data-a="lootbrowse">VIEW DROPS</button>'+
+  (wallet.boxes?'<button class="btn sm go" data-a="loot" data-v="go">OPEN ('+wallet.boxes+')</button>':'<button class="btn sm go" data-a="lootbuy">BUY &amp; OPEN '+coin(BOX_PRICE)+'</button>')+'</div></div>';
 function shopHTML(col) {
   if (F.sel && ITEMS[F.sel] && ITEMS[F.sel][2] > 0) return productHTML(F.sel, col);
   const ids = Object.keys(ITEMS).filter(id => (ITEMS[id][2] > 0 || ITEMS[id][0] === 'gun') && ITEMS[id][3] !== 2 && filtOf(id) === F.filt).sort((a, b) => ITEMS[a][2] - ITEMS[b][2]);
@@ -2540,6 +2541,30 @@ function bxConfetti() {
   return '<div class="bx-confetti" aria-hidden="true">' +
     Array.from({length:14},(_,i)=>'<i style="--bx-x:'+(3+i*31%96)+'%;--bx-col:'+(i%4===0?'#f69bfc':i%4===1?'#ffdc45':i%4===2?'#a4eeff':'#fff0b2')+';--bx-dur:'+(1.2+(i%6)*.17)+'s;--bx-delay:'+(i%7)*.06+'s"></i>').join('')+'</div>';
 }
+/* Collectable Season 01 gallery. Only the actual server loot pool is listed. */
+function lootGalleryHTML(st,col){
+  const all=Object.keys(ITEMS).filter(exclusive);
+  const featured=globalThis.STAKKZ_SEASON&&globalThis.STAKKZ_SEASON.ids||[];
+  const pool=[...new Set(featured.concat(all))].filter(exclusive);
+  const owned=pool.filter(owns).length;
+  const header='<header class="bx-head"><div class="bx-brand">'+logo('sm')+'</div><span class="bx-spacer"></span><span class="bx-stock">'+owned+' / '+pool.length+'</span>'+xBtn()+'</header>';
+  if(st.item&&ITEMS[st.item]){
+    const id=st.item,it=ITEMS[id];
+    return '<div class="bx-shell">'+header+'<div class="bx-collect-preview">'+bxPrizeArt(id,col)+
+      '<div><span class="bx-eyebrow">SEASON 01</span>'+bxTierTag(id)+'<h2>'+esc(it[1])+'</h2><p>'+(owns(id)?'OWNED':'NOT COLLECTED')+'</p></div></div>'+
+      '<div class="bx-actions"><button class="bx-btn" data-a="lootgallery">BACK TO DROPS</button><button class="bx-btn" data-a="lootback">LOOT BOX</button></div></div>';
+  }
+  const page=Math.max(0,Math.min(Math.ceil(pool.length/12)-1,st.page||0)),current=pool.slice(page*12,page*12+12);
+  const cards=current.map(id=>'<button class="bx-collect-card bx-'+bxTier(id)+'" data-a="lootselect" data-v="'+id+'" aria-label="View '+esc(ITEMS[id][1])+'">'+
+    pimg(id,110,col)+bxTierTag(id)+'<strong>'+esc(ITEMS[id][1])+'</strong>'+
+    '<small class="'+(owns(id)?'bx-owned':'bx-new')+'">'+(owns(id)?'OWNED':'LOCKED')+'</small></button>').join('');
+  return '<div class="bx-shell">'+header+
+    '<div class="bx-collection"><div class="bx-collection-head"><h2>SEASON 01</h2><span>'+owned+'/'+pool.length+' COLLECTED</span></div>'+
+    '<div class="bx-collection-grid">'+cards+'</div>'+
+    '<div class="bx-collection-foot">'+(page>0?'<button class="bx-btn" data-a="lootpage" data-v="'+(page-1)+'">PREVIOUS</button>':'')+
+    (page<Math.ceil(pool.length/12)-1?'<button class="bx-btn" data-a="lootpage" data-v="'+(page+1)+'">NEXT</button>':'')+
+    '<button class="bx-btn" data-a="lootback">BACK TO BOX</button></div></div></div>';
+}
 function lootModal() {
   lootSt = {phase:'idle', prize:null};
   openModal('loot', lootHTML, {onClose:()=>{
@@ -2551,6 +2576,7 @@ function lootModal() {
 function lootHTML() {
   const st=lootSt||{phase:'idle'}, n=wallet.boxes, col=PC[Math.max(0,mine0())];
   const busy=st.phase==='spin'||st.phase==='opening', won=st.phase==='prize'&&st.prize;
+  if(st.view==='collection')return lootGalleryHTML(st,col);
   const head='<header class="bx-head"><div class="bx-brand">'+logo('sm')+'</div><span class="bx-spacer"></span><span class="bx-stock">'+lootImg(19)+' '+fmt(n)+'</span>'+(busy?'':xBtn())+'</header>';
   if(won){
     const id=st.prize.item,it=id&&ITEMS[id],tier=bxTier(id);
@@ -2571,7 +2597,7 @@ function lootHTML() {
     '<button class="bx-cta" data-a="lootopen">OPEN BOX</button>':
     '<button class="bx-cta" data-a="lootbuy">BUY &amp; OPEN <span class="bx-price">'+fmt(BOX_PRICE)+'</span></button>';
   const secondary=!busy&&n>0?'<button class="bx-btn" data-a="lootbuy">BUY &amp; OPEN <span class="bx-price">'+fmt(BOX_PRICE)+'</span></button>':'';
-  return '<div class="bx-shell">'+head+hero+wheelHTML(st,col)+'<div class="bx-actions">'+main+secondary+'</div></div>';
+  return '<div class="bx-shell">'+head+hero+wheelHTML(st,col)+'<div class="bx-actions">'+main+secondary+(busy?'':'<button class="bx-btn" data-a="lootbrowse">VIEW DROPS</button>')+'</div></div>';
 }
 async function spinLoot() {
   const st=lootSt;
@@ -3322,6 +3348,22 @@ document.addEventListener('click', async e => {
       if (!owns(id)) { if (wallet.coins < it[2]) { toast('You need ' + fmt(it[2] - wallet.coins) + ' more coins.'); break; } el.disabled = true; try { await syncAcct(); await api('shop', { op: 'buy', item: id }); } catch (er) { toast(er.message); el.disabled = false; break; } Snd('buy'); toast('The ' + it[1].toLowerCase() + ' is yours.'); }
       wearItem(id); styleChanged(); break; }
     case 'wardrobe': wardrobeModal(); break;
+    case 'lootbrowse':
+      if(!modal||modal.kind!=='loot')lootModal();
+      if(lootSt){lootSt.view='collection';lootSt.item='';lootSt.page=0;refreshModal();}
+      break;
+    case 'lootselect':
+      if(lootSt&&exclusive(el.dataset.v)){lootSt.item=el.dataset.v;lootSt.view='collection';refreshModal();}
+      break;
+    case 'lootgallery':
+      if(lootSt){lootSt.item='';refreshModal();}
+      break;
+    case 'lootpage':
+      if(lootSt){lootSt.page=Math.max(0,Math.floor(+el.dataset.v||0));refreshModal();}
+      break;
+    case 'lootback':
+      if(lootSt){lootSt.view='';lootSt.item='';refreshModal();}
+      break;
     case 'loot': lootModal(); if (el.dataset.v === 'go' && wallet.boxes > 0) await spinLoot(); break;
     case 'lootbuy': {
       if (lootSt && (lootSt.phase === 'opening' || lootSt.phase === 'spin')) break;
