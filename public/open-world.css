@@ -429,4 +429,4 @@ html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}
 }
 #flist .fr:not(.gone):hover{outline:1px solid #000;outline-offset:-1px}
 #fside .fr:not(.gone) .ava{background-color:#fff!important}
-#modal[data-kind="loot"],#modal[data-kind="loot"] .bx-shell{background-color:#fff!important}
+/* Loot-specific styling is intentionally dark, unlike the neutral white panels. */
