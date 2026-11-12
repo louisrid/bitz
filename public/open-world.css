@@ -662,3 +662,289 @@ html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}
 @media(prefers-reduced-motion:reduce){
  #fprofov .pp-card,#fprofov .pp-char,#fprofov .pp-char:before{animation:none!important}
 }
+
+/* BITZ DESIGN: Season 01 lavender, pink and ice-blue */
+:root{--bitz-lav:#c6b2ff;--bitz-pink:#ffacd9;--bitz-blue:#a7e4ff;--bitz-night:#121521;--bitz-deep:#191b2a}
+
+/* The normal white shop is unchanged. The loot room shares its chunky outlines and Coolvetica. */
+#veil:has(#modal[data-kind="loot"]){z-index:260!important;background:#050711c9!important;backdrop-filter:blur(4px)!important}
+#modal[data-kind="loot"]{
+ width:min(875px,calc(100vw - 26px))!important;max-height:min(92dvh,860px)!important;
+ border:4px solid #000!important;border-radius:22px!important;
+ background:var(--bitz-night)!important;color:#fff!important;
+ box-shadow:0 0 0 3px var(--bitz-lav),7px 9px 0 #000,0 24px 60px #000a!important;
+ scrollbar-color:var(--bitz-lav) #121521
+}
+#modal[data-kind="loot"] .bx-shell{background:var(--bitz-night)!important}
+#modal[data-kind="loot"],#modal[data-kind="loot"] *,#modal[data-kind="loot"] button{
+ font-family:"Coolvetica",sans-serif!important;font-weight:400!important;letter-spacing:.005em!important
+}
+#modal[data-kind="loot"] .bx-head{
+ min-height:62px!important;background:#111522!important;border-bottom:3px solid #000!important;
+ padding:9px 19px!important
+}
+#modal[data-kind="loot"] .bx-head .logo{font-size:clamp(25px,3vw,36px)!important;color:#fff!important;letter-spacing:-.025em!important}
+#modal[data-kind="loot"] .bx-season-chip{display:none!important}
+#modal[data-kind="loot"] .bx-head .bx-stock{
+ background:#c6b2ff!important;border:3px solid #000!important;color:#101019!important;
+ padding:9px 15px!important;border-radius:11px!important;font-size:17px!important;box-shadow:3px 3px 0 #000!important
+}
+#modal[data-kind="loot"] .ib[data-a="close"]{
+ background:#fff!important;border:3px solid #000!important;border-radius:12px!important;
+ box-shadow:3px 3px 0 #000!important;color:#000!important
+}
+#modal[data-kind="loot"] .ib[data-a="close"] svg{stroke:#000!important}
+
+/* Season One ribbon: colour and movement without unnecessary copy. */
+#modal[data-kind="loot"] .bx-season-ribbon{
+ position:relative;isolation:isolate;display:flex;align-items:center;gap:17px;
+ min-height:77px;padding:10px 25px;overflow:hidden;
+ background:linear-gradient(110deg,#bba6ff 0%,#fdb0dc 30%,#a4e5ff 64%,#bdabff 100%);
+ background-size:240% 100%;border-bottom:4px solid #000;
+ animation:bitz-season-shift 11s ease-in-out infinite alternate;
+ color:#0d1121
+}
+#modal[data-kind="loot"] .bx-season-ribbon:before{
+ content:"";position:absolute;z-index:-1;inset:-30% -20%;
+ background:repeating-linear-gradient(120deg,transparent 0,transparent 55px,#ffffff28 55px,#ffffff28 70px);
+ animation:bitz-season-scroll 15s linear infinite;pointer-events:none
+}
+#modal[data-kind="loot"] .bx-ribbon-emblem{
+ width:54px;height:53px;flex:0 0 54px;display:grid;place-items:center;
+ background:#111522!important;color:#fff!important;
+ border:3px solid #000;border-radius:14px;box-shadow:3px 4px 0 #000;
+ font-size:31px!important;transform:rotate(-6deg);animation:bitz-emblem-pop 4s ease-in-out infinite
+}
+#modal[data-kind="loot"] .bx-ribbon-text{display:flex;flex-direction:column;gap:1px;min-width:0}
+#modal[data-kind="loot"] .bx-ribbon-text strong{
+ font-size:clamp(29px,4.1vw,44px)!important;line-height:.95!important;
+ color:#141425;white-space:nowrap
+}
+#modal[data-kind="loot"] .bx-ribbon-text small{
+ font-size:12px!important;color:#212236;white-space:nowrap
+}
+#modal[data-kind="loot"] .bx-ribbon-signal{margin-left:auto;display:flex;gap:8px}
+#modal[data-kind="loot"] .bx-ribbon-signal i{
+ display:block;width:16px;height:16px;border:3px solid #151624;border-radius:5px;
+ background:#f1eeff;transform:rotate(20deg);animation:bitz-banner-bounce 2.2s ease-in-out infinite
+}
+#modal[data-kind="loot"] .bx-ribbon-signal i:nth-child(2){background:#b0f3ff;animation-delay:.35s}
+#modal[data-kind="loot"] .bx-ribbon-signal i:nth-child(3){background:#ffc1e6;animation-delay:.7s}
+#modal[data-kind="loot"] .bx-season-sparks{position:absolute;z-index:-1;inset:0;pointer-events:none}
+#modal[data-kind="loot"] .bx-season-sparks i{
+ position:absolute;left:calc(7% + var(--x,0%));top:var(--y,35%);
+ width:9px;height:9px;border:2px solid #fff;border-radius:2px;
+ background:#fff6;animation:bitz-sparkle 2.8s ease-in-out infinite
+}
+#modal[data-kind="loot"] .bx-season-sparks i:nth-child(1){--x:4%;--y:68%}
+#modal[data-kind="loot"] .bx-season-sparks i:nth-child(2){--x:27%;--y:19%;animation-delay:.3s}
+#modal[data-kind="loot"] .bx-season-sparks i:nth-child(3){--x:46%;--y:62%;animation-delay:1s}
+#modal[data-kind="loot"] .bx-season-sparks i:nth-child(4){--x:62%;--y:20%;animation-delay:.8s}
+#modal[data-kind="loot"] .bx-season-sparks i:nth-child(5){--x:78%;--y:68%;animation-delay:1.6s}
+#modal[data-kind="loot"] .bx-season-sparks i:nth-child(6){--x:85%;--y:23%;animation-delay:2s}
+
+/* The shop's silhouette, but with dark ink panels and pastel highlights. */
+#modal[data-kind="loot"] .bx-hero{
+ min-height:196px!important;border-bottom:3px solid #000!important;
+ background:linear-gradient(110deg,#242037 0%,#161a2b 58%,#1b2034 100%)!important
+}
+#modal[data-kind="loot"] .bx-art{
+ min-height:195px!important;background:radial-gradient(ellipse at center,#dcb9ff1f,transparent 67%);
+ overflow:hidden
+}
+#modal[data-kind="loot"] .bx-art:before{opacity:.18!important}
+#modal[data-kind="loot"] .bx-ring{
+ border-color:#bcacff!important;background:#bdadff26!important;
+ box-shadow:0 0 11px #c9aeff55!important;animation:bitz-ring-breathe 3s ease-in-out infinite
+}
+#modal[data-kind="loot"] .bx-chestpic{
+ height:200px!important;filter:drop-shadow(0 9px 7px #000a) drop-shadow(0 0 10px #d8b1ff42)!important;
+ animation:bitz-box-hover 3.1s ease-in-out infinite
+}
+#modal[data-kind="loot"] .bx-chestpic img{max-height:192px!important}
+#modal[data-kind="loot"] .bx-detail{padding:12px 18px 12px 10px!important;gap:11px!important}
+#modal[data-kind="loot"] .bx-eyebrow{color:#c4baff!important;font-size:12px!important}
+#modal[data-kind="loot"] .bx-title{font-size:clamp(34px,4.6vw,49px)!important;color:#fff!important}
+#modal[data-kind="loot"] .bx-title em{color:var(--bitz-pink)!important}
+#modal[data-kind="loot"] .bx-hero-line{color:#b5c8e8!important;font-size:12px!important}
+#modal[data-kind="loot"] .bx-tier{
+ font-size:12px!important;border:2px solid currentColor!important;
+ padding:7px 10px!important;border-radius:9px!important;
+ box-shadow:none!important
+}
+#modal[data-kind="loot"] .bx-tier.bx-mythical{color:#ffb1e2!important;background:#ff9bd222!important}
+#modal[data-kind="loot"] .bx-tier.bx-legendary{color:#ffda79!important;background:#ffd56f19!important}
+#modal[data-kind="loot"] .bx-featured-skin{
+ border:3px solid #000!important;box-shadow:3px 3px 0 #000!important;
+ border-radius:13px!important;background:#30283f!important;transition:transform .15s ease,background .15s ease
+}
+#modal[data-kind="loot"] .bx-featured-skin.bx-mythical{background:#442943!important}
+#modal[data-kind="loot"] .bx-featured-skin:hover{transform:translateY(-3px) rotate(2deg)!important;border-color:#beafff!important}
+#modal[data-kind="loot"] .bx-roulette{
+ border-bottom:3px solid #000!important;
+ background:#171c2c!important;padding:12px 0 13px!important
+}
+#modal[data-kind="loot"] .bx-reel-top strong{color:#c4b5ff!important;font-size:12px!important}
+#modal[data-kind="loot"] .bx-reel-top span{color:#aacff3!important;font-size:11px!important}
+#modal[data-kind="loot"] .bx-reel-viewport{
+ border:3px solid #05050c!important;border-radius:16px!important;background:#101522!important;
+ box-shadow:0 0 0 2px #a7a0e0,inset 0 0 12px #000a!important
+}
+#modal[data-kind="loot"] .bx-card{
+ background:#2d2740!important;border:3px solid #b4a1fc!important;
+ border-radius:12px!important;box-shadow:0 3px 0 #000!important
+}
+#modal[data-kind="loot"] .bx-card.bx-mythical{background:#47283f!important;border-color:#ff9fdb!important}
+#modal[data-kind="loot"] .bx-card .bx-card-tier{color:#e7dcff!important;font-size:11px!important}
+#modal[data-kind="loot"] .bx-card .bx-card-name{font-size:12px!important}
+#modal[data-kind="loot"] .bx-pointer{border-top-color:#b9aaff!important;filter:drop-shadow(0 3px 5px #b9aaff)!important}
+#modal[data-kind="loot"] .bx-reel-viewport.bx-moving{animation:bitz-reel-lively .65s ease-in-out infinite alternate}
+#modal[data-kind="loot"] .bx-reel-viewport.bx-ended{box-shadow:0 0 0 3px #c8b0ff,0 0 18px #d7baff86!important}
+#modal[data-kind="loot"] .bx-actions{
+ background:#141928!important;padding:16px 21px 19px!important;border-top:1px solid #29263d
+}
+#modal[data-kind="loot"] .bx-cta{
+ min-height:58px!important;border:3px solid #000!important;border-radius:13px!important;
+ color:#101020!important;
+ background:linear-gradient(110deg,#c7b8ff 0%,#b6e2ff 53%,#ffc1e2 100%)!important;
+ box-shadow:4px 5px 0 #000!important;text-shadow:none!important;
+ font-size:clamp(23px,2.7vw,31px)!important;transition:transform .1s ease,filter .15s ease!important
+}
+#modal[data-kind="loot"] .bx-cta:hover:not(:disabled){transform:translateY(-2px)!important;filter:brightness(1.06)!important}
+#modal[data-kind="loot"] .bx-cta:active:not(:disabled){transform:translate(3px,3px)!important;box-shadow:1px 2px 0 #000!important}
+#modal[data-kind="loot"] .bx-price{font-size:18px!important}
+#modal[data-kind="loot"] .bx-btn,#modal[data-kind="loot"] .bx-mini-more{
+ background:#eeeaff!important;color:#181523!important;
+ border:3px solid #000!important;box-shadow:3px 4px 0 #000!important;
+ border-radius:12px!important;font-size:16px!important
+}
+#modal[data-kind="loot"] .bx-btn:hover,#modal[data-kind="loot"] .bx-mini-more:hover{background:#c4eaff!important}
+#modal[data-kind="loot"] .bx-btn.bx-close{background:#fff!important;color:#151522!important}
+#modal[data-kind="loot"] .bx-btn.bx-wear{background:#c1f7e5!important;color:#12171d!important}
+#modal[data-kind="loot"] .bx-result-actions{flex-wrap:wrap}
+#modal[data-kind="loot"] .bx-result-actions .bx-cta{min-width:0!important}
+
+/* Prize screen and collection get the same restrained season palette. */
+#modal[data-kind="loot"] .bx-drop-head,#modal[data-kind="loot"] .bx-collection-head{background:#171b2c!important;color:#cbbdff!important}
+#modal[data-kind="loot"] .bx-reward{
+ background:radial-gradient(circle at 27% 47%,#bba4ff44,transparent 46%),#181a2b!important;
+ border-bottom:3px solid #000!important
+}
+#modal[data-kind="loot"] .bx-reward.bx-mythical{
+ background:radial-gradient(circle at 27% 47%,#ff9cdb55,transparent 46%),#251b34!important
+}
+#modal[data-kind="loot"] .bx-reward-halo{background:radial-gradient(circle,#e6cbff77,transparent 65%)!important;animation:bitz-ring-breathe 3s ease-in-out infinite}
+#modal[data-kind="loot"] .bx-reward.bx-mythical .bx-reward-halo{background:radial-gradient(circle,#ffc1ec88,transparent 65%)!important}
+#modal[data-kind="loot"] .bx-prize-name{color:#fff!important}
+#modal[data-kind="loot"] .bx-reward-sub{color:#b5dfff!important}
+#modal[data-kind="loot"] .bx-reward-saved{color:#b5f5da!important}
+#modal[data-kind="loot"] .bx-meter{background:#292c3e!important}
+#modal[data-kind="loot"] .bx-meter span{background:#aeccff!important}
+#modal[data-kind="loot"] .bx-reward.bx-mythical .bx-meter span{background:#ff9cdb!important}
+#modal[data-kind="loot"] .bx-more-drops{background:#1e2131!important;border-bottom:2px solid #000!important}
+#modal[data-kind="loot"] .bx-more-title{color:#c7b8ff!important}
+#modal[data-kind="loot"] .bx-mini-skin,#modal[data-kind="loot"] .bx-collect-card{
+ background:#2f2942!important;border:3px solid #000!important;box-shadow:3px 3px 0 #000!important;
+ transition:transform .15s ease,border-color .15s ease
+}
+#modal[data-kind="loot"] .bx-mini-skin.bx-mythical,#modal[data-kind="loot"] .bx-collect-card.bx-mythical{background:#472941!important}
+#modal[data-kind="loot"] .bx-mini-skin:hover,#modal[data-kind="loot"] .bx-collect-card:hover{
+ transform:translateY(-3px)!important;border-color:var(--bitz-lav)!important
+}
+#modal[data-kind="loot"] .bx-collection{background:#131726!important}
+#modal[data-kind="loot"] .bx-collect-preview{background:#1a1b30!important}
+#modal[data-kind="loot"] .bx-collection-head h2{font-size:37px!important}
+#modal[data-kind="loot"] .bx-collect-card strong{font-size:16px!important;color:white!important}
+#modal[data-kind="loot"] .bx-owned{color:#b2f8db!important}
+#modal[data-kind="loot"] .bx-new{color:#ffb9dd!important}
+
+/* Trading has real focus above the Shop billboard; same shape, dark palette. */
+#veil:has(#modal[data-kind="trade"]),#veil:has(#modal[data-kind="traded"]){
+ z-index:270!important;background:#070912be!important;backdrop-filter:blur(3px)!important
+}
+#modal[data-kind="trade"],#modal[data-kind="traded"]{
+ background:#171c2c!important;color:#fff!important;border:4px solid #000!important;
+ border-radius:21px!important;box-shadow:0 0 0 3px #bba8ff,6px 8px 0 #000!important
+}
+#modal[data-kind="trade"] h2,#modal[data-kind="trade"] h3,
+#modal[data-kind="trade"] .fine,#modal[data-kind="trade"] span,#modal[data-kind="trade"] p,
+#modal[data-kind="traded"] h2{color:#fff!important;font-family:"Coolvetica",sans-serif!important;font-weight:400!important}
+#modal[data-kind="trade"] .mhead,#modal[data-kind="traded"] .mhead{
+ background:#171c2c!important;border-bottom:2px solid #8c80bb!important
+}
+#modal[data-kind="trade"] .tside{
+ background:#23293b!important;border:3px solid #000!important;
+ border-radius:14px!important;color:#fff!important
+}
+#modal[data-kind="trade"] .tside.ok{
+ background:#213b39!important;box-shadow:inset 0 0 0 2px #b2f4e3!important
+}
+#modal[data-kind="trade"] .titem{
+ background:#2d3147!important;color:#fff!important;border:2px solid #000!important;
+ border-radius:11px!important;box-shadow:2px 3px 0 #000!important
+}
+#modal[data-kind="trade"] .titem.on{background:#524079!important;outline:2px solid #cfbfff}
+#modal[data-kind="trade"] .tgold{background:#23293b!important;color:white!important;border:2px solid #000!important}
+#modal[data-kind="trade"] .tgold input{background:#fff!important;color:#000!important}
+#modal[data-kind="trade"]>.row:last-child{
+ background:#171c2c!important;border-top:3px solid #af9ceb!important
+}
+#modal[data-kind="trade"] .btn{font-family:"Coolvetica",sans-serif!important;font-weight:400!important}
+#modal[data-kind="trade"] .btn.go,#modal[data-kind="trade"] .btn.ok{
+ background:#b9efff!important;color:#141520!important;border:3px solid #000!important
+}
+#modal[data-kind="trade"] .btn:not(.go):not(.ok){background:#e6dfff!important;color:#171625!important}
+#modal[data-kind="trade"] .tchip{background:#efeaff!important;color:#111320!important}
+#modal[data-kind="trade"] .tchip b{color:#111320!important}
+#modal[data-kind="trade"] .tok{background:#c2f7dd!important;color:#10291c!important}
+#modal[data-kind="trade"] .ib[data-a="close"]{background:#fbc2e3!important;color:#111!important}
+
+/* Player cards stay white like your profile, with the same animated pastel detail. */
+#fprofov{z-index:220!important}
+#fprofov .pp-card{box-shadow:0 0 0 3px #b6a8ff,7px 9px 0 #000,0 19px 45px #0006!important}
+#fprofov .pp-char{outline:2px solid #d0c3ff;outline-offset:-5px}
+#fprofov .pp-scene-label{background:#ddcfff!important}
+#fprofov .pp-pet-label{border-color:#000!important;background:#e8f7ffed!important;animation:bitz-label-rise .44s cubic-bezier(.2,1.2,.25,1) both}
+#fprofov .pp-info .plist .prow{transition:transform .14s ease,background .16s ease}
+#fprofov .pp-info .plist .prow:hover{transform:translateX(-2px);background:#f5f0ff!important}
+#fprofov .pbtns .btn.go{background:#c6b2ff!important}
+#fprofov .pbtns .btn{font-family:"Coolvetica",sans-serif!important;font-weight:400!important}
+
+/* Reduced-motion and narrow layouts. */
+@keyframes bitz-season-shift{from{background-position:0 0}to{background-position:100% 0}}
+@keyframes bitz-season-scroll{to{transform:translateX(100px)}}
+@keyframes bitz-emblem-pop{0%,100%{transform:rotate(-6deg) scale(1)}50%{transform:rotate(-3deg) scale(1.08)}}
+@keyframes bitz-banner-bounce{0%,100%{transform:translateY(0) rotate(17deg)}50%{transform:translateY(-6px) rotate(24deg)}}
+@keyframes bitz-sparkle{0%,100%{opacity:.28;transform:scale(.7) rotate(20deg)}50%{opacity:.9;transform:scale(1.3) rotate(62deg)}}
+@keyframes bitz-ring-breathe{50%{opacity:.55;transform:scale(1.06)}}
+@keyframes bitz-box-hover{50%{transform:translateY(-7px) rotate(2deg)}}
+@keyframes bitz-reel-lively{from{filter:brightness(1)}to{filter:brightness(1.13)}}
+@keyframes bitz-label-rise{from{transform:translateY(10px);opacity:.2}to{transform:translateY(0);opacity:1}}
+@media(max-width:680px){
+ #modal[data-kind="loot"]{max-height:calc(100dvh - 16px)!important}
+ #modal[data-kind="loot"] .bx-season-ribbon{min-height:53px!important;padding:5px 13px;gap:9px}
+ #modal[data-kind="loot"] .bx-ribbon-emblem{height:39px;width:40px;flex-basis:40px;border-radius:9px;font-size:22px!important}
+ #modal[data-kind="loot"] .bx-ribbon-text strong{font-size:28px!important}
+ #modal[data-kind="loot"] .bx-ribbon-text small{font-size:10px!important}
+ #modal[data-kind="loot"] .bx-ribbon-signal{gap:4px}
+ #modal[data-kind="loot"] .bx-ribbon-signal i{width:11px;height:11px;border-width:2px}
+ #modal[data-kind="loot"] .bx-hero{min-height:170px!important}
+ #modal[data-kind="loot"] .bx-art{min-height:170px!important}
+ #modal[data-kind="loot"] .bx-chestpic{height:170px!important}
+ #modal[data-kind="loot"] .bx-chestpic img{max-height:165px!important}
+ #modal[data-kind="loot"] .bx-reel-viewport{height:118px!important}
+ #modal[data-kind="loot"] .bx-base-actions{padding:11px 9px 14px!important}
+ #modal[data-kind="loot"] .bx-cta{font-size:23px!important;min-height:50px!important}
+ #modal[data-kind="loot"] .bx-btn{font-size:15px!important}
+ #modal[data-kind="loot"] .bx-collection-head h2{font-size:30px!important}
+ #modal[data-kind="trade"] .mhead{background:#171c2c!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #modal[data-kind="loot"] .bx-season-ribbon,#modal[data-kind="loot"] .bx-season-ribbon:before,
+ #modal[data-kind="loot"] .bx-ribbon-emblem,#modal[data-kind="loot"] .bx-ribbon-signal i,
+ #modal[data-kind="loot"] .bx-season-sparks i,#modal[data-kind="loot"] .bx-ring,
+ #modal[data-kind="loot"] .bx-chestpic,#modal[data-kind="loot"] .bx-reward-halo,
+ #modal[data-kind="loot"] .bx-reel-viewport.bx-moving,
+ #fprofov .pp-pet-label{animation:none!important}
+ #modal[data-kind="loot"] .bx-season-ribbon{background-position:center}
+}
