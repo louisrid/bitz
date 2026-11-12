@@ -6,7 +6,7 @@ import { ITEMS, HAIRS } from './shop.js';
 import { BOT_NAMES, BOT_LOOKS, isBot } from './bots.js';
 
 const E = globalThis.Engine;
-export const BOX_PRICE = 500000, GOLD_RATE = 1000, AWAY_MS = 45000;
+export const BOX_PRICE = 2000000, GOLD_RATE = 1000000 / 60, AWAY_MS = 45000;
 const MYTHIC_ODDS = 0.15;   // every box holds an exclusive: Legendary usually, Mythical about one box in seven
 const rarity = p => (p <= 40000 ? 0 : p <= 100000 ? 1 : p <= 300000 ? 2 : p <= 3000000 ? 3 : 4);
 const exclusive = id => !!(ITEMS[id] && ITEMS[id][3] === 1);   // [3] 1 = loot boxes only, 2 = caught in the wild only
@@ -30,7 +30,9 @@ export function earn(w, now) {
   const from = w.gt || 0; w.gt = now;
   if (!from || now <= from || now - from > AWAY_MS) return 0;
   const b = w.boost, boosted = b && b.until > from ? Math.min(now, b.until) - from : 0;
-  const gain = Math.floor(((now - from) + boosted * ((b ? b.x : 1) - 1)) * GOLD_RATE / 1000);
+  const units = (now - from) + boosted * ((b ? b.x : 1) - 1);
+  const raw = Math.max(0,Math.round(units))*1000000 + Math.max(0,Math.floor(w.goldCarry||0));
+  const gain=Math.floor(raw/60000);w.goldCarry=raw%60000;
   w.coins = Math.floor(w.coins || 0) + gain; if (b && b.until <= now) delete w.boost;
   return gain;
 }
