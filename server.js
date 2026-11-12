@@ -151,7 +151,7 @@ function authSucceeded(key) { authAttempts.delete(key); }
 function allowed(ip) { const now = Date.now(), b = buckets.get(ip) || { n: 80, t: now }; b.n = Math.min(80, b.n + (now - b.t) / 1000 * 20); b.t = now; buckets.set(ip, b); if (buckets.size > 5000) buckets.clear(); if (b.n < 1) return false; b.n--; return true; }
 /* which release this server is running; open pages reload themselves when it changes */
 const handoffs = new Map();
-const BUILD = String(process.env.RENDER_GIT_COMMIT || Date.now()).slice(0, 12);
+const BUILD = String(process.env.RENDER_GIT_COMMIT || 'dev').slice(0, 12);   // only a new release changes this, never a restart
 const send = (res, code, o) => { const buf = Buffer.from(JSON.stringify(o)); res.writeHead(code, { 'Content-Type': 'application/json', 'Content-Length': buf.length, 'Cache-Control': 'no-store' }); res.end(buf); };
 const read = req => new Promise((ok, no) => { let n = 0; const parts = []; req.on('data', c => { n += c.length; if (n > 20000) { no(new Error('big')); req.destroy(); } else parts.push(c); }); req.on('end', () => { try { ok(JSON.parse(Buffer.concat(parts).toString('utf8') || '{}')); } catch (e) { no(e); } }); req.on('error', no); });
 
@@ -514,11 +514,11 @@ function plazaJoin(ws, raw) {
     if (q.dead) return;
     const now = Date.now(), np = [Math.max(-145, Math.min(145, msg.p[0])), Math.max(0, Math.min(12, msg.p[1])), Math.max(-145, Math.min(145, msg.p[2])), msg.p[3] % 7, msg.p[4] | 0];
     /* nobody runs faster than 11 a second: a longer step is cut short, so nobody can teleport into range to shoot */
-    const step = Math.hypot(np[0] - q.p[0], np[2] - q.p[2]), most = (q.sprintUntil > now - 400 ? 38 : 16) * Math.min(2, Math.max(0.1, (now - (q.lastAt || now)) / 1000)) + 3;
+    const step = Math.hypot(np[0] - q.p[0], np[2] - q.p[2]), most = 38 * Math.min(2, Math.max(0.1, (now - (q.lastAt || now)) / 1000)) + 3;
     if (q.lastAt && step > most) { const k = most / step; np[0] = q.p[0] + (np[0] - q.p[0]) * k; np[2] = q.p[2] + (np[2] - q.p[2]) * k; }
     const far = false;
     q.p = np; q.lastAt = now; q.moved = true; plazaTouch(q, ws, now);
-  } else if (msg.sprint) { const now = Date.now(); if (now >= (q.sprintReady || 0) && !q.dead) { q.sprintUntil = now + 3000; q.sprintReady = now + 8000; }
+  } else if (msg.sprint) { /* sprint has no stamina now: the step limit above already allows it */
   } else if (msg.admin && typeof msg.admin === 'object') {
     if (!isAdmin(q)) return plazaSend(ws, { error: 'Only the admin can change that.' });
     const k = msg.admin.k, on = !!msg.admin.on; if (!(k in world) || k === 'zom' || k === 'wild' || k === 'gift') return;   // zombies and rare creatures are gone

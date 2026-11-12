@@ -1561,9 +1561,9 @@ const B3 = (function () {
   WD.snap = rows => rows.forEach(r => { const o = WD.others.get(r[0]); if (o) o.t = r.slice(1); });
   WD.emote = (i, e) => { const o = i === 'me' ? WD.me : WD.others.get(i); if (o) { o.emo = e; o.emoT = performance.now() + (e === 'dance' ? 2600 : 1600); } };
   WD.jump = () => { const m = WD.me; if (m && m.y <= 0.001 && !WD.dead) m.vy = 14; };
-  /* sprint: double-tap forward. Four times walking speed for 3 seconds, then 5 seconds to recharge. */
-  WD.sprintUntil = 0; WD.sprintReady = 0; WD.lastW = 0;
-  WD.trySprint = () => { const now = performance.now(); if (WD.dead || !WD.me || now < WD.sprintReady || (WD.blocked && WD.blocked())) return; WD.sprintUntil = now + 3000; WD.sprintReady = now + 8000; if (WD.send) WD.send({ sprint: 1 }); if (WD.onSprint) WD.onSprint(); };
+  /* sprint: double-tap W (or the stick). Four times walking speed for as long as you keep moving; let go and you walk again. No stamina. */
+  WD.sprinting = false; WD.lastW = 0;
+  WD.trySprint = () => { if (WD.dead || !WD.me || (WD.blocked && WD.blocked())) return; WD.sprinting = true; if (WD.onSprint) WD.onSprint(); };
   /* ---- creatures, gift drops and zombies. The server moves them and decides who got them. ---- */
   const entM = new Map(), RAINBOW = [0xff4b3e, 0xff9f1c, 0xffd60a, 0x3ddc84, 0x3fa9ff, 0xb388ff];
   OUTC.zombie = ['#4f6b3d', '#34324a', '#2a2a2a'];
@@ -1699,18 +1699,28 @@ const B3 = (function () {
   });
   WD.pose = () => { const m = WD.me; return m ? [m.x, m.y, m.z, m.ry, m.sp > 0.5 ? (m.sp > 8 ? 2 : 1) : 0] : null; };
   const typing = e => /^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '');
+  /* Keys are tracked by physical key (e.code), not the letter typed: Option, Shift or Cmd held at the wrong moment changes
+     the letter between press and release, the release never matches, and the character walks by itself. */
+  const keyOf = e => { const c = e.code || ''; if (/^Key[A-Z]$/.test(c)) return c.slice(3).toLowerCase(); if (/^Arrow/.test(c)) return c.toLowerCase(); if (/^Digit\d$/.test(c)) return c.slice(5); if (c === 'Space') return ' '; if (/^Shift/.test(c)) return 'shift'; return String(e.key || '').toLowerCase(); };
+  let keyAt = 0; const anyHeld = K => !!(K.w || K.a || K.s || K.d || K.arrowup || K.arrowdown || K.arrowleft || K.arrowright || K.shift);
+  const letGo = () => { WD.keys = {}; WD.sprinting = false; };
+  WD.letGo = () => { letGo(); WD.joy.x = WD.joy.y = 0; };
+  ['blur', 'pagehide', 'focus'].forEach(n => addEventListener(n, WD.letGo));
+  document.addEventListener('visibilitychange', WD.letGo); document.addEventListener('contextmenu', WD.letGo);
+  document.addEventListener('pointerdown', () => { if (anyHeld(WD.keys) && performance.now() - keyAt > 1500) letGo(); }, true);   // a key that stopped repeating while you click is a lost key-up
   document.addEventListener('keydown', e => {
-    if (!WD.on || typing(e) || e.metaKey || e.ctrlKey) return;
+    keyAt = performance.now();
+    if (e.metaKey || e.ctrlKey || e.altKey) { letGo(); return; }   // browsers swallow key-ups while these are held
+    if (!WD.on || typing(e)) return;
     if (WD.blocked && WD.blocked()) { WD.keys = {}; return; }
-    const k = e.key.toLowerCase(); WD.keys[k] = true;
+    const k = keyOf(e); WD.keys[k] = true;
     if (k === ' ') { e.preventDefault(); WD.jump(); }
     if (k === 'w' && !e.repeat) { const tn = performance.now(); if (tn - WD.lastW < 320) WD.trySprint(); WD.lastW = tn; }
     if (/^[1-5]$/.test(k)) { if (WD.canUse && !WD.canUse(+k - 1)) { if (WD.onLocked) WD.onLocked(+k - 1); } else WD.setWeapon(+k - 1); }
     if (k === 'f' && !e.repeat) WD.fire();
     if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].indexOf(k) >= 0) e.preventDefault();
   });
-  document.addEventListener('keyup', e => { WD.keys[e.key.toLowerCase()] = false; });
-  addEventListener('blur', () => { WD.keys = {}; });
+  document.addEventListener('keyup', e => { keyAt = performance.now(); if (/^(Meta|Control|Alt|OS)/.test(e.key || '')) { letGo(); return; } delete WD.keys[keyOf(e)]; delete WD.keys[String(e.key || '').toLowerCase()]; });
   function animate(o, u, sp, air, now, t) {
     const sw = air ? 0 : Math.sin(t * (sp > 8 ? 16 : 11)) * Math.min(1, sp / 5) * 0.9;
     if (!u.legs) return;
@@ -1738,7 +1748,7 @@ const B3 = (function () {
       el=0.34;zoom=1;az=WD.me?WD.me.ry+Math.PI:0;WD.cAz=az;WD.cEl=el;WD.cZ=1;cT.set(WD.me?WD.me.x:0,3.1,WD.me?WD.me.z:0);
     }
     Object.keys(tokens).forEach(k=>{tokens[k].visible=false;});Object.keys(pets).forEach(k=>{pets[k].visible=false;});
-    const m = WD.me, lock = !!(WD.blocked && WD.blocked()); if (lock) { WD.keys = {}; WD.joy.x = WD.joy.y = 0; }
+    const m = WD.me, lock = !!(WD.blocked && WD.blocked()); if (lock) { WD.keys = {}; WD.joy.x = WD.joy.y = 0; WD.sprinting = false; } else if (anyHeld(WD.keys) && now - keyAt > 10000) letGo();   // held keys repeat; ten silent seconds means a lost key-up
     if (m && !(Number.isFinite(m.x) && Number.isFinite(m.z) && Number.isFinite(m.y) && Number.isFinite(m.ry))) { m.x = 0; m.z = 0; m.y = 0; m.vy = 0; m.ry = 0; }   // never let a bad number lose the world
     if (m) {
       const K=WD.keys;
@@ -1750,7 +1760,7 @@ const B3 = (function () {
       const fx = -Math.sin(az), fz = -Math.cos(az), rx = -fz, rz = fx;
       let mx = rx * ix - fx * iz, mz = rz * ix - fz * iz, stick = true;
       const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
-      const sprinting = performance.now() < WD.sprintUntil, speed = (sprinting ? 34 : K.shift || Math.hypot(WD.joy.x, WD.joy.y) > 0.92 ? 13.5 : 8.5) * Math.min(1, ml);
+      if (ml < 0.08) WD.sprinting = false; const sprinting = WD.sprinting && ml > 0.08, speed = (sprinting ? 34 : K.shift || Math.hypot(WD.joy.x, WD.joy.y) > 0.92 ? 13.5 : 8.5) * Math.min(1, ml);
       if (sprinting && ml > 0.1 && Math.random() < 0.6) burst(m.x - Math.sin(m.ry) * 0.6, 0.3, m.z - Math.cos(m.ry) * 0.6, 0xf4f1e2, now, 1);
       const lim = 143; let nx = Math.max(-lim, Math.min(lim, m.x + mx * speed * dt)), nz = Math.max(-lim, Math.min(lim, m.z + mz * speed * dt));
       if (m.y < 2.6) { if (blocked(nx, nz)) { if (!blocked(nx, m.z)) nz = m.z; else if (!blocked(m.x, nz)) nx = m.x; else { nx = m.x; nz = m.z; } } }
@@ -1962,11 +1972,12 @@ function goldPaint() {
   const r = document.getElementById('wrate'); if (r) { r.textContent = '+' + Gold.rate.toLocaleString('en-GB') + '/s' + (Gold.boost ? ' · ' + Math.ceil((Gold.boost.until - now) / 1000) + 's' : ''); r.classList.toggle('hot', !!Gold.boost); }
 }
 setInterval(goldPaint, 200);
-/* a new release went live: reload so nobody keeps playing an old version in an open tab */
+/* a new release went live: say so, but never reload anybody's page for them (only you refresh your own game) */
 (function watchBuild() {
-  let first = null;
-  const check = () => fetch('api/ping', { cache: 'no-store' }).then(r => r.json()).then(j => { if (!j.build) return; if (first === null) first = j.build; else if (j.build !== first && !(typeof Trade !== 'undefined' && Trade)) location.reload(); }).catch(() => {});
-  check(); setInterval(check, 20000); document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+  let first = null, shown = false;
+  const tell = () => { if (shown) return; shown = true; const b = document.createElement('button'); b.id = 'newver'; b.type = 'button'; b.textContent = 'New version ready. Tap to update'; b.onclick = () => location.reload(); document.body.appendChild(b); };
+  const check = () => fetch('api/ping', { cache: 'no-store' }).then(r => r.json()).then(j => { if (!j.build || j.build === 'dev') return; if (first === null) first = j.build; else if (j.build !== first) tell(); }).catch(() => {});
+  check(); setInterval(check, 60000); document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
 })();
 function setWallet(w) { wallet = newWallet(Object.assign({}, w, { v: 3 })); store.set('bigrent-wallet', Object.assign({}, wallet, { name: F.name, look: F.look, pet: F.pet })); }
 const refreshAcct = () => api('me').then(rerender, () => {});
@@ -3092,12 +3103,7 @@ function giftHTML() {
       : pz.box ? '<div class="ptitle"><b>A free loot box</b></div><button class="btn ok big" data-a="loot" data-v="go">Open it now</button>' : '<div class="prize">' + coin('+' + fmt(pz.coins)) + '<p class="fine">Straight into your gold.</p></div>') +
     '<button class="btn" data-a="close">Back to the world</button>';
 }
-setInterval(() => {
-  const W = B3.world, el = $('#wsprint'); if (!W || !el) return; const now = performance.now();
-  if (now < W.sprintUntil) { el.hidden = false; el.className = 'go'; el.firstChild.style.width = ((W.sprintUntil - now) / 3000 * 100) + '%'; el.lastChild.textContent = 'Sprint'; }
-  else if (now < W.sprintReady) { el.hidden = false; el.className = 'wait'; el.firstChild.style.width = ((1 - (W.sprintReady - now) / 5000) * 100) + '%'; el.lastChild.textContent = 'Recharging'; }
-  else el.hidden = true;
-}, 100);
+{ const sb = $('#wsprint'); if (sb) sb.remove(); }   // no stamina bar any more
 function worldHud(kind) {
   const W = B3.world, hp = Math.max(0, Math.round(W.hp)), bar = $('#whp'); if (!bar) return;
   bar.firstChild.style.width = hp + '%'; bar.firstChild.style.background = hp > 50 ? '#3ddc84' : hp > 25 ? '#ffd60a' : '#ff4b3e'; bar.lastChild.textContent = hp + ' · ' + (W.GUNS ? W.GUNS[W.weapon].n : '');
@@ -3118,7 +3124,7 @@ function plazaEmote(e) { if (!B3.world || !B3.world.on) return; B3.world.emote('
   st.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); const tn = performance.now(); if (tn - lastTap < 320) B3.world.trySprint(); lastTap = tn; pid = e.pointerId; try { st.setPointerCapture(pid); } catch (x) {} set(e.clientX, e.clientY); });
   st.addEventListener('pointermove', e => { if (e.pointerId === pid) set(e.clientX, e.clientY); });
   const end = e => { if (e.pointerId !== pid) return; pid = null; B3.world.joy.x = B3.world.joy.y = 0; knob.style.transform = ''; };
-  st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end);
+  st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end); st.addEventListener('lostpointercapture', end);
   jb.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); B3.world.jump(); });
   $('#wfire').addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); B3.world.fire(); });
   $('#wui').addEventListener('pointerdown', e => { if (e.target.closest('button')) e.stopPropagation(); });
@@ -3319,7 +3325,7 @@ document.addEventListener('click', async e => {
   Snd('tap'); Snd.music(!!settings.music);
   switch (a) {
     case 'page': {
-      if (F.page === el.dataset.v) break;
+      if (F.page === el.dataset.v) { if (F.page !== 'world' && $('#app').dataset.screen === 'home' && el.closest('#shopbig,#wbar')) { F.page = 'world'; F.sel = null; renderHome(true); } break; }   // press Shop again and it closes
       F.page = el.dataset.v; F.sel = null;
       renderHome(true); $('#side').scrollTop=0;
       break;

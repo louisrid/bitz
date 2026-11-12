@@ -375,6 +375,8 @@ html.fopen #app[data-screen="home"]{left:0!important;width:100%!important}
 #modal .ib[data-a=close] svg,#fprofov .pp-x svg{width:22px!important;height:22px!important}
 #modal .ib[data-a=close]:active,#fprofov .pp-x:active,.bigx:active{transform:translate(2px,3px);box-shadow:1px 1px 0 #000!important}
 #modal .mhead{position:sticky;top:-24px;z-index:3;background:#fff;padding-top:4px}
+#newver{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:200;background:#FFF01F;color:#000;border:3px solid #000;border-radius:14px;padding:12px 20px;font:400 20px/1 'Coolvetica','Arial Black',sans-serif;box-shadow:4px 6px 0 #000;cursor:pointer}
+#newver:active{transform:translate(calc(-50% + 3px),4px);box-shadow:1px 2px 0 #000}
 /*BG>*/
 .bg-b_cyber{background:repeating-linear-gradient(90deg,#19e3ff33 0 2px,transparent 2px 26px),repeating-linear-gradient(0deg,#ff2bd633 0 2px,transparent 2px 26px),linear-gradient(180deg,#0b1030,#1c375e,#87e9ff)}
 .bg-b_haunt{background:radial-gradient(circle at 72% 22%,#e9e0ff,transparent 14%),linear-gradient(180deg,#17132b,#373052,#b8a3e6)}
