@@ -20,3 +20,19 @@ html:has(#veil:not([hidden])) #shopbig,html:has(#fprofov:not([hidden])) #shopbig
  #modal[data-kind="explore"] .explore-place .btn{min-width:56px;padding:0 10px}
  #app[data-screen="home"] #wbar .wbtn[data-a="explore"]{background:#d6ceff!important}
 }
+
+/* Clans match the existing shop's white cards, black borders and Coolvetica. */
+#modal[data-kind="clans"] .mhead h2{font:400 36px/1 "Coolvetica",sans-serif!important}
+#modal[data-kind="clans"] .clan-panel,#modal[data-kind="clans"] .clan-main{margin-top:16px;padding:16px;background:#f3f2ff;border:3px solid #000;border-radius:14px;box-shadow:3px 4px 0 #000;display:grid;gap:12px}
+#modal[data-kind="clans"] .clan-panel h3{font:400 25px/1 "Coolvetica",sans-serif!important}
+#modal[data-kind="clans"] .clan-panel .btn,#modal[data-kind="clans"] .clan-main>.btn{background:#fff}
+#modal[data-kind="clans"] .clan-panel .btn.go{background:#ddd6ff!important}
+#modal[data-kind="clans"] .clan-panel input{font:400 20px/1 "Coolvetica",sans-serif!important;border:3px solid #000!important;border-radius:10px!important;padding:12px!important;background:#fff!important;color:#000!important}
+#modal[data-kind="clans"] .clan-overline{font:400 13px/1 "Coolvetica",sans-serif;color:#504388}
+#modal[data-kind="clans"] .clan-main h2{font:400 36px/1 "Coolvetica",sans-serif}
+#modal[data-kind="clans"] .clan-invite{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;border:2px solid #000;border-radius:10px;padding:10px}
+#modal[data-kind="clans"] .clan-invite strong{font:400 23px/1 "Coolvetica",sans-serif;letter-spacing:.08em}
+#modal[data-kind="clans"] .clan-roster{display:grid;gap:7px;max-height:280px;overflow:auto}
+#modal[data-kind="clans"] .clan-member{display:flex;justify-content:space-between;gap:12px;background:#fff;border:2px solid #000;border-radius:9px;padding:10px 13px;font:400 18px/1 "Coolvetica",sans-serif}
+#modal[data-kind="clans"] .clan-member small{font-size:12px;color:#5341a7}
+@media(max-width:650px){#modal[data-kind="clans"] .clan-panel,#modal[data-kind="clans"] .clan-main{padding:10px}#modal[data-kind="clans"] .clan-invite strong{font-size:19px}}
