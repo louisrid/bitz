@@ -111,7 +111,7 @@ export function createCardService({ accounts, serials, offers, world, markDirty,
     const xp = awardXP(w, Math.min(600, count * ECON.xp.open), ITEMS);
     touch();
     const all = packs.flat();
-    return { packs, pack: packId, value: all.reduce((s, x) => s + value(x), 0), discovered: [...new Set(all.flatMap(x => x.players))].filter(pid => !before.has(pid)), ones: ones.map(view), xp, best: all.slice().sort((a, b) => value(b) - value(a))[0] };
+    return { packs: packs.map(pk => pk.map(view)), pack: packId, value: all.reduce((s, x) => s + value(x), 0), discovered: [...new Set(all.flatMap(x => x.players))].filter(pid => !before.has(pid)), ones: ones.map(view), xp, best: view(all.slice().sort((a, b) => value(b) - value(a))[0]) };
   }
 
   /* ---------- the Card Buyer ---------- */

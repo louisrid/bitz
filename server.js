@@ -91,7 +91,7 @@ const idOf = key => 'p_' + crypto.createHash('sha256').update('stakkz:' + key).d
 const nameOf = id => { const w = accounts.get(id); return (w && w.name || auth.username(id) || 'Player').slice(0, 12); };
 const findByCode = code => { const c = String(code || '').replace(/[^a-f0-9]/g, '').slice(0, 10); if (c.length < 10) return null; for (const id of accounts.keys()) if (id.slice(2, 12) === c) return id; return null; };
 const account = id => {
-  let w = accounts.get(id); if (!w) { w = core.freshWallet(); w.fresh = true; w.econ = { v: ECON.version, at: Date.now() }; accounts.set(id, w); dirty = true; }
+  let w = accounts.get(id); if (!w) { w = core.freshWallet(); w.fresh = true; w.econ = { v: ECON.version, at: Date.now() }; if (process.env.NODE_ENV === 'test' && process.env.BITZ_TEST_CASH) w.coins = Number(process.env.BITZ_TEST_CASH) || 0; accounts.set(id, w); dirty = true; }   // BITZ_TEST_CASH: browser tests only
   if (migrate(w, Date.now())) { dirty = true; console.log('economy', ECON.version, 'migration applied to', id.slice(2, 12)); }
   cards.ensure(w); return w;
 };
@@ -254,8 +254,8 @@ const server = http.createServer((req, res) => {
   const full = path.normalize(path.join(PUB, rel));
   if (!full.startsWith(PUB + path.sep)) { res.writeHead(403); return res.end(); }
   fs.readFile(full, (err, buf) => {
-    if (err) {   // a missing portrait is never a broken image: every player falls back to the placeholder
-      if (/^\/portraits\/[a-z0-9-]+\.(png|jpg|webp)$/.test(rel)) return fs.readFile(path.join(PUB, 'portraits', 'placeholder.png'), (e2, ph) => { if (e2) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': ph.length, 'Cache-Control': 'public, max-age=3600', 'X-Portrait': 'placeholder' }); res.end(req.method === 'HEAD' ? undefined : ph); });
+    if (err) {   // a missing portrait is never a broken image: it redirects to the one shared placeholder, which the browser caches once
+      if (/^\/portraits\/[a-z0-9-]+\.(png|jpg|webp)$/.test(rel)) { res.writeHead(302, { Location: 'placeholder.png', 'Cache-Control': 'public, max-age=600', 'X-Portrait': 'placeholder' }); return res.end(); }
       res.writeHead(404, { 'Content-Type': 'text/plain' }); return res.end('Not found');
     }
     const long = /\.(otf|woff2|png|jpg|webp|mp3)$/.test(full) || /three\.min\.js$/.test(full);
@@ -283,7 +283,7 @@ async function bootstrap() {
       if (!process.env.STAKKZ_SECRET && saved.secret) SECRET = saved.secret;
     }
     console.log('Persistent storage ready:', accounts.size, 'accounts');
-  } else console.warn('No persistent database configured: free-host restarts can erase player progress. Account registration is disabled.');
+  } else if (persistent) console.log('File persistence:', DATA, '(local accounts allowed)'); else console.warn('No persistent database configured: free-host restarts can erase player progress. Account registration is disabled.');
   /* a one-time safety copy of the pre-reset state, written once per data store, before any account migrates */
   if (!world.backupV1 && accounts.size) { const legacy = [...accounts.entries()].filter(([, w]) => !w.econ || w.econ.v < ECON.version); if (legacy.length) { world.backupV1 = { at: Date.now(), accounts: legacy.length, note: 'per-account archives live under wallet.archive.v1' }; dirty = true; console.log('economy reset pending for', legacy.length, 'legacy accounts; each keeps an archive of its old balance, cards and packs'); } }
   server.listen(PORT, () => console.log('BITZ is running on port ' + PORT));

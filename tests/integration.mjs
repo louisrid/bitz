@@ -38,7 +38,7 @@ try {
   const kA = key(), kB = key();
   let st = await api(kA, 'state'); assert.equal(st.cash, 0); assert.equal(st.cards.length, 0); assert.equal(st.packs.welcome, 1); assert.equal(st.progress.level, 1); log('new account: $0, no cards, one welcome pack, level 1');
   const open = await api(kA, 'cards', { op: 'open', pack: 'welcome', count: 1 }); assert.equal(open.packs[0].length, 5); for (const c of open.packs[0]) assert(cat.players.find(p => p.id === c.player)); assert(Object.keys(open.state.book).length >= 1); log('welcome pack opened with real player names; book updated');
-  const ph = await fetch(BASE + '/portraits/' + open.packs[0][0].player + '.png'); assert.equal(ph.headers.get('x-portrait'), 'placeholder'); assert.equal(ph.headers.get('content-type'), 'image/png'); log('missing portrait serves placeholder.png, never a broken image');
+  const ph = await fetch(BASE + '/portraits/' + open.packs[0][0].player + '.png'); assert(ph.redirected && /placeholder\.png$/.test(ph.url), 'missing portrait redirects to the shared placeholder'); assert.equal(ph.headers.get('content-type'), 'image/png'); log('missing portrait redirects to placeholder.png, never a broken image');
   /* earnings: anywhere, then x3 in gold, then packs in purple */
   const A = await connect(kA); assert(A.got[0].you && A.got[0].earner); A.send({ vis: 1 });
   const t1 = await A.waitFor(m => m.gained > 0); assert.equal(t1.zone, ''); const base = t1.gained;
