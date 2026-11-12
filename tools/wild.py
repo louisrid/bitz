@@ -1,0 +1,17 @@
+"""Rare creatures that roam the world and are caught by touching them first. Original designs.
+Pet space: a cat's body is [0.3, 0.26, 0.46] at y 0.24; the pet group is scaled 1.5 (and about 2.4 more in the world)."""
+from costumes import B, mir
+RAIN=['#ff4b3e','#ff9f1c','#ffd60a','#3ddc84','#3fa9ff','#b388ff']
+def legs(c, w, d, h, y=None):
+    y = h/2 if y is None else y
+    return [B(.08,h,.08,c,sx*w,y,sz*d) for sx in (-1,1) for sz in (-1,1)]
+W={
+ 'w_unicorn':('Unicorn',12000000,[B(.34,.28,.6,'#fbfbff',0,.46,0),B(.18,.3,.18,'#fbfbff',0,.66,.28),B(.2,.2,.3,'#fbfbff',0,.8,.4),B(.06,.06,.02,'#3a2a6a',.08,.84,.55),B(.06,.06,.02,'#3a2a6a',-.08,.84,.55),B(.05,.26,.05,'#ffd60a',0,1.02,.46,'g'),B(.08,.08,.08,'#ffe9a8',0,.9,.46,'g')]
+   +[B(.06,.08,.1,RAIN[i],0,.94-i*.07,.24-i*.03,'g') for i in range(6)]+[B(.08,.08,.08,RAIN[i],0,.52-i*.06,-.34-i*.02,'g') for i in range(6)]+legs('#fbfbff',.12,.2,.34)+[B(.09,.05,.09,'#ffd60a',sx*.12,.02,sz*.2,'s') for sx in (-1,1) for sz in (-1,1)]),
+ 'w_phoenix':('Phoenix chick',9000000,[B(.3,.3,.34,'#ff6a1f',0,.32,0,'g'),B(.24,.22,.22,'#ffb000',0,.56,.12,'g'),B(.1,.06,.12,'#ffe14d',0,.52,.28,'g'),B(.05,.05,.02,'#000',.07,.6,.24),B(.05,.05,.02,'#000',-.07,.6,.24),B(.1,.22,.1,'#ff4b3e',0,.78,.06,'f'),B(.07,.16,.07,'#ffd60a',0,.86,.1,'f')]+mir(.06,.22,.24,'#ff4b3e',.18,.36,-.02,'f')+[B(.14,.12,.22,'#ff4b3e',0,.3,-.26,'f'),B(.05,.12,.05,'#ffb000',.06,.08,0),B(.05,.12,.05,'#ffb000',-.06,.08,0)]),
+ 'w_cosmiccat':('Cosmic cat',5000000,[B(.3,.26,.46,'#2b1b5e',0,.24,0),B(.3,.26,.26,'#2b1b5e',0,.44,.28),B(.08,.1,.06,'#2b1b5e',.1,.62,.28),B(.08,.1,.06,'#2b1b5e',-.1,.62,.28),B(.06,.06,.02,'#7ef9ff',.08,.46,.415,'g'),B(.06,.06,.02,'#7ef9ff',-.08,.46,.415,'g'),B(.06,.3,.06,'#2b1b5e',0,.44,-.26)]+[B(.04,.04,.02,'#ffffff',x,y,z,'g') for x,y,z in ((.1,.3,.235),(-.08,.2,.235),(.155,.26,.05),(-.155,.3,-.1),(0,.38,-.1))]+[B(.08,.08,.08,'#ffd60a',.0,.62,-.3,'g')]+legs('#2b1b5e',.1,.15,.14)),
+ 'w_crystaldeer':('Crystal deer',3000000,[B(.3,.28,.52,'#8fefff',0,.42,0,'t'),B(.16,.26,.16,'#8fefff',0,.6,.26,'t'),B(.18,.18,.26,'#bff7ff',0,.74,.36,'t'),B(.05,.05,.02,'#1b3a6a',.07,.78,.5),B(.05,.05,.02,'#1b3a6a',-.07,.78,.5)]+mir(.04,.22,.04,'#ffffff',.08,.94,.3,'g')+mir(.12,.04,.04,'#ffffff',.12,1.02,.3,'g')+legs('#5fd4ff',.1,.18,.3)),
+ 'w_rainbowfox':('Rainbow fox',2500000,[B(.26,.24,.46,'#ff7a2f',0,.26,0),B(.26,.22,.24,'#ff9a4a',0,.42,.28),B(.12,.08,.1,'#ffffff',0,.36,.42),B(.05,.05,.02,'#000',.07,.46,.405),B(.05,.05,.02,'#000',-.07,.46,.405)]+mir(.07,.12,.05,'#ff7a2f',.09,.58,.26)+[B(.12,.12,.12,RAIN[i],0,.3+i*.02,-.28-i*.1,'g') for i in range(6)]+legs('#3a2414',.08,.15,.14)),
+ 'w_goldpig':('Golden pig',2500000,[B(.4,.3,.5,'#ffd60a',0,.27,0,'s'),B(.32,.3,.26,'#ffd60a',0,.36,.34,'s'),B(.16,.12,.06,'#e0a800',0,.32,.49,'s'),B(.05,.06,.02,'#000',.09,.42,.475),B(.05,.06,.02,'#000',-.09,.42,.475)]+mir(.08,.1,.06,'#e0a800',.12,.54,.3,'s')+[B(.1,.14,.1,'#e0a800',sx*.13,.07,sz*.17,'s') for sx in (-1,1) for sz in (-1,1)]+[B(.06,.06,.06,'#ffffff',0,.46,-.1,'g')]),
+}
+DESC={'w_unicorn':'The rarest thing in the world. Caught by outrunning it.','w_phoenix':'A tiny bird made of fire. Caught in the wild.','w_cosmiccat':'Stars in its fur. Caught in the wild.','w_crystaldeer':'Glass antlers that ring when it runs. Caught in the wild.','w_rainbowfox':'Leaves a rainbow behind it. Caught in the wild.','w_goldpig':'Solid gold and very fast for a pig. Caught in the wild.'}

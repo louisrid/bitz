@@ -9,7 +9,8 @@ const E = globalThis.Engine;
 export const BOX_PRICE = 500000, GOLD_RATE = 1000, AWAY_MS = 45000;
 const MYTHIC_ODDS = 0.15;   // every box holds an exclusive: Legendary usually, Mythical about one box in seven
 const rarity = p => (p <= 40000 ? 0 : p <= 100000 ? 1 : p <= 300000 ? 2 : p <= 3000000 ? 3 : 4);
-const exclusive = id => !!(ITEMS[id] && ITEMS[id][3]);
+const exclusive = id => !!(ITEMS[id] && ITEMS[id][3] === 1);   // [3] 1 = loot boxes only, 2 = caught in the wild only
+export { ITEMS };
 const int = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.floor(Number(v) || 0)));
 const rnd = () => { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; };
 const ctx = now => ({ now: now, rand: rnd, die: () => 1 + Math.floor(rnd() * 6) });
@@ -56,7 +57,7 @@ function rollLoot(w) {
 export function shop(w, what, item) {
   if (what === 'buy') {
     const it = ITEMS[item]; if (!it || it[2] <= 0) refuse('That is not for sale.');
-    if (it[3]) refuse('That one only comes from loot boxes.');
+    if (it[3]) refuse(it[3] === 2 ? 'That one can only be caught in the wild.' : 'That one only comes from loot boxes.');
     if (owns(w, item)) return {};
     if (w.coins < it[2]) refuse('You need ' + (it[2] - w.coins).toLocaleString('en-GB') + ' more coins.');
     w.coins -= it[2]; w.own.push(item); return {};
@@ -71,6 +72,8 @@ export function shop(w, what, item) {
   if (what === 'reset') refuse('Accounts can no longer be reset.');
   refuse('Unknown request.');
 }
+/* net worth: gold in hand plus the price of every item owned */
+export function worth(w) { return Math.floor(w.coins || 0) + (Array.isArray(w.own) ? w.own : []).reduce((a, id) => a + (ITEMS[id] && ITEMS[id][2] > 0 ? ITEMS[id][2] : 0), 0); }
 /* ---------- trading ---------- */
 /* what one side may put up: things they own that the other side does not, and gold they really have */
 export function tradeCheck(w, other, offer) {

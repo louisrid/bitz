@@ -167,29 +167,30 @@ html:has(#app[data-screen=home]) #toast{bottom:118px!important}
 .whoami{display:flex;align-items:center;gap:10px;min-width:0}
 .whoami b{display:block;font:400 24px/1 'Coolvetica','Arial Black',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 .whoami small{display:flex;align-items:center;gap:5px;font:700 14px/1.2 'Space Grotesk',sans-serif;margin-top:4px}
-/* BITZ loading screen: sky, rolling hills, bouncing letters and a spinning coin. */
-#bload{position:fixed;inset:0;z-index:100;background:linear-gradient(#7fd0f2,#c8f0ff 62%,#9fd8f0);display:grid;place-items:center;overflow:hidden;transition:opacity .5s ease,transform .5s ease}
-#bload.out{opacity:0;transform:scale(1.04);pointer-events:none}
-.bl-sun{position:absolute;right:12%;top:12%;width:110px;height:110px;background:#ffd60a;border:4px solid #000;box-shadow:6px 7px 0 #000;animation:blspin 9s linear infinite}
-.bl-hills{position:absolute;left:0;right:0;bottom:0;height:34%}
-.bl-hills i{position:absolute;bottom:0;width:70%;height:100%;background:#3f8a4d;border-top:4px solid #000;border-radius:50% 50% 0 0/40% 40% 0 0;animation:blhill 6s ease-in-out infinite}
-.bl-hills i:nth-child(1){left:-15%;background:#2e6f3a;height:86%}
-.bl-hills i:nth-child(2){left:40%;background:#47994f;animation-delay:-2s}
-.bl-hills i:nth-child(3){left:15%;background:#357f45;height:62%;animation-delay:-4s}
-.bl-mid{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:18px;padding:0 16px}
-.bl-logo{display:flex;gap:.04em;font:400 clamp(72px,16vw,168px)/1 'Coolvetica','Archivo Black','Arial Black',sans-serif}
-.bl-logo span{display:inline-block;color:#ffd60a;text-shadow:-4px -4px 0 #000,4px -4px 0 #000,-4px 4px 0 #000,4px 4px 0 #000,0 -4px 0 #000,0 4px 0 #000,-4px 0 0 #000,4px 0 0 #000,9px 11px 0 #000;animation:blbounce 1.1s cubic-bezier(.3,1.6,.5,1) infinite}
-.bl-logo span:nth-child(2){animation-delay:.1s;color:#ff8ad8}.bl-logo span:nth-child(3){animation-delay:.2s;color:#8fdbff}.bl-logo span:nth-child(4){animation-delay:.3s;color:#b6f26a}
-.bl-coin{width:54px;height:54px;perspective:200px}
-.bl-coin i{display:block;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff7b0,#ffd60a 45%,#e0a800);border:4px solid #000;box-shadow:4px 5px 0 #000;animation:blcoin 1.2s linear infinite}
-.bl-bar{width:min(280px,70vw);height:22px;border:4px solid #000;border-radius:14px;background:#fff;overflow:hidden;box-shadow:5px 6px 0 #000}
+/* BITZ loading screen: a dark green vault, light rays, and gold coins, cash and gems exploding out from behind the logo. */
+#bload{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 50% 45%,#1f6b40 0%,#0d3320 45%,#04120a 100%);display:grid;place-items:center;overflow:hidden;transition:opacity .6s ease,transform .6s ease}
+#bload.out{opacity:0;transform:scale(1.06);pointer-events:none}
+.bl-rays{position:absolute;left:50%;top:45%;width:240vmax;height:240vmax;margin:-120vmax 0 0 -120vmax;background:repeating-conic-gradient(from 0deg,rgba(255,214,10,.13) 0deg 6deg,transparent 6deg 18deg);animation:blspin 24s linear infinite;-webkit-mask:radial-gradient(circle,#000 0,transparent 55%);mask:radial-gradient(circle,#000 0,transparent 55%)}
+.bl-flash{position:absolute;left:50%;top:45%;width:20vmin;height:20vmin;margin:-10vmin 0 0 -10vmin;border-radius:50%;border:6px solid #ffd60a;box-shadow:0 0 60px #ffd60a,inset 0 0 40px #fff3b0;animation:blflash 1.6s ease-out infinite}
+.bl-burst{position:absolute;left:50%;top:45%;width:0;height:0}
+.bl-burst i{position:absolute;left:0;top:0;transform:translate(-50%,-50%) scale(.2);opacity:0;animation:blfly var(--t) cubic-bezier(.15,.7,.35,1) var(--d) infinite}
+.bl-burst i.coin{width:calc(30px*var(--s));height:calc(30px*var(--s));border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff7b0,#ffd60a 45%,#c48a00);border:3px solid #000;box-shadow:inset -3px -3px 0 rgba(0,0,0,.18)}
+.bl-burst i.bill{width:calc(46px*var(--s));height:calc(24px*var(--s));border-radius:3px;background:linear-gradient(90deg,#2f9a4f 0 20%,#7fd890 20% 80%,#2f9a4f 80%);border:3px solid #000}
+.bl-burst i.bill::after{content:'$';position:absolute;inset:0;display:grid;place-items:center;font:900 calc(15px*var(--s))/1 'Archivo Black',sans-serif;color:#1d5a2f}
+.bl-burst i.gem{width:calc(22px*var(--s));height:calc(22px*var(--s));background:linear-gradient(135deg,#bff7ff,#7ef9ff 50%,#3fa9ff);border:3px solid #000;transform:translate(-50%,-50%) rotate(45deg)}
+.bl-mid{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:20px;padding:0 16px}
+.bl-logo{display:flex;gap:.04em;font:400 clamp(80px,17vw,180px)/1 'Coolvetica','Archivo Black','Arial Black',sans-serif}
+.bl-logo span,.bl-logo span:nth-child(n){display:inline-block;color:#fff!important;text-shadow:-5px -5px 0 #000,5px -5px 0 #000,-5px 5px 0 #000,5px 5px 0 #000,0 -5px 0 #000,0 5px 0 #000,-5px 0 0 #000,5px 0 0 #000,10px 13px 0 #000,0 0 40px rgba(255,214,10,.55);animation:blbounce 1.1s cubic-bezier(.3,1.6,.5,1) infinite}
+.bl-logo span:nth-child(2){animation-delay:.1s}.bl-logo span:nth-child(3){animation-delay:.2s}.bl-logo span:nth-child(4){animation-delay:.3s}
+.bl-coin{display:none}
+.bl-bar{width:min(300px,70vw);height:22px;border:4px solid #000;border-radius:14px;background:#0b2416;overflow:hidden;box-shadow:5px 6px 0 #000}
 .bl-bar i{display:block;height:100%;width:40%;background:repeating-linear-gradient(45deg,#ffd60a 0 12px,#ffbf00 12px 24px);border-right:4px solid #000;animation:blbar 1.4s ease-in-out infinite}
-#bload p{margin:0;font:700 15px/1 'Space Grotesk',sans-serif;color:#0b1f15;letter-spacing:.08em;text-transform:uppercase}
+#bload p{margin:0;font:700 14px/1 'Space Grotesk',sans-serif;color:#ffd60a;letter-spacing:.14em;text-transform:uppercase;text-shadow:0 2px 0 #000}
 @keyframes blbounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-22px) rotate(-4deg)}60%{transform:translateY(0) scale(1.06,.94)}}
-@keyframes blcoin{to{transform:rotateY(360deg)}}
 @keyframes blbar{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
 @keyframes blspin{to{transform:rotate(360deg)}}
-@keyframes blhill{50%{transform:translateY(6px)}}
+@keyframes blflash{0%{transform:scale(.2);opacity:1}100%{transform:scale(7);opacity:0}}
+@keyframes blfly{0%{transform:translate(-50%,-50%) scale(.2) rotate(0);opacity:0}8%{opacity:1}75%{opacity:1}100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1) rotate(var(--r));opacity:0}}
 @media (prefers-reduced-motion:reduce){#bload *{animation:none!important}}
 #app[data-screen=home] #side{top:92px!important}
 @media(max-width:900px){#app[data-screen=home] #side{top:104px!important}}
@@ -197,6 +198,118 @@ html:has(#app[data-screen=home]) #toast{bottom:118px!important}
 .bitzsale b{font:400 30px/1 'Coolvetica','Archivo Black',sans-serif;color:#fff;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,4px 5px 0 #000;letter-spacing:.02em}
 .bitzsale span{font:700 12px/1.3 'Space Grotesk',sans-serif;color:#000;text-transform:uppercase;letter-spacing:.06em}
 .items.bitzgrid .item{background:#fff8e1}
+/* Gold: always on top, top right, big and plain. Shop: the big yellow button in the middle. */
+#wbar .wstat{display:none!important}
+#goldtop{position:fixed;top:12px;right:14px;z-index:95;display:flex;align-items:center;gap:10px;background:#fff;border:3px solid #000;border-radius:14px;box-shadow:4px 5px 0 #000;padding:8px 14px 8px 10px;pointer-events:none}
+#goldtop .gc{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff7b0,#ffd60a 45%,#e0a800);border:3px solid #000;flex:none}
+#goldtop span{display:flex;flex-direction:column;line-height:1}
+#goldtop #wgold{font:400 28px/1 'Coolvetica','Archivo Black',sans-serif;color:#000;font-style:normal;font-variant-numeric:tabular-nums}
+#goldtop #wgold::before{display:none!important}
+#goldtop #wrate{font:700 12px/1 'Space Grotesk',sans-serif!important;color:#2f7d45!important;margin-top:3px}
+#goldtop #wrate.hot{color:#c47d00!important}
+#shopbig{position:fixed;top:12px;left:calc(50% + var(--fw) / 2);transform:translateX(-50%);z-index:94;height:56px;padding:0 38px;background:#ffd60a;color:#000;border:3px solid #000;border-radius:16px;box-shadow:5px 6px 0 #000;font:400 28px/1 'Coolvetica','Archivo Black',sans-serif;letter-spacing:.04em;cursor:pointer}
+html:not(.fopen) #shopbig{left:50%}
+#shopbig:hover{background:#ffe14d}
+#shopbig:active{transform:translate(calc(-50% + 3px),4px);box-shadow:2px 2px 0 #000}
+html:not(:has(#app[data-screen=home])) #shopbig,html:not(:has(#app[data-screen=home])) #goldtop{display:none}
+#wbar .wbtn.wzom.on{background:#86b86a;color:#000;animation:zpulse 1.2s ease-in-out infinite}
+@keyframes zpulse{50%{box-shadow:0 3px 0 #153629,0 0 0 5px #86b86a66}}
+#wsprint{width:min(200px,44vw);height:14px;border:2px solid #000;border-radius:9px;background:#22262b;position:relative;overflow:hidden;box-shadow:2px 3px 0 #000}
+#wsprint[hidden]{display:none}
+#wsprint i{position:absolute;left:0;top:0;bottom:0;background:#8fdbff}
+#wsprint.go i{background:#ffd60a}
+#wsprint b{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font:700 9px/1 'Space Grotesk',sans-serif;letter-spacing:.08em;text-transform:uppercase;text-shadow:0 1px 0 #000}
+#app[data-screen=home] #side{top:84px!important}
+@media(max-width:900px){
+  #goldtop{top:8px;right:8px;padding:6px 10px 6px 7px;gap:7px;border-width:2px;box-shadow:3px 4px 0 #000}
+  #goldtop .gc{width:22px;height:22px;border-width:2px}
+  #goldtop #wgold{font-size:20px}
+  #shopbig{top:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%!important;height:52px;padding:0 26px;font-size:24px}
+  #shopbig:active{transform:translate(calc(-50% + 3px),4px)}
+  #whud{bottom:84px!important}
+  #wbar{top:54px!important}
+}
+/* The SHOP button: four times the height of the others. */
+#shopbig{height:150px!important;min-width:230px;padding:0 44px!important;border-width:4px!important;border-radius:24px!important;box-shadow:7px 9px 0 #000!important;font-size:64px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+#shopbig::after{content:'Bitz Piece sale on';font:700 13px/1 'Space Grotesk',sans-serif;letter-spacing:.08em;text-transform:uppercase;background:#000;color:#ffd60a;padding:5px 9px;border-radius:999px}
+@media(max-width:900px){#shopbig{height:84px!important;min-width:0;font-size:36px!important;padding:0 26px!important;border-width:3px!important;box-shadow:4px 5px 0 #000!important}#shopbig::after{font-size:9px;padding:3px 6px}}
+/* Profiles: a big gold net-worth badge beside Swag. */
+#fprofov .pbadges{position:absolute;left:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:14px}
+#fprofov .pbadges .pswag{position:static;transform:rotate(3deg)}
+#fprofov .pworth{background:linear-gradient(135deg,#fff3b0,#ffd60a 45%,#e0a800);border:4px solid #000;border-radius:20px;box-shadow:6px 7px 0 #000;padding:14px 20px;transform:rotate(-4deg);text-align:center}
+#fprofov .pworth small{display:block;font:700 13px/1 'Space Grotesk',sans-serif;letter-spacing:.08em;text-transform:uppercase}
+#fprofov .pworth b{display:flex;align-items:center;gap:8px;font:400 44px/1 'Coolvetica','Archivo Black',sans-serif;margin-top:6px;white-space:nowrap}
+#fprofov .pworth .gc{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff7b0,#ffd60a 45%,#e0a800);border:3px solid #000;display:inline-block}
+#fprofov .pback{top:178px!important}
+#fprofov .pname{top:180px!important}
+@media(max-width:900px){#fprofov .pbadges{top:200px;transform:none;left:8px;gap:8px}#fprofov .pworth{padding:8px 12px}#fprofov .pworth b{font-size:26px}#fprofov .pworth .gc{width:20px;height:20px}#fprofov .pback{top:98px!important}#fprofov .pname{top:150px!important}}
+/* Wave and boss banners. */
+#wbanner{position:fixed;left:50%;top:190px;transform:translateX(-50%);z-index:93;text-align:center;pointer-events:none;animation:bannerin .45s cubic-bezier(.3,1.6,.5,1)}
+#wbanner[hidden]{display:none}
+#wbanner b{display:block;font:400 clamp(48px,8vw,96px)/1 'Coolvetica','Archivo Black',sans-serif;color:#fff;text-shadow:-4px -4px 0 #000,4px -4px 0 #000,-4px 4px 0 #000,4px 4px 0 #000,0 -4px 0 #000,0 4px 0 #000,-4px 0 0 #000,4px 0 0 #000,8px 10px 0 #000}
+#wbanner.zw b{color:#b6f26a}#wbanner.zb b{color:#ff4b3e}#wbanner.zc b{color:#ffd60a}
+#wbanner small{display:inline-block;margin-top:10px;background:#fff;border:3px solid #000;border-radius:999px;padding:6px 14px;font:700 14px/1.2 'Space Grotesk',sans-serif;box-shadow:3px 4px 0 #000}
+@keyframes bannerin{from{transform:translateX(-50%) scale(.4);opacity:0}}
+@media(max-width:900px){#wbanner{top:120px}}
+#wbar .wbtn.wadm{background:#000;color:#ffd60a}
+.admrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:3px solid #000;border-radius:14px;background:#f6f7fb}
+.admrow b{display:block;font-size:16px}.admrow small{font-size:12px;color:#555}
+.admrow .btn{margin:0;width:auto;min-width:64px}
+#wgun{display:none}
+@media (pointer:coarse){#wgun{display:block;position:absolute;right:14px;bottom:210px;height:44px;padding:0 12px;border-radius:12px;background:#fff;border:3px solid #000;box-shadow:3px 4px 0 #000;font:400 15px/1 'Coolvetica','Arial Black',sans-serif;pointer-events:auto;color:#000}}
+/* Desktop: the nav sits in a column on the left so the tall SHOP button has the top middle to itself. */
+@media(min-width:901px){
+  #app[data-screen="home"] #wbar{flex-direction:column;align-items:flex-start;flex-wrap:nowrap;right:auto;top:12px;left:12px;gap:8px}
+  #app[data-screen="home"] #wfeed{top:230px!important}
+}
+/* Small bouncing BITZ logo at the foot of the friends bar: bounces after every refresh and whenever you hover it. */
+#fside{flex-direction:column}
+#flist{flex:1 1 auto;min-height:0;overflow:auto}
+#flogo{flex:none;display:flex;justify-content:center;gap:1px;padding:10px 4px 12px;border-top:2px solid #000;background:#fff;cursor:default;font:400 clamp(22px,2.4vw,30px)/1 'Coolvetica','Archivo Black','Arial Black',sans-serif;user-select:none}
+#flogo span{display:inline-block;color:#fff;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 0 #000,2px 0 0 #000,3px 4px 0 #000;animation:flb 1s cubic-bezier(.3,1.6,.5,1) 3}
+#flogo span:nth-child(2){animation-delay:.1s}#flogo span:nth-child(3){animation-delay:.2s}#flogo span:nth-child(4){animation-delay:.3s}
+#flogo:hover span{animation:flb2 1s cubic-bezier(.3,1.6,.5,1) infinite}
+#flogo:hover span:nth-child(2){animation-delay:.1s}#flogo:hover span:nth-child(3){animation-delay:.2s}#flogo:hover span:nth-child(4){animation-delay:.3s}
+@keyframes flb{0%,100%{transform:translateY(0)}40%{transform:translateY(-9px) rotate(-5deg)}60%{transform:translateY(0) scale(1.08,.92)}}
+@keyframes flb2{0%,100%{transform:translateY(0)}40%{transform:translateY(-9px) rotate(-5deg)}60%{transform:translateY(0) scale(1.08,.92)}}
+@media (prefers-reduced-motion:reduce){#flogo span{animation:none!important}}
+/* Profile pop-up: a card in the middle, the world still moving behind it, 30% darker. */
+#fprofov{position:absolute;inset:0;z-index:40;display:grid;place-items:center;padding:16px;pointer-events:auto}
+#fprofov[hidden]{display:none}
+#fprofov .pp-back{position:absolute;inset:0;background:rgba(0,0,0,.3)}
+#fprofov .pp-card{position:relative;display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;width:min(640px,100%);max-height:calc(100% - 20px);overflow:auto;background:#fff;border:3px solid #000;border-radius:20px;box-shadow:6px 8px 0 #000;padding:16px;animation:ppin .25s cubic-bezier(.3,1.5,.5,1)}
+@keyframes ppin{from{transform:scale(.9);opacity:0}}
+#fprofov .pp-x{position:absolute;right:10px;top:10px;z-index:2}
+#fprofov .pp-char{position:relative;border:3px solid #000;border-radius:14px;overflow:hidden;min-height:280px}
+#fprofov .pp-char canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#fprofov .pp-info{min-width:0;display:flex;flex-direction:column;gap:9px}
+#fprofov .pp-info h2{margin:0;padding-right:40px;font:400 34px/1 'Coolvetica','Archivo Black',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#fprofov .pp-sub{margin:0;font:700 12px/1.2 'Space Grotesk',sans-serif;color:#555}
+#fprofov .pp-badges{display:flex;gap:8px;flex-wrap:wrap}
+#fprofov .pp-badges .pworth{transform:none;padding:8px 12px;border-width:3px;box-shadow:3px 4px 0 #000;border-radius:14px;flex:1 1 auto}
+#fprofov .pp-badges .pworth small,#fprofov .pp-badges .pswag small{font-size:10px}
+#fprofov .pp-badges .pworth b{font-size:28px;margin-top:3px}
+#fprofov .pp-badges .pworth .gc{width:20px;height:20px}
+#fprofov .pp-badges .pswag{position:static;transform:none;padding:8px 12px;border-width:3px;box-shadow:3px 4px 0 #000;border-radius:14px}
+#fprofov .pp-badges .pswag b{font-size:28px}
+#fprofov .plist{display:grid;gap:5px}
+#fprofov .prow{grid-template-columns:40px minmax(0,1fr) auto;padding:4px 7px}
+#fprofov .prow .bgsw{width:40px;height:40px}
+#fprofov .pbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+#fprofov .pbtns .btn{margin:0;width:auto;flex:1 1 auto}
+#stage.prof #wui{display:block!important}
+#stage.prof #whud,#stage.prof #wstick,#stage.prof #wjump,#stage.prof #wfire,#stage.prof #wgun{visibility:hidden}
+@media(max-width:600px){#fprofov .pp-card{grid-template-columns:1fr;gap:10px;padding:12px}#fprofov .pp-char{min-height:190px}#fprofov .pp-info h2{font-size:26px}}
+/* Friends bar: twice as wide again, still minimisable; online shows in green words, no dots. */
+:root{--fw:clamp(164px,16vw,244px)!important}
+#flist .fr{grid-template-columns:38px minmax(0,1fr)!important;gap:8px!important;padding:5px!important}
+#flist .fr .ava{width:38px!important;height:38px!important}
+#flist .fr b{font-size:14px!important}
+#flist .fr small{font-size:11px!important}
+#flist .fr small i{display:none!important}
+#flist .fr small em.fon{font-style:normal;color:#1f9a4a;font-weight:700}
+#fside .fhead b{font-size:18px!important}
+@media(max-width:900px){#fside{width:min(62vw,240px)!important}}
 /*BG>*/
 .bg-b_cyber{background:repeating-linear-gradient(90deg,#19e3ff33 0 2px,transparent 2px 26px),repeating-linear-gradient(0deg,#ff2bd633 0 2px,transparent 2px 26px),linear-gradient(180deg,#0b1030,#1c375e,#87e9ff)}
 .bg-b_haunt{background:radial-gradient(circle at 72% 22%,#e9e0ff,transparent 14%),linear-gradient(180deg,#17132b,#373052,#b8a3e6)}
