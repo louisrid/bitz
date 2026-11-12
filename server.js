@@ -130,7 +130,7 @@ const account = id => { let w = accounts.get(id); if (!w) { w = core.freshWallet
   if (!w.m1) { w.coins = (w.coins || 0) + 1000000; w.m1 = 1; dirty = true; }
   if (!w.m10) { w.coins = (w.coins || 0) + 10000000; w.m10 = 1; dirty = true; }   // one-off: 10,000,000 coins for everyone   // one-off: every player gets 1,000,000 coins for boxes
   /* Legacy e7 balance-reset migration intentionally disabled to preserve every saved balance. */
-  if (core.earn(w, Date.now())) dirty = true;
+  /* no passive income: gold is earned by collecting, selling, levelling, trading objectives and claimed rewards */
   return w; };
 /* Legacy board game functions are archived in legacy/server.adventure.js. */
 const buckets = new Map();
@@ -254,7 +254,7 @@ async function api(req, res, parts) {
     return send(res, 200, { username:auth.username(id), registered:!!auth.username(id), persistent, id });
 
   let b = {}; if (req.method === 'POST') { try { b = await read(req); } catch (e) { return send(res, 400, { message: 'Bad request.' }); } }
-  const mine = extra => { const fresh = !!w.fresh, out = Object.assign({}, w); delete out.fresh; const bo = core.boostOf(w, now); return Object.assign({ wallet: out, seal: seal(id, out), fresh: fresh, id: id, now: now, worth: core.worth(w), rate: core.GOLD_RATE * (bo ? bo.x : 1), boost: bo ? { x: bo.x, left: bo.until - now } : null, swag: core.swag(w), progress: core.progressOf(w) }, extra); };
+  const mine = extra => { const fresh = !!w.fresh, out = Object.assign({}, w); delete out.fresh; const bo = core.boostOf(w, now); return Object.assign({ wallet: out, seal: seal(id, out), fresh: fresh, id: id, now: now, worth: core.worth(w), rate: 0, boost: bo ? { x: bo.x, left: bo.until - now } : null, swag: core.swag(w), progress: core.progressOf(w) }, extra); };
   const touch = () => { w.t = now; delete w.fresh; dirty = true; };
   try {
     /* Archived clan actions are never executed; saved memberships are preserved. */
@@ -276,6 +276,7 @@ async function api(req, res, parts) {
       if(persistent&&!(await save(true)))return send(res,503,{message:'Card change could not be saved safely. Do not retry until your account refreshes.'});
       return send(res,200,{...result,gold:w.coins,progress:core.progressOf(w)});
     }
+    if (parts[0] === 'daily' && req.method === 'POST') { const out = core.claimDaily(w, now); touch(); return send(res, 200, mine(out)); }
     if (parts[0] === 'me') { if (req.method === 'POST') { core.setProfile(w, b); touch(); } return send(res, 200, mine({swag:core.swag(w)})); }
     if (parts[0] === 'restore' && req.method === 'POST') {
       // a sealed copy this server issued earlier, for an account it no longer has

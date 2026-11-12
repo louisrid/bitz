@@ -1,5 +1,6 @@
 /* BITZ 2.0 progression, calculated by the server and stored on existing wallets. */
-export const LEVEL_GOLD=75000, MAX_LEVEL=100;
+export const LEVEL_GOLD=200000, MAX_LEVEL=100;
+export const levelGold=level=>LEVEL_GOLD+Math.max(0,Math.floor(level))*25000;   // every level pays, and higher levels pay more
 export const MILESTONES=Object.freeze({5:'bp_tricorn',10:'bp_crab',15:'bp_captain',20:'bp_turtle'});
 export const XP_PER_PURCHASE=35, XP_PER_BOX=60, XP_PER_PARTICIPATION=5;
 export function xpThreshold(level){const n=Math.max(0,Math.min(MAX_LEVEL,Math.floor(Number(level)||1))-1);return n*100+n*(n-1)*35/2;}
@@ -17,7 +18,7 @@ export function awardXP(w,amount,items){
  for(let level=before+1;level<=after.level;level++){
   const id=MILESTONES[level],available=id&&items&&items[id]&&!w.own.includes(id);
   if(available){w.own.push(id);rewards.push({level,item:id});}
-  else{w.coins=Math.floor(w.coins||0)+LEVEL_GOLD;rewards.push({level,gold:LEVEL_GOLD});}
+  else{const g=levelGold(level);w.coins=Math.floor(w.coins||0)+g;rewards.push({level,gold:g});}
  }
  return {xp:gain,level:after.level,rewards};
 }

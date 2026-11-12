@@ -13,8 +13,9 @@ test('legacy wallets keep owned possessions and gold',()=>{
 });
 test('gold accrues server-side at configured rate without extreme offline catch-up',()=>{
  const w=core.freshWallet();w.gt=1_000_000;const before=w.coins;
- assert.equal(core.earn(w,1_010_000),Math.floor(core.GOLD_RATE*10));
- assert.equal(w.coins,before+Math.floor(core.GOLD_RATE*10));
+ assert.equal(core.earn(w,1_010_000),0,'no passive income');
+ assert.equal(w.coins,before,'balance untouched by time');
+ const d=core.claimDaily(w,1_010_000);assert.ok(d.daily.gold>=core.DAILY_BASE);assert.throws(()=>core.claimDaily(w,1_020_000));
  assert.equal(core.earn(w,1_110_000),0);
 });
 test('shop purchases, unlocks, and rejects archived guns',()=>{

@@ -16,7 +16,9 @@ export function freshWallet(){
  return {v:3,t:0,coins:1000000,m1:1,m10:1,e7:1,gt:0,boxes:1,themeBoxes:{},xp:0,level:1,own:[],claimed:[],games:{},gb:{},played:0,wins:0,soloAt:0,stats:{earned:0,rent:0,bought:0,kos:0,best:0,opened:0},name:'',look:{skin:0,hair:'short',hc:0,outfit:'tee',hat:'',acc:'',bg:'paper'},pet:''};
 }
 export function boostOf(w,now){const b=w.boost;return b&&b.until>now?b:null;}
-export function earn(w,now){
+/* Passive income is switched off for good: gold only comes from things you do. Balances are never touched here. */
+export function earn(w,now){return 0;}
+export function earnArchived(w,now){
  const from=w.gt||0;w.gt=now;if(!from||now<=from||now-from>AWAY_MS)return 0;
  const b=w.boost,boosted=b&&b.until>from?Math.min(now,b.until)-from:0,units=(now-from)+boosted*((b?b.x:1)-1);
  const perMin=GOLD_RATE*60,raw=Math.max(0,Math.round(units))*perMin+Math.max(0,Math.floor(w.goldCarry||0));
@@ -67,6 +69,19 @@ export function shop(w,what,item){
  }
  if(what==='reset')refuse('Accounts cannot be reset.');
  refuse('Unknown request.');
+}
+/* daily reward: claimed by hand once per UTC day; a streak of consecutive days pays more, up to day 7 */
+export const DAILY_BASE=400000, DAILY_STEP=150000;
+export function dayKey(now){return new Date(now).toISOString().slice(0,10);}
+export function dailyState(w,now){
+ const d=w.daily&&typeof w.daily==='object'?w.daily:{},today=dayKey(now),yest=dayKey(now-86400000);
+ const streak=d.day===today?Math.floor(d.streak||1):d.day===yest?Math.min(7,Math.floor(d.streak||0)+1):1;
+ return {ready:d.day!==today,streak,gold:DAILY_BASE+DAILY_STEP*(Math.min(7,streak)-1)};
+}
+export function claimDaily(w,now){
+ const s=dailyState(w,now);if(!s.ready)refuse('You have already claimed today. Come back tomorrow.');
+ w.daily={day:dayKey(now),streak:s.streak};w.coins=Math.floor(w.coins||0)+s.gold;w.stats=w.stats||{};w.stats.daily=(w.stats.daily||0)+s.gold;
+ return {daily:{gold:s.gold,streak:s.streak},progress:awardXP(w,40,ITEMS)};
 }
 export function participate(w){return awardXP(w,XP_PER_PARTICIPATION,ITEMS);}
 export function worth(w){return Math.floor(w.coins||0)+(Array.isArray(w.own)?w.own:[]).reduce((s,id)=>s+(ITEMS[id]&&ITEMS[id][2]>0?ITEMS[id][2]:0),0);}

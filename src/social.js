@@ -65,7 +65,7 @@ export function mountSocial({server,wss,core,getAuth,account,idOf,isAdmin,markDi
  setInterval(()=>{
   const seen=new Set();
   plaza.forEach((q,ws)=>{if(!q.i||seen.has(q.id))return;seen.add(q.id);
-   const w=account(q.id);send(ws,{gold:w.coins,rate:core.GOLD_RATE,progress:core.progressOf(w)});});
+   const w=account(q.id);send(ws,{gold:w.coins,rate:0,progress:core.progressOf(w)});});
  },5000).unref();
  setInterval(()=>plaza.forEach((q,ws)=>{
   if(!ws.alive){try{ws.terminate();}catch(e){}return;}ws.alive=false;try{ws.ping();}catch(e){}
