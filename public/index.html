@@ -639,10 +639,10 @@ html.fopen #ftab{display:none}
 </style>
 
 <div id="bd" class="bg-paper"></div>
-<link rel="stylesheet" href="open-world.css?v=pastel-return1"><link rel="stylesheet" href="loot-polish.css?v=bluepurple4"><link rel="stylesheet" href="interface-polish.css?v=world1">
+<link rel="stylesheet" href="open-world.css?v=pastel-return1"><link rel="stylesheet" href="loot-polish.css?v=bluepurple4"><link rel="stylesheet" href="interface-polish.css?v=world1"><link rel="stylesheet" href="bitz2.css?v=2">
 
 <canvas id="gl" aria-hidden="true"></canvas>
-<aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div><div id="flogo" aria-label="BITZ"><span>B</span><span>I</span><span>T</span><span>Z</span></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
+<aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="b2invite" data-a="invitefriend" aria-label="Invite people to the lobby">Invite</button><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div><div id="flogo" aria-label="BITZ"><span>B</span><span>I</span><span>T</span><span>Z</span></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
 <div id="app" data-screen="home">
   <aside id="side" class="panel"></aside>
   <aside id="hud" class="panel" hidden>
@@ -652,94 +652,9 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="stuff">My Stuff</button><button class="wbtn" data-a="explore">Explore</button><button class="wbtn" data-a="clans">Clans</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><button class="wbtn wzom" data-a="zombies" id="wzom" hidden>Zombies: off</button><button class="wbtn wadm" data-a="adminpanel" id="wadm" hidden>Admin</button><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="BITZ social lobby. Walk with WASD, jump with Space, click players to inspect their possessions."><div id="b2-nographics" hidden role="status"><strong>3D VIEW UNAVAILABLE</strong><span>Your browser could not start 3D graphics. You can still browse your collection and the Shop.</span></div><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar" aria-label="Game menu"><button class="wbtn active" data-a="page" data-v="world">Lobby</button><button class="wbtn" data-a="stuff">My Stuff</button><button class="wbtn" data-a="page" data-v="me">Customise</button><button class="wbtn" data-a="loot">Mystery Boxes</button></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
-<div id="title" class="bg-paper" hidden></div><div id="goldtop" aria-label="Your gold"><i class="gc"></i><span><em id="wgold">...</em><small id="wrate">+1,000,000/min</small></span></div><button id="shopbig" data-a="page" data-v="shop"><span class="sbi"></span><b>Shop</b><i class="sale">Sale</i></button><div id="bload" aria-label="Loading BITZ"><canvas id="blc"></canvas><div class="bl-vig"></div><div class="bl-scan"></div><div class="bl-hud"><i></i><i></i><i></i><i></i><span>BITZ</span><span>Loading</span></div><p class="bl-sr">Loading BITZ</p></div><script>(function(){
-var host=document.getElementById('bload'),cv=document.getElementById('blc');if(!host||!cv||!cv.getContext)return;
-var cx=cv.getContext('2d'),dpr=Math.min(window.devicePixelRatio||1,2),W=0,H=0,bits=[],T0=performance.now(),CYC=4400,still=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches);
-var LOGO="BITZ",FONT="'Coolvetica','Archivo Black','Arial Black',sans-serif",fs=100,g=5,lx=0,ly=0,sc=1;
-var IC={
-bolt:["......###..",".....###...","....###....","...###.....","..#######..","..#######..",".....###...","....###....","...###.....","..###......","..##......."],
-crown:["...........",".#....#...#",".##...#..##",".###..#.###",".#########.",".#########.",".#########.",".#########.","...........",".#########.","..........."],
-skull:["..#######..",".#########.","###########","##..###..##","##..###..##","###########",".####.####.","..#######..","..#.#.#.#..","..#.#.#.#..","..........."],
-gem:["...#####...","..#######..",".#########.","###########",".#########.","..#######..","...#####...","....###....",".....#.....","...........","..........."],
-heart:[".###...###.","#####.#####","###########","###########","###########",".#########.","..#######..","...#####...","....###....",".....#.....","..........."],
-sword:[".........##","........###",".......###.","......###..",".#...###...",".##.###....","..#####....","...###.....","..#####....",".##..##....","##........."],
-cube:[".....#.....","...#####...",".#########.","###########","###########","####.######","####.######","####.######",".###.#####.","...#.###...",".....#....."],
-star:["....###....","....###....",".....#.....","###########",".#########.","..#######..","..#######..",".####.####.",".###...###.","##.......##","..........."]};
-var NAMES=['bolt','crown','skull','gem','heart','sword','cube','star'];
-var LINES=['WAKING THE WORLD','STACKING BLOCKS','LOADING LOOT','SHARPENING BLASTERS','POLISHING COSTUMES','FINDING YOUR FRIENDS','FEEDING THE FOXES'];
-var slots=[],specks=[],i,k;
-for(i=0;i<5;i++){var map=[];for(k=0;k<121;k++)map.push(Math.random());slots.push({a:(i*2)%8,b:(i*2+1)%8,at:900+i*320,map:map});}
-for(i=0;i<46;i++)specks.push({x:Math.random(),y:Math.random(),p:Math.random()*6.28,s:0.6+Math.random()*1.6});
-var ease=function(t){return t<0?0:t>1?1:1-Math.pow(1-t,3)},back=function(t){if(t<=0)return 0;if(t>=1)return 1;var c1=1.4,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
-function fit(){var r=host.getBoundingClientRect();W=Math.max(1,r.width);H=Math.max(1,r.height);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cx.setTransform(dpr,0,0,dpr,0,0);sc=Math.min(W,H*1.15)/800;build();}
-function build(){
-  fs=Math.max(70,Math.min(W*0.26,H*0.27,200));g=Math.max(4,Math.round(fs/24));
-  var oc=document.createElement('canvas'),ow=Math.ceil(W),oh=Math.ceil(fs*1.5),ox=oc.getContext('2d');oc.width=ow;oc.height=oh;
-  ox.fillStyle='#fff';ox.font='400 '+fs+'px '+FONT;ox.textBaseline='alphabetic';ox.textAlign='center';ox.fillText(LOGO,ow/2,fs*1.05);
-  var d=ox.getImageData(0,0,ow,oh).data,pts=[],minx=1e9,maxx=0,miny=1e9,maxy=0,x,y;
-  for(y=0;y<oh;y+=g)for(x=0;x<ow;x+=g){if(d[((y+(g>>1))*ow+x+(g>>1))*4+3]>140){pts.push([x,y]);if(x<minx)minx=x;if(x>maxx)maxx=x;if(y<miny)miny=y;if(y>maxy)maxy=y;}}
-  lx=W/2-(minx+maxx)/2;ly=H*0.37-(miny+maxy)/2;
-  var old=bits;bits=pts.map(function(p,n){var o=old[n]||{},ang=Math.random()*6.283,far=Math.max(W,H)*(0.55+Math.random()*0.5);
-    return {tx:p[0]+lx,ty:p[1]+ly,sx:o.sx!=null?o.sx:W/2+Math.cos(ang)*far,sy:o.sy!=null?o.sy:H/2+Math.sin(ang)*far*0.7,d:o.d!=null?o.d:Math.random()*650,y:o.y!=null?o.y:(Math.random()<0.14),vx:o.vx!=null?o.vx:(Math.random()-0.5)*900,vy:o.vy!=null?o.vy:-200-Math.random()*700,fl:Math.random()};});
-}
-function slices(t){var r=[],q=Math.floor(t/55),n=3+(q%3);for(var s=0;s<n;s++){var h=Math.sin(q*12.9898+s*78.233)*43758.5453;h-=Math.floor(h);var h2=Math.sin(q*4.1+s*9.3)*1e4;h2-=Math.floor(h2);r.push([ly+h*fs*0.95,8+h2*fs*0.22,(h2-0.5)*fs*0.55]);}return r;}
-function drawIcon(slot,cxp,cyp,px,t,tt){
-  var A=IC[NAMES[slot.a]],B=IC[NAMES[slot.b]],p=(tt-slot.at)/460,x,y,idx=0;
-  if(p>=1){slot.a=slot.b;slot.b=(slot.b+1+Math.floor(Math.random()*3))%8;slot.at=tt+1400+Math.random()*500;for(idx=0;idx<121;idx++)slot.map[idx]=Math.random();A=IC[NAMES[slot.a]];B=IC[NAMES[slot.b]];p=-1;}
-  for(y=0;y<11;y++)for(x=0;x<11;x++){idx=y*11+x;var on=A[y][x]==='#',mix=0;
-    if(p>0){var on2=B[y][x]==='#';if(p>slot.map[idx]){on=on2;mix=Math.max(0,1-(p-slot.map[idx])*5);}else if(on){mix=0;}}
-    if(!on&&!mix)continue;
-    var band=(((x+y)*55+t*0.22)%700)<70;cx.fillStyle=mix>0.01?'#fff':band?'#FFF01F':'#e9e9e9';
-    var j=mix>0.01?(Math.random()-0.5)*px*0.6:0;cx.fillRect(cxp+(x-5.5)*px+j,cyp+(y-5.5)*px,px-1,px-1);}
-}
-var line=0,lineAt=0,typed=0;
-function frame(now){
-  if(!host.isConnected)return;requestAnimationFrame(frame);
-  var t=now-T0,tt=t%CYC,done=host.classList.contains('out');
-  cx.fillStyle='#000';cx.fillRect(0,0,W,H);
-  /* dot grid drifting up */
-  var gs=Math.max(22,Math.round(34*sc)),off=(t*0.012)%gs;cx.fillStyle='rgba(255,255,255,.07)';
-  for(var gy=-gs+off;gy<H;gy+=gs)for(var gx=gs/2;gx<W;gx+=gs)cx.fillRect(gx,gy,2,2);
-  specks.forEach(function(s){var a=0.15+0.35*Math.abs(Math.sin(t*0.0014*s.s+s.p));cx.fillStyle='rgba(255,240,31,'+a.toFixed(2)+')';cx.fillRect(s.x*W,s.y*H,s.s*2,s.s*2);});
-  /* the logo */
-  var sl=tt>3300&&tt<3720?slices(tt):null,band=-1;
-  if(tt>1500&&tt<3300)band=(tt-1500)/1500*(W*0.9)+(W*0.05);
-  if(tt>1480&&tt<1760){var f=(tt-1480)/280,wd=W*ease(f);cx.fillStyle='rgba(255,255,255,'+(0.9*(1-f)).toFixed(2)+')';cx.fillRect(W/2-wd/2,ly+fs*0.45,wd,Math.max(2,4*sc));}
-  var ghost=sl?1:0,n,b;
-  for(var pass=ghost;pass>=0;pass--){
-    for(n=0;n<bits.length;n++){b=bits[n];var x,y,a=1,col='#fff',sz=g-1;
-      if(tt<1500){var p=(tt-b.d)/900;if(p<=0){continue;}var e=back(Math.min(1,p));x=b.sx+(b.tx-b.sx)*e;y=b.sy+(b.ty-b.sy)*e;a=Math.min(1,p*3);if(p<1)col=b.y?'#FFF01F':'#fff';}
-      else if(tt<3700){x=b.tx;y=b.ty;
-        if(band>=0&&Math.abs(b.tx-band)<g*5){col='#FFF01F';y-=Math.round(g*0.6);sz=g;}
-        else if(b.y&&Math.sin(t*0.004+b.fl*30)>0.55)col='#FFF01F';
-        else if(Math.sin(t*0.003+b.fl*50)>0.985)col='#FFF01F';}
-      else{var q=(tt-3700)/700;x=b.tx+b.vx*q*0.5;y=b.ty+b.vy*q*0.5+q*q*420;a=1-q;col=b.y?'#FFF01F':'#fff';}
-      if(sl){for(var s=0;s<sl.length;s++){if(b.ty>=sl[s][0]&&b.ty<sl[s][0]+sl[s][1])x+=sl[s][2];}}
-      if(pass===1){if(!sl)continue;cx.fillStyle='rgba(120,200,255,.55)';cx.fillRect(x-g*0.7,y,sz,sz);continue;}
-      cx.globalAlpha=Math.max(0,a);cx.fillStyle=col;cx.fillRect(x,y,sz,sz);
-    }
-    cx.globalAlpha=1;
-  }
-  /* pixel symbols */
-  var px=Math.max(3,Math.round(5*sc)),gap=Math.round(98*sc),cy2=H*0.62;
-  for(i=0;i<5;i++)drawIcon(slots[i],W/2+(i-2)*gap,cy2,px,t,t);
-  /* segmented bar */
-  var segs=28,bw=Math.min(W*0.7,520),sw=bw/segs,bx=W/2-bw/2,by=H*0.73,bh=Math.max(14,Math.round(20*sc*1.1));
-  var prog=done?1:Math.min(0.97,ease(t/4300)*0.97+Math.sin(t*0.004)*0.004);
-  for(i=0;i<segs;i++){var fill=prog*segs-i;cx.fillStyle=fill>=1?'#FFF01F':fill>0?'rgba(255,240,31,'+(fill*0.8).toFixed(2)+')':'#1b1b1b';
-    if(fill>0&&fill<1.2&&Math.sin(t*0.03)>0)cx.fillStyle='#fff';cx.fillRect(bx+i*sw+1,by,sw-3,bh);}
-  cx.font='700 '+Math.max(11,Math.round(14*sc*1.1))+'px "Space Grotesk",ui-monospace,monospace';cx.textBaseline='top';cx.textAlign='left';cx.fillStyle='#FFF01F';
-  cx.fillText(Math.floor(prog*100)+'%',bx+bw+12,by+bh/2-7);
-  if(t-lineAt>1000){lineAt=t;line=(line+1)%LINES.length;typed=0;}typed=Math.min(LINES[line].length,typed+0.9);
-  cx.fillStyle='#bdbdbd';cx.textAlign='center';cx.fillText(LINES[line].slice(0,Math.floor(typed))+(Math.floor(t/260)%2?'_':' '),W/2,by+bh+16);
-}
-fit();addEventListener('resize',fit);
-if(document.fonts&&document.fonts.load)document.fonts.load('100px Coolvetica').then(function(){build();}).catch(function(){});
-if(still){T0=performance.now()-2400;}
-requestAnimationFrame(frame);
-})();</script>
+<div id="title" class="bg-paper" hidden></div><button id="leveltop" data-a="levelinfo" aria-label="Your level and experience"><b>LVL <span id="my-level">1</span></b><span class="b2xp"><i id="my-xp"></i></span></button><div id="goldtop" aria-label="Your gold"><i class="gc"></i><span><em id="wgold">...</em><small id="wrate">+500,000/min</small></span></div><button id="shopbig" data-a="page" data-v="shop"><span class="sbi"></span><b>Shop</b><i class="sale">Sale</i></button><div id="bload" aria-label="Loading BITZ"><div class="b2loader"><b>BITZ<span>.</span></b><p>YOUR WORLD. YOUR COLLECTION.</p><div class="b2loadbar"><i></i></div></div></div>
 <div id="veil" hidden><div id="modal" class="card" role="dialog" aria-modal="true"></div></div>
 <div id="confetti" hidden></div>
 
@@ -1600,8 +1515,8 @@ const B3 = (function () {
   const took = () => { if (chasing) az = cA; fUntil = 0; userHold = performance.now() + 2500; };
   stage.addEventListener('contextmenu', e => { if (WD.on) e.preventDefault(); });
   stage.addEventListener('pointerdown', e => { if (e.target !== stage && e.target.closest && e.target.closest('button,a,input,select,textarea,label,[data-a],#fprofov,#side,#wtrade,#wbanner')) return;   // taps on buttons and pop-ups are theirs, not the camera's
-    if (WD.on && e.button === 2) { e.preventDefault(); WD.fire(); return; } stage.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]); if (ptr.size === 1) { moved = 0; t0 = performance.now(); heldFire = false; }
-    if (WD.on && e.pointerType === 'mouse' && e.button === 0 && ptr.size === 1) { clearTimeout(holdT); clearInterval(autoI); holdT = setTimeout(() => { if (ptr.size === 1 && moved < 6) { heldFire = true; WD.fire(); autoI = setInterval(() => { if (!ptr.size || moved >= 6) { clearInterval(autoI); return; } WD.fire(); }, 70); } }, 320); }   // hold the button to keep firing
+    if (WD.on && e.button === 2) return; stage.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]); if (ptr.size === 1) { moved = 0; t0 = performance.now(); heldFire = false; }
+    /* No click-and-hold firing; clicks now inspect players. */
     pinch = 0; });
   stage.addEventListener('pointermove', e => {
     const p = ptr.get(e.pointerId); if (!p) return;
@@ -1611,7 +1526,7 @@ const B3 = (function () {
   });
   const up = e => {
     if (!ptr.delete(e.pointerId)) return; pinch = 0; clearTimeout(holdT); clearInterval(autoI);
-    if (ptr.size === 0 && moved < 10 && performance.now() - t0 < 500 && e.type === 'pointerup' && WD.on && e.pointerType === 'mouse' && e.button === 0 && !e.shiftKey && !e.altKey && !heldFire) { WD.fire(); return; }   // a click shoots; Shift or Alt click on a player opens their profile
+    /* Single clicks inspect player profiles rather than shooting. */
     if (ptr.size === 0 && moved < 10 && performance.now() - t0 < 500 && e.type === 'pointerup' && WD.on && WD.onPick && !heldFire) {
       const nd = new THREE.Vector2((e.clientX - rc.left) / rc.width * 2 - 1, -((e.clientY - rc.top) / rc.height * 2 - 1)), ray = new THREE.Raycaster(); ray.setFromCamera(nd, cam); let best = null;
       WD.others.forEach((o, i) => { const h = ray.intersectObject(o.g, true); if (h.length && (!best || h[0].distance < best.d)) best = { d: h[0].distance, o: o, i: i }; });
@@ -1640,11 +1555,8 @@ const B3 = (function () {
   const worldG = new THREE.Group(); worldG.visible = false; scene.add(worldG);
   const worldHidden=new Map();
   const socialEnvironment=STAKKZ_BUILD_WORLD(THREE,worldG); api._s = scene; api._wg = worldG; api._r = renderer;
-  const colliders = [];
-  setTimeout(() => {   // solid things in the city: anything taller than a person with a modest footprint
-    city.updateMatrixWorld(true);
-    city.children.forEach(o => { const b = new THREE.Box3().setFromObject(o), sz = b.getSize(new THREE.Vector3()); if (sz.y > 1.1 && sz.x < 14 && sz.z < 14 && b.max.y > 1.1) colliders.push([b.min.x, b.min.z, b.max.x, b.max.z]); });
-  }, 0);
+  /* BITZ 2.0: retired adventure-city collider scan.
+     The social lobby is collision-free. See legacy/index.adventure.html to restore. */
   const CHAR = 2;   // people in the world are drawn at twice the board size
   const WD = api.world = { on: false, me: null, others: new Map(), joy: { x: 0, y: 0 }, keys: {}, you: null, feed: null, cAz: 0, cEl: 0.34, cZ: 1 };
   function nameTag(text) {
@@ -1655,18 +1567,18 @@ const B3 = (function () {
     g.fillStyle = '#000'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 126, 29, 230);
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthWrite: false })); sp.scale.set(4.2, 1.05, 1); sp.position.y = 6.3; sp.renderOrder = 5; return sp;
   }
-  function plazaBody(look, col, name) {
+  function plazaBody(look, col, name, pet) {
     const g = makeChar(look || {}, col, 'bust'); g.scale.setScalar(CHAR); g.userData.tag = nameTag(name || 'Player'); g.userData.tag.scale.set(5.6 / CHAR, 1.4 / CHAR, 1); g.userData.tag.position.y = 3.95; g.add(g.userData.tag);
-    const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xff2b2b, depthWrite: false })); bar.scale.set(3 / CHAR, 0.3 / CHAR, 1); bar.position.y = 4.5; bar.renderOrder = 6; bar.visible = false; g.userData.bar = bar; g.add(bar); worldG.add(g); return g;
+    const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xff2b2b, depthWrite: false })); bar.scale.set(3 / CHAR, 0.3 / CHAR, 1); bar.position.y = 4.5; bar.renderOrder = 6; bar.visible = false; g.userData.bar=bar;g.add(bar);if(pet){const buddy=makePet(pet);buddy.scale.setScalar(.95);buddy.position.set(1.9,-.1,1.05);g.add(buddy);g.userData.buddy=buddy;}worldG.add(g);return g;
   }
   function dropBody(g) { if (!g) return; worldG.remove(g); g.traverse(q => { if (q.material && q.material.map) q.material.map.dispose(); }); }
   WD.setMe = (look, col, name) => {
     const sa = Math.random() * Math.PI * 2, sr = Math.random() * 9;
     const old = WD.me, pos = old ? [old.x, old.y, old.z, old.ry] : [Math.sin(sa) * sr, 0, Math.cos(sa) * sr, Math.atan2(-Math.sin(sa), -Math.cos(sa))];
     if (old) dropBody(old.g);
-    WD.me = { g: plazaBody(look, col, name), x: pos[0], y: pos[1], z: pos[2], ry: pos[3], vy: 0, sp: 0, emo: '', emoT: 0 }; setGun(WD.me, WD.weapon); if (WD.dead) WD.me.g.rotation.x = -Math.PI / 2;
+    WD.me = { g: plazaBody(look, col, name, F.pet), x: pos[0], y: pos[1], z: pos[2], ry: pos[3], vy: 0, sp: 0, emo: '', emoT: 0 }; /* No equipped guns in the social lobby. */ if (WD.dead) WD.me.g.rotation.x = -Math.PI / 2;
   };
-  WD.add = (o, col) => { WD.drop(o.i); const g = plazaBody(o.l, col, o.n), p = o.p || [0, 0, 0, 0, 0]; const q = { g: g, n: o.n, f: o.f, sw: o.sw, nw: o.nw, l: o.l, pet: o.pet, x: p[0], y: p[1], z: p[2], ry: p[3], t: p.slice(), a: 0, sp: 0, emo: '', emoT: 0 }; WD.others.set(o.i, q); setGun(q, Number.isInteger(o.w)?o.w:0); setBar(q, o.hp == null ? 100 : o.hp); if (o.d) { q.dead = true; g.rotation.x = -Math.PI / 2; } };
+  WD.add = (o, col) => { WD.drop(o.i); const g = plazaBody(o.l, col, o.n, o.pet), p = o.p || [0, 0, 0, 0, 0]; const q = { g: g, n: o.n, f: o.f, sw: o.sw, nw: o.nw, level:o.level||1, l: o.l, pet: o.pet, x: p[0], y: p[1], z: p[2], ry: p[3], t: p.slice(), a: 0, sp: 0, emo: '', emoT: 0 }; WD.others.set(o.i,q); /* No active combat or health bars. */ if (o.d) { q.dead = true; g.rotation.x = -Math.PI / 2; } };
   WD.drop = i => { const o = WD.others.get(i); if (o) { dropBody(o.g); WD.others.delete(i); } };
   WD.clear = () => { WD.others.forEach(o => dropBody(o.g)); WD.others.clear(); };
   WD.snap = rows => rows.forEach(r => { const o = WD.others.get(r[0]); if (o) o.t = r.slice(1); });
@@ -1809,7 +1721,7 @@ const B3 = (function () {
   WD.setHp = (i, hp) => { const o = who(i); if (!o) return; setBar(o, hp); if (o === WD.me) { WD.hp = hp; hud('hit'); } };
   WD.ko = i => { const o = who(i); if (!o) return; o.dead = true; setBar(o, 0); o.g.rotation.x = -Math.PI / 2; burst(o.x, 2, o.z, 0xff4b3e, performance.now(), 16); if (o === WD.me) { WD.dead = true; WD.hp = 0; hud('ko'); } };
   WD.spawn = (i, x, z) => { const o = who(i); if (!o) return; o.dead = false; o.g.rotation.x = 0; setBar(o, 100); o.x = x; o.z = z; o.y = 0; if (o === WD.me) { WD.dead = false; WD.hp = 100; o.vy = 0; hud(); } else o.t = [x, 0, z, o.ry, 0]; };
-  WD.gun = (i, w) => { const o = WD.others.get(i); if (o) setGun(o, w); };
+  WD.gun = () => {}; WD.setWeapon = () => {}; WD.fire = () => {}; // combat is archived
   /* gold boost pads: walk into the floating cube; the server gives the boost and rests the pad */
   socialEnvironment.pickups.forEach(q => { q.mesh.visible = false; });
   const padG = new THREE.Group(), padM = new Map(), PADC = [0xffd60a, 0x19e3ff, 0xff2bd6], PADX = [2, 3, 5]; worldG.add(padG);
@@ -1850,8 +1762,8 @@ const B3 = (function () {
     const k = keyOf(e); WD.keys[k] = true;
     if (k === ' ') { e.preventDefault(); WD.jump(); }
     if (k === 'w' && !e.repeat) { const tn = performance.now(); if (tn - WD.lastW < 320) WD.trySprint(); WD.lastW = tn; }
-    if (/^[1-9]$/.test(k) && (+k-1)<GUNS.length) WD.setWeapon(+k-1);
-    if (k === 'f' && !e.repeat) WD.fire();
+    /* Old weapon key bindings are disabled. */
+    /* Old firing key binding disabled. */
     if (e.key === '+' || e.key === '=' || e.code === 'NumpadAdd') WD.zoomBy(0.85); else if (e.key === '-' || e.key === '_' || e.code === 'NumpadSubtract') WD.zoomBy(1.18);
     if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].indexOf(k) >= 0) e.preventDefault();
   });
@@ -1879,7 +1791,7 @@ const B3 = (function () {
     const dt = Math.min(0.1, (now - (WD.last || now)) / 1000), t = now / 1000; WD.last = now;socialEnvironment.animate(t);
     if(!worldG.visible){
       scene.children.forEach(o=>{if(o!==worldG&&!o.isLight){worldHidden.set(o,o.visible);o.visible=false;}});
-      worldG.visible=true;scene.background=new THREE.Color(0x9fd8f0);scene.fog=new THREE.Fog(0x9fd8f0,90,215);
+      worldG.visible=true;scene.background=new THREE.Color(0xf9f9ff);scene.fog=new THREE.Fog(0xf9f9ff,74,130);
       el=0.34;zoom=1;az=WD.me?WD.me.ry+Math.PI:0;WD.cAz=az;WD.cEl=el;WD.cZ=1;cT.set(WD.me?WD.me.x:0,3.1,WD.me?WD.me.z:0);
     }
     Object.keys(tokens).forEach(k=>{tokens[k].visible=false;});Object.keys(pets).forEach(k=>{pets[k].visible=false;});
@@ -1929,7 +1841,7 @@ const B3 = (function () {
     el = Math.max(0.16, Math.min(1.05, el)); zoom = Math.max(0.4, Math.min(3.4, zoom));
     const ease2 = 1 - Math.exp(-dt * 9);
     WD.cAz = az; WD.cEl = el; WD.cZ = zoom;
-    const tx=m?m.x:0,ty=(m?m.y*.6:0)+5.2,tz=m?m.z:0,pitch=WD.cEl,dist=34*WD.cZ;
+    const tx=m?m.x:0,ty=(m?m.y*.6:0)+5.2,tz=m?m.z:0,pitch=WD.cEl,dist=27*WD.cZ;
     cT.set(tx, 5.2, tz);
     cam.position.set(cT.x + Math.sin(WD.cAz) * Math.cos(pitch) * dist, Math.max(3, cT.y + Math.sin(pitch) * dist), cT.z + Math.cos(WD.cAz) * Math.cos(pitch) * dist);
     cam.lookAt(cT); cam.aspect = rc.width / rc.height; cam.updateProjectionMatrix();
@@ -1944,6 +1856,12 @@ const B3 = (function () {
     if ((fN2++ & 31) === 0) { const r = stage.getBoundingClientRect(); if (Math.abs(r.left + stage.clientLeft - rc.left) + Math.abs(r.top + stage.clientTop - rc.top) + Math.abs(stage.clientWidth - rc.width) + Math.abs(stage.clientHeight - rc.height) > 0.5 && r.width > 0) size(); }
     if (api.auto && !api.low) { const dt = now - fL; if (fL && dt < 400) { fN++; if (fN > 40) fT += dt; if (fN === 140) { if (fT / 100 > 40) api.quality('low'); api.auto = false; } } }
     fL = now;
+    /* Run only the social renderer. Previously the entire Monopoly/city scene
+       was animated every frame even while invisible; that work is now dormant.
+       Full original loop remains in legacy/index.adventure.html. */
+    if (WD.on) { worldFrame(now); if (WD.profileActive && api.showing) drawProfileChar(now); return; }
+    if (worldG.visible) worldOff();
+    if (api.home && !api.showing) { renderer.setClearColor(0xf9f9ff, 1); renderer.clear(); return; }
     for (let i = tw.length - 1; i >= 0; i--) { const a = tw[i], f = Math.min(1, (now - a.t0) / a.ms); a.fn(f); if (f >= 1) { tw.splice(i, 1); a.res(); } }
     if (api.showing && api.home && showChar && !api.world?.on) { drawShow(now); return; }
     const t = now / 1000, mv = still ? 0 : 1;
@@ -1997,8 +1915,9 @@ const B3 = (function () {
     logo3.rotation.y = t * 0.5 * mv;
     gift.rotation.z = Math.sin(t * 5) * 0.14 * mv; gift.rotation.y = t * 0.6 * mv; gift.position.y = 3 + Math.abs(Math.sin(t * 2.4)) * 0.6 * mv;
     sirenM.color.setHex(Math.floor(t * 3) % 2 ? 0xff4b3e : 0x3fa9ff);
-    if (WD.on) { worldFrame(now); if (WD.profileActive && api.showing) drawProfileChar(now); return; } else if (worldG.visible) worldOff();
-    if (api.home) { renderer.setClearColor(0x9fd8f0, 1); renderer.clear(); return; }
+    /* Legacy city/board animations below are only reachable when the old
+       board was deliberately restored. Normal lobby and Shop skip them. */
+    if (api.home) { renderer.setClearColor(0xf9f9ff, 1); renderer.clear(); return; }
     const asp = rc.width / rc.height, tv = Math.tan(cam.fov * Math.PI / 360), th = tv * asp;
     const kk = 1 - Math.exp(-Math.min(0.1, (now - (api.last || now)) / 1000) * 6); api.last = now;
     // the whole board is the resting view. The camera closes in on a player when their turn starts, while the dice
@@ -2062,7 +1981,10 @@ function newWallet(o) {
   return w;
 }
 let wallet = newWallet(store.get('bigrent-wallet')), wchain = Promise.resolve(), wT = 0, pendingStyle = null, lootSt = null;
-function loadProfile(o) { if (!o) return; if (typeof o.name === 'string' && o.name) F.name = o.name.slice(0, 12); if (o.look && typeof o.look === 'object') Object.assign(F.look, o.look); if (typeof o.pet === 'string') F.pet = o.pet; }
+let LEVEL={level:wallet.level||1,xp:wallet.xp||0,levelXp:0,nextXp:100,percent:0};
+function levelSync(p){if(!p)return;LEVEL={...LEVEL,...p};levelPaint();}
+function levelPaint(){const l=$('#my-level'),w=$('#wlevel'),b=$('#my-xp');if(l)l.textContent=LEVEL.level||1;if(w)w.textContent=LEVEL.level||1;if(b)b.style.width=Math.max(0,Math.min(100,Number(LEVEL.percent)||0))+'%';}
+function loadProfile(o) { if (!o) return; if(o.level||o.xp)levelSync({level:o.level||1,xp:o.xp||0}); if (typeof o.name === 'string' && o.name) F.name = o.name.slice(0, 12); if (o.look && typeof o.look === 'object') Object.assign(F.look, o.look); if (typeof o.pet === 'string') F.pet = o.pet; }
 const owns = id => !!ITEMS[id] && (ITEMS[id][2] === 0 || wallet.own.indexOf(id) >= 0);
 function fixLook() {
   ['outfit', 'hat', 'acc', 'bg'].forEach(k => { const v = F.look[k]; if (v && !(owns(v) && ITEMS[v][0] === k)) F.look[k] = ''; });
@@ -2090,16 +2012,16 @@ async function api(path, body) {
   let j = {}; try { j = await r.json(); } catch (e) {}
   if (j.now) skew = j.now - Date.now();
   if (!r.ok) throw { code: r.status >= 500 || r.status === 429 ? 'unavailable' : 'refused', message: j.message || 'That did not work. Try again.', state: j.state };
-  if (typeof j.swag === 'number') MYSWAG = j.swag;
-  if (j.wallet) { setWallet(j.wallet); if (j.rate) goldSync({ rate: j.rate, boost: j.boost }); if (j.seal) store.set('stakkz-seal', { wallet: j.wallet, seal: j.seal }); }   // the sealed copy lets the server give the account back if it ever loses it
+  if (typeof j.swag === 'number') MYSWAG = j.swag; if(j.progress)levelSync(j.progress);
+  if (j.wallet) { setWallet(j.wallet);levelSync({level:j.wallet.level||1,xp:j.wallet.xp||0}); if (j.rate) goldSync({ rate: j.rate, boost: j.boost }); if (j.seal) store.set('stakkz-seal', { wallet: j.wallet, seal: j.seal }); }   // the sealed copy lets the server give the account back if it ever loses it
   return j;
 }
 /* gold: the server owns the balance; between its answers the page counts up at the rate the server gave */
-const Gold = { rate: 1000000 / 60, at: Date.now(), boost: null, live: false, carry:0 };
+const Gold = { rate: 500000 / 60, at: Date.now(), boost: null, live: false, carry:0 };
 let MYSWAG = -100;
 function goldSync(j) { if (typeof j.gold === 'number' && wallet) wallet.coins = j.gold; if (j.rate) Gold.rate = j.rate; Gold.boost = j.boost ? { x: j.boost.x, until: Date.now() + j.boost.left } : null; Gold.at = Date.now(); Gold.carry=0; Gold.live = true; goldPaint(); }
 function goldPaint() {
-  const now = Date.now(); if (Gold.boost && Gold.boost.until <= now) { Gold.boost = null; Gold.rate = 1000000 / 60; }
+  const now = Date.now(); if (Gold.boost && Gold.boost.until <= now) { Gold.boost = null; Gold.rate = 500000 / 60; }
   if (wallet && Gold.live && typeof Plaza !== 'undefined' && Plaza.you) { const dt = Math.min(6000, now - Gold.at); const exact=(dt*Gold.rate/1000)+(Gold.carry||0);const add=Math.floor(exact);Gold.carry=exact-add;wallet.coins=Math.floor(wallet.coins||0)+add; }
   Gold.at = now;
   const e = document.getElementById('wgold'); if (e && wallet) e.textContent = Math.floor(wallet.coins || 0).toLocaleString('en-GB');
@@ -2154,8 +2076,8 @@ function rollLoot() {
 }
 /* the server opens the box and decides the prize */
 async function openLoot() {
-  if (wallet.boxes < 1) return null;
-  try { return (await api('shop', { op: 'open' })).prize || null; } catch (e) { toast(e.message); return null; }
+  if (bxCount()<1)return null;
+  try{return (await api('shop',{op:'open',item:bxTheme()})).prize||null;}catch(e){toast(e.message);return null;}
 }
 function wearItem(id) {
   const it = ITEMS[id]; if (!it || !owns(id)) return;
@@ -2590,7 +2512,7 @@ const row = (label, html) => '<div class="fld"><span class="lbl">' + label + '</
 const xBtn = () => '<button class="ib" data-a="close" aria-label="Close">' + ico('x', 16) + '</button>';
 const PAGES = [['world','World'],['me','Profile'],['shop','Shop']];
 const CATS = [['body', 'Body'], ['outfit', 'Outfit'], ['hat', 'Hat'], ['acc', 'Extra'], ['pet', 'Pet'], ['bg', 'Scene']];
-const FILTS = [['bitz', 'Bitz Piece'], ['gun', 'Guns'], ['outfit', 'Outfits'], ['hat', 'Hats'], ['acc', 'Extras'], ['pet', 'Pets'], ['bg', 'Scenes']];
+const FILTS = [['bitz', 'Bitz Piece'], ['outfit', 'Outfits'], ['hat', 'Hats'], ['acc', 'Extras'], ['pet', 'Pets'], ['bg', 'Scenes']];
 const filtOf = id => BITZP.indexOf(id) >= 0 ? 'bitz' : FGROUP[ITEMS[id][0]];
 const lengthRow = () => row('Choose a mode', seg('mode', [[25, 'QUICK · 25m'], [35, 'FAST FUN · 35m'], [45, 'LONG · 45m'], ['classic', 'Classic']], 'modes') +
   '<p class="fine"><b>FAST FUN recommended.</b> Everyone starts with £1,500. Buy streets as you land on them.</p>');
@@ -2632,7 +2554,7 @@ const lootBanner=()=>'<div class="loot r3"><span class="loot-pic">'+lootImg(66)+
   '<button class="btn sm" data-a="lootbuy">BUY '+coin(BOX_PRICE)+'</button>')+'</div></div>';
 function shopHTML(col) {
   if (F.sel && ITEMS[F.sel] && ITEMS[F.sel][2] > 0) return productHTML(F.sel, col);
-  const ids = Object.keys(ITEMS).filter(id => (ITEMS[id][2] > 0 || ITEMS[id][0] === 'gun') && ITEMS[id][3] !== 2 && filtOf(id) === F.filt).sort((a, b) => ITEMS[a][2] - ITEMS[b][2]);
+  const ids = Object.keys(ITEMS).filter(id => ITEMS[id][2] > 0 && ITEMS[id][0] !== 'gun' && ITEMS[id][3] !== 2 && filtOf(id) === F.filt).sort((a, b) => ITEMS[a][2] - ITEMS[b][2]);
   const sale = F.filt === 'bitz' ? '<div class="bitzsale"><b>BITZ PIECE</b><span>Special sale · pirate adventure collection</span></div>' : '';
   return '<div class="shophead"><span class="lbl">Your coins</span>' + coin(wallet.coins) + '</div>' + lootBanner() + pick('filt', '', FILTS, F.filt, 'dense') + sale + '<div class="items' + (ids.length === 4 ? ' two' : '') + (F.filt === 'bitz' ? ' bitzgrid' : '') + '">' + ids.map(id => {
     const it = ITEMS[id], ra = rarity(it[2]), own = owns(id);
@@ -2658,14 +2580,18 @@ function wardrobeModal() {
   openModal('wardrobe', () => { const col = PC[Math.max(0, mine0())], t = tryLook(); return '<div class="whead"><span class="pv bg-' + bgOf(t.look) + '">' + fig(t.look, col, 104) + petImg(t.pet, 40) + '</span><div class="wside">' + '<span class="logo sm"><b>' + esc((G && me >= 0 && G.players[me] ? G.players[me].name : F.name) || 'You') + '</b>' + mark() + '</span>' + pick('wtab', '', [['style', 'Profile'], ['shop', 'Shop']], F.wtab) + '<button class="btn go" data-a="close">Done</button></div></div>' + wardrobeHTML(col); });
 }
 /* Premium exclusive reveal. The server chooses the reward before the reel animates. */
-function bxSeasonPool(){return BITZ_LOOT_RULES.eligible(ITEMS,[]);}
-function bxRemaining(){return BITZ_LOOT_RULES.eligible(ITEMS,wallet&&wallet.own||[]);}
+function bxTheme(){return lootSt&&lootSt.theme||'season';}
+function bxConfig(){return BITZ_LOOT_RULES.themeOf(bxTheme());}
+function bxCount(){const t=bxTheme();return t==='season'?wallet.boxes||0:wallet.themeBoxes&&wallet.themeBoxes[t]||0;}
+function bxThemePicker(){return '<nav class="bx-theme-picker" aria-label="Mystery box themes">'+Object.entries(BITZ_LOOT_RULES.themes).map(([id,t])=>'<button data-a="boxtheme" data-v="'+id+'" class="'+(id===bxTheme()?'on':'')+'">'+esc(t.name)+'</button>').join('')+'</nav>';}
+function bxSeasonPool(){return BITZ_LOOT_RULES.eligible(ITEMS,[],bxTheme());}
+function bxRemaining(){return BITZ_LOOT_RULES.eligible(ITEMS,wallet&&wallet.own||[],bxTheme());}
 function bxTier(id){return BITZ_LOOT_RULES.tier(id,ITEMS)||'epic';}
 function bxTierTag(id){const t=bxTier(id);return '<span class="bx-tier bx-'+t+'">'+t.toUpperCase()+'</span>';}
 function bxOdds(){
   const remaining=bxRemaining();
-  if(!remaining.length)return '<div class="bx-odds bx-complete">SEASON COMPLETE · EVERY REWARD COLLECTED</div>';
-  const rates=BITZ_LOOT_RULES.odds(remaining,ITEMS);
+  if(!remaining.length)return '<div class="bx-odds bx-complete">COLLECTION COMPLETE · EVERY REWARD COLLECTED</div>';
+  const rates=BITZ_LOOT_RULES.odds(remaining,ITEMS,bxTheme());
   return '<div class="bx-odds" aria-label="Current drop chances"><b>DROP CHANCES</b>'+
     BITZ_LOOT_RULES.order.map(t=>'<span class="bx-odd bx-'+t+'">'+t.toUpperCase()+' <strong>'+
       (Number.isInteger(rates[t])?rates[t]:rates[t].toFixed(1))+'%</strong></span>').join('')+'</div>';
@@ -2679,7 +2605,7 @@ function bxCard(id,col){
 }
 function wheelSlices(pz){
   const S=[],pool=[...new Set(bxRemaining().concat(pz.item?[pz.item]:[]))];
-  for(let i=0;i<36;i++)S.push({item:BITZ_LOOT_RULES.pick(pool,ITEMS,Math.random)||null});
+  for(let i=0;i<36;i++)S.push({item:BITZ_LOOT_RULES.pick(pool,ITEMS,Math.random,bxTheme())||null});
   const k=29;S[k]=pz.item?{item:pz.item}:{coins:pz.coins};
   return {S,k};
 }
@@ -2687,7 +2613,7 @@ function wheelHTML(st,col){
   const pool=bxRemaining();
   const cards=st.S||Array.from({length:10},()=>({item:BITZ_LOOT_RULES.pick(pool,ITEMS,Math.random)||null}));
   return '<section class="bx-roulette" aria-label="Single-line prize ticker">'+
-    '<div class="bx-reel-top"><strong>'+(st.phase==='spin'?'YOUR REWARD IS COMING':'POSSIBLE REWARDS')+'</strong><span>SEASON 1</span></div>'+
+    '<div class="bx-reel-top"><strong>'+(st.phase==='spin'?'YOUR REWARD IS COMING':'POSSIBLE REWARDS')+'</strong><span>'+esc(bxConfig().name.toUpperCase())+'</span></div>'+
     '<div id="bx-reel-viewport" class="bx-reel-viewport'+(st.phase==='spin'?' bx-moving':'')+'">'+
     '<div id="bx-reel-track" class="bx-reel-track">'+cards.map(x=>bxCard(x.item,col)).join('')+'</div><span class="bx-pointer" aria-hidden="true"></span></div>'+
     '</section>';
@@ -2706,13 +2632,13 @@ function seasonRibbon(){
   return '<div class="bx-season-ribbon" aria-label="Season 1 exclusive rewards">'+
     '<div class="bx-season-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>'+
     '<span class="bx-ribbon-emblem" aria-hidden="true">01</span>'+
-    '<span class="bx-ribbon-text"><strong>SEASON 1</strong><small>EXCLUSIVE DROPS</small></span>'+
+    '<span class="bx-ribbon-text"><strong>'+esc(bxConfig().name.toUpperCase())+'</strong><small>EXCLUSIVE DROPS</small></span>'+
     '<span class="bx-ribbon-signal" aria-hidden="true"><i></i><i></i><i></i></span>'+
     '</div>';
 }
 function lootGalleryHTML(st,col){
   const all=bxSeasonPool();
-  const featured=globalThis.STAKKZ_SEASON&&globalThis.STAKKZ_SEASON.ids||[];
+  const featured=bxTheme()==='season'&&globalThis.STAKKZ_SEASON&&globalThis.STAKKZ_SEASON.ids||[];
   const pool=[...new Set(featured.concat(all))].filter(id => exclusive(id) && ITEMS[id][0] === 'outfit');
   const owned=pool.filter(owns).length;
   const header='<header class="bx-head"><div class="bx-brand">'+logo('sm')+'</div><span class="bx-spacer"></span><span class="bx-stock">'+owned+' / '+pool.length+'</span>'+xBtn()+'</header>';
@@ -2727,7 +2653,7 @@ function lootGalleryHTML(st,col){
     pimg(id,110,col)+bxTierTag(id)+'<strong>'+esc(ITEMS[id][1])+'</strong>'+
     '<small class="'+(owns(id)?'bx-owned':'bx-new')+'">'+(owns(id)?'OWNED':'LOCKED')+'</small></button>').join('');
   return '<div class="bx-shell">'+header+seasonRibbon()+
-    '<div class="bx-collection"><div class="bx-collection-head"><h2>ALL SEASON 1 REWARDS</h2><span>'+owned+' / '+pool.length+' OWNED</span></div>'+
+    '<div class="bx-collection"><div class="bx-collection-head"><h2>'+esc(bxConfig().name.toUpperCase())+' REWARDS</h2><span>'+owned+' / '+pool.length+' OWNED</span></div>'+
     '<div class="bx-collection-grid">'+cards+'</div>'+
     '<div class="bx-collection-foot">'+(page>0?'<button class="bx-btn" data-a="lootpage" data-v="'+(page-1)+'">PREVIOUS</button>':'')+
     (page<Math.ceil(pool.length/12)-1?'<button class="bx-btn" data-a="lootpage" data-v="'+(page+1)+'">NEXT</button>':'')+
@@ -2766,7 +2692,7 @@ function exploreModal(){
   openModal('explore',()=>'<div class="mhead"><h2>Explore the World</h2>'+xBtn()+'</div><p class="fine">Travel to the caves or waterfall. Walk over chests to collect prizes.</p><div class="explore-list">'+entries+'</div>');
 }
 function lootModal() {
-  lootSt = {phase:'idle', prize:null};
+  lootSt = {phase:'idle',prize:null,theme:'season'};
   openModal('loot', lootHTML, {onClose:()=>{
     lootSt=null;
     if(V && V.phase==='over') setTimeout(()=>{if(V && V.phase==='over' && !modal) winnerModal();},0);
@@ -2774,7 +2700,7 @@ function lootModal() {
   }});
 }
 function lootHTML(){
-  const st=lootSt||{phase:'idle'},n=wallet.boxes,col=PC[Math.max(0,mine0())],pool=bxSeasonPool();
+  const st=lootSt||{phase:'idle'},n=bxCount(),col=PC[Math.max(0,mine0())],pool=bxSeasonPool();
   const owned=pool.filter(owns).length,total=pool.length,remaining=bxRemaining();
   const busy=['spin','opening','purchasing'].includes(st.phase),won=st.phase==='prize'&&st.prize;
   if(st.view==='collection')return lootGalleryHTML(st,col);
@@ -2800,24 +2726,24 @@ function lootHTML(){
   }
   const hero='<section class="bx-hero"><div class="bx-art"><span class="bx-ring"></span>'+
     '<div class="bx-chestpic">'+lootImg(240)+'</div></div>'+
-    '<div class="bx-detail"><span class="bx-eyebrow">SEASON 1</span>'+
+    '<div class="bx-detail"><span class="bx-eyebrow">'+esc(bxConfig().name.toUpperCase())+'</span>'+
     '<h2 class="bx-title">MYSTERY <em>BOX</em></h2>'+
     '<div class="bx-hero-line">RARE OUTFITS</div>'+
     '<div class="bx-current-progress">'+owned+' / '+total+' COLLECTED</div></div></section>';
   const button=busy?'<button class="bx-cta" disabled>OPENING...</button>':
     n>0?'<button class="bx-cta" data-a="lootopen">OPEN BOX</button>':
     remaining.length?'<button class="bx-cta" data-a="lootbuy">BUY &amp; OPEN</button>':
-    '<button class="bx-cta" disabled>SEASON COMPLETE</button>';
+    '<button class="bx-cta" disabled>COLLECTION COMPLETE</button>';
   const price=n>0?'<span class="bx-cost">'+fmt(n)+' AVAILABLE</span>':
-    remaining.length?'<span class="bx-cost">'+fmt(BOX_PRICE)+' GOLD PER BOX</span>':'';
-  return '<div class="bx-shell">'+head+seasonRibbon()+hero+bxOdds()+wheelHTML(st,col)+
+    remaining.length?'<span class="bx-cost">'+fmt(bxConfig().price)+' GOLD PER BOX</span>':'';
+  return '<div class="bx-shell">'+head+bxThemePicker()+seasonRibbon()+hero+bxOdds()+wheelHTML(st,col)+
     '<div class="bx-actions bx-base-actions">'+price+button+
     (busy?'':'<button class="bx-btn bx-browse" data-a="lootbrowse">VIEW REWARDS</button>')+'</div></div>';
 }
 async function spinLoot() {
   const st=lootSt;
   if(!st || st.phase!=='idle' && st.phase!=='prize')return;
-  if(wallet.boxes<1){toast('No loot boxes left.');return;}
+  if(bxCount()<1){toast('No mystery boxes left.');return;}
   st.phase='opening';
   refreshModal();
   const pz=await openLoot();
@@ -2837,14 +2763,14 @@ async function spinLoot() {
         track.getBoundingClientRect();
         requestAnimationFrame(()=>{
           if(lootSt!==st || !track.isConnected)return;
-          track.style.transition='transform 4.35s cubic-bezier(.10,.67,.05,1)';
+          track.style.transition='transform 2.1s cubic-bezier(.1,.65,.08,1)';
           track.style.transform='translate3d(-'+Math.max(0,offset)+'px,0,0)';
         });
       }
     }
-    const ticks=[480,850,1180,1510,1840,2170,2490,2810,3100,3400,3710,3970];
+    const ticks=[420,690,960,1230,1500,1800,2100];
     ticks.forEach(t=>setTimeout(()=>{if(lootSt===st && st.phase==='spin')Snd('tap');},t));
-    await wait(4550);
+    await wait(2350);
     if(view && view.isConnected)view.classList.add('bx-ended');
   }
   if(lootSt!==st){toast(pz.item?'You unlocked '+ITEMS[pz.item][1]+'.':'Gold has been added.');return;}
@@ -3123,11 +3049,11 @@ function friendModal(i) {
 let PROF = null;
 /* ---- stuff: your inventory, and anyone else's from their profile ---- */
 let StuffSt = null;
-const STUFF_TABS = [['all', 'All'], ['outfit', 'Outfits'], ['hat', 'Hats'], ['acc', 'Extras'], ['pet', 'Pets'], ['bg', 'Scenes'], ['gun', 'Guns'], ['dye', 'Dyes']];
+const STUFF_TABS = [['all', 'All'], ['outfit', 'Outfits'], ['hat', 'Hats'], ['acc', 'Extras'], ['pet', 'Pets'], ['bg', 'Scenes'], ['dye', 'Hair']];
 const stuffWorn = id => { const it = ITEMS[id]; if (!it) return false; const L = F.look || {}; return L.outfit === id || L.hat === id || L.acc === id || L.bg === id || L.dye === id || F.pet === id || (it[0] === 'gun' && typeof GUNIDS !== 'undefined' && B3.world && GUNIDS[B3.world.weapon] === id); };
 function stuffHTML() {
   const S = StuffSt; if (!S) return '<button class="btn" data-a="close">Close</button>';
-  const all = (S.self ? (wallet.own || []) : S.items).filter(id => ITEMS[id] && ITEMS[id][2] > 0).sort((a, b) => ITEMS[b][2] - ITEMS[a][2]);
+  const all = (S.self ? (wallet.own || []) : S.items).filter(id => ITEMS[id] && ITEMS[id][2] > 0 && ITEMS[id][0] !== 'gun').sort((a, b) => ITEMS[b][2] - ITEMS[a][2]);
   const tab = S.tab || 'all', list = tab === 'all' ? all : all.filter(id => ITEMS[id][0] === tab), worth = S.self ? worthOf(wallet.own, wallet.coins) : S.worth;
   const counts = {}; all.forEach(id => { counts[ITEMS[id][0]] = (counts[ITEMS[id][0]] || 0) + 1; });
   const head = '<div class="mhead"><h2>' + (S.self ? 'My Stuff' : esc(S.n) + '’s stuff') + '</h2>' + xBtn() + '</div>';
@@ -3135,9 +3061,9 @@ function stuffHTML() {
   if (S.err) return head + '<p class="fine">' + esc(S.err) + '</p><button class="btn" data-a="close">Close</button>';
   const sum = '<div class="stuff-sum"><span>' + all.length + ' item' + (all.length === 1 ? '' : 's') + '</span>' + (worth != null ? '<span class="stuff-worth">' + coin(fmt(worth)) + ' net worth</span>' : '') + '</div>';
   const tabs = '<div class="stuff-tabs">' + STUFF_TABS.filter(t => t[0] === 'all' || counts[t[0]]).map(t => '<button class="' + (tab === t[0] ? 'on' : '') + '" data-a="stufftab" data-v="' + t[0] + '">' + t[1] + (t[0] === 'all' ? '' : ' ' + counts[t[0]]) + '</button>').join('') + '</div>';
-  const tiles = list.map(id => { const it = ITEMS[id], ra = rarity(it[2]), worn = S.self && stuffWorn(id), inner = pimg(id, 64, PC[0]) + '<b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + '</small><span class="rar r' + ra[0] + '">' + ra[1] + '</span>' + (worn ? '<i class="sworn">On</i>' : '');
-    return S.self ? '<button class="stile' + (worn ? ' worn' : '') + '" data-a="wear" data-k="' + it[0] + '" data-v="' + id + '">' + inner + '</button>' : '<div class="stile">' + inner + '</div>'; }).join('');
-  return head + sum + tabs + (list.length ? '<div class="sgrid">' + tiles + '</div>' : '<p class="fine">' + (S.self ? 'Nothing here yet. Open a loot box or visit the shop.' : 'Nothing here.') + '</p>') + (S.self ? '<p class="fine">Tap something to wear it.</p>' + (Zom.admin ? '<button class="btn sm" data-a="grantall">Unlock every item (admin)</button>' : '') : '');
+  const tiles = list.map(id => { const it = ITEMS[id], ra = rarity(it[2]), worn = S.self && stuffWorn(id), inner = pimg(id, 104, PC[0]) + '<b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + '</small><span class="rar r' + ra[0] + '">' + ra[1] + '</span>' + (worn ? '<i class="sworn">On</i>' : '');
+    return S.self ? '<button class="stile' + (worn ? ' worn' : '') + '" data-a="wear" data-k="' + it[0] + '" data-v="' + (worn ? '' : id) + '">' + inner + '<span class="st-action">' + (worn ? 'UNEQUIP' : 'EQUIP') + '</span></button>' : '<div class="stile">' + inner + '</div>'; }).join('');
+  return head + sum + tabs + (list.length ? '<div class="sgrid">' + tiles + '</div>' : '<p class="fine">' + (S.self ? 'Nothing here yet. Open a loot box or visit the shop.' : 'Nothing here.') + '</p>') + (S.self ? '<p class="fine">Equip your favourite possessions to show them off.</p>' + (Zom.admin ? '<button class="btn sm" data-a="grantall">Unlock every item (admin)</button>' : '') : '');
 }
 function stuffOpen(o) {
   profileClose();
@@ -3165,12 +3091,12 @@ function profilePaint() {
   const handle = p.self ? (authInfo.registered && authInfo.username ? '@' + esc(authInfo.username) : 'Guest') : info.u ? '@' + esc(info.u) : 'Guest';
   const rows = worn.map(x => { const it = ITEMS[x[1]], ra = it[2] > 0 ? rarity(it[2]) : [0, 'Starter']; return '<button type="button" class="prow pr' + ra[0] + '" data-a="profitem" data-v="' + x[1] + '">' + pimg(x[1], 40, col) + '<span><b>' + esc(it[1]) + '</b><small>' + SLOTN[it[0]] + (exclusive(x[1]) ? ' · Exclusive' : '') + '</small></span><span class="prar">' + ra[1] + '</span></button>'; }).join('');
   const btns = p.self ? '<button class="btn go" data-a="customise">Customise</button><button class="btn" data-a="stuff">My Stuff</button><button class="btn" data-a="page" data-v="shop">Shop</button>'
-    : '<button class="btn go" data-a="stuff" data-f="' + esc(p.f || '') + '" data-n="' + esc(p.n || '') + '">Their stuff</button><button class="btn" data-a="tradeask" data-i="' + liveI + '"' + (live ? '' : ' disabled') + '>' + (live ? 'Trade' : 'Trade (not in the world)') + '</button>' + (fr ? '<button class="btn" data-a="fop" data-v="remove">Remove friend</button>' : hid ? '<button class="btn ok" data-a="fop" data-v="restore">Add friend back</button>' : '');
+    : '<button class="btn go" data-a="stuff" data-f="' + esc(p.f || '') + '" data-n="' + esc(p.n || '') + '">Their stuff</button>' + (Plaza.experimental && liveI ? '<button class="btn b2test" data-a="testbetrayal" data-i="'+esc(liveI)+'">Test betrayal (no loss)</button>' : '') + (fr ? '<button class="btn" data-a="fop" data-v="remove">Remove friend</button>' : hid ? '<button class="btn ok" data-a="fop" data-v="restore">Add friend back</button>' : '');
   patchHTML(ov, '<div class="pp-back" data-a="profclose"></div><div class="pp-card" role="dialog" aria-label="' + esc(p.n) + '">' +
     '<button class="ib pp-x" data-a="profclose" aria-label="Close">' + ico('x', 16) + '</button>' +
     '<div class="pp-char bg-' + bgOf(L2) + '"><span class="pp-scene-label">' + (p.self ? 'YOUR CHARACTER' : 'PLAYER CARD') + '</span><canvas id="pchar"></canvas><div class="pp-pet-label"><span>COMPANION</span><b>' + (ITEMS[p.pet] ? esc(ITEMS[p.pet][1]) : 'No pet equipped') + '</b></div></div>' +
     '<div class="pp-info"><h2>' + esc(p.n) + '</h2><p class="pp-sub">' + handle + ' · ' + where + '</p>' +
-    '<div class="pp-badges">' + (p.self ? '<div class="pworth pgold"><small>Gold</small><b><i class="gc"></i><span id="ppgold">' + fmt(wallet.coins) + '</span></b></div>' : '<div class="pworth pp-online"><small>Status</small><b>' + (live || info.at ? 'Online' : 'Offline') + '</b></div>') + '<div class="pworth"><small>Net worth</small><b><i class="gc"></i>' + (nw != null ? fmt(nw) : '…') + '</b></div><div class="pswag"><small>Swag</small><b>' + fmt(swag) + '</b></div></div>' +
+    '<div class="pp-badges">' + (p.self ? '<div class="pworth pgold"><small>Gold</small><b><i class="gc"></i><span id="ppgold">' + fmt(wallet.coins) + '</span></b></div>' : '<div class="pworth pp-online"><small>Status</small><b>' + (live || info.at ? 'Online' : 'Offline') + '</b></div>') + '<div class="pworth"><small>Net worth</small><b><i class="gc"></i>' + (nw != null ? fmt(nw) : '…') + '</b></div><div class="pswag"><small>Swag</small><b>' + fmt(swag) + '</b></div><div class="pworth b2playerlevel"><small>Level</small><b>' + (p.self ? LEVEL.level : live && live.level || info.level || p.level || 1) + '</b></div></div>' +
     '<div class="plist">' + rows + '</div><div class="pbtns">' + btns + '</div></div></div>');
 }
 document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (modal && FORCED.indexOf(modal.kind) < 0 && !(lootSt && lootSt.phase === 'spin')) closeModal(); else if (PROF) profileClose(); else if (F.page && F.page !== 'world' && $('#app').dataset.screen === 'home') { F.page = 'world'; renderHome(true); } });
@@ -3214,20 +3140,22 @@ function tradeHTML() {
 /* ================= the plaza connection =================
    Everyone outside a match is in one shared world. The page joins it on arrival and in lobbies, leaves it when a
    match starts (so players in a game disappear from the plaza) and rejoins when they come home. */
-const Plaza = { ws: null, you: null, tries: 0, timer: 0, sent: null, sentAt: 0, sig: '', restyleT: 0, clearT: 0, came: {} };
+const Plaza = { ws: null, you: null, tries: 0, timer: 0, sent: null, sentAt: 0, sig: '', restyleT: 0, clearT: 0, came: {}, experimental:false };
 const plazaCol = n => PC[[...String(n || '')].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) % PC.length];
 const PLAZA_ON = true;    // the shared world ships switched off until it is tested live
 function plazaWanted() { return PLAZA_ON && !!(Net.ready && Net.db && B3.ok) && $('#app').dataset.screen !== 'game'; }
 function plazaShown() { const s=$('#app').dataset.screen;return plazaWanted()&&(s==='home'||s==='lobby'); }
-const LOAD_T0 = Date.now(), LOAD_MIN = 4500;
+const LOAD_T0 = Date.now(), LOAD_MIN = 0; /* Never delay a ready lobby. */
 function loaderDone() { const l = document.getElementById('bload'); if (!l || l.classList.contains('out')) return; const wait = LOAD_MIN - (Date.now() - LOAD_T0); if (wait > 0) { clearTimeout(loaderDone.t); loaderDone.t = setTimeout(loaderDone, wait); return; } l.classList.add('out'); setTimeout(() => l.remove(), 600); }
-setTimeout(loaderDone, 12000);   // never stuck on the loading screen
+setTimeout(loaderDone, 3200);   // never stuck on the loading screen
+setTimeout(()=>{const gfx=$('#b2-nographics');if(gfx)gfx.hidden=!!B3.ok;},2000);
 function plazaSync() {
+  const gfx=$('#b2-nographics');if(gfx)gfx.hidden=!!B3.ok;
   if (!B3.ok || !B3.world) return;
   const want = plazaWanted();
   if (want && !Plaza.ws) plazaOpen();
   if (!want && Plaza.ws) plazaClose();
-  const show = plazaShown(), sig = JSON.stringify([F.look, F.name]);
+  const show = plazaShown(), sig = JSON.stringify([F.look, F.name, F.pet]);
   if (show && (!B3.world.me || sig !== Plaza.sig)) { const changed = !!B3.world.me; Plaza.sig = sig; B3.world.setMe(F.look, plazaCol(F.name || 'You'), F.name || 'You'); if (changed) { clearTimeout(Plaza.restyleT); Plaza.restyleT = setTimeout(() => plazaSend({ restyle: 1 }), 2000); } }
   B3.world.on=show;$('#wui').hidden=!show;if(show)setTimeout(loaderDone,350);if(show&&!B3.world.profileActive)B3.show(null);
   if (show) plazaCount();
@@ -3239,7 +3167,7 @@ function plazaOpen() {
   Plaza.ws = ws; Plaza.sent = null;
   ws.onopen = () => { Plaza.tries = 0; try { const me = B3.world && B3.world.me; ws.send(JSON.stringify(me ? { hello: activeKey || KEY, at: [Math.round(me.x * 100) / 100, Math.round(me.z * 100) / 100, Math.round(me.ry * 100) / 100] } : { hello: activeKey || KEY })); } catch (e) {} };
   ws.onmessage = e => { if (e.data === 'pong') return; let d; try { d = JSON.parse(e.data); } catch (x) { return; } plazaGot(d); };
-  ws.onclose = () => { if (Plaza.ws !== ws) return; Plaza.ws = null; Plaza.you = null; if (Trade) tradeDrop('The trade was cancelled.'); clearTimeout(Plaza.clearT); Plaza.clearT = setTimeout(() => { if (!Plaza.you) { B3.world.clear(); plazaCount(); } }, 12000); if (plazaWanted()) Plaza.timer = setTimeout(plazaSync, Math.min(10000, 800 * Math.pow(1.7, Plaza.tries++))); };
+  ws.onclose = () => { if (Plaza.ws !== ws) return; Plaza.ws = null; Plaza.you = null; Plaza.experimental=false; if (Trade) tradeDrop('The trade was cancelled.'); clearTimeout(Plaza.clearT); Plaza.clearT = setTimeout(() => { if (!Plaza.you) { B3.world.clear(); plazaCount(); } }, 12000); if (plazaWanted()) Plaza.timer = setTimeout(plazaSync, Math.min(10000, 800 * Math.pow(1.7, Plaza.tries++))); };
   ws.onerror = () => { try { ws.close(); } catch (x) {} };
 }
 function plazaClose() { const ws = Plaza.ws; Plaza.ws = null; Plaza.you = null; clearTimeout(Plaza.timer); clearTimeout(Plaza.clearT); try { ws && ws.close(); } catch (e) {} B3.world.clear(); plazaCount(); }
@@ -3251,7 +3179,8 @@ function plazaFeed(text) {
 }
 function plazaGot(d) {
   const W = B3.world;
-  if (d.trade) return tradeGot(d.trade);
+  if(d.progress)levelSync(d.progress);if(d.level){const o=W.others.get(d.level[0]);if(o)o.level=d.level[1];}if(d.testBetrayal)toast(d.testBetrayal.error||('Dry run: '+(d.testBetrayal.success?'success':'miss')+'. No possessions changed.'));
+   if (d.trade) return; /* retired */
   if (d.ents) { W.entClear(); d.ents.forEach(W.entAdd); }
   if (d.ent) W.entAdd(d.ent);
   if (d.e) W.entMove(d.e);
@@ -3277,7 +3206,7 @@ function plazaGot(d) {
   if (d.wpn && d.wpn[0] !== Plaza.you) W.gun(d.wpn[0], d.wpn[1]);
   if (d.pads) W.pads(d.pads);
   if (d.took && d.took[0] !== Plaza.you) { const o = W.others.get(d.took[0]); if (o) plazaFeed(o.n + ' grabbed a x' + d.took[1] + ' gold boost'); }
-  if (d.you) { Zom.admin = !!d.admin; if (d.world) Zom.world = d.world; if (d.zmode) { Zom.on = !!d.zmode.on; Zom.wave = d.zmode.wave || 0; if (d.zmode.str) Zom.str = d.zmode.str; } zomButton(); if (d.ents) { W.entClear(); d.ents.forEach(W.entAdd); } Plaza.you = d.you; W.you = d.you; W.dead = false; W.hp = 100; if (W.me) W.me.g.rotation.x = 0; worldHud(); if (W.weapon) plazaSend({ wpn: W.weapon }); W.clear(); (d.all || []).forEach(o => W.add(o, plazaCol(o.n))); plazaCount(); if (d.all && d.all.length) plazaFeed(d.all.length === 1 ? d.all[0].n + ' is here' : d.all.length + ' people are here'); return; }
+  if (d.you) { Plaza.experimental=!!d.testBetrayal;Zom.admin=!!d.admin; if (d.world) Zom.world = d.world; if (d.zmode) { Zom.on = !!d.zmode.on; Zom.wave = d.zmode.wave || 0; if (d.zmode.str) Zom.str = d.zmode.str; } zomButton(); if (d.ents) { W.entClear(); d.ents.forEach(W.entAdd); } Plaza.you = d.you; W.you = d.you; W.dead = false; W.hp = 100; if (W.me) W.me.g.rotation.x = 0; worldHud(); if (W.weapon) plazaSend({ wpn: W.weapon }); W.clear(); (d.all || []).forEach(o => W.add(o, plazaCol(o.n))); plazaCount(); if (d.all && d.all.length) plazaFeed(d.all.length === 1 ? d.all[0].n + ' is here' : d.all.length + ' people are here'); return; }
   if (d.join) { W.add(d.join, plazaCol(d.join.n)); const nk = d.join.f || d.join.n, seenAt = Plaza.came[nk] || 0; Plaza.came[nk] = Date.now(); if (Date.now() - seenAt > 90000) { plazaFeed(d.join.n + ' joined'); Snd('hop', 9); } plazaCount(); }   // tabbing out and in is not news
   if (d.leave) { const o = W.others.get(d.leave); if (o) Plaza.came[o.f || o.n] = Date.now(); W.drop(d.leave); plazaCount(); }
   if (d.s) W.snap(d.s.filter(r => r[0] !== Plaza.you));
@@ -3287,7 +3216,7 @@ function plazaGot(d) {
 }
 setInterval(() => {
   if (!B3.ok || !B3.world) return;
-  if (B3.world.on && JSON.stringify([F.look, F.name]) !== Plaza.sig) plazaSync();
+  if (B3.world.on && JSON.stringify([F.look, F.name, F.pet]) !== Plaza.sig) plazaSync();
   const ws = Plaza.ws; if (!ws || ws.readyState !== 1 || !Plaza.you || !B3.world.on) return;
   const p = B3.world.pose(); if (!p) return; const now = Date.now(), q = Plaza.sent;
   const moved = !q || Math.abs(p[0] - q[0]) + Math.abs(p[1] - q[1]) + Math.abs(p[2] - q[2]) > 0.02 || Math.abs(p[3] - q[3]) > 0.03 || p[4] !== q[4];
@@ -3297,7 +3226,7 @@ setInterval(() => {
 setInterval(() => { const ws = Plaza.ws; if (ws && ws.readyState === 1) { try { ws.send('ping'); } catch (e) {} } }, 25000);
 const plazaBack = () => { if (document.hidden) return; Plaza.tries = 0; if (!Plaza.ws || Plaza.ws.readyState > 1) { clearTimeout(Plaza.timer); plazaSync(); } try { loadFriends(); } catch (e) {} };
 document.addEventListener('visibilitychange', plazaBack); addEventListener('online', plazaBack); addEventListener('pageshow', plazaBack);
-const Zom = { on: false, admin: false, world: { zom: false, wild: true, gift: true, forage: true }, wave: 0, str: 2 };
+const Zom = { on: false, admin: false, world: { zom: false, wild: false, gift: false, forage: false }, wave: 0, str: 2 };
 const ZSTR = [null, ['Easy', 0.5], ['Normal', 1], ['Hard', 2.5], ['Brutal', 6], ['Nightmare', 15]];
 function banner(big, small, cls) { const b = $('#wbanner'); if (!b) return; b.className = cls || ''; b.innerHTML = '<b>' + esc(big) + '</b>' + (small ? '<small>' + esc(small) + '</small>' : ''); b.hidden = false; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; clearTimeout(banner.t); banner.t = setTimeout(() => { b.hidden = true; }, 3200); }
 function adminHTML() { const W = Zom.world, row = (k, name, note) => '<div class="admrow"><span><b>' + name + '</b><small>' + note + '</small></span><button class="btn sm' + (W[k] ? ' ok' : '') + '" data-a="adminset" data-k="' + k + '" data-v="' + (W[k] ? '0' : '1') + '">' + (W[k] ? 'On' : 'Off') + '</button></div>'; return '<div class="mhead"><h2>Admin</h2>' + xBtn() + '</div><p class="fine">Switches for everyone in the world. Only you can see this.</p>' + row('zom', 'Zombies', 'Waves of zombies, runners and brutes, with a boss after each wave') +
@@ -3358,8 +3287,8 @@ function worldHud(kind) {
   $('#wdead').hidden = !W.dead;
   if (kind === 'hit' || kind === 'ko') { const st = $('#stage'); st.classList.remove('hurt'); void st.offsetWidth; st.classList.add('hurt'); setTimeout(() => st.classList.remove('hurt'), 320); }
 }
-if (B3.world) { B3.world.send = m => plazaSend(m); B3.world.onHud = worldHud; B3.world.onFire = w => Snd(w ? 'boom' : 'zap'); B3.world.canUse = gunOwned; B3.world.onLocked = n => { toast('Buy the ' + ITEMS[GUNIDS[n]][1] + ' in the shop to use it.'); F.filt = 'gun'; };
-B3.world.blocked = () => !!modal || !!PROF || (F.page && F.page !== 'world'); B3.world.onPick = (o, i) => i === 'me' ? profileOpen({ self: true }) : profileOpen({ f: o.f, n: o.n, l: o.l, pet: o.pet, swag: o.sw, nw: o.nw }); }
+if (B3.world) { B3.world.send = m => plazaSend(m); B3.world.onHud = () => {}; B3.world.onFire = () => {}; B3.world.canUse = () => false; B3.world.onLocked = () => {};
+B3.world.blocked = () => !!modal || !!PROF || (F.page && F.page !== 'world'); B3.world.onPick = (o, i) => i === 'me' ? profileOpen({ self: true }) : profileOpen({ f: o.f, n: o.n, l: o.l, pet: o.pet, swag: o.sw, nw: o.nw, level:o.level }); }
 function plazaEmote(e) { if (!B3.world || !B3.world.on) return; B3.world.emote('me', e); if (e === 'jump') B3.world.jump(); plazaSend({ emote: e }); }
 /* touch: a thumb stick on the left, a jump button on the right */
 (function plazaTouch() {
@@ -3371,14 +3300,11 @@ function plazaEmote(e) { if (!B3.world || !B3.world.on) return; B3.world.emote('
   const end = e => { if (e.pointerId !== pid) return; pid = null; B3.world.joy.x = B3.world.joy.y = 0; knob.style.transform = ''; };
   st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end); st.addEventListener('lostpointercapture', end);
   jb.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); B3.world.jump(); });
-  $('#wfire').addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); B3.world.fire(); });
+  /* Old mobile fire control disabled. */
   $('#wui').addEventListener('pointerdown', e => { if (e.target.closest('button')) e.stopPropagation(); });
   document.addEventListener('keydown', e => { if (!B3.world || !B3.world.on || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return; const m = { 1: 'wave', 2: 'dance', 3: 'cheer' }[e.key]; if (m) plazaEmote(m); });
 })();
-/* It is your turn and you have not rolled: an alarm repeats until you do. */
-setInterval(() => {
-  try { if (G && V && V.phase === 'play' && me >= 0 && E.cur(V) === me && V.stage === 'roll' && !busy && pending === 0 && !V.trade && !document.hidden) { Snd('turn'); window.__alarms = (window.__alarms || 0) + 1; } } catch (e) {}
-}, 2600);
+/* Disabled BITZ 1.x board-game turn alarm. Source: legacy/index.adventure.html. */
 function tick() {
   const s = V; if (!s || s.phase !== 'play') return;
   const now = Date.now() + skew, tb = $('#tmbar'), ck = $('#clock'), chaosTag=$('#chaosTag');
@@ -3402,14 +3328,8 @@ function tick() {
   }
   if (mode === 'online' && !s.timer && !busy && me >= 0 && me !== E.cur(s) && now - (s.t || now) > 90000 && nudgeV !== s.v) { nudgeV = s.v; renderActions(); }
 }
-setInterval(tick, 300);
-/* Presence heartbeat informs the server when a device is still actively viewing
-   a game. Hidden/backgrounded devices stop checking in; seats are preserved. */
-setInterval(() => {
-  if (Net.acct && !document.hidden && G && mode==='online') api('heartbeat',{}).catch(()=>{});
-}, 20000);
-/* now and then, a bird, a far-off horn or a tram bell */
-(function city() { setTimeout(() => { if (V && V.phase === 'play' && !document.hidden) Snd('city', Math.floor(Math.random() * 3)); city(); }, 9000 + Math.random() * 14000); })();
+/* Disabled old 300ms board-game timer. Original: legacy/index.adventure.html. */
+/* Legacy board heartbeat and city ambience loops archived in legacy/index.adventure.html. */
 
 /* ================= modals ================= */
 let modal = null, TB = null;
@@ -3535,20 +3455,20 @@ function winnerModal() {
       (mode === 'online' && rematch ? '<p class="fine c">' + (rematch.phase === 'lobby' ? esc(rematch.players[0] ? rematch.players[0].name : 'Someone') + ' is setting up the next game.' : 'The others have started the next game.') + '</p>' : '');
   });
 }
-const WORLD_HELP = [['star', 'Explore and collect', 'Choose Explore above the world to visit three caves and the waterfall. Walk into tunnels and pick up chests, but beware of cave zombies.'], ['arrow', 'Getting around', 'WASD walks. Arrow keys or dragging turn the camera. Double-tap W to sprint at four times the speed for as long as you keep moving. The + and − keys, the wheel or the zoom buttons zoom. Space jumps, Shift runs, scroll or pinch zooms. Click, hold the button, F or right-click shoots where you are looking. Shift-click a player to open their profile.'],
-  ['coins', 'Gold', 'You earn 1,000 gold every second, counted by the server, whether the page is open on your phone or your laptop. Walk into a floating cube to boost it for a while.'],
-  ['gift', 'Collecting', 'Spend gold in the Shop on outfits, hats, extras, pets and scenes. Loot boxes cost 500,000 and only ever hold Legendary or Mythical exclusives you cannot buy.'],
-  ['star', 'Swag Level', 'Everyone starts at -100. Rare things you wear, and everything you collect, push it up towards 9,999.'],
-  ['bolt', 'Blasters', 'Choose a gun in the Shop, then select it in the world. Left-click or hold to fire, or use F and right-click. Each gun has its own effects against zombies and bosses. At zero health you respawn a few seconds later.'],
-  ['swap', 'Friends and trading', 'Everyone with an account is in your friends list. Tap a friend, or tap somebody in the world, to open their profile, trade with them, or remove them.']];
+const WORLD_HELP = [
+ ['arrow','Move together','WASD to walk, Space to jump, drag to turn the camera. On mobile use the joystick and Jump button.'],
+ ['coins','Collect gold','Earn gold automatically and spend it in the Shop or on mystery boxes.'],
+ ['star','Show off your collection','Open My Stuff to equip outfits and pets. Click a player to inspect their possessions.'],
+ ['gift','Level up','Collect items and participate to earn XP. Ordinary levels grant gold, milestones grant collectibles.']
+];
 const RULES = [['star', 'Goal', 'Be the last player standing. Everyone else goes bankrupt.'], ['arrow', 'Your turn', 'Roll and move. Buy the street you land on, or pay rent to whoever owns it. Doubles roll again, and three in a row means Jail. On a keyboard, Space does your main move. The camera closes in on whoever is rolling and moving; the Follow cam button switches that off.'], ['coins', 'Auctions', 'Pass on a street and it goes to auction. Everyone bids in turn, and the last bidder left wins it.'], ['home', 'Build', 'Own every street in a colour to double rent. Build evenly: three houses per street, then one hotel.'], ['cash', 'Short on cash', 'Sell houses and streets back to the bank for half price, or strike a trade. If you still cannot pay, you are out.'], ['bars', 'Jail', 'Roll doubles, pay £50 or play a card to get out. After three tries you pay and move.'], ['swap', 'Trades', 'Offer only cash and streets you own, for immediate acceptance or rejection. Trading closes in Final Chaos.'], ['arrow', 'Station travel', 'Land on a station you own and you can take the train, free, to any other station you own. You need to own both stations. Travelling ends your turn, with no Start bonus.'], ['bars', 'Setting up', 'The host picks the number of players (2 to 6, bots included), the bots and the turn timer. Everyone starts with £2,500 and no streets. Passing Start pays £200 and a loot box.'], ['arrow', 'Turn timer', 'Off, or 20, 30, 45 or 60 seconds, as the host chose. With it off, anyone can skip a player who has been away for 90 seconds.'], ['cash', 'Mortgages', 'Short of cash? Mortgage a street for half its price. It collects no rent until you pay back 55% of its price. You cannot build on a colour set with a mortgaged street.'], ['gift', 'Coins and loot boxes', 'Coins come from playing: buying, rent, sets, cards and Coin Rush. Spend them in the shop. You get a loot box every time you pass Start, and one for every game you finish.']];
 function rulesModal() { const home = $('#app').dataset.screen === 'home'; openModal('rules', () => '<div class="mhead">' + logo('sm') + xBtn() + '</div><h2>How to play</h2>' + (home ? WORLD_HELP : RULES).map(r => '<div class="rule">' + ico(r[0], 24) + '<b>' + r[1] + '</b><p>' + r[2] + '</p></div>').join('') + '<button class="btn go" data-a="close">Got it</button>'); }
 function settingsModal() {
-  F.reset = false;
-  openModal('settings', () => '<div class="mhead">' + logo('sm') + xBtn() + '</div><h2>Settings</h2>' +
-    row('Sound effects', pick('set', 'sound', [['1', 'On'], ['0', 'Off']], settings.sound ? '1' : '0')) + row('Music', pick('set', 'music', [['1', 'On'], ['0', 'Off']], settings.music ? '1' : '0')) + row('Motion', pick('set', 'calm', [['0', 'Full'], ['1', 'Reduced']], settings.calm ? '1' : '0')) +
-    (!G && adminOk() ? '<h3>Admin</h3>' + (settings.admin ? '<div class="col"><button class="btn sm" data-a="adm" data-v="coins">Add 1,000,000 coins</button><button class="btn sm" data-a="adm" data-v="boxes">Add 10 loot boxes</button><button class="btn sm" data-a="adm" data-v="all">Unlock every item</button></div>' : row('Admin code', '<input class="t" id="f-admin" type="password" inputmode="numeric" maxlength="12" autocomplete="off" aria-label="Admin code">') + '<button class="btn sm" data-a="admin">Unlock admin tools</button>') : '') +
-    (G ? '' : F.reset ? '<p class="note">Reset everything? Your coins, items and stats go back to the start.</p><div class="row"><button class="btn bad" data-a="reset">Reset</button><button class="btn" data-a="askreset" data-v="">Keep my progress</button></div>' : '<button class="btn sm" data-a="askreset" data-v="1">Reset my progress</button>') + '<button class="btn go" data-a="close">Done</button>');
+ openModal('settings',()=>'<div class="mhead">'+logo('sm')+xBtn()+'</div><h2>Settings</h2>'+
+ row('Sound',pick('set','sound',[['1','On'],['0','Off']],settings.sound?'1':'0'))+
+ row('Music',pick('set','music',[['1','On'],['0','Off']],settings.music?'1':'0'))+
+ row('Motion',pick('set','calm',[['0','Full'],['1','Reduced']],settings.calm?'1':'0'))+
+ '<button class="btn" data-a="acct">Account & sync</button>');
 }
 function menuModal() {
   F.leave = false;
@@ -3569,6 +3489,7 @@ document.addEventListener('click', async e => {
   const a = el.dataset.a, i = +el.dataset.i;
   Snd('tap'); Snd.music(!!settings.music);
   switch (a) {
+    case 'levelinfo': openModal('level',()=>'<div class="mhead"><h2>Level '+LEVEL.level+'</h2>'+xBtn()+'</div><p>Collect items and join in to earn XP.</p><div class="b2levelbar"><i style="width:'+LEVEL.percent+'%"></i></div><p>'+fmt(LEVEL.levelXp)+' / '+fmt(LEVEL.nextXp)+' XP</p><p>Earn 75,000 gold each level. Special milestone levels reward collectibles.</p>');break;
     case 'page': {
       if (F.page === el.dataset.v) { if (F.page !== 'world' && $('#app').dataset.screen === 'home' && el.closest('#shopbig,#wbar')) { F.page = 'world'; F.sel = null; renderHome(true); } break; }   // press Shop again and it closes
       F.page = el.dataset.v; F.sel = null;
@@ -3592,7 +3513,7 @@ document.addEventListener('click', async e => {
     case 'filt': F.filt = el.dataset.v; F.sel = null; rerender(); break;
     case 'more': F.filt = FGROUP[el.dataset.v] || 'outfit'; F.sel = null; F.wtab = 'shop'; if (!modal) F.page = 'shop'; rerender(); break;
     case 'look': { const k = el.dataset.k; F.look[k] = k === 'hair' ? el.dataset.v : +el.dataset.v; styleChanged(); break; }
-    case 'wear': { const k = el.dataset.k, v = el.dataset.v; if (k === 'gun' || (v && ITEMS[v] && ITEMS[v][0] === 'gun')) { const n = GUNIDS.indexOf(v); if (n >= 0 && gunOwned(n)) { B3.world.setWeapon(n); toast(ITEMS[v][1] + ' equipped. Click or hold to shoot.'); } break; } if (!v) { if (k === 'pet') F.pet = ''; else if (k === 'outfit') F.look.outfit = 'tee'; else F.look[k] = ''; styleChanged(); } else if (owns(v)) { wearItem(v); styleChanged(); } break; }
+    case 'wear': { const k = el.dataset.k, v = el.dataset.v; if (k === 'gun' || (v && ITEMS[v] && ITEMS[v][0] === 'gun')) { const n = GUNIDS.indexOf(v); if (n >= 0 && gunOwned(n)) { B3.world.setWeapon(n); toast(ITEMS[v][1] + ' equipped. Click or hold to shoot.'); } break; } if (!v) { if (k === 'dye') F.look.hc = 0; else if (k === 'pet') F.pet = ''; else if (k === 'outfit') F.look.outfit = 'tee'; else F.look[k] = ''; styleChanged(); } else if (owns(v)) { wearItem(v); styleChanged(); } break; }
     case 'item': { const v = el.dataset.v; F.sel = v || null; if (v && ITEMS[v]) { F.filt = filtOf(v); F.wtab = 'shop'; if (!modal) F.page = 'shop'; } rerender(); break; }
     case 'buy': if (modal && modal.kind === 'buy') { act({ t: 'buy' }); break; } // falls through to the shop purchase
     case 'equip': { const id = F.sel, it = ITEMS[id]; if (!it) break;
@@ -3618,15 +3539,16 @@ document.addEventListener('click', async e => {
     case 'lootback':
       if(lootSt){lootSt.view='';lootSt.item='';refreshModal();}
       break;
-    case 'loot': lootModal(); if (el.dataset.v === 'go' && wallet.boxes > 0) await spinLoot(); break;
+    case 'loot': lootModal(); if (el.dataset.v === 'go' && bxCount()>0) await spinLoot(); break;
+    case 'boxtheme': if(lootSt&&lootSt.phase==='idle'){lootSt.theme=el.dataset.v;lootSt.item='';lootSt.page=0;refreshModal();}break;
     case 'lootbuy': {
       if(lootBuyBusy||lootSt&&['purchasing','opening','spin'].includes(lootSt.phase))break;
-      if(wallet.coins<BOX_PRICE){toast('Not enough gold. You need '+fmt(BOX_PRICE-wallet.coins)+' more.');break;}
-      if(!bxRemaining().length){toast('All Season 1 rewards collected.');break;}
+      if(wallet.coins<bxConfig().price){toast('Not enough gold. You need '+fmt(bxConfig().price-wallet.coins)+' more.');break;}
+      if(!bxRemaining().length){toast('All rewards in this collection are owned.');break;}
       lootBuyBusy=true;el.disabled=true;
       if(lootSt&&modal&&modal.kind==='loot'){lootSt.phase='purchasing';refreshModal();}
       try{
-        await api('shop',{op:'box'});Snd('buy');
+        await api('shop',{op:'box',item:bxTheme()});Snd('buy');
         if(!modal||modal.kind!=='loot')lootModal();
         else{lootSt.phase='idle';lootSt.prize=null;lootSt.S=null;lootSt.view='';}
         await spinLoot();
@@ -3698,13 +3620,23 @@ document.addEventListener('click', async e => {
       else { wardrobeModal(); if (tab === 'shop') { F.wtab = 'shop'; refreshModal(); } }
       renderActions(); break; }
     case 'tile': tileModal(i); break;
+    case 'invitefriend': {
+      const link=new URL('./',location.href).href;
+      try{
+        if(navigator.share)await navigator.share({title:'BITZ',text:'Join me in the BITZ lobby',url:link});
+        else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(link);toast('Lobby invite link copied.');}
+        else toast('Share this lobby link: '+link);
+      }catch(err){if(err?.name!=='AbortError')toast('Share this lobby link: '+link);}
+      break;
+    }
+    case 'testbetrayal': if(Plaza.experimental && el.dataset.i)plazaSend({testBetrayal:{target:el.dataset.i}}); break;
     case 'fmin': friendsToggle(); break;
     case 'friend': profileOpen(FRIENDS[+el.dataset.i]); break;
     case 'profclose': profileClose(); break;
     case 'customise': profileClose(); F.page = 'me'; renderHome(true); break;
     case 'fop': if (PROF) { try { await api('friends', { op: el.dataset.v, friend: PROF.f }); await loadFriends(); toast(el.dataset.v === 'remove' ? 'Removed from your friends.' : 'Back in your friends.'); } catch (e) { toast(e.message || 'That did not work.'); } } break;
     case 'frestore': try { await api('friends', { op: 'restore', friend: el.dataset.f }); await loadFriends(); } catch (e) { toast(e.message || 'That did not work.'); } break;
-    case 'tradeask': if (el.dataset.i) { plazaSend({ trade: { op: 'ask', to: el.dataset.i } }); profileClose(); } break;
+    case 'tradeask': break; // archived in legacy/index.adventure.html
     case 'tradeyes': tradeSend({ op: 'accept' }); break;
     case 'tradeno': if (Trade) { tradeSend({ op: Trade.phase === 'ask' ? 'decline' : 'cancel' }); } break;
     case 'tradeitem': if (Trade && Trade.me) { const id = el.dataset.v, it = Trade.me.items.slice(), k = it.indexOf(id); if (k >= 0) it.splice(k, 1); else it.push(id); tradeSend({ op: 'offer', items: it, gold: Trade.me.gold }); } break;
@@ -3712,12 +3644,12 @@ document.addEventListener('click', async e => {
     case 'tradegoldset': if (Trade && Trade.me) tradeSend({ op: 'offer', items: Trade.me.items, gold: Math.max(0, Math.floor(+($('#tgold') || {}).value || 0)) }); break;
     case 'tradeok': if (Trade) tradeSend({ op: 'confirm', v: Trade.v }); break;
     case 'emote': plazaEmote(el.dataset.v); break;
-    case 'wpn': B3.world.setWeapon(+el.dataset.v); break;
-    case 'wpnnext': { let n = B3.world.weapon; for (let i = 0; i < GUNIDS.length; i++) { n = (n + 1) % GUNIDS.length; if (gunOwned(n)) break; } B3.world.setWeapon(n); break; }
-    case 'zombies': plazaSend({ admin: { k: 'zom', on: !Zom.on } }); break;
+    case 'wpn': break; // no combat
+    case 'wpnnext': break; // no combat
+    case 'zombies': break; // archived
     case 'adminpanel': openModal('admin', adminHTML); break;
     case 'stuff': stuffOpen(el.dataset.f ? { f: el.dataset.f, n: el.dataset.n } : { self: true }); break;
-    case 'clans': clansModal();break;
+    case 'clans': break; // archived
     case 'clanrefresh': clansModal();break;
     case 'clancopy': try{await navigator.clipboard.writeText(el.dataset.v);toast('Clan code copied.');}catch(e){toast('Clan code: '+el.dataset.v);}break;
     case 'clanop': {
@@ -3731,7 +3663,7 @@ document.addEventListener('click', async e => {
       catch(er){if(ClanSt){ClanSt.loading=false;ClanSt.err=null;refreshModal();}toast(er.message||'Could not update clan.');}
       break;
     }
-    case 'explore': exploreModal();break;
+    case 'explore': break; // archived
     case 'worldgoto': if(!Plaza.you){toast('Connect to the world first.');break;} closeModal();F.page='world';renderHome(true);plazaSend({travel:el.dataset.v});break;
     case 'stufftab': if (StuffSt) { StuffSt.tab = el.dataset.v; refreshModal(); } break;
     case 'zoomin': B3.world.zoomBy(0.8); break;

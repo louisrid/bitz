@@ -1,18 +1,16 @@
-name: Stakkz beta validation
-concurrency:
-  group: beta-validate-${{ github.ref }}
-  cancel-in-progress: true
+name: BITZ 2.0 validation
 on:
   push:
-    branches:
-      - beta-ui-bots-account-sync-20261111
+    branches: [feature/bitz-2-minimal-social]
   pull_request:
-    branches:
-      - main
+    branches: [main]
+concurrency:
+  group: bitz2-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  smoke:
+  core-and-api:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,30 +18,24 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - name: Syntax-check game and server modules
+      - name: Syntax-check all active server and gameplay modules
         run: |
           node --check server.js
           node --check src/core.js
-          node --check src/bots.js
+          node --check src/social.js
+          node --check src/progression.js
+          node --check src/shop.js
           node --check src/auth.js
-          node --check public/engine.js
-      - name: Beta smoke tests
-        run: node tests/beta-smoke.mjs
-      - name: Loot fairness and duplicate-free server rewards
-        run: node tests/loot-ux.mjs
-      - name: Expanded world, landmarks and weapon definitions
-        run: node tests/world-and-weapons.mjs
-      - name: Six-player game modes, station travel, hotels and final chaos
-        run: node tests/gameplay-finalisation.mjs
-      - name: Server, persistent storage and cross-device integration
-        run: node tests/integration.mjs
-      - name: Long-running bot gameplay simulations
-        run: node tests/bot-simulation.mjs
-      - name: Two-device reconnect and offline grace behaviour
-        run: node tests/reconnect-grace.mjs
-  browser:
+          node --check public/voxel-world.js
+          node --check public/world-layout.js
+          node --check public/loot-rules.js
+      - name: Economy, levels, loot fairness and archived-feature protection
+        run: node tests/bitz2-unit.mjs
+      - name: Live multiplayer, signup, friends, buying and persistence
+        run: node tests/bitz2-integration.mjs
+  desktop-and-mobile:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -52,22 +44,19 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm install --no-save playwright@1.56.1
-      - name: Confirm headless Chrome is installed
-        run: google-chrome --version
-      - name: Test desktop UI and iPhone account-to-game handoff
-        run: node tests/browser-smoke.mjs
-      - name: Save screenshot evidence for visual QA
+      - name: Test desktop and mobile WebGL, menus and no overlap
+        run: node tests/bitz2-browser.mjs
+      - name: Upload BITZ 2.0 UI screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stakkz-beta-layout-screenshots
-          path: qa-screenshots/*.png
+          name: bitz2-browser-layouts
+          path: qa-bitz2/*.png
           if-no-files-found: ignore
           retention-days: 7
-
-  postgres:
+  postgres-preservation:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     services:
       pg:
         image: postgres:18-alpine
@@ -91,42 +80,7 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - name: Test rolling-deploy data integrity against real PostgreSQL
+      - name: Test Postgres persistence through rolling deploy
         run: node tests/postgres-rollover.mjs
-      - name: Test that an overlapping deploy cannot lock the live instance out of saving
+      - name: Test overlapping writers cannot destroy newer accounts
         run: node tests/postgres-overlap.mjs
-
-  visual:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-      - run: npm ci
-      - run: npm install --no-save playwright@1.56.1
-      - name: Render the real WebGL board, hotel, six players and train on desktop and phone
-        run: node tests/visual-stage.mjs
-      - name: Upload actual 3D scene screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: stakkz-webgl-visual-check
-          path: qa-3d-screenshots/*.png
-          if-no-files-found: ignore
-          retention-days: 7
-
-  staging:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    needs: [smoke, browser, postgres]
-    timeout-minutes: 8
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Test the real Render beta with its private Postgres database
-        run: node tests/staging-live-smoke.mjs

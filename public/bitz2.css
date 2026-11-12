@@ -1,0 +1,222 @@
+/* BITZ 2.0 visual system. Applied LAST to harmonise the existing Shop
+   instead of replacing its typography or component conventions. */
+:root{--b2-white:#fff;--b2-ink:#101014;--b2-lavender:#eae5ff;--b2-violet:#ae9cff;--b2-blue:#c9e9ff}
+#app[data-screen="home"],#app[data-page="world"] #stage{background:#f9f9ff!important}
+#app[data-screen=home] #side{border:3px solid #000!important;background:#fff!important;box-shadow:5px 6px 0 #000!important;border-radius:17px!important}
+#app[data-screen=home] #wui #whp,
+#app[data-screen=home] #wui #wweap,
+#app[data-screen=home] #wui #wfire,
+#app[data-screen=home] #wui #wgun,
+#app[data-screen=home] #wui #wboost,
+#app[data-screen=home] #wui #wdead,
+#app[data-screen=home] #wui #whud,
+#app[data-screen=home] #wui .wemo,
+#app[data-screen=home] #wui .whelp,
+#app[data-screen=home] #wui .wtop{display:none!important}
+#app[data-screen=home] #wui #wstick,#app[data-screen=home] #wui #wjump{pointer-events:auto;z-index:20}
+#app[data-screen=home] #wui #wjump{background:#ebe6ff!important;color:#000!important;border:3px solid #000!important;box-shadow:3px 4px 0 #000!important}
+#app[data-screen=home] #wbar{display:flex!important;align-items:center;right:250px;left:14px;top:15px;gap:7px;flex-wrap:wrap;pointer-events:none}
+#app[data-screen=home] #wbar>*{pointer-events:auto}
+#app[data-screen=home] #wbar .wbtn{background:#fff!important;color:#000!important;border:3px solid #000!important;border-radius:12px!important;box-shadow:3px 4px 0 #000!important;font:400 16px/1 "Coolvetica","Arial Black",sans-serif!important;padding:9px 12px!important;white-space:nowrap;transition:background .16s ease,transform .16s ease}
+#app[data-screen=home] #wbar .wbtn:hover{background:#eae5ff!important;transform:translateY(-2px)}
+#app[data-screen=home] #wbar .wbtn.active{background:#d9d1ff!important}
+#app[data-screen=home] #wbar .wbtn.wlevel{background:#eae5ff!important}
+#app[data-screen=home] #wbar .wbtn:focus-visible,#shopbig:focus-visible,#leveltop:focus-visible{outline:3px solid #7655fd;outline-offset:3px}
+#shopbig{background:#dbd3ff!important;color:#000!important;height:52px!important;border:3px solid #000!important;border-radius:13px!important;box-shadow:4px 5px 0 #000!important;font-size:25px!important}
+#shopbig .sale{display:none!important}
+html:has(#veil:not([hidden])) #shopbig,html:has(#fprofov:not([hidden])) #shopbig{display:none!important;pointer-events:none!important;visibility:hidden!important}
+#goldtop{height:52px;top:12px!important;right:14px!important;padding:5px 13px!important;border:3px solid #000!important;border-radius:12px!important;box-shadow:3px 4px 0 #000!important;background:#fff!important;gap:7px}
+#goldtop #wgold{font:400 22px/1 "Coolvetica",sans-serif!important}
+#goldtop #wrate{color:#43317f!important;font-size:11px!important}
+#goldtop .gc{width:25px!important;height:25px!important}
+#leveltop{position:fixed;top:13px;right:221px;z-index:94;width:113px;min-height:50px;padding:5px 9px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;background:#fff;border:3px solid #000;border-radius:12px;box-shadow:3px 4px 0 #000;color:#000}
+#leveltop>b{font:400 19px/1 "Coolvetica",sans-serif}
+#leveltop .b2xp{display:block;width:100%;height:8px;border:1px solid #000;border-radius:20px;overflow:hidden;background:#eeedf3}
+#leveltop .b2xp i{display:block;width:0;height:100%;background:#a99cff;transition:width .25s}
+#bload{background:#fff!important;color:#000!important;display:grid!important;place-items:center!important;transition:opacity .18s ease!important;transform:none!important}
+#bload.out{opacity:0;transform:none!important;pointer-events:none}
+#bload .b2loader{text-align:center;width:min(300px,76vw);display:flex;flex-direction:column;align-items:center;gap:14px}
+#bload .b2loader>b{font:400 clamp(62px,14vw,108px)/1 "Coolvetica","Arial Black",sans-serif;letter-spacing:-.045em}
+#bload .b2loader>b span{color:#9c8cff}
+#bload .b2loader p{font:700 12px/1.4 "Space Grotesk",sans-serif;color:#3b3750;letter-spacing:.13em;margin:0}
+#bload .b2loadbar{width:100%;max-width:232px;height:10px;border:2px solid #000;border-radius:20px;overflow:hidden;background:#f2efff}
+#bload .b2loadbar i{display:block;width:38%;height:100%;background:#b6a8ff;animation:b2load 1s ease-in-out infinite alternate}
+@keyframes b2load{from{transform:translateX(-100%)}to{transform:translateX(270%)}}
+#modal[data-kind="stuff"]{background:#fff!important;color:#000!important;border:3px solid #000!important;box-shadow:5px 6px 0 #000!important;width:min(830px,calc(100vw - 20px))!important}
+#modal[data-kind="stuff"] .sgrid{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))!important;gap:12px!important}
+#modal[data-kind="stuff"] .stile{background:#fff!important;border:3px solid #000!important;border-radius:13px!important;box-shadow:3px 4px 0 #000!important;padding:12px 8px!important;min-height:200px!important}
+#modal[data-kind="stuff"] .stile.worn{background:#e9e3ff!important;border-color:#000!important}
+#modal[data-kind="stuff"] .stile .pim{width:100px!important;height:105px!important;object-fit:contain!important}
+#modal[data-kind="stuff"] .st-action{display:block;align-self:stretch;text-align:center;background:#111;color:#fff;border-radius:6px;font:400 15px/1 "Coolvetica",sans-serif;margin-top:7px;padding:7px 4px}
+#modal[data-kind="stuff"] .stile.worn .st-action{background:#7566db}
+#modal[data-kind="stuff"] .stuff-tabs button{border:2px solid #000!important;border-radius:9px!important;background:#fff!important;color:#000!important}
+#modal[data-kind="stuff"] .stuff-tabs button.on{background:#d8d1ff!important}
+#modal[data-kind="level"]{background:#fff;border:3px solid #000;box-shadow:4px 5px 0 #000;color:#000;width:min(480px,calc(100vw - 28px));padding:18px}
+.b2levelbar{height:16px;border:3px solid #000;background:#f2efff;border-radius:12px;overflow:hidden;margin:13px 0}
+.b2levelbar>i{display:block;height:100%;background:#ad9dfb}
+/* Mystery-box redesign: same white cards, black strokes and violet focus as the Shop. */
+#veil:has(#modal[data-kind="loot"]){background:rgba(21,19,35,.34)!important;backdrop-filter:blur(3px)!important}
+#modal[data-kind="loot"]{background:#fff!important;color:#000!important;border:3px solid #000!important;box-shadow:5px 6px 0 #000!important;border-radius:17px!important;max-height:min(92dvh,860px)!important}
+#modal[data-kind="loot"] .bx-shell,#modal[data-kind="loot"] .bx-head,#modal[data-kind="loot"] .bx-collection{background:#fff!important;color:#000!important}
+#modal[data-kind="loot"] .bx-head{border-bottom:3px solid #000!important}
+#modal[data-kind="loot"] .bx-season-ribbon{background:#eae5ff!important;border-bottom:2px solid #000!important}
+#modal[data-kind="loot"] .bx-season-ribbon strong,#modal[data-kind="loot"] .bx-season-ribbon small{color:#31286c!important}
+#modal[data-kind="loot"] .bx-stock{background:#fff!important;color:#000!important;border:2px solid #000!important}
+#modal[data-kind="loot"] .bx-hero{background:#f3f0ff!important;color:#000!important;border-bottom:2px solid #000!important;min-height:156px!important}
+#modal[data-kind="loot"] .bx-ring{border-color:#bcb3e9!important;background:#eeeaff!important;box-shadow:none!important}
+#modal[data-kind="loot"] .bx-title{color:#000!important}
+#modal[data-kind="loot"] .bx-title em{color:#7567ca!important}
+#modal[data-kind="loot"] .bx-eyebrow,#modal[data-kind="loot"] .bx-hero-line,#modal[data-kind="loot"] .bx-current-progress{color:#31286c!important}
+#modal[data-kind="loot"] .bx-chestpic{filter:none!important;animation:none!important}
+#modal[data-kind="loot"] .bx-odds{background:#fff!important;border-bottom:2px solid #000!important}
+#modal[data-kind="loot"] .bx-odds>b{color:#000!important}
+#modal[data-kind="loot"] .bx-odd,#modal[data-kind="loot"] .bx-odd.bx-epic,#modal[data-kind="loot"] .bx-odd.bx-legendary,#modal[data-kind="loot"] .bx-odd.bx-mythical,#modal[data-kind="loot"] .bx-odd.bx-secret{background:#f6f4ff!important;color:#000!important;border:2px solid #000!important}
+#modal[data-kind="loot"] .bx-odd strong{color:#000!important}
+#modal[data-kind="loot"] .bx-complete{color:#5b4cb2!important}
+#modal[data-kind="loot"] .bx-roulette{background:#faf9ff!important;border-bottom:2px solid #000!important}
+#modal[data-kind="loot"] .bx-reel-top strong,#modal[data-kind="loot"] .bx-reel-top span{color:#000!important}
+#modal[data-kind="loot"] .bx-reel-viewport{background:#fff!important;border:3px solid #000!important;box-shadow:none!important}
+#modal[data-kind="loot"] .bx-reel-track{transition:transform 2.1s cubic-bezier(.1,.65,.08,1)!important}
+#modal[data-kind="loot"] .bx-card,#modal[data-kind="loot"] .bx-card.bx-epic,#modal[data-kind="loot"] .bx-card.bx-legendary,#modal[data-kind="loot"] .bx-card.bx-mythical,#modal[data-kind="loot"] .bx-card.bx-secret{background:#fff!important;color:#000!important;border:2px solid #000!important;box-shadow:none!important;animation:none!important}
+#modal[data-kind="loot"] .bx-card .bx-card-tier,#modal[data-kind="loot"] .bx-card .bx-card-name{color:#000!important}
+#modal[data-kind="loot"] .bx-pointer{border-top-color:#8a79e8!important;filter:none!important}
+#modal[data-kind="loot"] .bx-pointer:after{background:linear-gradient(#8776e544,transparent)!important}
+#modal[data-kind="loot"] .bx-reward,#modal[data-kind="loot"] .bx-reward.bx-epic,#modal[data-kind="loot"] .bx-reward.bx-legendary,#modal[data-kind="loot"] .bx-reward.bx-mythical,#modal[data-kind="loot"] .bx-reward.bx-secret{background:#efebff!important;color:#000!important;border-bottom:2px solid #000!important}
+#modal[data-kind="loot"] .bx-reward-text{color:#000!important}
+#modal[data-kind="loot"] .bx-win-title{color:#51429d!important}
+#modal[data-kind="loot"] .bx-prize-name{color:#000!important}
+#modal[data-kind="loot"] .bx-win-note,#modal[data-kind="loot"] .bx-win-progress{color:#3d355f!important}
+#modal[data-kind="loot"] .bx-actions{background:#fff!important;border-top:2px solid #000!important;box-shadow:none!important}
+#modal[data-kind="loot"] .bx-cost{color:#000!important}
+#modal[data-kind="loot"] .bx-cta{background:#cfc5ff!important;color:#000!important}
+#modal[data-kind="loot"] .bx-btn{background:#fff!important;color:#000!important}
+#modal[data-kind="loot"] .bx-collection-head h2{color:#000!important}
+#modal[data-kind="loot"] .bx-collection-head span{color:#544a86!important}
+#modal[data-kind="loot"] .bx-collect-card,#modal[data-kind="loot"] .bx-collect-card.bx-epic,#modal[data-kind="loot"] .bx-collect-card.bx-legendary,#modal[data-kind="loot"] .bx-collect-card.bx-mythical,#modal[data-kind="loot"] .bx-collect-card.bx-secret{background:#fff!important;color:#000!important;border:2px solid #000!important;box-shadow:2px 3px 0 #000!important;animation:none!important}
+#modal[data-kind="loot"] .bx-collect-card strong{color:#000!important}
+#modal[data-kind="loot"] .bx-tier.bx-epic,#modal[data-kind="loot"] .bx-tier.bx-legendary,#modal[data-kind="loot"] .bx-tier.bx-mythical,#modal[data-kind="loot"] .bx-tier.bx-secret{background:#d9d1ff!important;color:#000!important}
+#modal[data-kind="loot"] .bx-win-actions .bx-cta{background:#cfc5ff!important}
+#modal[data-kind="loot"] .bx-theme-picker{display:flex;gap:8px;padding:9px 15px;flex-wrap:wrap;background:#fff;border-bottom:2px solid #000}
+#modal[data-kind="loot"] .bx-theme-picker button{border:2px solid #000;border-radius:9px;padding:8px 11px;background:#fff;color:#000;font:400 17px/1 "Coolvetica",sans-serif;cursor:pointer}
+#modal[data-kind="loot"] .bx-theme-picker button.on{background:#cfc5ff}
+#modal[data-kind="loot"] .bx-theme-picker button:disabled{opacity:.5;cursor:default}
+#modal[data-kind="loot"] .bx-cta:hover,#modal[data-kind="loot"] .bx-btn:hover{background:#e4dfff!important}
+#fprofov .pp-card{background:#fff!important;border:3px solid #000!important;box-shadow:5px 6px 0 #000!important}
+#fprofov .pp-card .b2playerlevel{background:#eeeaff!important;border:2px solid #000!important}
+@media(max-width:1100px){
+ #app[data-screen=home] #wbar{top:81px;right:12px;justify-content:center}
+ #app[data-screen=home] #side{top:134px!important}
+ #leveltop{right:190px}
+}
+@media(max-width:680px){
+ #shopbig{top:8px!important;left:auto!important;right:9px!important;transform:none!important;height:42px!important;font-size:19px!important;padding:0 15px!important;border-radius:10px!important}
+ #shopbig:active{transform:translate(2px,2px)!important}
+ #goldtop{top:61px!important;right:8px!important;height:39px!important;padding:4px 7px!important}
+ #goldtop #wgold{font-size:17px!important}
+ #goldtop #wrate{font-size:9px!important}
+ #goldtop .gc{width:20px!important;height:20px!important}
+ #leveltop{top:61px!important;right:auto!important;left:9px!important;min-height:38px!important;width:103px!important;z-index:94}
+ #leveltop>b{font-size:15px!important}
+ #app[data-screen=home] #wbar{top:114px!important;left:7px!important;right:7px!important;gap:5px!important;justify-content:center}
+ #app[data-screen=home] #wbar .wbtn{font-size:13px!important;padding:7px 8px!important;box-shadow:2px 3px 0 #000!important;border-width:2px!important}
+ #app[data-screen=home] #side{top:180px!important;right:8px!important;width:calc(100% - 16px)!important;padding:12px!important}
+ #modal[data-kind="stuff"] .sgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+ #modal[data-kind="stuff"] .stile{min-height:166px!important}
+ #modal[data-kind="stuff"] .stile .pim{height:78px!important}
+ #modal[data-kind="loot"] .bx-hero{grid-template-columns:34% 66%!important}
+ #modal[data-kind="loot"] .bx-actions{position:static!important}
+ #modal[data-kind="loot"] .bx-reward{grid-template-columns:1fr!important}
+ #modal[data-kind="loot"] .bx-reward-image{min-height:150px!important;height:155px!important}
+ #modal[data-kind="loot"] .bx-reward-image img{max-height:145px!important}
+ #modal[data-kind="loot"] .bx-reward-text{padding:5px 0!important}
+}
+@media(prefers-reduced-motion:reduce){#bload .b2loadbar i{animation:none!important;transform:none!important}}
+
+/* Lobby invitations, and disabled-by-default admin experiment. */
+#fside .fhead .b2invite{border:2px solid #000;border-radius:8px;background:#e7e0ff;color:#000;padding:4px 8px;font:400 13px/1 "Coolvetica",sans-serif;cursor:pointer}
+#fside .fhead .b2invite:hover{background:#d1c6ff}
+#fside .fhead .b2invite:focus-visible{outline:3px solid #6c55c9}
+#fprofov .pbtns .b2test{background:#f2edff;border-color:#000;color:#000}
+
+/* BITZ 2.0 final layout corrections. Overrides old adventure toolbar rules. */
+html #app[data-screen="home"] #wbar{
+  position:fixed!important;flex-direction:row!important;align-items:center!important;
+  justify-content:flex-start!important;flex-wrap:wrap!important;
+  left:calc(var(--fw) + 22px)!important;right:12px!important;
+  top:87px!important;width:auto!important;gap:7px!important;
+}
+html:not(.fopen) #app[data-screen="home"] #wbar{left:16px!important}
+html #goldtop{
+  display:flex!important;align-items:center!important;
+  min-width:175px;max-width:220px;
+}
+html #goldtop #wrate{display:block!important;color:#403478!important}
+html #leveltop{right:260px;top:13px}
+html #shopbig{
+  height:54px!important;min-height:54px!important;
+  padding:5px 20px!important;font-size:27px!important;
+  border-radius:13px!important;box-shadow:4px 5px 0 #000!important;
+}
+html:has(#app[data-screen="home"]:not([data-page="world"])) #wbar,
+html:has(#app[data-screen="home"]:not([data-page="world"])) #goldtop,
+html:has(#app[data-screen="home"]:not([data-page="world"])) #leveltop{
+  display:none!important
+}
+html:has(#veil:not([hidden])) #wbar,
+html:has(#veil:not([hidden])) #goldtop,
+html:has(#veil:not([hidden])) #leveltop,
+html:has(#fprofov:not([hidden])) #wbar,
+html:has(#fprofov:not([hidden])) #goldtop,
+html:has(#fprofov:not([hidden])) #leveltop{
+  visibility:hidden!important;pointer-events:none!important
+}
+#b2-nographics[hidden]{display:none!important}
+#b2-nographics{position:absolute;z-index:4;top:48%;left:50%;transform:translate(-50%,-50%);width:min(380px,calc(100vw - 54px));text-align:center;pointer-events:none;color:#14141e;display:flex;flex-direction:column;gap:8px;padding:20px;border:2px solid #000;border-radius:14px;background:#fff;box-shadow:4px 5px 0 #000}
+#b2-nographics strong{font:400 21px/1.1 "Coolvetica",sans-serif}
+#b2-nographics span{font:600 12px/1.5 "Space Grotesk",sans-serif}
+@media(max-width:1100px){
+ html #app[data-screen="home"] #wbar{left:12px!important;top:90px!important}
+ html #leveltop{right:245px}
+}
+@media(max-width:680px){
+ html #shopbig{top:7px!important;right:9px!important;left:auto!important;min-height:42px!important;height:42px!important;padding:3px 13px!important;font-size:20px!important;transform:none!important}
+ html #app[data-screen="home"] #wbar{top:114px!important;left:8px!important;right:8px!important;justify-content:center!important;gap:5px!important}
+ html #goldtop{display:flex!important;min-width:0;max-width:195px;top:62px!important;right:8px!important;height:39px!important}
+ html #goldtop #wrate{font-size:9px!important}
+ html #leveltop{top:62px;right:auto!important;left:9px!important;height:39px!important}
+ #modal[data-kind="loot"] .bx-season-ribbon{display:none!important}
+ #modal[data-kind="loot"] .bx-head{min-height:45px!important;padding:7px 11px!important}
+ #modal[data-kind="loot"] .bx-theme-picker{padding:5px 9px!important;gap:5px!important}
+ #modal[data-kind="loot"] .bx-theme-picker button{font-size:15px!important;padding:6px 8px!important}
+ #modal[data-kind="loot"] .bx-hero{min-height:100px!important;max-height:118px!important}
+ #modal[data-kind="loot"] .bx-art{height:100px!important;min-height:0!important}
+ #modal[data-kind="loot"] .bx-chestpic{height:100px!important;min-height:0!important}
+ #modal[data-kind="loot"] .bx-chestpic .pim{max-width:100px!important;max-height:100px!important}
+ #modal[data-kind="loot"] .bx-detail{padding:5px 4px!important}
+ #modal[data-kind="loot"] .bx-title{font-size:clamp(25px,8vw,37px)!important}
+ #modal[data-kind="loot"] .bx-odds{padding:5px 7px!important;gap:5px!important}
+ #modal[data-kind="loot"] .bx-odd{padding:6px 4px!important;font-size:11px!important}
+ #modal[data-kind="loot"] .bx-roulette{padding:7px 7px 9px!important}
+ #modal[data-kind="loot"] .bx-reel-top{padding-bottom:6px!important}
+ #modal[data-kind="loot"] .bx-reel-viewport{max-height:116px!important;height:116px!important}
+ #modal[data-kind="loot"] .bx-card{min-height:104px!important;max-height:104px!important}
+ #modal[data-kind="loot"] .bx-card .pim{max-height:60px!important}
+ #modal[data-kind="loot"] .bx-actions{position:sticky!important;bottom:0!important;z-index:4!important;padding:7px!important;background:#fff!important}
+ #modal[data-kind="loot"] .bx-cost{font-size:12px!important}
+ #b2-nographics{top:43%}
+}
+
+/* The 3D canvas is below #app in the stacking order. These layers MUST be
+   transparent or the real social lobby is hidden behind a blank white sheet.
+   This is a functional rendering rule, not decorative styling. */
+html #app[data-screen="home"],
+html #app[data-screen="home"] #stage,
+html #app[data-page="world"] #stage{background:transparent!important}
+/* Quiet, cohesive movement and camera controls (replaces old yellow). */
+html #app[data-screen="home"][data-page="world"] #wzoom button{
+  background:#fff!important;color:#000!important;border:2px solid #000!important;
+  border-radius:11px!important;box-shadow:2px 3px 0 #000!important;
+  width:43px!important;height:43px!important;font-size:25px!important
+}
+html #ftab{background:#e7e0ff!important;color:#000!important}
+html #wstick i{background:#c8b9ff!important}
