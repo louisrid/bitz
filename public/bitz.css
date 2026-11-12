@@ -562,3 +562,7 @@ input.t:focus { box-shadow: 0 0 0 3px var(--purple-2); }
 #load .signin .btn { background: #fff; color: #000; border-color: #fff; box-shadow: 0 3px 0 #666; }
 #load .signin .btn.ghost { background: transparent; color: #fff; }
 #load .signin p { margin: 0; font-size: 13px; opacity: .8; text-align: center; }
+
+/* Hidden context controls must stay hidden even when button styles set display:flex. */
+#btn-act[hidden], button[hidden] { display: none; }
+@media(max-width:760px) { #feed .line { font-size: 12px; line-height: 1.25; padding: 8px 11px; } }
