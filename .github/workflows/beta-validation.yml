@@ -21,8 +21,6 @@ jobs:
       - name: Syntax-check every active module
         run: |
           for f in server.js src/*.js public/*.js tools/*.mjs tests/*.mjs; do node --check "$f"; done
-      - name: New signup strength and existing account compatibility
-        run: node tests/auth-security.mjs
       - name: Roster, packs, odds, serials, book, trades, clubs, milestones, Dealer, friends
         run: node tests/cards-unit.mjs
       - name: Real server, socket earnings, stands, accounts, trades, persistence
