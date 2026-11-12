@@ -11,6 +11,9 @@ import * as core from './src/core.js';
 import { AccountAuth } from './src/auth.js';
 import { nextBotAction, isBot } from './src/bots.js';
 
+/* the old address after a move: forward everyone, run nothing else */
+if (process.env.STAKKZ_MOVED_TO) { await import('./moved.js'); await new Promise(() => {}); }
+
 const DIR = path.dirname(fileURLToPath(import.meta.url)), PUB = path.join(DIR, 'public');
 const PORT = Number(process.env.PORT) || 3000, DATA = process.env.DATA_FILE || path.join(DIR, 'data.json');
 const AB = 'ABCDEFGHJKLMNPQRSTUVWXYZ', IDLE = 48 * 3600 * 1000;
@@ -147,6 +150,7 @@ function authFailed(key) { const rec=authAttempts.get(key); if(rec)rec.count++; 
 function authSucceeded(key) { authAttempts.delete(key); }
 function allowed(ip) { const now = Date.now(), b = buckets.get(ip) || { n: 80, t: now }; b.n = Math.min(80, b.n + (now - b.t) / 1000 * 20); b.t = now; buckets.set(ip, b); if (buckets.size > 5000) buckets.clear(); if (b.n < 1) return false; b.n--; return true; }
 /* which release this server is running; open pages reload themselves when it changes */
+const handoffs = new Map();
 const BUILD = String(process.env.RENDER_GIT_COMMIT || Date.now()).slice(0, 12);
 const send = (res, code, o) => { const buf = Buffer.from(JSON.stringify(o)); res.writeHead(code, { 'Content-Type': 'application/json', 'Content-Length': buf.length, 'Cache-Control': 'no-store' }); res.end(buf); };
 const read = req => new Promise((ok, no) => { let n = 0; const parts = []; req.on('data', c => { n += c.length; if (n > 20000) { no(new Error('big')); req.destroy(); } else parts.push(c); }); req.on('end', () => { try { ok(JSON.parse(Buffer.concat(parts).toString('utf8') || '{}')); } catch (e) { no(e); } }); req.on('error', no); });
@@ -154,6 +158,23 @@ const read = req => new Promise((ok, no) => { let n = 0; const parts = []; req.o
 async function api(req, res, parts) {
   const now = Date.now();
   if (parts[0] === 'ping') return send(res, 200, { ok: true, now, parties: parties.size, persistent, build: BUILD });
+  /* moving address: the old site's page posts its guest key and session here and gets a one-time code;
+     the new page swaps the code for them. Codes last two minutes and work once. */
+  if (parts[0] === 'handoff') {
+    const OLD = process.env.STAKKZ_OLD_ORIGIN || 'https://stakkz.onrender.com', cors = { 'Access-Control-Allow-Origin': OLD, 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type', 'Vary': 'Origin' };
+    if (req.method === 'OPTIONS') { res.writeHead(204, cors); return res.end(); }
+    if (req.method === 'POST' && !parts[1]) {
+      if (!allowed(String(req.headers['x-forwarded-for'] || req.socket.remoteAddress).split(',')[0].trim())) { res.writeHead(429, cors); return res.end(); }
+      let b; try { b = await read(req); } catch (e) { res.writeHead(400, cors); return res.end(); }
+      const k = typeof b.key === 'string' && /^[a-f0-9]{48}$/.test(b.key) ? b.key : null, sess = typeof b.session === 'string' && auth.authenticate(b.session) ? b.session : null;
+      if (!k && !sess) { res.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }, cors)); return res.end('{}'); }
+      handoffs.forEach((v, c) => { if (v.exp < now) handoffs.delete(c); }); if (handoffs.size > 2000) { res.writeHead(429, cors); return res.end(); }
+      const code = crypto.randomBytes(16).toString('hex'); handoffs.set(code, { key: k, session: sess, exp: now + 120000 });
+      res.writeHead(200, Object.assign({ 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, cors)); return res.end(JSON.stringify({ code: code }));
+    }
+    if (req.method === 'GET' && /^[a-f0-9]{32}$/.test(parts[1] || '')) { const h = handoffs.get(parts[1]); handoffs.delete(parts[1]); return send(res, 200, h && h.exp >= now ? { key: h.key, session: h.session } : {}); }
+    return send(res, 404, {});
+  }
   if (!allowed(String(req.headers['x-forwarded-for'] || req.socket.remoteAddress).split(',')[0].trim())) return send(res, 429, { message: 'Slow down a little.' });
   if (parts[0] === 'party' && parts[1] && req.method === 'GET') return send(res, 200, { state: parties.get(parts[1]) || null, now });
   const key = String(req.headers.authorization || '').replace(/^Bearer /, '');
