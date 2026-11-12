@@ -1,7 +1,7 @@
 name: BITZ 2.0 validation
 on:
   push:
-    branches: [feature/bitz-2-minimal-social]
+    branches: [feature/bitz-2-minimal-social, feature/football-cards-collections]
   pull_request:
     branches: [main]
 concurrency:
@@ -29,10 +29,18 @@ jobs:
           node --check public/voxel-world.js
           node --check public/world-layout.js
           node --check public/loot-rules.js
+          node --check src/football.js
+          node --check src/football-catalogue.js
+          node --check public/football-ui.js
+          node --check scripts/sync-football-media.mjs
       - name: Economy, levels, loot fairness and archived-feature protection
         run: node tests/bitz2-unit.mjs
+      - name: Football album, guaranteed packs, quests, trades and rarity tests
+        run: node tests/football-unit.mjs
       - name: Live multiplayer, signup, friends, buying and persistence
         run: node tests/bitz2-integration.mjs
+      - name: Football cards API, offers, and account persistence
+        run: node tests/football-integration.mjs
   desktop-and-mobile:
     runs-on: ubuntu-latest
     timeout-minutes: 12
