@@ -2676,15 +2676,15 @@ function bxCard(id,col){
 }
 function wheelSlices(pz){
   const S=[],pool=[...new Set(bxRemaining().concat(pz.item?[pz.item]:[]))];
-  for(let i=0;i<36;i++)S.push({item:pool[Math.floor(Math.random()*pool.length)]||null});
+  for(let i=0;i<36;i++)S.push({item:BITZ_LOOT_RULES.pick(pool,ITEMS,Math.random)||null});
   const k=29;S[k]=pz.item?{item:pz.item}:{coins:pz.coins};
   return {S,k};
 }
 function wheelHTML(st,col){
   const pool=bxRemaining();
-  const cards=st.S||Array.from({length:10},(_,i)=>({item:pool[(i*3+2)%Math.max(1,pool.length)]||null}));
+  const cards=st.S||Array.from({length:10},()=>({item:BITZ_LOOT_RULES.pick(pool,ITEMS,Math.random)||null}));
   return '<section class="bx-roulette" aria-label="Single-line prize ticker">'+
-    '<div class="bx-reel-top"><strong>SPIN TO REVEAL</strong><span>SEASON 1</span></div>'+
+    '<div class="bx-reel-top"><strong>'+(st.phase==='spin'?'YOUR REWARD IS COMING':'POSSIBLE REWARDS')+'</strong><span>SEASON 1</span></div>'+
     '<div id="bx-reel-viewport" class="bx-reel-viewport'+(st.phase==='spin'?' bx-moving':'')+'">'+
     '<div id="bx-reel-track" class="bx-reel-track">'+cards.map(x=>bxCard(x.item,col)).join('')+'</div></div>'+
     '<span class="bx-pointer" aria-hidden="true"></span></section>';
@@ -2756,11 +2756,12 @@ function lootHTML(){
       '<span class="bx-win-note">'+(it?(worn?'You are wearing this outfit':'Added to your collection'):'You already own every reward')+'</span>'+
       '<span class="bx-win-progress">'+owned+' / '+total+' COLLECTED</span></div></section>';
     const buttons='<div class="bx-actions bx-win-actions">'+
-      (it&&!worn?'<button class="bx-cta" data-a="lootwear">EQUIP NOW</button>':'')+
-      (n>0?'<button class="bx-btn" data-a="lootopen">OPEN NEXT BOX</button>':remaining.length?
-        '<button class="bx-btn" data-a="lootbuy">BUY ANOTHER · '+fmt(BOX_PRICE)+'</button>':'')+
-      '<button class="bx-btn" data-a="lootbrowse">VIEW COLLECTION</button>'+
-      '<button class="bx-btn bx-close" data-a="close">BACK TO WORLD</button></div>';
+      (it&&!worn?'<button class="bx-cta" data-a="lootwear">EQUIP &amp; PLAY</button>':
+      '<button class="bx-cta" data-a="close">DONE</button>')+
+      (n>0?'<button class="bx-btn" data-a="lootopen">OPEN NEXT</button>':remaining.length?
+        '<button class="bx-btn" data-a="lootbuy">BUY ANOTHER</button>':'')+
+      (it&&!worn?'<button class="bx-btn bx-close" data-a="close">NOT NOW</button>':'')+
+      '</div>';
     return '<div class="bx-shell">'+head+section+buttons+'</div>';
   }
   const hero='<section class="bx-hero"><div class="bx-art"><span class="bx-ring"></span>'+
@@ -2797,7 +2798,7 @@ async function spinLoot() {
     if(track && view){
       const cells=track.querySelectorAll('.bx-card'), target=cells[st.k];
       if(target){
-        const offset=target.offsetLeft+target.offsetWidth/2-view.clientWidth/2;
+        const offset=target.getBoundingClientRect().left-track.getBoundingClientRect().left+target.offsetWidth/2-view.clientWidth/2;
         track.style.transition='none';track.style.transform='translate3d(0,0,0)';
         track.getBoundingClientRect();
         requestAnimationFrame(()=>{
@@ -3574,7 +3575,7 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'lootopen': await spinLoot(); break;
-    case 'lootwear': { const id = lootSt && lootSt.prize && lootSt.prize.item; if (!id) break; const dye = ITEMS[id][0] === 'dye'; wearItem(id); if (dye) { closeModal(); if (G) { wardrobeModal(); F.cat = 'body'; refreshModal(); } } styleChanged(); break; }
+    case 'lootwear': { const id=lootSt&&lootSt.prize&&lootSt.prize.item; if(!id)break; wearItem(id);styleChanged();closeModal();toast('Equipped '+ITEMS[id][1]+'!'); break; }
     case 'gift': { const n = +el.dataset.n; if (!G || mode !== 'online' || me !== E.cur(G) || busy) { toast('You can send coins when it is your turn.'); break; } if (wallet.coins < n) { toast('You only have ' + fmt(wallet.coins) + ' coins.'); break; } if (await act({ t: 'gift', to: i, n: n })) { closeModal(); refreshAcct(); } break; }
     case 'view': settings.follow = settings.follow === false; applySettings(); break;
     case 'rules': rulesModal(); break;
