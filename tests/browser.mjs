@@ -41,6 +41,32 @@ try {
   await d.click('#stage .sum [data-a="close"]'); await sleep(300);
   const names = await d.evaluate(() => BZ.state.cards.map(c => BZART.player(c.player).name)); assert.equal(names.length, 5); log('desktop: real player names: ' + names.join(', '));
   const broken = await d.evaluate(async () => { const imgs = [...document.images]; await Promise.all(imgs.map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; }))); return imgs.filter(i => !i.naturalWidth).length; }); assert.equal(broken, 0, 'no broken images'); log('desktop: placeholder portraits load, no broken images');
+  // Launch gate: genuine WASD, arrow and sprint keyboard events must move the avatar.
+  const pose = () => d.evaluate(() => ({x:BZWORLD.me.x,z:BZWORLD.me.z}));
+  const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
+  for(const key of ['w','s','a','d','ArrowUp','ArrowDown']){
+    const start=await pose();await d.keyboard.down(key);await sleep(510);await d.keyboard.up(key);await sleep(80);
+    const end=await pose();assert(distance(start,end)>.65,'WASD/arrow movement broken for '+key+': '+JSON.stringify({start,end}));
+  }
+  const beforeShift=await pose();await d.keyboard.down('Shift');await d.keyboard.down('w');await sleep(450);
+  await d.keyboard.up('w');await d.keyboard.up('Shift');assert(distance(beforeShift,await pose())>1.1,'Shift+W sprint must move avatar');
+  log('desktop: actual WASD, arrows and Shift+W update world position');
+  // A menu blocks movement, then closing it returns control to walking normally.
+  await d.click('#btn-menu');await d.waitForSelector('.menu-grid');
+  const beforeModal=await pose();await d.keyboard.down('w');await sleep(330);await d.keyboard.up('w');
+  assert(distance(beforeModal,await pose())<.12,'WASD must not move beneath open menu');
+  await d.click('[data-m="settings"]');await d.waitForSelector('[data-s="music"]');
+  const initialAudio=await d.evaluate(()=>BITZAUDIO.state());
+  assert(initialAudio.enabled,'Original background music must be enabled by default');
+  await d.click('[data-s="music"]');
+  assert.equal(await d.evaluate(()=>BITZAUDIO.state().enabled),false,'Music should mute separately from sound effects');
+  await d.click('[data-s="music"]');
+  assert.equal(await d.evaluate(()=>BITZAUDIO.state().enabled),true,'Music must resume after unmuting');
+  await d.evaluate(()=>BZ.close(true));await sleep(200);
+  const resumed=await pose();await d.keyboard.down('w');await sleep(400);await d.keyboard.up('w');
+  assert(distance(resumed,await pose())>.6,'Walking must resume after closing menu');
+  log('desktop: original music toggle works and modal focus cannot break movement');
+
   await sleep(600); await shot(d, 'desktop-05-world');
   const px = await d.evaluate(() => new Promise(res => requestAnimationFrame(() => { const c = document.getElementById('gl'); const g = c.getContext('webgl2') || c.getContext('webgl'); const b = new Uint8Array(4); g.readPixels(Math.floor(c.width / 2), Math.floor(c.height * 0.8), 1, 1, g.RGBA, g.UNSIGNED_BYTE, b); res([...b]); }))).catch(() => null);
   const grass = await d.evaluate(() => {
