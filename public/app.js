@@ -191,14 +191,14 @@
   }
   function account() {
     const body = BZ.auth.registered ? '<div class="card-box account"><p>Signed in as <b>' + esc(BZ.auth.username) + '</b>. Your cards, cash and friends follow you to any phone or computer.</p><p class="mute">Player code <b class="brand">' + esc(BZ.code) + '</b></p><button class="btn" data-a="signout">Sign out</button></div>'
-      : '<div class="card-box account">' + (BZ.auth.persistent ? '<p>Pick a username and password so your collection follows you between devices. No email needed. Your cards and cash so far come with you.</p><form data-a="authform"><input class="t" id="au" maxlength="20" placeholder="Username" autocomplete="username"><input class="t" id="ap" type="password" minlength="3" maxlength="128" placeholder="Password (3+ characters)" autocomplete="current-password"><div class="row"><button class="btn go grow" data-a="register">Create account</button><button class="btn grow" data-a="login">Sign in</button></div></form>' : '<p>This server has no account database connected, so you play as a guest on this device.</p>') + '<p class="mute">Player code <b class="brand">' + esc(BZ.code) + '</b></p></div>';
+      : '<div class="card-box account">' + (BZ.auth.persistent ? '<p>Pick a username and password so your collection follows you between devices. No email needed. Your cards and cash so far come with you. Keep your password safe: self-service password recovery is not yet available.</p><form data-a="authform"><input class="t" id="au" maxlength="20" placeholder="Username" autocomplete="username"><input class="t" id="ap" type="password" minlength="10" maxlength="128" placeholder="Password (10+ characters)" autocomplete="current-password"><div class="row"><button class="btn go grow" data-a="register">Create account</button><button class="btn grow" data-a="login">Sign in</button></div></form>' : '<p>This server has no account database connected, so you play as a guest on this device.</p>') + '<p class="mute">Player code <b class="brand">' + esc(BZ.code) + '</b></p></div>';
     const el = screen({ title: 'ACCOUNT', back: true, body });
     el.addEventListener('submit', e => e.preventDefault());
     el.addEventListener('click', async e => {
       const b = e.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a; if (a === 'close') return;
       e.preventDefault();
       if (a === 'signout') { try { await api('auth/logout', {}); } catch (x) {} token = null; store.del('stakkz-session'); store.del('stakkz-seal'); location.reload(); return; }
-      if (a === 'register' || a === 'login') { const u = $('#au').value.trim(), p = $('#ap').value; if (!u || !p) return toast('Enter a username and password.', true); b.disabled = true;
+      if (a === 'register' || a === 'login') { const u = $('#au').value.trim(), p = $('#ap').value; if (!u || !p) return toast('Enter a username and password.', true); if(a==='register' && p.length<10)return toast('Use at least 10 characters for your password.',true); b.disabled = true;
         try { const r = await api('auth/' + a, { username: u, password: p }); token = r.token; store.set('stakkz-session', token); if (a === 'register') { KEY = guestKey(); store.set('stakkz-key', KEY); } toast('Signed in as ' + r.username + '.'); location.reload(); } catch (err) { toast(err.message, true); b.disabled = false; } }
     });
   }
