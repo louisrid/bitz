@@ -326,7 +326,7 @@ function plazaHurt(o, dmg, by, now) {
    The server moves them, decides who touched or shot them first, and pays out. */
 const ADMINS = new Set(String(process.env.STAKKZ_ADMINS || 'louis').toLowerCase().split(',').map(x => x.trim()).filter(Boolean));
 const isAdmin = q => { const u = auth.username(q.id); return !!u && ADMINS.has(String(u).toLowerCase()); };
-const world = { zom: false, wild: false, gift: true, forage: true };   // rare creatures switched off for good
+const world = { zom: false, wild: false, gift: false, forage: true };   // gift drops are off too   // rare creatures switched off for good
 const ents = new Map(); let entSeq = 0, zMode = false, zBy = '';
 let zWave = 0, zLeft = 0, zBoss = false, zNext = 0;
 const WILD = [['w_goldpig', 26, 9.5], ['w_rainbowfox', 25, 11], ['w_crystaldeer', 20, 12], ['w_cosmiccat', 15, 12.5], ['w_phoenix', 10, 14], ['w_unicorn', 4, 16.5]];
@@ -521,7 +521,7 @@ function plazaJoin(ws, raw) {
   } else if (msg.sprint) { const now = Date.now(); if (now >= (q.sprintReady || 0) && !q.dead) { q.sprintUntil = now + 3000; q.sprintReady = now + 8000; }
   } else if (msg.admin && typeof msg.admin === 'object') {
     if (!isAdmin(q)) return plazaSend(ws, { error: 'Only the admin can change that.' });
-    const k = msg.admin.k, on = !!msg.admin.on; if (!(k in world) || k === 'zom' || k === 'wild') return;   // zombies and rare creatures are gone
+    const k = msg.admin.k, on = !!msg.admin.on; if (!(k in world) || k === 'zom' || k === 'wild' || k === 'gift') return;   // zombies and rare creatures are gone
     world[k] = on;
     if (k === 'zom') { zMode = on; zBy = q.n; if (on) { zWave = 0; zNext = Date.now() + 1500; zLeft = 0; zBoss = false; } else ents.forEach(e => { if (e.k === 'zom') entGone(e, 'poof'); }); }
     if (!on && k !== 'zom') ents.forEach(e => { if (e.k === k) entGone(e, 'gone'); });
@@ -543,10 +543,12 @@ setInterval(() => {
 }, 100).unref();
 /* gold keeps flowing for everyone standing in the world, and each of them hears their true balance */
 setInterval(() => { const now = Date.now(), seen = new Set(); plaza.forEach((q, ws) => { if (!q.i || seen.has(q.id)) return; seen.add(q.id); const w = account(q.id), bo = core.boostOf(w, now); plazaSend(ws, { gold: w.coins, rate: core.GOLD_RATE * (bo ? bo.x : 1), boost: bo ? { x: bo.x, left: bo.until - now } : null }); }); }, 5000).unref();
+/* players whose connection died without closing (a sleeping laptop, a crashed tab) are removed within 30 seconds */
+setInterval(() => { plaza.forEach((q, ws) => { if (!ws.alive) { try { ws.terminate(); } catch (e) {} return; } ws.alive = false; try { ws.ping(); } catch (e) {} }); }, 15000).unref();
 server.on('upgrade', (req, socket, head) => {
   if (new URL(req.url, 'http://x').pathname.endsWith('/api/plaza/ws')) {
     return wss.handleUpgrade(req, socket, head, ws => {
-      plaza.set(ws, {}); let count = 0, since = Date.now();
+      plaza.set(ws, {}); let count = 0, since = Date.now(); ws.alive = true; ws.on('pong', () => { ws.alive = true; });
       ws.on('message', d => {
         const m = String(d); if (m === 'ping') return plazaSend(ws, 'pong');
         const now = Date.now(); if (now - since > 1000) { since = now; count = 0; } if (++count > 40) return;   // flood guard

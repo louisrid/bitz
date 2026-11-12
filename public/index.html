@@ -10,7 +10,7 @@
    Type: Coolvetica in sentence case for the logo, buttons, tabs, titles and names; Archivo Black for money and numbers; Space Grotesk for small detail text.
    Size: every length is multiplied by --k and every font size by --kf, so the whole interface scales from two numbers. */
 :root{
-  --ink:#000;--paper:#fff;--mist:#EEF2F8;--sun:#FFD60A;--hot:#FF4B3E;--sky:#3FA9FF;--leaf:#3DDC84;--grape:#B983FF;--pink:#FF8AD8;
+  --ink:#000;--paper:#fff;--mist:#EEF2F8;--sun:#FFF01F;--hot:#FF4B3E;--sky:#3FA9FF;--leaf:#3DDC84;--grape:#B983FF;--pink:#FF8AD8;
   --brand:"Archivo Black","Arial Black",Impact,sans-serif;--ui:"Coolvetica","Archivo Black","Arial Black",sans-serif;--text:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
   --k:.58;--kf:.82;
   --bw:2px;--sb:2px;--r:calc(var(--k)*12px);--h:calc(var(--k)*38px);--fs:max(12px,calc(var(--kf)*15px));--fb:max(12px,calc(var(--kf)*17px));--fl:max(12px,calc(var(--kf)*13px));--gap:calc(var(--k)*13px);--sw:clamp(268px,21vw,300px);--ot:8px;--gut:clamp(28px,6.5vw,120px);--sr:14px;
@@ -1659,7 +1659,7 @@ const B3 = (function () {
   WD.setWeapon = w => { w = Math.max(0, Math.min(GUNS.length - 1, w | 0)); WD.weapon = w; if (WD.me) setGun(WD.me, w); if (WD.send) WD.send({ wpn: w }); hud(); };
   WD.fire = () => {
     const m = WD.me, now = performance.now(); if (!m || WD.dead || !WD.on || now < WD.fireAt || (WD.blocked && WD.blocked())) return; WD.fireAt = now + GUNS[WD.weapon].cd;
-    const fx = Math.sin(m.ry), fz = Math.cos(m.ry); m.g.rotation.y = m.ry; m.aimT = now + 500;
+    const fx = -Math.sin(az), fz = -Math.cos(az); m.ry = Math.atan2(fx, fz); m.g.rotation.y = m.ry; m.g.rotation.y = m.ry; m.aimT = now + 500;
     if (WD.send) { WD.send({ p: WD.pose().map(v => Math.round(v * 100) / 100) }); WD.send({ shoot: [WD.weapon, Math.round(fx * 1000) / 1000, Math.round(fz * 1000) / 1000] }); }
     if (WD.onFire) WD.onFire(WD.weapon);
   };
@@ -1703,7 +1703,7 @@ const B3 = (function () {
     if (WD.blocked && WD.blocked()) { WD.keys = {}; return; }
     const k = e.key.toLowerCase(); WD.keys[k] = true;
     if (k === ' ') { e.preventDefault(); WD.jump(); }
-    if ((k === 'w' || k === 'arrowup') && !e.repeat) { const tn = performance.now(); if (tn - WD.lastW < 320) WD.trySprint(); WD.lastW = tn; }
+    if (k === 'w' && !e.repeat) { const tn = performance.now(); if (tn - WD.lastW < 320) WD.trySprint(); WD.lastW = tn; }
     if (/^[1-5]$/.test(k)) { if (WD.canUse && !WD.canUse(+k - 1)) { if (WD.onLocked) WD.onLocked(+k - 1); } else WD.setWeapon(+k - 1); }
     if (k === 'f' && !e.repeat) WD.fire();
     if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].indexOf(k) >= 0) e.preventDefault();
@@ -1743,12 +1743,11 @@ const B3 = (function () {
       const K=WD.keys;
       /* keyboard: forward and back walk the way you face, left and right turn you (arrows or WASD).
          thumb stick: push the way you want to go. */
-      const turn = WD.dead ? 0 : ((K.a || K.arrowleft) ? 1 : 0) - ((K.d || K.arrowright) ? 1 : 0), fwd = WD.dead ? 0 : ((K.w || K.arrowup) ? 1 : 0) - ((K.s || K.arrowdown) ? 1 : 0);
-      if (turn) { m.ry += turn * dt * 2.7; az += turn * dt * 2.7; }   // the camera turns exactly with you
-      let mx = 0, mz = 0, stick = false;
-      if (fwd) { mx = Math.sin(m.ry) * fwd; mz = Math.cos(m.ry) * fwd; }
-      const jl = WD.dead ? 0 : Math.hypot(WD.joy.x, WD.joy.y);
-      if (jl > 0.08) { const fx = -Math.sin(az), fz = -Math.cos(az), rx = -fz, rz = fx; mx = rx * WD.joy.x - fx * WD.joy.y; mz = rz * WD.joy.x - fz * WD.joy.y; stick = true; }
+      /* arrows turn and tilt the camera; WASD (or the thumb stick) walk relative to where the camera looks */
+      if (!lock) { if (K.arrowleft) az += dt * 2.4; if (K.arrowright) az -= dt * 2.4; if (K.arrowup) el = Math.max(0.16, el - dt * 0.9); if (K.arrowdown) el = Math.min(1.05, el + dt * 0.9); }
+      const turn = 0, ix = WD.dead ? 0 : Math.max(-1, Math.min(1, WD.joy.x + (K.d ? 1 : 0) - (K.a ? 1 : 0))), iz = WD.dead ? 0 : Math.max(-1, Math.min(1, WD.joy.y + (K.s ? 1 : 0) - (K.w ? 1 : 0)));
+      const fx = -Math.sin(az), fz = -Math.cos(az), rx = -fz, rz = fx;
+      let mx = rx * ix - fx * iz, mz = rz * ix - fz * iz, stick = true;
       const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
       const sprinting = performance.now() < WD.sprintUntil, speed = (sprinting ? 34 : K.shift || Math.hypot(WD.joy.x, WD.joy.y) > 0.92 ? 13.5 : 8.5) * Math.min(1, ml);
       if (sprinting && ml > 0.1 && Math.random() < 0.6) burst(m.x - Math.sin(m.ry) * 0.6, 0.3, m.z - Math.cos(m.ry) * 0.6, 0xf4f1e2, now, 1);
@@ -1756,7 +1755,7 @@ const B3 = (function () {
       if (m.y < 2.6) { if (blocked(nx, nz)) { if (!blocked(nx, m.z)) nz = m.z; else if (!blocked(m.x, nz)) nx = m.x; else { nx = m.x; nz = m.z; } } }
       m.sp = Math.hypot(nx - m.x, nz - m.z) / Math.max(dt, 0.001); m.x = nx; m.z = nz;
       m.vy -= 32 * dt; m.y = Math.max(0, m.y + m.vy * dt); if (m.y === 0) m.vy = Math.max(0, m.vy);
-      if (stick && ml > 0.08) { let d = Math.atan2(mx, mz) - m.ry; d = Math.atan2(Math.sin(d), Math.cos(d)); m.ry += d * Math.min(1, dt * 10); }
+      if (stick && ml > 0.08) { let d = Math.atan2(mx, mz) - m.ry; d = Math.atan2(Math.sin(d), Math.cos(d)); m.ry += d * Math.min(1, dt * 16); }
       /* the camera puts itself behind you whenever you move or turn; drag to look around, and a moment after you let go it settles back */
 
       m.g.position.set(m.x, m.y + (WD.dead ? 0.5 : 0), m.z); if (!(m.emoT > now && m.emo === 'dance')) m.g.rotation.y = m.ry; m.g.scale.setScalar(m.hitT > now ? 1.14 : 1);
@@ -2619,7 +2618,7 @@ function renderHome(soft=false) {
     B3.show(null);plazaSync();return;
   }
   const off = Net.ready && !Net.db ? '<p class="note">Parties need a connection to the game server. Play works without one.</p>' : Net.ready && !Net.canWrite ? '<p class="note">Your access is view-only. Ask the owner of this page to make you a Contributor.</p>' : '';
-  let h = '<header class="hd"><span class="whoami">' + ava(F.look, PC[0], 40) + '<span><b>' + esc(F.name || 'You') + '</b><small><i class="coin"></i>' + fmt(wallet.coins) + '</small></span></span><div class="tools">' + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button><button class="ib" data-a="settings" aria-label="Settings">' + ico('gear', 20) + '</button></div></header>' +
+  let h = '<header class="hd"><span class="whoami">' + ava(F.look, PC[0], 40) + '<span><b>' + esc(F.name || 'You') + '</b><small><i class="coin"></i>' + fmt(wallet.coins) + '</small></span></span><div class="tools">' + (F.page !== 'world' ? '<button class="bigx" data-a="page" data-v="world" aria-label="Close">&#x2715;</button>' : '') + muteBtns() + '<button class="ib" data-a="rules" aria-label="How to play">' + ico('help', 20) + '</button><button class="ib" data-a="settings" aria-label="Settings">' + ico('gear', 20) + '</button></div></header>' +
     '<div class="seg nav" role="tablist">' + PAGES.map(p => '<button data-a="page" data-v="' + p[0] + '" role="tab" aria-selected="' + (F.page === p[0]) + '" class="' + (F.page === p[0] ? 'on' : '') + (p[0] === 'shop' ? ' hot' : '') + '">' + p[1] + '</button>').join('') + '</div><h1 class="ph">' + PH[F.page] + '</h1>' +
     ((F.page === 'create' || F.page === 'join') && authInfo.persistent && !authInfo.registered ? '<button class="guestbar" data-a="acct"><b>Playing as a guest</b><span>Sign up / Log in to keep your coins on every device</span></button>' : '');
   if (F.page === 'create') h += nameRow() + '<p class="fine"><b>Classic.</b> Everyone starts with £2,500. Buy streets, collect rent, last player standing wins.</p>' + row('Players in the party', seg('max', [[2,'2'],[3,'3'],[4,'4'],[5,'5'],[6,'6']])) + row('Computer opponents', seg('bots', [[0,'None'],[1,'1 bot'],[2,'2 bots'],[3,'3 bots'],[4,'4 bots']].slice(0, Math.min(4, F.max - 1) + 1))) + (F.bots ? row('Bot difficulty', seg('difficulty', [['easy','Easy'],['medium','Medium'],['hard','Hard']])) + '<p class="fine">Easy makes mistakes, Medium plays cautiously, Hard plans ahead. Bots take real turns on the server.</p>' : '') + row('Turn timer', seg('turnTimer', [[0,'Off'],[20,'20s'],[30,'30s'],[45,'45s'],[60,'60s']], 'dense')) +
@@ -2970,7 +2969,7 @@ setInterval(() => {
 setInterval(() => { const ws = Plaza.ws; if (ws && ws.readyState === 1) { try { ws.send('ping'); } catch (e) {} } }, 25000);
 const Zom = { on: false, admin: false, world: { zom: false, wild: true, gift: true, forage: true }, wave: 0 };
 function banner(big, small, cls) { const b = $('#wbanner'); if (!b) return; b.className = cls || ''; b.innerHTML = '<b>' + esc(big) + '</b>' + (small ? '<small>' + esc(small) + '</small>' : ''); b.hidden = false; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; clearTimeout(banner.t); banner.t = setTimeout(() => { b.hidden = true; }, 3200); }
-function adminHTML() { const W = Zom.world, row = (k, name, note) => '<div class="admrow"><span><b>' + name + '</b><small>' + note + '</small></span><button class="btn sm' + (W[k] ? ' ok' : '') + '" data-a="adminset" data-k="' + k + '" data-v="' + (W[k] ? '0' : '1') + '">' + (W[k] ? 'On' : 'Off') + '</button></div>'; return '<div class="mhead"><h2>Admin</h2>' + xBtn() + '</div><p class="fine">Switches for everyone in the world. Only you can see this.</p>'  + row('gift', 'Gift drops', 'Fall from the sky about every minute') + row('forage', 'Foraging', 'Mushrooms, gold nuggets, gems and chests'); }
+function adminHTML() { const W = Zom.world, row = (k, name, note) => '<div class="admrow"><span><b>' + name + '</b><small>' + note + '</small></span><button class="btn sm' + (W[k] ? ' ok' : '') + '" data-a="adminset" data-k="' + k + '" data-v="' + (W[k] ? '0' : '1') + '">' + (W[k] ? 'On' : 'Off') + '</button></div>'; return '<div class="mhead"><h2>Admin</h2>' + xBtn() + '</div><p class="fine">Switches for everyone in the world. Only you can see this.</p>'  + row('forage', 'Foraging', 'Mushrooms, gold nuggets, gems and chests'); }
 function zomButton() { const b = $('#wzom'), a = $('#wadm'); if (b) { b.hidden = true; b.textContent = Zom.on ? 'Zombies: ON' + (Zom.wave ? ' · wave ' + Zom.wave : '') : 'Zombies: off'; b.classList.toggle('on', Zom.on); } if (a) a.hidden = !Zom.admin; if (modal && modal.kind === 'admin') refreshModal(); }
 function worldReward(r) {
   if (r.k === 'zom') { toast('+1,000,000 gold for the zombie'); return; }
@@ -3199,7 +3198,7 @@ function winnerModal() {
       (mode === 'online' && rematch ? '<p class="fine c">' + (rematch.phase === 'lobby' ? esc(rematch.players[0] ? rematch.players[0].name : 'Someone') + ' is setting up the next game.' : 'The others have started the next game.') + '</p>' : '');
   });
 }
-const WORLD_HELP = [['arrow', 'Getting around', 'Arrow keys or WASD: up and down walk, left and right turn. The camera follows behind you; drag to look around and it settles back. Double-tap forward to sprint at four times the speed for 3 seconds. Space jumps, Shift runs, scroll or pinch zooms.'],
+const WORLD_HELP = [['arrow', 'Getting around', 'WASD walks. Arrow keys or dragging turn the camera. Double-tap W to sprint at four times the speed for 3 seconds. Space jumps, Shift runs, scroll or pinch zooms. F or right-click shoots where you are looking.'],
   ['coins', 'Gold', 'You earn 1,000 gold every second, counted by the server, whether the page is open on your phone or your laptop. Walk into a floating cube to boost it for a while.'],
   ['gift', 'Collecting', 'Spend gold in the Shop on outfits, hats, extras, pets and scenes. Loot boxes cost 500,000 and only ever hold Legendary or Mythical exclusives you cannot buy.'],
   ['star', 'Swag Level', 'Everyone starts at -100. Rare things you wear, and everything you collect, push it up towards 9,999.'],
@@ -3225,8 +3224,10 @@ function menuModal() {
 }
 
 /* ================= input ================= */
+let downAt = [0, 0]; document.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; }, true);
 document.addEventListener('click', async e => {
   if (e.target.id === 'veil' && modal && FORCED.indexOf(modal.kind) < 0) { closeModal(); return; }
+  if ((e.target.id === 'stage' || e.target.id === 'wui') && !modal && F.page && F.page !== 'world' && $('#app').dataset.screen === 'home' && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) < 8) { F.page = 'world'; renderHome(true); return; }
   const el = e.target.closest('[data-a]'); if (!el || el.disabled) return;
   const a = el.dataset.a, i = +el.dataset.i;
   Snd('tap'); Snd.music(!!settings.music);
