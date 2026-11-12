@@ -972,3 +972,153 @@ html:has(#veil:not([hidden])) #shopbig,html:has(#veil:not([hidden])) #wzoom,html
  #fprofov .pp-pet-label{animation:none!important}
  #modal[data-kind="loot"] .bx-season-ribbon{background-position:center}
 }
+
+/* BITZ Season 1: final coolvetica / blue-purple usability pass. */
+#veil:has(#modal[data-kind="loot"]){z-index:270!important;background:#0a0b1ac9!important;backdrop-filter:blur(3px)!important}
+#modal[data-kind="loot"]{
+ width:min(830px,calc(100vw - 24px))!important;max-height:min(88dvh,790px)!important;overflow:auto!important;
+ border:4px solid #05050b!important;border-radius:19px!important;
+ background:#181329!important;color:#fff!important;
+ box-shadow:0 0 0 3px #bba6ff,5px 7px 0 #000,0 25px 55px #000a!important
+}
+#modal[data-kind="loot"],#modal[data-kind="loot"] *,#modal[data-kind="loot"] button{
+ font-family:"Coolvetica",sans-serif!important;font-weight:400!important;letter-spacing:0!important
+}
+#modal[data-kind="loot"] .bx-shell{background:#181329!important;color:#fff!important}
+#modal[data-kind="loot"] .bx-head{
+ min-height:58px!important;padding:9px 17px!important;
+ border-bottom:3px solid #07070d!important;background:#16142a!important;position:relative;z-index:4
+}
+#modal[data-kind="loot"] .bx-head .logo{font-size:33px!important;letter-spacing:0!important}
+#modal[data-kind="loot"] .bx-stock{background:#e4d8ff!important;border:3px solid #000!important;color:#15112b!important;font-size:17px!important;box-shadow:3px 3px 0 #000!important}
+#modal[data-kind="loot"] .bx-hero{min-height:188px!important;background:linear-gradient(125deg,#262244 0%,#1c2540 60%,#312043 100%)!important;border-bottom:3px solid #000!important}
+#modal[data-kind="loot"] .bx-art{min-height:185px!important}
+#modal[data-kind="loot"] .bx-chestpic{height:190px!important;animation:bitz-box-hover 3.2s ease-in-out infinite}
+#modal[data-kind="loot"] .bx-chestpic img{max-height:185px!important}
+#modal[data-kind="loot"] .bx-ring{border-color:#c2acff!important;box-shadow:0 0 16px #bdabff80!important}
+#modal[data-kind="loot"] .bx-detail{padding:12px 15px 12px 7px!important;gap:10px!important}
+#modal[data-kind="loot"] .bx-eyebrow{font-size:12px!important;color:#c8baff!important}
+#modal[data-kind="loot"] .bx-title{font-size:clamp(36px,5vw,53px)!important;line-height:.98!important;color:#fff!important}
+#modal[data-kind="loot"] .bx-title em{color:#ffc5e9!important}
+#modal[data-kind="loot"] .bx-hero-line{font-size:14px!important;color:#d8d0f2!important}
+#modal[data-kind="loot"] .bx-current-progress{font-size:13px!important;color:#afdfff!important}
+#modal[data-kind="loot"] .bx-odds{
+ display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;
+ flex-wrap:wrap!important;padding:10px 15px!important;background:#181b34!important;border-bottom:2px solid #4d4772!important
+}
+#modal[data-kind="loot"] .bx-odds>b{font-size:13px!important;color:#e4d9ff!important;white-space:nowrap!important;margin-right:5px}
+#modal[data-kind="loot"] .bx-odd{
+ color:#fff!important;padding:6px 9px!important;border:2px solid #ada5e3!important;border-radius:9px!important;
+ font-size:14px!important;background:#373256!important;white-space:nowrap!important
+}
+#modal[data-kind="loot"] .bx-odd strong{font:inherit!important;color:#fff!important;font-size:16px!important}
+#modal[data-kind="loot"] .bx-odd.bx-epic{border-color:#ad96ff!important;background:#5747a6!important}
+#modal[data-kind="loot"] .bx-odd.bx-legendary{border-color:#ffe0a1!important;background:#765b2a!important}
+#modal[data-kind="loot"] .bx-odd.bx-mythical{border-color:#ff9ad9!important;background:#873b74!important}
+#modal[data-kind="loot"] .bx-odd.bx-secret{border-color:#a7e8ff!important;background:#23536e!important}
+#modal[data-kind="loot"] .bx-roulette{position:relative!important;padding:13px 0 13px!important;background:#17182e!important;border-bottom:2px solid #3d3e6a!important}
+#modal[data-kind="loot"] .bx-reel-top{display:flex!important;align-items:center!important;justify-content:space-between!important;margin:0 24px 9px!important;gap:9px}
+#modal[data-kind="loot"] .bx-reel-top strong{font-size:14px!important;color:#c6baff!important}
+#modal[data-kind="loot"] .bx-reel-top span{font-size:12px!important;color:#c3cee8!important}
+#modal[data-kind="loot"] .bx-reel-viewport{
+ height:147px!important;border:3px solid #bdb0ff!important;border-radius:13px!important;
+ background:#101426!important;box-shadow:inset 0 0 16px #03030d!important
+}
+#modal[data-kind="loot"] .bx-reel-viewport.bx-ended{border-color:#c0f1ff!important;box-shadow:0 0 17px #c4b8ff96!important}
+#modal[data-kind="loot"] .bx-card{background:#453b79!important;border:3px solid #9a8ce7!important;box-shadow:none!important;gap:3px!important}
+#modal[data-kind="loot"] .bx-card.bx-epic{
+ background:linear-gradient(130deg,#5141a3,#9b57c9,#4878ce,#5141a3)!important;
+ background-size:280% 280%!important;border-color:#b9b0ff!important;animation:bitz-epic-cycle 4s ease-in-out infinite!important
+}
+#modal[data-kind="loot"] .bx-card.bx-legendary{background:linear-gradient(135deg,#8c6533,#d4a958)!important;border-color:#ffe09c!important}
+#modal[data-kind="loot"] .bx-card.bx-mythical{background:linear-gradient(135deg,#823b7f,#d35c9f)!important;border-color:#ffc0e6!important}
+#modal[data-kind="loot"] .bx-card.bx-secret{
+ background:linear-gradient(120deg,#20394f,#543f7d,#215f79,#20394f)!important;background-size:250% 250%!important;
+ border-color:#a5e9ff!important;animation:bitz-epic-cycle 5s ease-in-out infinite!important
+}
+#modal[data-kind="loot"] .bx-card .bx-card-tier{font-size:11px!important;color:#fff!important}
+#modal[data-kind="loot"] .bx-card .bx-card-name{font-size:12px!important;color:#fff!important;max-width:110px!important}
+#modal[data-kind="loot"] .bx-card img{height:75px!important;max-width:100%!important;object-fit:contain}
+#modal[data-kind="loot"] .bx-pointer{border-top-color:#a7e8ff!important;filter:drop-shadow(0 0 5px #8fd8ff)!important}
+#modal[data-kind="loot"] .bx-actions{
+ display:flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;
+ flex-wrap:wrap!important;padding:13px 15px!important;background:#191a32!important;
+ border-top:2px solid #090a1a!important;position:sticky!important;bottom:0!important;z-index:14!important;
+ box-shadow:0 -3px 12px #0b0c219e!important
+}
+#modal[data-kind="loot"] .bx-base-actions{flex-wrap:nowrap!important}
+#modal[data-kind="loot"] .bx-cost{font-size:14px!important;color:#d2d9ff!important;white-space:nowrap;min-width:98px}
+#modal[data-kind="loot"] .bx-cta,#modal[data-kind="loot"] .bx-btn{
+ background:#fff!important;color:#121126!important;border:3px solid #000!important;border-radius:10px!important;
+ box-shadow:3px 3px 0 #000!important;text-shadow:none!important;letter-spacing:0!important;
+ cursor:pointer!important;min-height:48px!important;padding:8px 15px!important;font-size:20px!important;
+ width:auto!important;max-width:100%!important;min-width:0!important;white-space:nowrap
+}
+#modal[data-kind="loot"] .bx-cta{flex:1 1 175px!important;font-size:26px!important}
+#modal[data-kind="loot"] .bx-btn{flex:0 0 auto!important;font-size:17px!important}
+#modal[data-kind="loot"] .bx-cta:hover:not(:disabled),#modal[data-kind="loot"] .bx-btn:hover{
+ background:#c5eaff!important;filter:none!important;transform:translateY(-2px)!important
+}
+#modal[data-kind="loot"] .bx-cta:active:not(:disabled),#modal[data-kind="loot"] .bx-btn:active{
+ transform:translate(2px,2px)!important;box-shadow:1px 1px 0 #000!important
+}
+#modal[data-kind="loot"] .bx-cta:disabled{opacity:.6!important;cursor:wait!important}
+#modal[data-kind="loot"] .bx-reward{min-height:300px!important;background:radial-gradient(circle at 24% 50%,#796dce62,transparent 46%),#201b37!important}
+#modal[data-kind="loot"] .bx-reward.bx-epic{background:radial-gradient(circle at 24% 50%,#9273d260,transparent 48%),#1e1b36!important}
+#modal[data-kind="loot"] .bx-reward.bx-legendary{background:radial-gradient(circle at 24% 50%,#e6c47e53,transparent 48%),#251e34!important}
+#modal[data-kind="loot"] .bx-reward.bx-mythical{background:radial-gradient(circle at 24% 50%,#ef8ad260,transparent 48%),#241c35!important}
+#modal[data-kind="loot"] .bx-reward.bx-secret{background:radial-gradient(circle at 24% 50%,#7ad6ef6e,transparent 48%),#141d35!important}
+#modal[data-kind="loot"] .bx-win-title{font-size:clamp(37px,5vw,52px)!important;color:#d0baff!important;line-height:1!important}
+#modal[data-kind="loot"] .bx-prize-name{font-size:clamp(30px,4vw,46px)!important;color:#fff!important;line-height:1.06!important}
+#modal[data-kind="loot"] .bx-win-note{font-size:16px!important;color:#dfe2ff!important}
+#modal[data-kind="loot"] .bx-win-progress{font-size:13px!important;color:#c4b8ff!important}
+#modal[data-kind="loot"] .bx-tier.bx-epic{background:#6548a941!important;color:#d8c9ff!important}
+#modal[data-kind="loot"] .bx-tier.bx-legendary{background:#c89c4930!important;color:#ffe6b0!important}
+#modal[data-kind="loot"] .bx-tier.bx-mythical{background:#d55fb53c!important;color:#ffc1ed!important}
+#modal[data-kind="loot"] .bx-tier.bx-secret{background:#45b9d342!important;color:#a6ebff!important}
+#modal[data-kind="loot"] .bx-win-actions .bx-cta{background:#d6c9ff!important}
+#modal[data-kind="loot"] .bx-win-actions .bx-btn{font-size:15px!important}
+#modal[data-kind="loot"] .bx-collect-card.bx-epic{background:linear-gradient(130deg,#5345ab,#9853c9)!important;background-size:210% 210%!important;animation:bitz-epic-cycle 5s infinite!important}
+#modal[data-kind="loot"] .bx-collect-card.bx-legendary{background:#6d5530!important;border-color:#ebcc8b!important}
+#modal[data-kind="loot"] .bx-collect-card.bx-mythical{background:#723565!important;border-color:#ffb9eb!important}
+#modal[data-kind="loot"] .bx-collect-card.bx-secret{background:#275168!important;border-color:#a9ecff!important}
+#modal[data-kind="loot"] .bx-season-ribbon{border-bottom:3px solid #000!important}
+#modal[data-kind="loot"] button:focus-visible{outline:3px solid #fff!important;outline-offset:3px!important}
+@keyframes bitz-epic-cycle{0%,100%{background-position:0% 0%}50%{background-position:100% 100%}}
+/* Keep the weapons accessible without covering the world; mobile uses the next-gun button. */
+#app[data-screen=home] #wui .wweap{
+ display:flex!important;position:absolute;left:12px;bottom:13px;z-index:7;
+ width:min(610px,63vw);max-width:calc(100% - 24px);
+ overflow-x:auto;overflow-y:hidden;gap:7px!important;padding:2px 5px 7px 2px;
+ scrollbar-width:thin;scrollbar-color:#c2b4ff transparent;pointer-events:auto
+}
+#app[data-screen=home] #wui .wweap .ww{flex:0 0 auto!important;font-size:13px!important;height:35px!important;padding:0 9px!important}
+#app[data-screen=home] #wui .wweap .ww.on{background:#bfb1ff!important}
+@media(max-width:680px){
+ #modal[data-kind="loot"]{width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important}
+ #modal[data-kind="loot"] .bx-odds{gap:5px!important;padding:7px 8px!important}
+ #modal[data-kind="loot"] .bx-odds>b{flex-basis:100%!important;text-align:center!important;font-size:10px!important;margin:0!important}
+ #modal[data-kind="loot"] .bx-odd{padding:5px 6px!important;font-size:11px!important}
+ #modal[data-kind="loot"] .bx-odd strong{font-size:12px!important}
+ #modal[data-kind="loot"] .bx-title{font-size:clamp(27px,7vw,36px)!important}
+ #modal[data-kind="loot"] .bx-hero{min-height:150px!important}
+ #modal[data-kind="loot"] .bx-reel-viewport{height:117px!important}
+ #modal[data-kind="loot"] .bx-card{height:102px!important}
+ #modal[data-kind="loot"] .bx-card img{height:58px!important}
+ #modal[data-kind="loot"] .bx-actions{padding:10px 9px!important;gap:7px!important}
+ #modal[data-kind="loot"] .bx-base-actions{flex-wrap:wrap!important}
+ #modal[data-kind="loot"] .bx-cost{flex:1 1 100%!important;text-align:center!important}
+ #modal[data-kind="loot"] .bx-base-actions .bx-cta{flex:1 1 50%!important;font-size:24px!important}
+ #modal[data-kind="loot"] .bx-base-actions .bx-btn{flex:1 1 40%!important;font-size:15px!important}
+ #modal[data-kind="loot"] .bx-win-actions .bx-cta{flex:1 1 100%!important}
+ #modal[data-kind="loot"] .bx-win-actions .bx-btn{flex:1 1 40%!important;font-size:14px!important}
+ #modal[data-kind="loot"] .bx-reward{min-height:215px!important}
+ #modal[data-kind="loot"] .bx-win-title{font-size:31px!important}
+ #modal[data-kind="loot"] .bx-prize-name{font-size:26px!important}
+ #modal[data-kind="loot"] .bx-win-note{font-size:13px!important}
+ #app[data-screen=home] #wui .wweap{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #modal[data-kind="loot"] .bx-card.bx-epic,#modal[data-kind="loot"] .bx-card.bx-secret,
+ #modal[data-kind="loot"] .bx-collect-card.bx-epic{animation:none!important}
+}
