@@ -234,6 +234,13 @@ async function api(req, res, parts) {
   }
   if (parts[0]==='cards' && req.method==='GET' && parts[1]==='catalogue')
     return send(res,200,football.catalogue());
+  if (parts[0]==='cards' && req.method==='GET' && parts[1]==='inventory'){
+    const fragment=String(parts[2]||'').replace(/[^a-zA-Z0-9]/g,'').slice(0,12);
+    const other=[...accounts.entries()].find(([aid])=>aid.slice(2,12)===fragment);
+    if(!other)return send(res,404,{message:'Collector not found.'});
+    const c=football.self(other[1],other[0]);
+    return send(res,200,{id:fragment,name:other[1].name||'Player',cards:c.cards.slice(0,3000),favorites:c.favorites});
+  }
   if (parts[0]==='cards' && req.method==='GET' && parts[1]==='profile'){
     const fragment=String(parts[2]||'').replace(/[^a-zA-Z0-9]/g,'').slice(0,12);
     const other=[...accounts.entries()].find(([aid])=>aid.slice(2,12)===fragment);
