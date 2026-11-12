@@ -196,7 +196,9 @@ async function main() {
     'murillo': 'Murillo and Tony Loughlan 22122025 (1) (Murillo Santiago Costa dos Santos).jpg',
     'rayan': 'Rayan 2026.png',
     'julio-enciso': 'Enciso 220826.jpg',
-    'junior-kroupi': 'Eli Junior Kroupi (cropped).jpg'
+    'junior-kroupi': 'Eli Junior Kroupi (cropped).jpg',
+    'adam-smith': 'Adam Smith 27122025 (2).jpg',
+    'lewis-miley': 'Lewis Miley 2026.png'
   };
   for (const p of lookup) {
     if (!curated[p.id]) continue;
