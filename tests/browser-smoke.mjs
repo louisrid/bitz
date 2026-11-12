@@ -53,11 +53,15 @@ async function observe(page,name){
     };
   });
   await page.goto(url,{waitUntil:'domcontentloaded'});
-  await page.waitForSelector('#title [data-a=go]');
+  await page.waitForSelector('#app[data-screen=home] #wbar [data-a=page][data-v=world]');
+  // The old title screen was retired; remove the animated WebGL loader in this
+  // deliberately no-WebGL test, while the separate visual job tests the renderer.
+  await page.evaluate(()=>document.querySelector('#bload')?.remove());
 }
 async function openPage(page,name){
   await observe(page,name);
-  await page.locator('#title .tmore [data-a=go][data-v=me]').click();
+  await page.locator('#shopbig').click();
+  await page.locator('#side .seg.nav [data-a=page][data-v=me]').click();
   await page.waitForSelector('#side [data-a=authregister]');
 }
 async function stableLayout(page, label) {
@@ -146,7 +150,8 @@ try {
   const phoneContext=await browser.newContext(iphone);
   const phone=await phoneContext.newPage();
   await observe(phone,'iPhone');
-  await phone.locator('#title .tmore [data-a=go][data-v=me]').click();
+  await phone.locator('#shopbig').click();
+  await phone.locator('#side .seg.nav [data-a=page][data-v=me]').click();
   for(const [width,height] of [[390,844],[375,667],[430,932],[844,390]]) {
     await phone.setViewportSize({width,height});
     await stableLayout(phone,width+'x'+height+' mobile');
