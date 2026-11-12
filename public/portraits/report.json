@@ -1,14 +1,9 @@
 {
   "total": 265,
-  "imported": 250,
+  "imported": 252,
   "downloadedNow": 2,
-  "missing": 15,
+  "missing": 13,
   "missingPlayers": [
-    {
-      "id": "adam-smith",
-      "name": "Adam Smith",
-      "reason": "No unambiguous footballer identity on Wikidata"
-    },
     {
       "id": "antonin-kinsky",
       "name": "Antonin Kinsky",
@@ -50,11 +45,6 @@
       "reason": "No verified footballer P18 photograph"
     },
     {
-      "id": "lewis-miley",
-      "name": "Lewis Miley",
-      "reason": "No verified footballer P18 photograph"
-    },
-    {
       "id": "milan-van-ewijk",
       "name": "Milan van Ewijk",
       "reason": "No verified footballer P18 photograph"
@@ -81,5 +71,5 @@
     }
   ],
   "source": "Wikidata P18 / Wikimedia Commons",
-  "generatedAt": "2026-11-12T19:59:11.401Z"
+  "generatedAt": "2026-11-12T20:01:01.663Z"
 }

@@ -21,6 +21,17 @@
     "attribution": "Wikimedia Commons",
     "adapted": false
   },
+  "adam-smith": {
+    "file": "adam-smith.jpg",
+    "player": "Adam Smith",
+    "wikidata": "Commons-verified-adam-smith",
+    "source": "https://commons.wikimedia.org/wiki/File:Adam_Smith_27122025_(2).jpg",
+    "artist": "Timmy96",
+    "licence": "CC0",
+    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "attribution": "Wikimedia Commons",
+    "adapted": false
+  },
   "adam-wharton": {
     "file": "adam-wharton.jpg",
     "player": "Adam Wharton",
@@ -1653,6 +1664,17 @@
     "wikidata": "Q110487162",
     "source": "https://commons.wikimedia.org/wiki/File:Lewis_Hall_24052026_(2).jpg",
     "artist": "Timmy96",
+    "licence": "CC0",
+    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "attribution": "Wikimedia Commons",
+    "adapted": false
+  },
+  "lewis-miley": {
+    "file": "lewis-miley.png",
+    "player": "Lewis Miley",
+    "wikidata": "Commons-verified-lewis-miley",
+    "source": "https://commons.wikimedia.org/wiki/File:Lewis_Miley_2026.png",
+    "artist": "Perchybits",
     "licence": "CC0",
     "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "attribution": "Wikimedia Commons",
