@@ -27,12 +27,12 @@
      No external terrain assets, no terrain collision changes, and no per-frame plant work. */
   function grassTexture() {
     const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128;
-    const ctx = cv.getContext('2d'), greens = ['#548a42','#619449','#477f40','#6b9c4e','#78a65b','#4a8442','#5c9250','#719c51'];
+    const ctx = cv.getContext('2d'), greens = ['#477149','#4c7b4c','#395f40','#558451','#608b58','#446d47','#4a774b','#577d51'];
     let seed = 14329; const rand = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
     for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
       ctx.fillStyle = greens[Math.floor(rand() * greens.length)];
       ctx.fillRect(x * 8, y * 8, 8, 8);
-      if (rand() < 0.54) { ctx.fillStyle = rand() > 0.5 ? '#83a961' : '#3e783b'; ctx.fillRect(x * 8 + (rand() > .5 ? 4 : 1), y * 8 + (rand() > .5 ? 1 : 5), 3, 2); }
+      if (rand() < 0.54) { ctx.fillStyle = rand() > 0.5 ? '#73965f' : '#385e3c'; ctx.fillRect(x * 8 + (rand() > .5 ? 4 : 1), y * 8 + (rand() > .5 ? 1 : 5), 3, 2); }
     }
     const tex = new THREE.CanvasTexture(cv);
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -60,7 +60,7 @@
       return false;
     };
     const tufts = new THREE.InstancedMesh(new THREE.BoxGeometry(0.09, 0.23, 0.12), new THREE.MeshLambertMaterial({color:0xffffff, side:THREE.DoubleSide}), 1350);
-    const dummy = new THREE.Object3D(), tint = new THREE.Color(), tcols = [0x317539,0x477f40,0x69a34f,0x79a959,0x4c8e47];
+    const dummy = new THREE.Object3D(), tint = new THREE.Color(), tcols = [0x34653a,0x467748,0x5a8854,0x5d8556,0x47704a];
     let used = 0;
     for (let n = 0; n < 3200 && used < tufts.count; n++) {
       const x = (hash(n*4+1)-.5)*152, z = (hash(n*4+2)-.5)*152;
@@ -72,7 +72,7 @@
     tufts.count = used; tufts.instanceMatrix.needsUpdate = true; worldG.add(tufts);
     const stems = new THREE.InstancedMesh(new THREE.BoxGeometry(0.085,0.35,0.085),lam(0x427b3c),86);
     const heads = new THREE.InstancedMesh(new THREE.BoxGeometry(0.30,0.20,0.30),new THREE.MeshLambertMaterial({color:0xffffff}),86);
-    const petals=[0xf7e3a2,0xf6f0e8,0x9476d6,0xf1b6c5,0xf6d56e];
+    const petals=[0xf1d59c,0xf4eee3,0x9271b6,0xe7b6c5,0xf1d275];
     let flowers=0;
     for(let n=0;n<420 && flowers<86;n++){
       const x=(hash(7000+n*5)-.5)*130,z=(hash(7001+n*5)-.5)*130;
@@ -86,21 +86,27 @@
     worldG.add(stems,heads);
   }
   function steppingPaths() {
-    const dest = [...Object.values(L.spots), ...Object.values(L.circles)];
-    const pieces=[];
-    dest.forEach(target=>{
-      const tx=target.x+(target.face===undefined?0:Math.sin(target.face)*3.1);
-      const tz=target.z+(target.face===undefined?0:Math.cos(target.face)*3.1);
-      const len=Math.hypot(tx,tz), steps=Math.floor((len-4.5)/1.48);
-      for(let n=0;n<steps;n++){
-        const t=(3.8+n*1.48)/len; if(t>=1)break;
-        const x=tx*t,z=tz*t;
-        for(let side=-1;side<=1;side++)pieces.push([x+Math.cos(Math.atan2(tx,tz))*side*1.4,z-Math.sin(Math.atan2(tx,tz))*side*1.4,n,side]);
+    const targets=[...Object.values(L.spots),...Object.values(L.circles)],pieces=[];
+    targets.forEach(target=>{
+      const tx=target.x+(target.face==null?0:Math.sin(target.face)*3.1);
+      const tz=target.z+(target.face==null?0:Math.cos(target.face)*3.1);
+      const len=Math.hypot(tx,tz),ux=tx/len,uz=tz/len,a=Math.atan2(ux,uz);
+      for(let dist=7.8;dist<len-1.8;dist+=1.56){
+        for(const side of [-.66,.66]){
+          const x=ux*dist+uz*side,z=uz*dist-ux*side;
+          pieces.push([x,z,a,Math.floor(dist*2)+Math.round(side*10)]);
+        }
       }
     });
-    const stones=new THREE.InstancedMesh(new THREE.BoxGeometry(1.41,0.09,1.43),new THREE.MeshLambertMaterial({color:0xffffff}),pieces.length);
-    const d=new THREE.Object3D(),col=new THREE.Color(),shades=[0xccc6ad,0xdad3b9,0xbeb69a,0xe4d7bc];
-    pieces.forEach((p,i)=>{d.position.set(p[0],0.045,p[1]);d.rotation.set(0,0,0);d.scale.setScalar(1);d.updateMatrix();stones.setMatrixAt(i,d.matrix);stones.setColorAt(i,col.setHex(shades[(p[2]+p[3]+8)%4]));});
+    const stones=new THREE.InstancedMesh(
+      new THREE.BoxGeometry(1.19,.08,1.32),
+      new THREE.MeshLambertMaterial({color:0xffffff}),pieces.length
+    );
+    const d=new THREE.Object3D(),col=new THREE.Color(),shades=[0x827864,0x93886d,0xa99b82,0x887e6a];
+    pieces.forEach((p,i)=>{
+      d.position.set(p[0],.062,p[1]);d.rotation.set(0,p[2],0);d.scale.setScalar(1);d.updateMatrix();
+      stones.setMatrixAt(i,d.matrix);stones.setColorAt(i,col.setHex(shades[Math.abs(p[3])%4]));
+    });
     stones.instanceMatrix.needsUpdate=true;stones.receiveShadow=true;worldG.add(stones);
   }
 
@@ -135,10 +141,15 @@
 
     // Coloured stone floor and individual square pavers.
     box(interior,9.5,0.12,8.8,stone,0,0,-0.60,0);
-    for(let x=-4;x<=4;x++) for(let z=-4;z<=3;z++){
-      const odd=(x+z+32)%3===0, colour=odd?0xd5cbb0:((x+z)%2===0?0xe7ddc3:0xeee7d3);
-      box(interior,.94,.012,.94,colour,x,0.068,z,0);
+    // Instanced interior paving keeps the world fast on phones.
+    const pavers=new THREE.InstancedMesh(new THREE.BoxGeometry(.94,.012,.94),lam(0xffffff),72);
+    const pv=new THREE.Object3D(),pc=new THREE.Color();let pi=0;
+    for(let x=-4;x<=4;x++)for(let z=-4;z<=3;z++){
+      const colour=(x+z+32)%3===0?0xc2b39c:((x+z)%2===0?0xd6c9b2:0xe2d6c2);
+      pv.position.set(x,.068,z);pv.rotation.set(0,0,0);pv.scale.setScalar(1);pv.updateMatrix();
+      pavers.setMatrixAt(pi,pv.matrix);pavers.setColorAt(pi,pc.setHex(colour));pi++;
     }
+    pavers.instanceMatrix.needsUpdate=true;pavers.receiveShadow=true;interior.add(pavers);
     const mat=box(interior,4.3,.045,1.05,accent,0,.09,2.85,0);
     mat.receiveShadow=true;
 
@@ -410,7 +421,7 @@
       o.g.position.set(o.x, o.y, o.z); o.g.rotation.y = o.ry; o.g.userData.av.userData.anim(t, dt, { moving: o.moving, speed: 1 }); if (o.g.userData.pet) petFollow(o.g, o, t, dt, o.moving, false); });
     for (const a of anim) a.fn(t, dt);
     for (let i = fx.length - 1; i >= 0; i--) { const f = fx[i]; f.t += dt; const g = 18; f.parts.forEach((p, k) => { p.vy -= g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; if (p.y < 0.05) { p.y = 0.05; p.vy = 0; p.vx *= 0.9; p.vz *= 0.9; } p.r += p.rs * dt; f.d.position.set(p.x, p.y, p.z); f.d.rotation.set(p.r, p.r * 0.7, 0); f.d.scale.setScalar(Math.max(0.01, 1 - Math.max(0, f.t - f.life + 0.6) / 0.6)); f.d.updateMatrix(); f.mesh.setMatrixAt(k, f.d.matrix); }); f.mesh.instanceMatrix.needsUpdate = true; if (f.t > f.life) { worldG.remove(f.mesh); fx.splice(i, 1); } }
-    if (flashCol) { const k = Math.max(0, flashUntil - t); scene.background.copy(new THREE.Color(0xd8e8e9)).lerp(flashCol, Math.min(1, k) * 0.7); scene.fog.color.copy(scene.background); if (k <= 0) flashCol = null; }
+    if (flashCol) { const k = Math.max(0, flashUntil - t); scene.background.copy(new THREE.Color(0xd5e4df)).lerp(flashCol, Math.min(1, k) * 0.7); scene.fog.color.copy(scene.background); if (k <= 0) flashCol = null; }
     renderer.render(scene, cam);
   }
   function petFollow(g, o, t, dt, moving, excited) {
@@ -423,11 +434,11 @@
     THREE = window.THREE; if (!THREE) return false; canvas = cv;
     try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' }); } catch (e) { return false; }
     const small = Math.min(innerWidth, innerHeight) < 700;
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, small ? 2 : 2)); renderer.setClearColor(0xd8e8e9, 1); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    scene = new THREE.Scene(); scene.background = new THREE.Color(0xd8e8e9); scene.fog = new THREE.Fog(0xd8e8e9, 78, 235);
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, small ? 2 : 2)); renderer.setClearColor(0xd5e4df, 1); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    scene = new THREE.Scene(); scene.background = new THREE.Color(0xd5e4df); scene.fog = new THREE.Fog(0xd5e4df, 68, 175);
     cam = new THREE.PerspectiveCamera(42, 1, 0.5, 500); raycaster = new THREE.Raycaster();
-    hemi = new THREE.HemisphereLight(0xf9f6eb, 0x769368, 1.05); scene.add(hemi);
-    sun = new THREE.DirectionalLight(0xffffff, 0.78); sun.position.set(26, 48, 20); sun.castShadow = true; sun.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048);
+    hemi = new THREE.HemisphereLight(0xf6f5eb, 0x607c60, 0.84); scene.add(hemi);
+    sun = new THREE.DirectionalLight(0xfff9ed, 0.70); sun.position.set(26, 48, 20); sun.castShadow = true; sun.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048);
     Object.assign(sun.shadow.camera, { left: -44, right: 44, top: 44, bottom: -44, near: 1, far: 160 }); sun.shadow.camera.updateProjectionMatrix(); sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3; scene.add(sun); scene.add(sun.target);
     worldG = new THREE.Group(); scene.add(worldG);
     ground = new THREE.Mesh(new THREE.PlaneGeometry(L.size * 2, L.size * 2), new THREE.MeshLambertMaterial({ color: 0xffffff })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
