@@ -334,7 +334,7 @@
   function jump() { const m = W.me; if (!m || !m.grounded || (W.blocked && W.blocked())) return; m.vy = 9.5; m.grounded = false; W.touched(); }
 
   /* ---------------- input ---------------- */
-  const K = {}; let touch = false, lastW = 0, ptr = new Map(), dragged = 0, downAt = 0, pinch0 = 0, zoom0 = 1;
+  const K = {}; let footstepAt = 0; let touch = false, lastW = 0, ptr = new Map(), dragged = 0, downAt = 0, pinch0 = 0, zoom0 = 1;
   function bindInput() {
     // Physical key codes work reliably across keyboard layouts, uppercase Shift and browser focus.
     // Keyboard movement is disabled only when a visible modal or text editor has focus.
@@ -428,6 +428,7 @@
         if(Object.values(L.spots).some(s=>shopWall(s,m.x,m.z))){
           m.x=prevX;m.z=prevZ;
         }
+        if (W.onFootstep && Math.hypot(m.x-prevX,m.z-prevZ) > 0.08 && t >= footstepAt) { W.onFootstep(); footstepAt = t + (running ? .29 : .43); }
         W.touched();
       }
       m.moving = moving; m.runningNow = running;

@@ -6,7 +6,7 @@
   const money = n => '$' + Math.round(Number(n) || 0).toLocaleString('en-US');
   const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }, del(k) { try { localStorage.removeItem(k); } catch (e) {} } };
   const W = globalThis.BZWORLD, A = globalThis.BZART, L = globalThis.STAKKZ_WORLD_LAYOUT;
-  const BZ = { state: null, cat: null, me: null, code: '', auth: { username: null, registered: false, persistent: false }, settings: Object.assign({ sound: true, haptics: true, motion: true }, store.get('bitz-settings') || {}), online: 0, board: [], rank: null, zone: '', earner: true, idle: false };
+  const BZ = { state: null, cat: null, me: null, code: '', auth: { username: null, registered: false, persistent: false }, settings: Object.assign({ sound: true, music: true, haptics: true, motion: true }, store.get('bitz-settings') || {}), online: 0, board: [], rank: null, zone: '', earner: true, idle: false };
   const reduced = () => !BZ.settings.motion || matchMedia('(prefers-reduced-motion: reduce)').matches;
   /* the guest key: made on first visit, kept in this browser. A sign-in token replaces it as the active credential. */
   const guestKey = () => Array.from(crypto.getRandomValues(new Uint8Array(24)), x => ('0' + x.toString(16)).slice(-2)).join('');
@@ -24,7 +24,9 @@
     return j;
   }
 
-  /* ---------------- sound ---------------- */
+  /* ---------------- music and sound ---------------- */
+  const MUSIC = globalThis.BITZAUDIO;
+  if (MUSIC) MUSIC.setEnabled(BZ.settings.music !== false);
   let AC = null;
   function sound(kind) {
     if (!BZ.settings.sound) return;
@@ -36,7 +38,7 @@
         epic: [[392, 0, 'square', .3, .03], [523, .12, 'square', .3, .03], [659, .24, 'square', .3, .03], [784, .36, 'square', .3, .03], [1047, .5, 'triangle', .6, .05], [1319, .64, 'sine', .9, .05], [1568, .8, 'sine', 1.1, .04]],
         one: [[196, 0, 'sine', 1.2, .06], [262, .3, 'sine', 1.2, .06], [330, .6, 'sine', 1.2, .06], [392, .9, 'triangle', 1.6, .06], [784, 1.3, 'sine', 2, .05], [1568, 1.6, 'sine', 2.4, .04]],
         cash: [[988, 0, 'square', .1, .035], [1319, .07, 'square', .14, .035], [1760, .14, 'triangle', .2, .03]], pack: [[660, 0, 'triangle', .12, .04], [880, .09, 'triangle', .18, .04], [1320, .18, 'sine', .3, .04]],
-        ink: [[220, 0, 'sine', .9, .02], [330, .3, 'sine', .9, .02]], no: [[200, 0, 'square', .12, .04], [150, .1, 'square', .18, .04]], level: [[523, 0, 'triangle', .2, .04], [659, .1, 'triangle', .2, .04], [784, .2, 'triangle', .2, .04], [1047, .3, 'triangle', .5, .05]]
+        step: [[165, 0, 'triangle', .065, .007], [98, .022, 'sine', .09, .006]], enter: [[360, 0, 'triangle', .11, .024], [540, .085, 'sine', .22, .023]], ink: [[220, 0, 'sine', .9, .02], [330, .3, 'sine', .9, .02]], no: [[200, 0, 'square', .12, .04], [150, .1, 'square', .18, .04]], level: [[523, 0, 'triangle', .2, .04], [659, .1, 'triangle', .2, .04], [784, .2, 'triangle', .2, .04], [1047, .3, 'triangle', .5, .05]]
       };
       (seqs[kind] || seqs.click).forEach(([f, d, type, len, vol]) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t0 + d); g.gain.exponentialRampToValueAtTime(vol, t0 + d + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + len); o.connect(g); g.connect(AC.destination); o.start(t0 + d); o.stop(t0 + d + len + 0.05); });
     } catch (e) {}
@@ -186,8 +188,8 @@
 
   function settings() {
     const row = (k, name, note) => '<div class="kv"><div><b>' + name + '</b><div class="mute" style="font-size:12px">' + note + '</div></div><button class="chip ' + (BZ.settings[k] ? 'on' : '') + '" data-s="' + k + '">' + (BZ.settings[k] ? 'On' : 'Off') + '</button></div>';
-    const el = screen({ title: 'SETTINGS', back: true, body: '<div class="card-box">' + row('sound', 'Sound', 'Pack tears, flips, cash and reveals') + row('haptics', 'Vibration', 'Little taps on rare pulls (phones)') + row('motion', 'Animation', 'Turn off for a calmer, faster game') + '</div><p class="mute" style="margin-top:14px">Move with WASD or the stick, jump with Space, run with Shift, talk with E. Drag to look around, scroll or pinch to zoom.</p><p class="mute">Your player code: <b class="brand">' + esc(BZ.code) + '</b></p><p class="mute">Football photographs: <a href="portraits/credits.html" target="_blank" rel="noopener noreferrer">Image credits and sources</a></p>' });
-    el.addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (!b) return; BZ.settings[b.dataset.s] = !BZ.settings[b.dataset.s]; store.set('bitz-settings', BZ.settings); b.classList.toggle('on', BZ.settings[b.dataset.s]); b.textContent = BZ.settings[b.dataset.s] ? 'On' : 'Off'; });
+    const el = screen({ title: 'SETTINGS', back: true, body: '<div class="card-box">' + row('music', 'Background Music', 'Original looping soundtrack while you play') + row('sound', 'Sound Effects', 'Footsteps, shops, packs and rare reveals') + row('haptics', 'Vibration', 'Little taps on rare pulls (phones)') + row('motion', 'Animation', 'Turn off for a calmer, faster game') + '</div><p class="mute" style="margin-top:14px">Move with WASD or the stick, jump with Space, run with Shift, talk with E. Drag to look around, scroll or pinch to zoom.</p><p class="mute">Your player code: <b class="brand">' + esc(BZ.code) + '</b></p><p class="mute">Football photographs: <a href="portraits/credits.html" target="_blank" rel="noopener noreferrer">Image credits and sources</a></p>' });
+    el.addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (!b) return; BZ.settings[b.dataset.s] = !BZ.settings[b.dataset.s]; store.set('bitz-settings', BZ.settings); if (b.dataset.s === 'music' && MUSIC) MUSIC.setEnabled(BZ.settings.music); b.classList.toggle('on', BZ.settings[b.dataset.s]); b.textContent = BZ.settings[b.dataset.s] ? 'On' : 'Off'; });
   }
   function account() {
     const body = BZ.auth.registered ? '<div class="card-box account"><p>Signed in as <b>' + esc(BZ.auth.username) + '</b>. Your cards, cash and friends follow you to any phone or computer.</p><p class="mute">Player code <b class="brand">' + esc(BZ.code) + '</b></p><button class="btn" data-a="signout">Sign out</button></div>'
@@ -216,7 +218,7 @@
     status('Entering the world');
     if (!W.init($('#gl'))) { status('This browser cannot draw 3D. Try Chrome or Safari.'); return; }
     W.setMe(BZ.me.look || {}, BZ.me.name || BZ.auth.username || 'You', BZ.me.pet || '', colourOf(BZ.me.name || 'you'));
-    W.onPrompt = paintAct; W.onInteract = spot => { sound('click'); CARDS.open(spot.id); }; W.onPick = o => CARDS.profile(o.f, o.n); W.onZone = z => { BZ.zone = z; paintZone(z, 0); if (z === 'gold') { sound('cash'); hint('gold1', 'Gold Circle: cash comes in three times faster here'); } if (z === 'purple') hint('purple0', 'Purple Circle: stay 40 seconds for a free RED HOT pack'); };
+    W.onFootstep = () => sound('step'); W.onPrompt = paintAct; W.onInteract = spot => { sound('enter'); CARDS.open(spot.id); }; W.onPick = o => CARDS.profile(o.f, o.n); W.onZone = z => { BZ.zone = z; paintZone(z, 0); if (z === 'gold') { sound('cash'); hint('gold1', 'Gold Circle: cash comes in three times faster here'); } if (z === 'purple') hint('purple0', 'Purple Circle: stay 40 seconds for a free RED HOT pack'); };
     await refresh(); W.level = BZ.state.progress.level; W.on = true;
     connect(); loadBoard(); setInterval(loadBoard, 20000);
     $('#load').classList.add('out'); setTimeout(() => $('#load').remove(), 600);
