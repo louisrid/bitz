@@ -1397,17 +1397,17 @@ const B3 = (function () {
   api.loot = () => shot('loot', makeBox, 448, { az: 0.6, el: 0.3, shadow: true });
   api.lootPrize = (id, col) => { const it=ITEMS[id];if(!it)return '';const slot=it[0],c=col||'#B983FF';const look={skin:0,hair:'short',hc:0,outfit:'tee',hat:'',acc:'',bg:'paper'};if(['outfit','hat','acc'].includes(slot))look[slot]=id;return shot('loot-prize-'+id+'-'+c,()=>slot==='pet'?makePet(id):makeChar(look,c,'fig'),420,{az:0.55,el:0.19,shadow:true,fit:0.80}); };
 
-  const showScene = new THREE.Scene(); let showKey = '', showChar = null, showPet = null;
+  const showScene = new THREE.Scene(); let showKey = '', showChar = null, showPet = null, introT=0;
   showScene.add(new THREE.HemisphereLight(0xffffff, 0xcfd8f0, 0.78)); { const dl = new THREE.DirectionalLight(0xffffff, 0.62); dl.position.set(-5, 9, 8); showScene.add(dl); }
   /* No white or black baseplate in the 3D preview either. */ let showAz = 0;
   api.show = function (look, pet, col) {
     if (!look) { api.showing = false; return; }
     const k = JSON.stringify([look, pet, col]);
     if (k !== showKey) {
-      showKey = k;
+      showKey = k;introT=performance.now();
       [showChar, showPet].forEach(o => { if (o) { showScene.remove(o); o.traverse(q => { if (q.geometry) q.geometry.dispose(); }); } });
       showChar = makeChar(look, col, 'fig'); showScene.add(showChar);
-      showPet = ITEMS[pet] && ITEMS[pet][0] === 'pet' ? makePet(pet) : null; if (showPet) { showPet.position.set(1.95, 0, 1.0); showScene.add(showPet); }
+      showPet = ITEMS[pet] && ITEMS[pet][0] === 'pet' ? makePet(pet) : null; if (showPet) { showPet.position.set(1.55, 0, 1.0);showPet.scale.setScalar(1.22); showScene.add(showPet); }
     }
     if (!api.showing) showAz = az;
     api.showing = true;
@@ -1426,10 +1426,10 @@ const B3 = (function () {
     if (!pRen || pRen.domElement !== cv) { try { if (pRen) pRen.dispose(); pRen = new THREE.WebGLRenderer({ canvas: cv, alpha: true, antialias: true }); pRen.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); pRen.setClearColor(0x000000, 0); } catch (e) { pRen = null; return; } }
     const w = cv.clientWidth, h = cv.clientHeight; if (cv.width !== Math.round(w * pRen.getPixelRatio())) pRen.setSize(w, h, false);
     const t = now / 1000, mv = still ? 0 : 1, u = showChar.userData; flameTick(t, mv);
-    showChar.rotation.y = t * 0.6 * mv; showChar.position.y = Math.abs(Math.sin(t * 2.2)) * 0.12 * mv;
+    const intro=Math.min(1,Math.max(0,(now-introT)/900)), bounce=Math.sin(intro*Math.PI);showChar.rotation.y=t*.6*mv+(1-intro)*.9;showChar.scale.setScalar(.92+.08*intro+.035*bounce);showChar.position.y=Math.abs(Math.sin(t*2.2))*.12*mv+.15*(1-intro);
     u.arms[1].rotation.z = 2.5 + Math.sin(t * 7) * 0.4 * mv; u.arms[1].rotation.x = 0; u.legs[0].rotation.x = u.legs[1].rotation.x = 0;
     if (showPet) { const ud = showPet.userData; showPet.position.y = ud.fly ? 1.5 + Math.sin(t * 2.4) * 0.3 * mv : Math.abs(Math.sin(t * 3.2)) * 0.22 * mv; ud.wings.forEach(q => { q.rotation.z = q.userData.sg * (0.2 + Math.sin(t * 16) * 0.7 * mv); }); }
-    pCam.aspect = w / h; pCam.updateProjectionMatrix(); const d = 13.5 / Math.min(1, pCam.aspect * 1.25); pCam.position.set(0, 3.1, d); pCam.lookAt(0.4, 2.45, 0);
+    pCam.aspect = w / h; pCam.updateProjectionMatrix(); const d = 10.5 / Math.min(1, pCam.aspect * 1.25); pCam.position.set(0, 3.05, d); pCam.lookAt(0.25, 2.42, 0);
     pRen.render(showScene, pCam);
   }
   api.drawProfileChar = drawProfileChar;
@@ -2933,7 +2933,8 @@ let fSeq = 0;
 async function loadFriends() { if (!Net.ready || !Net.db) return; const my = ++fSeq; try { const r = await api('friends'); if (my !== fSeq) return; FRIENDS = r.friends || []; HIDDEN = r.hidden || []; renderFriends(); if (PROF) profilePaint(); } catch (e) {} }
 setInterval(loadFriends, 8000); [1500, 3500, 6000].forEach(t => setTimeout(loadFriends, t));
 function friendModal(i) {
-  const f = FRIENDS[i]; if (!f) return; const L2 = f.l || {};
+  const f = FRIENDS[i];if(f)profileOpen(f);return;
+  const L2 = f.l || {};
   const worn = [['outfit', L2.outfit], ['hat', L2.hat], ['acc', L2.acc], ['pet', f.pet], ['bg', L2.bg]].filter(x => x[1] && ITEMS[x[1]] && ITEMS[x[1]][2] > 0);
   openModal('friend', () => '<div class="mhead"><h2>' + esc(f.n) + '</h2>' + xBtn() + '</div><div class="fprof"><span class="pv bg-' + bgOf(L2) + '">' + fig(L2, plazaCol(f.n), 190) + petImg(f.pet, 56) + '</span>' +
     '<p class="fine">@' + esc(f.u || f.n) + ' · ' + fStatus(f).replace(/<i[^>]*><\/i>/, '') + ' · ' + (f.wins || 0) + ' wins in ' + (f.played || 0) + ' games</p></div>' +
@@ -2966,9 +2967,9 @@ function profilePaint() {
     : '<button class="btn go" data-a="tradeask" data-i="' + liveI + '"' + (live ? '' : ' disabled') + '>' + (live ? 'Trade' : 'Trade (not in the world)') + '</button>' + (fr ? '<button class="btn" data-a="fop" data-v="remove">Remove friend</button>' : hid ? '<button class="btn ok" data-a="fop" data-v="restore">Add friend back</button>' : '');
   patchHTML(ov, '<div class="pp-back" data-a="profclose"></div><div class="pp-card" role="dialog" aria-label="' + esc(p.n) + '">' +
     '<button class="ib pp-x" data-a="profclose" aria-label="Close">' + ico('x', 16) + '</button>' +
-    '<div class="pp-char bg-' + bgOf(L2) + '"><canvas id="pchar"></canvas></div>' +
+    '<div class="pp-char bg-' + bgOf(L2) + '"><span class="pp-scene-label">' + (p.self ? 'YOUR CHARACTER' : 'PLAYER CARD') + '</span><canvas id="pchar"></canvas><div class="pp-pet-label"><span>COMPANION</span><b>' + (ITEMS[p.pet] ? esc(ITEMS[p.pet][1]) : 'No pet equipped') + '</b></div></div>' +
     '<div class="pp-info"><h2>' + esc(p.n) + '</h2><p class="pp-sub">' + handle + ' · ' + where + '</p>' +
-    '<div class="pp-badges">' + (p.self ? '<div class="pworth pgold"><small>Gold</small><b><i class="gc"></i><span id="ppgold">' + fmt(wallet.coins) + '</span></b></div>' : '') + '<div class="pworth"><small>Net worth</small><b><i class="gc"></i>' + (nw != null ? fmt(nw) : '…') + '</b></div><div class="pswag"><small>Swag</small><b>' + fmt(swag) + '</b></div></div>' +
+    '<div class="pp-badges">' + (p.self ? '<div class="pworth pgold"><small>Gold</small><b><i class="gc"></i><span id="ppgold">' + fmt(wallet.coins) + '</span></b></div>' : '<div class="pworth pp-online"><small>Status</small><b>' + (live || info.at ? 'Online' : 'Offline') + '</b></div>') + '<div class="pworth"><small>Net worth</small><b><i class="gc"></i>' + (nw != null ? fmt(nw) : '…') + '</b></div><div class="pswag"><small>Swag</small><b>' + fmt(swag) + '</b></div></div>' +
     '<div class="plist">' + rows + '</div><div class="pbtns">' + btns + '</div></div></div>');
 }
 document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (modal && FORCED.indexOf(modal.kind) < 0 && !(lootSt && lootSt.phase === 'spin')) closeModal(); else if (PROF) profileClose(); else if (F.page && F.page !== 'world' && $('#app').dataset.screen === 'home') { F.page = 'world'; renderHome(true); } });
