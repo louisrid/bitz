@@ -190,3 +190,30 @@ body:has(#fc-overlay:not([hidden])) #shopbig,body:has(#fc-overlay:not([hidden]))
 .fc-chase .fc-serial{animation:fc-serial-pop 1.7s ease-out both}
 @keyframes fc-serial-pop{0%,66%{opacity:0;transform:scale(.75)}100%{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.fc-chase .fc-portrait-wrap:after,.fc-chase .fc-serial,.fc-card.fc-tossed{animation:none!important}}
+
+/* Each collection has an independent card composition, not only a colour swap. */
+.fc-pack-odds{border:2px solid #16121e;border-radius:9px;background:#f6f2ff;padding:6px;color:#111}
+.fc-pack-odds summary{font:400 14px/1 Coolvetica,Arial,sans-serif;cursor:pointer}
+.fc-pack-odds>div{margin-top:7px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;font-size:10px}
+.fc-pack-odds b{font-variant-numeric:tabular-nums;color:#59448e}
+.fc-foil-pack.fc-ripped:after{content:"";position:absolute;inset:0 0 45% 0;background:linear-gradient(135deg,var(--pack-a),var(--pack-b));border-bottom:4px dashed #fff;z-index:9;animation:fc-rip .28s ease-out forwards}
+@keyframes fc-rip{to{transform:translate(38%,-85%) rotate(19deg);opacity:.15}}
+.fc-pack-first-xi .fc-portrait-wrap{border-radius:90px 90px 0 0;border:3px double #dabb62}
+.fc-pack-electric-nights .fc-layer>header{background:linear-gradient(90deg,#34145f,#177bc1);color:#fff}
+.fc-pack-electric-nights .fc-card-identity{background:linear-gradient(130deg,#251755,#5038a2);color:#fff;border-top-color:#00d7ff}
+.fc-pack-electric-nights .fc-card-tier{color:#76eaff}
+.fc-pack-electric-nights .fc-signature{background:repeating-linear-gradient(118deg,#c7e9ff,#e8bdff 10px,#b6f7ff 18px,#fff 25px)}
+.fc-pack-blackout .fc-layer>header{background:linear-gradient(90deg,#050505,#353535);color:#e5c27c;letter-spacing:.13em}
+.fc-pack-blackout .fc-card-identity{background:linear-gradient(150deg,#050505,#272629);color:#e3cfaa;border-top-color:#b59b65}
+.fc-pack-blackout .fc-signature{background:#101013;border-top-color:#c7a96a}
+.fc-pack-blackout .fc-signature span{color:#e7c580}.fc-pack-blackout .fc-signature small{color:#cdb87e}
+.fc-pack-crown-glory .fc-layer>header{color:#f5d88a;background:radial-gradient(ellipse,#6b2a92,#290e55)}
+.fc-pack-crown-glory .fc-card-identity{background:linear-gradient(100deg,#fff9d3,#e9d7ef,#fff9d3);border-top:3px double #b6933d}
+.fc-pack-crown-glory .fc-card-identity h3{font-family:Georgia,serif;font-weight:900}
+.fc-pack-derby-day .fc-layer>header{color:#fff;background:linear-gradient(95deg,#155ca2 0 45%,#c2cbd7 49%,#a81336 53%)}
+.fc-pack-derby-day .fc-card-identity{background:linear-gradient(110deg,#d2e8ff 0 48%,#f9d1d9 53%);color:#0d1625}
+.fc-pack-derby-day .fc-portrait-pair{transform:skewX(-3deg)}
+.fc-pack-god .fc-layer>header{background:linear-gradient(95deg,#642aae,#f7c86e,#b75ce8);color:#24142d}
+.fc-pack-god .fc-card-identity{background:radial-gradient(ellipse,#fff8c9,#ecc4ff 62%,#cea9f7)}
+.fc-pack-god .fc-portrait-wrap{border:4px ridge #f4d679;box-shadow:0 0 24px #f1c0ff}
+@media(prefers-reduced-motion:reduce){.fc-foil-pack.fc-ripped:after{animation:none}}
