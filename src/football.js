@@ -117,9 +117,9 @@ export function createFootballService({accounts,serials,offers,markDirty,resolve
   const gold=bonus.reduce((s,x)=>s+x.gold,0);w.coins=Math.floor(w.coins||0)+gold;
   touch();return {cards:made,bonusGold:gold,bonuses:bonus,pack:id,newAlbum:album(w)};
  }
- function sell(w,uid){
+ function sell(w,uid,id){
   const f=ensure(w),idx=f.cards.findIndex(x=>x.uid===uid);if(idx<0)refuse('You do not own this card.');
-  if([...offers.values()].some(o=>o.status==='pending'&&o.fromCards.includes(uid)&&o.fromId===w.__id))refuse('This card is in a pending offer.');
+  if([...offers.values()].some(o=>o.status==='pending'&&((o.fromId===id&&o.fromCards.includes(uid))||(o.toId===id&&o.toCards.includes(uid)))))refuse('This card is reserved by a pending trade. Decline or cancel the offer first.');
   const [card]=f.cards.splice(idx,1);const gold=(Number(card.valueCents)||50)*GOLD_PER_VIRTUAL_CENT;
   w.coins=Math.floor(w.coins||0)+gold;f.favorites=f.favorites.filter(x=>x!==uid);touch();
   return {sold:card,gold};
@@ -212,7 +212,7 @@ export function createFootballService({accounts,serials,offers,markDirty,resolve
   let out;
   if(verb==='buy')out=buy(w,String(b.pack||''));
   else if(verb==='open')out=open(w,String(b.pack||''));
-  else if(verb==='sell')out=sell(w,String(b.uid||''));
+  else if(verb==='sell')out=sell(w,String(b.uid||''),id);
   else if(verb==='favorites')out=favorites(w,b.cards);
   else if(verb==='claim')out=claim(w,String(b.club||''));
   else if(verb==='offer')out=offer(id,String(b.to||''),b.give,b.take);

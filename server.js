@@ -272,7 +272,9 @@ async function api(req, res, parts) {
     }
     if(parts[0]==='cards'&&req.method==='POST'){
       const result=football.move(String(b.op||''),w,id,b);
-      touch();return send(res,200,{...result,gold:w.coins,progress:core.progressOf(w)});
+      touch();
+      if(persistent&&!(await save(true)))return send(res,503,{message:'Card change could not be saved safely. Do not retry until your account refreshes.'});
+      return send(res,200,{...result,gold:w.coins,progress:core.progressOf(w)});
     }
     if (parts[0] === 'me') { if (req.method === 'POST') { core.setProfile(w, b); touch(); } return send(res, 200, mine({swag:core.swag(w)})); }
     if (parts[0] === 'restore' && req.method === 'POST') {
