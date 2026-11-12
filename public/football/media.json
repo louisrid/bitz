@@ -29,6 +29,16 @@
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
   },
+  "bournemouth-david-brooks": {
+    "local": "football/portraits/bournemouth-david-brooks.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Jack_Radcliffe.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Jack_Radcliffe.jpg",
+    "file": "File:Jack_Radcliffe.jpg",
+    "license": "Public domain",
+    "artist": "Lynn Ludwing",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
   "bournemouth-illia-zabarnyi": {
     "local": "football/portraits/bournemouth-illia-zabarnyi.jpg",
     "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Illya_Zabarnyi_2023.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -239,6 +249,16 @@
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
   },
+  "liverpool-ryan-gravenberch": {
+    "local": "football/portraits/liverpool-ryan-gravenberch.png",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Matheus_Barbosa_2024.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Matheus_Barbosa_2024.png",
+    "file": "File:Matheus_Barbosa_2024.png",
+    "license": "CC BY 3.0",
+    "artist": "TV Botafogo",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
   "liverpool-virgil-van-dijk": {
     "local": "football/portraits/liverpool-virgil-van-dijk.jpg",
     "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/5d/20160604_AUT_NED_8876_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -266,6 +286,16 @@
     "file": "File:Manchester_City_2025_06_26_Juventus_(cropped_to_Reijniders).jpg",
     "license": "CC BY 4.0",
     "artist": "Equipos de fútbol",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "man-united-bryan-mbeumo": {
+    "local": "football/portraits/man-united-bryan-mbeumo.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/44/Ashworth%2C_Luke.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Ashworth,_Luke.jpg",
+    "file": "File:Ashworth,_Luke.jpg",
+    "license": "CC BY-SA 3.0",
+    "artist": "Jonesy702",
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
   },
@@ -386,6 +416,16 @@
     "file": "File:Joaopalhinha.jpg",
     "license": "CC BY 3.0",
     "artist": "Agência Lusa",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "tottenham-lucas-bergvall": {
+    "local": "football/portraits/tottenham-lucas-bergvall.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/67/Felix_Hoffman.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Felix_Hoffman.jpg",
+    "file": "File:Felix_Hoffman.jpg",
+    "license": "Public domain",
+    "artist": "http://www.library.ucla.edu/libraries/biomed/his/painexhibit/hoffmann.htm web-archiv",
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
   },
