@@ -1391,7 +1391,7 @@ const B3 = (function () {
   api.figure = (look, col) => shot('f' + col + JSON.stringify(look), () => makeChar(look, col, 'fig'), 224, { az: 0.5, el: 0.16, shadow: true });
   api.product = (id, col) => { if (ITEMS[id] && ITEMS[id][0] === 'gun') return shot('i' + id, () => { const g = new THREE.Group(), m = gunMesh(GUNIDS.indexOf(id)); m.rotation.x = Math.PI / 2; m.scale.setScalar(4); g.add(m); return g; }, 208, { az: 0.9, el: 0.3, shadow: true }); const it = ITEMS[id], team = it[0] === 'outfit' && OUTC[id] && OUTC[id][0] === 'team'; return shot('i' + id + (team ? col : ''), () => it[0] === 'pet' ? makePet(id) : it[0] === 'dye' ? makeDye() : makeChar({ [it[0]]: id }, col, it[0]), 208, { az: 0.6, el: 0.26, shadow: true }); };
   api.loot = () => shot('loot', makeBox, 448, { az: 0.6, el: 0.3, shadow: true });
-  api.lootPrize = (id, col) => shot('loot-prize-'+id, () => makeChar({skin:0,hair:'none',hc:0,outfit:id,hat:'',acc:'',bg:'paper'},col||'#B983FF','fig'), 420, {az:0.6,el:0.26,shadow:true});
+  api.lootPrize = (id, col) => { const it=ITEMS[id];if(!it)return '';const slot=it[0],c=col||'#B983FF';const look={skin:0,hair:'short',hc:0,outfit:'tee',hat:'',acc:'',bg:'paper'};if(['outfit','hat','acc'].includes(slot))look[slot]=id;return shot('loot-prize-'+id+'-'+c,()=>slot==='pet'?makePet(id):makeChar(look,c,'fig'),420,{az:0.55,el:0.19,shadow:true,fit:0.80}); };
 
   const showScene = new THREE.Scene(); let showKey = '', showChar = null, showPet = null;
   showScene.add(new THREE.HemisphereLight(0xffffff, 0xcfd8f0, 0.78)); { const dl = new THREE.DirectionalLight(0xffffff, 0.62); dl.position.set(-5, 9, 8); showScene.add(dl); }
