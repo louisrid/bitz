@@ -341,14 +341,14 @@ const mobPay = sub => Math.max(1000, Math.round((MOBPAY[sub] || ZOMBIE_PAY) * ST
 const zInfo = () => ({ on: zMode, n: zBy, wave: zWave, str: zStr, name: STR[zStr].n, pay: mobPay('z0') });
 const edge = v => Math.max(-140, Math.min(140, v));
 function spawnMob(sub, t, d) {
-  const S = STR[zStr], a = Math.random() * Math.PI * 2, baseHp = 60 + (zWave - 1) * 12, spd = 3.6 + Math.min(2, zWave * 0.2);
+  const S = STR[zStr], a = Math.random() * Math.PI * 2, baseHp = 36 + (zWave - 1) * 7, spd = 3.6 + Math.min(2, zWave * 0.2);
   const k = { runner: { hp: 0.5, sp: 1.7, dmg: 0.7 }, brute: { hp: 3, sp: 0.75, dmg: 1.8 } }[sub] || { hp: 1, sp: 1, dmg: 1 };
   const hp = Math.round(baseHp * S.hp * k.hp);
-  return entAdd('zom', sub, edge(t.p[0] + Math.sin(a) * d), edge(t.p[2] + Math.cos(a) * d), { hp: hp, mh: hp, sp: spd * S.sp * k.sp, dmg: Math.round(12 * S.dmg * k.dmg), pay: mobPay(sub) });
+  return entAdd('zom', sub, edge(t.p[0] + Math.sin(a) * d), edge(t.p[2] + Math.cos(a) * d), { hp: hp, mh: hp, sp: spd * S.sp * k.sp, dmg: Math.round(9 * S.dmg * k.dmg), pay: mobPay(sub) });
 }
 function spawnBoss(t) {
-  zBoss = true; const S = STR[zStr], a = Math.random() * Math.PI * 2, hp = Math.round((450 + zWave * 200) * S.hp);
-  entAdd('zom', 'boss', edge(t.p[0] + Math.sin(a) * 32), edge(t.p[2] + Math.cos(a) * 32), { hp: hp, mh: hp, sp: 3.2 * S.sp, dmg: Math.round(30 * S.dmg), boss: 1, pay: mobPay('boss') });
+  zBoss = true; const S = STR[zStr], a = Math.random() * Math.PI * 2, hp = Math.round((240 + zWave * 100) * S.hp);
+  entAdd('zom', 'boss', edge(t.p[0] + Math.sin(a) * 32), edge(t.p[2] + Math.cos(a) * 32), { hp: hp, mh: hp, sp: 3.2 * S.sp, dmg: Math.round(22 * S.dmg), boss: 1, pay: mobPay('boss') });
   plazaAll({ boss: { n: zWave, hp: hp, pay: mobPay('boss') } });
 }
 const entCard = e => [e.id, e.k, e.sub, Math.round(e.x * 100) / 100, Math.round(e.y * 100) / 100, Math.round(e.z * 100) / 100, Math.round(e.ry * 100) / 100, e.hp || 0, e.mh || 0];
@@ -379,7 +379,7 @@ function plazaTouch(q, ws, now) {
 }
 function zombieShot(q, dx, dz, W, now) {
   const hits = [];
-  ents.forEach(e => { if (e.k !== 'zom') return; const rx = e.x - q.p[0], rz = e.z - q.p[2], along = rx * dx + rz * dz; if (along < 0.2 || along > W.range || Math.abs(rx * dz - rz * dx) > W.rad + (e.boss ? 3 : e.sub === 'brute' ? 1.4 : 0.9)) return; hits.push([along, e]); });
+  ents.forEach(e => { if (e.k !== 'zom') return; const rx = e.x - q.p[0], rz = e.z - q.p[2], along = rx * dx + rz * dz; if (along < 0.2 || along > W.range || Math.abs(rx * dz - rz * dx) > W.rad + (e.boss ? 4.5 : e.sub === 'brute' ? 2.2 : 1.7)) return; hits.push([along, e]); });   // generous hit boxes: mobs are easy to hit
   return hits;
 }
 setInterval(() => {

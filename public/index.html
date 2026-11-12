@@ -1591,11 +1591,13 @@ const B3 = (function () {
     crowdScale:Object.values(tokens).map(t=>t.userData.crowdScale||1),
     chaos:chaosLighting,traveling:api.traveling
   });
-  const ptr = new Map(); let moved = 0, t0 = 0, pinch = 0, userHold = 0;
+  const ptr = new Map(); let moved = 0, t0 = 0, pinch = 0, userHold = 0, holdT = 0, autoI = 0, heldFire = false;
   const took = () => { if (chasing) az = cA; fUntil = 0; userHold = performance.now() + 2500; };
   stage.addEventListener('contextmenu', e => { if (WD.on) e.preventDefault(); });
   stage.addEventListener('pointerdown', e => { if (e.target !== stage && e.target.closest && e.target.closest('button,a,input,select,textarea,label,[data-a],#fprofov,#side,#wtrade,#wbanner')) return;   // taps on buttons and pop-ups are theirs, not the camera's
-    if (WD.on && e.button === 2) { e.preventDefault(); WD.fire(); return; } stage.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]); if (ptr.size === 1) { moved = 0; t0 = performance.now(); } pinch = 0; });
+    if (WD.on && e.button === 2) { e.preventDefault(); WD.fire(); return; } stage.setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]); if (ptr.size === 1) { moved = 0; t0 = performance.now(); heldFire = false; }
+    if (WD.on && e.pointerType === 'mouse' && e.button === 0 && ptr.size === 1) { clearTimeout(holdT); clearInterval(autoI); holdT = setTimeout(() => { if (ptr.size === 1 && moved < 6) { heldFire = true; WD.fire(); autoI = setInterval(() => { if (!ptr.size || moved >= 6) { clearInterval(autoI); return; } WD.fire(); }, 70); } }, 320); }   // hold the button to keep firing
+    pinch = 0; });
   stage.addEventListener('pointermove', e => {
     const p = ptr.get(e.pointerId); if (!p) return;
     if (ptr.size === 1) { const dx = e.clientX - p[0], dy = e.clientY - p[1]; moved += Math.abs(dx) + Math.abs(dy); if (moved > 6) took(); az -= dx * (WD.on ? 0.0042 : 0.006); el = WD.on ? Math.max(0.16, Math.min(1.05, el + dy * 0.0035)) : Math.max(0.35, Math.min(1.45, el + dy * 0.005)); }
@@ -1603,8 +1605,9 @@ const B3 = (function () {
     if (ptr.size === 2) { const v = [...ptr.values()], d = Math.hypot(v[0][0] - v[1][0], v[0][1] - v[1][1]); if (pinch) zoom = Math.max(0.35, Math.min(2.6, zoom * pinch / d)); pinch = d; moved = 99; took(); }
   });
   const up = e => {
-    if (!ptr.delete(e.pointerId)) return; pinch = 0;
-    if (ptr.size === 0 && moved < 10 && performance.now() - t0 < 500 && e.type === 'pointerup' && WD.on && WD.onPick) {
+    if (!ptr.delete(e.pointerId)) return; pinch = 0; clearTimeout(holdT); clearInterval(autoI);
+    if (ptr.size === 0 && moved < 10 && performance.now() - t0 < 500 && e.type === 'pointerup' && WD.on && e.pointerType === 'mouse' && e.button === 0 && !e.shiftKey && !e.altKey && !heldFire) { WD.fire(); return; }   // a click shoots; Shift or Alt click on a player opens their profile
+    if (ptr.size === 0 && moved < 10 && performance.now() - t0 < 500 && e.type === 'pointerup' && WD.on && WD.onPick && !heldFire) {
       const nd = new THREE.Vector2((e.clientX - rc.left) / rc.width * 2 - 1, -((e.clientY - rc.top) / rc.height * 2 - 1)), ray = new THREE.Raycaster(); ray.setFromCamera(nd, cam); let best = null;
       WD.others.forEach((o, i) => { const h = ray.intersectObject(o.g, true); if (h.length && (!best || h[0].distance < best.d)) best = { d: h[0].distance, o: o, i: i }; });
       if (WD.me) { const h = ray.intersectObject(WD.me.g, true); if (h.length && (!best || h[0].distance < best.d)) best = { d: h[0].distance, o: WD.me, i: 'me' }; }
@@ -1649,7 +1652,7 @@ const B3 = (function () {
   }
   function plazaBody(look, col, name) {
     const g = makeChar(look || {}, col, 'bust'); g.scale.setScalar(CHAR); g.userData.tag = nameTag(name || 'Player'); g.userData.tag.scale.set(5.6 / CHAR, 1.4 / CHAR, 1); g.userData.tag.position.y = 3.95; g.add(g.userData.tag);
-    const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x3ddc84, depthWrite: false })); bar.scale.set(3 / CHAR, 0.3 / CHAR, 1); bar.position.y = 4.5; bar.renderOrder = 6; bar.visible = false; g.userData.bar = bar; g.add(bar); worldG.add(g); return g;
+    const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xff2b2b, depthWrite: false })); bar.scale.set(3 / CHAR, 0.3 / CHAR, 1); bar.position.y = 4.5; bar.renderOrder = 6; bar.visible = false; g.userData.bar = bar; g.add(bar); worldG.add(g); return g;
   }
   function dropBody(g) { if (!g) return; worldG.remove(g); g.traverse(q => { if (q.material && q.material.map) q.material.map.dispose(); }); }
   WD.setMe = (look, col, name) => {
@@ -1705,7 +1708,7 @@ const B3 = (function () {
       else { P(1.3, 0.7, 0.9, 0x7a4a26, 0, 0.35, 0); P(1.36, 0.3, 0.96, 0x5c3a1e, 0, 0.82, 0); P(1.4, 0.1, 0.12, 0xe8b830, 0, 0.6, 0.44, 's'); P(0.22, 0.26, 0.08, 0xe8b830, 0, 0.6, 0.5, 's'); [-0.62, 0.62].forEach(x => P(0.1, 1.0, 1.0, 0xe8b830, x, 0.5, 0, 's')); u.spark = 0xffd60a; }
     } else {
       const boss = sub === 'boss', z = makeChar({ outfit: 'zombie', skin: 0 }, '#4f6b3d', 'bust'); const brute = sub === 'brute', runner = sub === 'runner', tint = boss ? 0x4a2a6a : brute ? 0x2c4f7a : runner ? 0x9a3b2a : 0; z.scale.setScalar(boss ? 4.6 : brute ? CHAR * 1.5 : runner ? CHAR * 0.9 : CHAR); if (tint) z.traverse(q => { if (q.isMesh && q.material && q.material.color && q.material.color.getHex() === 0x4f6b3d) q.material = L(tint); }); g.add(z); u.z = z;
-      const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x3ddc84, depthWrite: false })); const bw = boss ? 6 : brute ? 3.6 : 2.4; bar.scale.set(bw, boss ? 0.5 : 0.26, 1); bar.position.y = boss ? 16 : brute ? 11.5 : 8; bar.renderOrder = 6; g.add(bar); u.bar = bar; u.barW = bw; if (brute) { const tg = label('BRUTE', '#7ec8ff'); tg.position.y = 12.9; g.add(tg); }
+      const bar = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xff2b2b, depthWrite: false })); const bw = boss ? 6.4 : brute ? 4.2 : 3.2, bh = boss ? 0.62 : 0.38; bar.scale.set(bw, bh, 1); bar.position.y = boss ? 16 : brute ? 11.5 : 8; bar.renderOrder = 7; const back = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x2a0000, depthWrite: false })); back.scale.set(bw + 0.16, bh + 0.14, 1); back.position.copy(bar.position); back.renderOrder = 6; g.add(back); g.add(bar); u.bar = bar; u.barW = bw; if (brute) { const tg = label('BRUTE', '#7ec8ff'); tg.position.y = 12.9; g.add(tg); }
       if (boss) { const tg = label('BOSS', '#ff4b3e'); tg.position.y = 17.4; tg.scale.set(5, 1.25, 1); g.add(tg); u.beam = beacon(0xff4b3e, 40); g.add(u.beam); }
     }
     g.traverse(q => { q.castShadow = q.isMesh && !(q.material && q.material.transparent); });
@@ -1714,7 +1717,7 @@ const B3 = (function () {
   WD.entAdd = c => {
     let e = entM.get(c[0]);
     if (!e) { const g = entBody(c[1], c[2]); worldG.add(g); e = { g: g, k: c[1], sub: c[2], x: c[3], y: c[4], z: c[5], ry: c[6], t: [c[3], c[4], c[5], c[6]], hp: c[7], sp: 0, ph: Math.random() * 9 }; entM.set(c[0], e); g.position.set(e.x, e.y, e.z); if (e.k === 'zom') { e.zom = true; burst(e.x, 1, e.z, 0x86b86a, performance.now(), 10); } }
-    e.hp = c[7]; e.mh = c[8] || e.mh || 60; if (e.k === 'zom' && e.g.userData.bar) { const b = e.g.userData.bar, f = Math.max(0.04, e.hp / e.mh); b.scale.x = (e.g.userData.barW || 2.4) * f; b.material.color.setHex(f > 0.5 ? 0x3ddc84 : f > 0.25 ? 0xffd60a : 0xff4b3e); e.hitT = performance.now() + 200; }
+    e.hp = c[7]; e.mh = c[8] || e.mh || 60; if (e.k === 'zom' && e.g.userData.bar) { const b = e.g.userData.bar, f = Math.max(0.04, e.hp / e.mh); b.scale.x = (e.g.userData.barW || 3.2) * f; b.material.color.setHex(0xff2b2b); e.hitT = performance.now() + 200; }
   };
   WD.entMove = rows => rows.forEach(r => { const e = entM.get(r[0]); if (e) e.t = [r[1], r[2], r[3], r[4]]; });
   WD.entClear = () => { entM.forEach(e => worldG.remove(e.g)); entM.clear(); };
@@ -1757,7 +1760,7 @@ const B3 = (function () {
     g.position.set(0, -0.44, 0.07); return g;
   }
   const setGun = (o, w) => { w = Math.max(0, Math.min(GUNS.length - 1, w | 0)); const u = o.g.userData; if (u.gun) u.arms[1].remove(u.gun); u.gun = gunMesh(w); u.arms[1].add(u.gun); o.w = w; };
-  const setBar = (o, hp) => { o.hp = hp; const b = o.g.userData.bar; if (b) { b.visible = o !== WD.me && hp > 0; b.scale.x = 3 / CHAR * Math.max(0.04, hp / 100); b.material.color.setHex(hp > 50 ? 0x3ddc84 : hp > 25 ? 0xffd60a : 0xff4b3e); } };
+  const setBar = (o, hp) => { o.hp = hp; const b = o.g.userData.bar; if (b) { b.visible = o !== WD.me && hp > 0; b.scale.x = 3 / CHAR * Math.max(0.04, hp / 100); b.material.color.setHex(0xff2b2b); } };
   const who = i => (i === WD.you ? WD.me : WD.others.get(i));
   const hud = k => { if (WD.onHud) WD.onHud(k); };
   function burst(x, y, z, col, now, n) { for (let i = 0; i < (n || 9); i++) { const m = mesh(BX(0.22, 0.22, 0.22), voxMat(col, 'g'), x, y, z); m.castShadow = false; worldG.add(m); WD.fx.push({ m: m, kind: 'spark', t0: now, dur: 380 + Math.random() * 200, x: x, y: y, z: z, vx: (Math.random() - 0.5) * 5, vy: 1.5 + Math.random() * 3, vz: (Math.random() - 0.5) * 5 }); } }
@@ -3434,11 +3437,11 @@ function winnerModal() {
       (mode === 'online' && rematch ? '<p class="fine c">' + (rematch.phase === 'lobby' ? esc(rematch.players[0] ? rematch.players[0].name : 'Someone') + ' is setting up the next game.' : 'The others have started the next game.') + '</p>' : '');
   });
 }
-const WORLD_HELP = [['arrow', 'Getting around', 'WASD walks. Arrow keys or dragging turn the camera. Double-tap W to sprint at four times the speed for as long as you keep moving. The + and − keys, the wheel or the zoom buttons zoom. Space jumps, Shift runs, scroll or pinch zooms. F or right-click shoots where you are looking.'],
+const WORLD_HELP = [['arrow', 'Getting around', 'WASD walks. Arrow keys or dragging turn the camera. Double-tap W to sprint at four times the speed for as long as you keep moving. The + and − keys, the wheel or the zoom buttons zoom. Space jumps, Shift runs, scroll or pinch zooms. Click, hold the button, F or right-click shoots where you are looking. Shift-click a player to open their profile.'],
   ['coins', 'Gold', 'You earn 1,000 gold every second, counted by the server, whether the page is open on your phone or your laptop. Walk into a floating cube to boost it for a while.'],
   ['gift', 'Collecting', 'Spend gold in the Shop on outfits, hats, extras, pets and scenes. Loot boxes cost 500,000 and only ever hold Legendary or Mythical exclusives you cannot buy.'],
   ['star', 'Swag Level', 'Everyone starts at -100. Rare things you wear, and everything you collect, push it up towards 9,999.'],
-  ['bolt', 'Blasters', 'Five guns on keys 1 to 5: Blaster, Pulse, Cannon, Scatter and Longshot. F or right-click fires. At zero health you respawn a few seconds later. Eliminations pay 5,000 gold.'],
+  ['bolt', 'Blasters', 'Five guns on keys 1 to 5: Blaster, Pulse, Cannon, Scatter and Longshot. Click, F or right-click fires. At zero health you respawn a few seconds later. Eliminations pay 5,000 gold.'],
   ['swap', 'Friends and trading', 'Everyone with an account is in your friends list. Tap a friend, or tap somebody in the world, to open their profile, trade with them, or remove them.']];
 const RULES = [['star', 'Goal', 'Be the last player standing. Everyone else goes bankrupt.'], ['arrow', 'Your turn', 'Roll and move. Buy the street you land on, or pay rent to whoever owns it. Doubles roll again, and three in a row means Jail. On a keyboard, Space does your main move. The camera closes in on whoever is rolling and moving; the Follow cam button switches that off.'], ['coins', 'Auctions', 'Pass on a street and it goes to auction. Everyone bids in turn, and the last bidder left wins it.'], ['home', 'Build', 'Own every street in a colour to double rent. Build evenly: three houses per street, then one hotel.'], ['cash', 'Short on cash', 'Sell houses and streets back to the bank for half price, or strike a trade. If you still cannot pay, you are out.'], ['bars', 'Jail', 'Roll doubles, pay £50 or play a card to get out. After three tries you pay and move.'], ['swap', 'Trades', 'Offer only cash and streets you own, for immediate acceptance or rejection. Trading closes in Final Chaos.'], ['arrow', 'Station travel', 'Land on a station you own and you can take the train, free, to any other station you own. You need to own both stations. Travelling ends your turn, with no Start bonus.'], ['bars', 'Setting up', 'The host picks the number of players (2 to 6, bots included), the bots and the turn timer. Everyone starts with £2,500 and no streets. Passing Start pays £200 and a loot box.'], ['arrow', 'Turn timer', 'Off, or 20, 30, 45 or 60 seconds, as the host chose. With it off, anyone can skip a player who has been away for 90 seconds.'], ['cash', 'Mortgages', 'Short of cash? Mortgage a street for half its price. It collects no rent until you pay back 55% of its price. You cannot build on a colour set with a mortgaged street.'], ['gift', 'Coins and loot boxes', 'Coins come from playing: buying, rent, sets, cards and Coin Rush. Spend them in the shop. You get a loot box every time you pass Start, and one for every game you finish.']];
 function rulesModal() { const home = $('#app').dataset.screen === 'home'; openModal('rules', () => '<div class="mhead">' + logo('sm') + xBtn() + '</div><h2>How to play</h2>' + (home ? WORLD_HELP : RULES).map(r => '<div class="rule">' + ico(r[0], 24) + '<b>' + r[1] + '</b><p>' + r[2] + '</p></div>').join('') + '<button class="btn go" data-a="close">Got it</button>'); }
