@@ -640,6 +640,7 @@ html.fopen #ftab{display:none}
 
 <div id="bd" class="bg-paper"></div>
 <link rel="stylesheet" href="open-world.css?v=season01-colour">
+<link rel="stylesheet" href="loot-blackgold.css?v=blackgold1">
 <canvas id="gl" aria-hidden="true"></canvas>
 <aside id="fside" aria-label="Friends"><div class="fhead"><b>Friends</b><span id="fcount"></span><button class="ib" data-a="fmin" aria-label="Hide friends">&#x2039;</button></div><div id="flist"></div><div id="flogo" aria-label="BITZ"><span>B</span><span>I</span><span>T</span><span>Z</span></div></aside><button id="ftab" data-a="fmin" aria-label="Show friends">Friends <b id="fon"></b></button>
 <div id="app" data-screen="home">
@@ -745,6 +746,7 @@ requestAnimationFrame(frame);
 <script src="three.min.js"></script>
 <script src="engine.js"></script>
 <script src="voxel-world.js?v=b1tz"></script>
+<script src="loot-rules.js?v=raretiers1"></script>
 <script>
 'use strict';
 const E = Engine, T = E.T;
@@ -1168,11 +1170,23 @@ const B3 = (function () {
     [-1, 1].forEach(sg => { const e = mesh(new THREE.SphereGeometry(0.11, 8, 6), L(0x111111), sg * 0.36, 0.05, 1.24); e.castShadow = false; c.add(e); const bl = mesh(new THREE.SphereGeometry(0.14, 8, 6), L(0xff8ad8), sg * 0.7, -0.2, 1.1); bl.castShadow = false; bl.scale.z = 0.4; c.add(bl); });
     c.userData = { a: n * 2.1, r: 16 + n * 3, h: 15 + n * 2 }; clouds.push(c); scene.add(c);
   }
-  function makeBox() {
-    const g = new THREE.Group(), add = (w, h, d, c, x, y, z) => g.add(mesh(BX(w, h, d), L(c), x, y, z));
-    add(1.4, 1.2, 1.4, 0xff8ad8, 0, 0.6, 0); add(1.6, 0.34, 1.6, 0xffd60a, 0, 1.37, 0);
-    add(0.32, 1.22, 1.44, 0xff4b3e, 0, 0.6, 0); add(1.44, 1.22, 0.32, 0xff4b3e, 0, 0.6, 0); add(0.34, 0.36, 1.64, 0xff4b3e, 0, 1.37, 0); add(1.64, 0.36, 0.34, 0xff4b3e, 0, 1.37, 0);
-    add(0.3, 0.26, 0.3, 0xff4b3e, -0.22, 1.67, 0); add(0.3, 0.26, 0.3, 0xff4b3e, 0.22, 1.67, 0);
+  function makeBox(){
+    const g=new THREE.Group(),add=(w,h,d,c,x,y,z)=>g.add(mesh(BX(w,h,d),L(c),x,y,z));
+    add(1.42,1.10,1.42,0x15161a,0,.55,0);
+    add(1.50,.16,1.5,0x090b0e,0,.09,0);
+    add(1.59,.28,1.59,0x131417,0,1.22,0);
+    add(1.64,.075,1.64,0xf5cf6d,0,1.39,0);
+    add(1.48,.10,1.48,0xbe8a30,0,1.0,0);
+    for(const side of [-1,1]){
+      add(.14,1.09,1.52,0xf3ca55,side*.61,.54,0);
+      add(1.54,1.09,.14,0xb78b35,0,.54,side*.61);
+      add(.19,.2,.18,0xffde81,side*.59,1.39,side*.59);
+      add(.35,.075,1.57,0xeec46b,side*.4,1.45,0);
+    }
+    add(.46,.49,.1,0xffd565,0,.67,.76);
+    add(.25,.26,.13,0x1b2231,0,.67,.83);
+    add(.12,.1,.15,0xf8df9a,0,.67,.93);
+    add(.3,.11,.13,0x9f732d,0,1.10,.82);
     return g;
   }
   function makeDye() {
@@ -2579,8 +2593,10 @@ function productHTML(id, col) {
     '<div class="ptitle"><b>' + it[1] + '</b><span class="rar r' + ra[0] + '">' + ra[1] + '</span></div><p class="pdesc">' + DESC[id] + '</p>' +
     '<div class="pbuy"><span class="lbl">' + SLOTN[slot] + '</span>' + cta + '</div></div>';
 }
-const lootBanner=()=>'<div class="loot r3"><span class="loot-pic">'+lootImg(66)+'</span><b>SEASON 01 BOX</b><div class="acts"><button class="btn sm" data-a="lootbrowse">VIEW DROPS</button>'+
-  (wallet.boxes?'<button class="btn sm go" data-a="loot" data-v="go">OPEN ('+wallet.boxes+')</button>':'<button class="btn sm go" data-a="lootbuy">BUY &amp; OPEN '+coin(BOX_PRICE)+'</button>')+'</div></div>';
+const lootBanner=()=>'<div class="loot r3"><span class="loot-pic">'+lootImg(66)+'</span>'+
+  '<b>SEASON 1 BOX</b><div class="acts"><button class="btn sm" data-a="lootbrowse">VIEW REWARDS</button>'+
+  (wallet.boxes?'<button class="btn sm" data-a="loot" data-v="go">OPEN</button>':
+  '<button class="btn sm" data-a="lootbuy">BUY '+coin(BOX_PRICE)+'</button>')+'</div></div>';
 function shopHTML(col) {
   if (F.sel && ITEMS[F.sel] && ITEMS[F.sel][2] > 0) return productHTML(F.sel, col);
   const ids = Object.keys(ITEMS).filter(id => (ITEMS[id][2] > 0 || ITEMS[id][0] === 'gun') && ITEMS[id][3] !== 2 && filtOf(id) === F.filt).sort((a, b) => ITEMS[a][2] - ITEMS[b][2]);
@@ -2609,34 +2625,37 @@ function wardrobeModal() {
   openModal('wardrobe', () => { const col = PC[Math.max(0, mine0())], t = tryLook(); return '<div class="whead"><span class="pv bg-' + bgOf(t.look) + '">' + fig(t.look, col, 104) + petImg(t.pet, 40) + '</span><div class="wside">' + '<span class="logo sm"><b>' + esc((G && me >= 0 && G.players[me] ? G.players[me].name : F.name) || 'You') + '</b>' + mark() + '</span>' + pick('wtab', '', [['style', 'Profile'], ['shop', 'Shop']], F.wtab) + '<button class="btn go" data-a="close">Done</button></div></div>' + wardrobeHTML(col); });
 }
 /* Premium exclusive reveal. The server chooses the reward before the reel animates. */
-function bxSeasonPool() { return Object.keys(ITEMS).filter(id => exclusive(id) && ITEMS[id][0] === 'outfit'); }
-function bxTier(id) {
-  if (!id || !ITEMS[id]) return 'legendary';
-  return rarity(ITEMS[id][2])[1] === 'Mythical' ? 'mythical' : 'legendary';
+function bxSeasonPool(){return BITZ_LOOT_RULES.eligible(ITEMS,[]);}
+function bxRemaining(){return BITZ_LOOT_RULES.eligible(ITEMS,wallet&&wallet.own||[]);}
+function bxTier(id){return BITZ_LOOT_RULES.tier(id,ITEMS)||'epic';}
+function bxTierTag(id){const t=bxTier(id);return '<span class="bx-tier bx-'+t+'">'+t.toUpperCase()+'</span>';}
+function bxOdds(){
+  const rates=BITZ_LOOT_RULES.odds(bxRemaining(),ITEMS);
+  return '<div class="bx-odds" aria-label="Current drop chances"><b>DROP CHANCES</b>'+
+    BITZ_LOOT_RULES.order.map(t=>'<span class="bx-odd bx-'+t+'">'+t.toUpperCase()+' <strong>'+
+      (Number.isInteger(rates[t])?rates[t]:rates[t].toFixed(1))+'%</strong></span>').join('')+'</div>';
 }
-function bxTierTag(id) {
-  const t = bxTier(id);
-  return '<span class="bx-tier bx-' + t + '">' + (t === 'mythical' ? '&#10022; MYTHICAL' : '&#9670; LEGENDARY') + '</span>';
+function bxCard(id,col){
+  if(!id||!ITEMS[id])return '<div class="bx-card bx-epic"><i class="coin"></i></div>';
+  const it=ITEMS[id],t=bxTier(id);
+  return '<div class="bx-card bx-'+t+'" aria-label="'+esc(it[1])+', '+t+'">'+
+    '<span class="bx-card-tier">'+t.toUpperCase()+'</span>'+pimg(id,94,col)+
+    '<span class="bx-card-name">'+esc(it[1])+'</span></div>';
 }
-function bxCard(id, col) {
-  if (!id || !ITEMS[id]) return '<div class="bx-card bx-legendary"><i class="coin"></i></div>';
-  const t=bxTier(id), it=ITEMS[id];
-  return '<div class="bx-card bx-'+t+'" aria-label="'+esc(it[1])+', '+t+'"><span class="bx-card-tier">'+(t==='mythical'?'MYTHICAL':'LEGENDARY')+'</span>'+pimg(id,84,col)+'<span class="bx-card-name">'+esc(it[1])+'</span></div>';
+function wheelSlices(pz){
+  const S=[],pool=[...new Set(bxRemaining().concat(pz.item?[pz.item]:[]))];
+  for(let i=0;i<36;i++)S.push({item:pool[Math.floor(Math.random()*pool.length)]||null});
+  const k=29;S[k]=pz.item?{item:pz.item}:{coins:pz.coins};
+  return {S,k};
 }
-function wheelSlices(pz) {
-  const pool = bxSeasonPool(), S = [];
-  for (let i = 0; i < 34; i++) S.push({ item: pool[Math.floor(Math.random() * pool.length)] || null });
-  const k = 29;
-  S[k] = pz.item ? { item: pz.item } : { coins: pz.coins };
-  return { S, k };
-}
-function wheelHTML(st,col) {
-  const pool=bxSeasonPool();
-  const cards=st.S||Array.from({length:10},(_,i)=>({item:pool[(i*3+2)%Math.max(1,pool.length)]}));
-  return '<section class="bx-roulette" aria-label="Legendary and Mythical outfit reel">'+
-    '<div class="bx-reel-top"><strong>IN THE BOX</strong><span>LEGENDARY  /  MYTHICAL</span></div>'+
-    '<span class="bx-pointer" aria-hidden="true"></span><div id="bx-reel-viewport" class="bx-reel-viewport'+(st.phase==='spin'?' bx-moving':'')+'"><div id="bx-reel-track" class="bx-reel-track">'+
-    cards.map(x=>bxCard(x.item,col)).join('')+'</div></div></section>';
+function wheelHTML(st,col){
+  const pool=bxRemaining();
+  const cards=st.S||Array.from({length:10},(_,i)=>({item:pool[(i*3+2)%Math.max(1,pool.length)]||null}));
+  return '<section class="bx-roulette" aria-label="Single-line prize ticker">'+
+    '<div class="bx-reel-top"><strong>SPIN TO REVEAL</strong><span>SEASON 1</span></div>'+
+    '<div id="bx-reel-viewport" class="bx-reel-viewport'+(st.phase==='spin'?' bx-moving':'')+'">'+
+    '<div id="bx-reel-track" class="bx-reel-track">'+cards.map(x=>bxCard(x.item,col)).join('')+'</div></div>'+
+    '<span class="bx-pointer" aria-hidden="true"></span></section>';
 }
 function bxPrizeArt(id,col) {
   if(!id || !ITEMS[id])return '<i class="coin big"></i>';
@@ -2665,15 +2684,15 @@ function lootGalleryHTML(st,col){
   if(st.item&&ITEMS[st.item]){
     const id=st.item,it=ITEMS[id];
     return '<div class="bx-shell">'+header+seasonRibbon()+'<div class="bx-collect-preview">'+bxPrizeArt(id,col)+
-      '<div><span class="bx-eyebrow">SEASON 01</span>'+bxTierTag(id)+'<h2>'+esc(it[1])+'</h2><p>'+(owns(id)?'OWNED':'NOT COLLECTED')+'</p></div></div>'+
-      '<div class="bx-actions"><button class="bx-btn" data-a="lootgallery">BACK TO DROPS</button><button class="bx-btn" data-a="lootback">LOOT BOX</button></div></div>';
+      '<div><span class="bx-eyebrow">ITEM PREVIEW</span>'+bxTierTag(id)+'<h2>'+esc(it[1])+'</h2><p>'+(owns(id)?'Already in your collection':'Not yet owned')+'</p></div></div>'+
+      '<div class="bx-actions"><button class="bx-btn" data-a="lootgallery">BACK TO REWARDS</button><button class="bx-btn" data-a="lootback">LOOT BOX</button></div></div>';
   }
   const page=Math.max(0,Math.min(Math.ceil(pool.length/12)-1,st.page||0)),current=pool.slice(page*12,page*12+12);
   const cards=current.map(id=>'<button class="bx-collect-card bx-'+bxTier(id)+'" data-a="lootselect" data-v="'+id+'" aria-label="View '+esc(ITEMS[id][1])+'">'+
     pimg(id,110,col)+bxTierTag(id)+'<strong>'+esc(ITEMS[id][1])+'</strong>'+
     '<small class="'+(owns(id)?'bx-owned':'bx-new')+'">'+(owns(id)?'OWNED':'LOCKED')+'</small></button>').join('');
   return '<div class="bx-shell">'+header+seasonRibbon()+
-    '<div class="bx-collection"><div class="bx-collection-head"><h2>SEASON 01</h2><span>'+owned+'/'+pool.length+' COLLECTED</span></div>'+
+    '<div class="bx-collection"><div class="bx-collection-head"><h2>ALL SEASON 1 REWARDS</h2><span>'+owned+' / '+pool.length+' OWNED</span></div>'+
     '<div class="bx-collection-grid">'+cards+'</div>'+
     '<div class="bx-collection-foot">'+(page>0?'<button class="bx-btn" data-a="lootpage" data-v="'+(page-1)+'">PREVIOUS</button>':'')+
     (page<Math.ceil(pool.length/12)-1?'<button class="bx-btn" data-a="lootpage" data-v="'+(page+1)+'">NEXT</button>':'')+
@@ -2687,50 +2706,46 @@ function lootModal() {
     else rerender();
   }});
 }
-function lootHTML() {
+function lootHTML(){
   const st=lootSt||{phase:'idle'},n=wallet.boxes,col=PC[Math.max(0,mine0())],pool=bxSeasonPool();
-  const count=pool.filter(owns).length,total=pool.length;
-  const busy=st.phase==='spin'||st.phase==='opening',won=st.phase==='prize'&&st.prize;
+  const owned=pool.filter(owns).length,total=pool.length,remaining=bxRemaining();
+  const busy=['spin','opening','purchasing'].includes(st.phase),won=st.phase==='prize'&&st.prize;
   if(st.view==='collection')return lootGalleryHTML(st,col);
-  const head='<header class="bx-head"><div class="bx-brand">'+logo('sm')+'</div><span class="bx-season-chip">SEASON 01</span>'+
-    '<span class="bx-spacer"></span><span class="bx-stock">'+lootImg(19)+' '+fmt(n)+'</span>'+(busy?'':xBtn())+'</header>';
-  const action=busy?'<button class="bx-cta" disabled>OPENING…</button>':
-    n>0?'<button class="bx-cta" data-a="lootopen">OPEN '+(won?'NEXT':'BOX')+'</button>':
-      '<button class="bx-cta" data-a="lootbuy">BUY &amp; OPEN <span class="bx-price">'+fmt(BOX_PRICE)+'</span></button>';
-  if(won) {
-    const id=st.prize.item,it=id&&ITEMS[id],tier=bxTier(id);
-    const name=it?esc(it[1]):'+'+fmt(st.prize.coins||0)+' GOLD',image=it?bxPrizeArt(id,col):'<i class="coin big"></i>';
-    const others=pool.filter(x=>x!==id).sort((a,b)=>bxTier(a)==='mythical'?-1:bxTier(b)==='mythical'?1:0).slice(0,4);
-    const pct=total?Math.round(100*count/total):0;
-    const reward='<section class="bx-drop">'+
-      '<div class="bx-drop-head"><span>DROP UNLOCKED</span><span>'+count+' / '+total+' COLLECTED</span></div>'+
-      '<div class="bx-reward bx-'+tier+'" role="status" aria-live="polite">'+bxConfetti()+
-        '<div class="bx-reward-image"><div class="bx-reward-halo"></div>'+image+'</div>'+
-        '<div class="bx-reward-text">'+(it?bxTierTag(id):'')+
-        '<h2 class="bx-prize-name">'+name+'</h2>'+
-        '<div class="bx-reward-sub">SEASON 01  ·  EXCLUSIVE '+(it?'OUTFIT':'DROP')+'</div>'+
-        '<div class="bx-meter" aria-label="'+count+' of '+total+' season outfits collected"><span style="width:'+pct+'%"></span></div>'+
-        '<span class="bx-reward-saved">✓ SAVED TO INVENTORY</span></div></div>'+
-      '<div class="bx-more-drops"><span class="bx-more-title">ALSO IN THIS SEASON</span>'+
-        '<div class="bx-mini-strip">'+others.map(x=>'<button class="bx-mini-skin bx-'+bxTier(x)+'" data-a="lootselect" data-v="'+x+'" aria-label="Preview '+esc(ITEMS[x][1])+'">'+pimg(x,90,col)+'</button>').join('')+
-        '<button class="bx-mini-more" data-a="lootbrowse">VIEW ALL '+total+'</button></div></div></section>';
-    return '<div class="bx-shell">'+head+seasonRibbon()+reward+
-      '<div class="bx-actions bx-result-actions">'+action+
-      (it&&!wearing(id)?'<button class="bx-btn bx-wear" data-a="lootwear">WEAR</button>':'')+
-      '<button class="bx-btn" data-a="lootbrowse">COLLECTION</button><button class="bx-btn bx-close" data-a="close">DONE</button></div></div>';
+  const head='<header class="bx-head"><div class="bx-brand">'+logo('sm')+'</div>'+
+    '<span class="bx-spacer"></span><span class="bx-stock">'+lootImg(19)+' '+fmt(n)+' BOX'+(n===1?'':'ES')+'</span>'+
+    (busy?'':xBtn())+'</header>';
+  if(won){
+    const id=st.prize.item,it=id&&ITEMS[id],worn=it&&wearing(id);
+    const art=it?bxPrizeArt(id,col):'<i class="coin big"></i>';
+    const section='<section class="bx-reward bx-'+(it?bxTier(id):'legendary')+'" role="status" aria-live="polite">'+
+      bxConfetti()+'<div class="bx-reward-image"><div class="bx-reward-halo"></div>'+art+'</div>'+
+      '<div class="bx-reward-text"><strong class="bx-win-title">'+(it?'YOU WON!':'BOX REFUNDED')+'</strong>'+
+      (it?bxTierTag(id):'')+'<h2 class="bx-prize-name">'+(it?esc(it[1]):'GOLD RETURNED')+'</h2>'+
+      '<span class="bx-win-note">'+(it?(worn?'You are wearing this outfit':'Added to your collection'):'You already own every reward')+'</span>'+
+      '<span class="bx-win-progress">'+owned+' / '+total+' COLLECTED</span></div></section>';
+    const buttons='<div class="bx-actions bx-win-actions">'+
+      (it&&!worn?'<button class="bx-cta" data-a="lootwear">EQUIP NOW</button>':'')+
+      (n>0?'<button class="bx-btn" data-a="lootopen">OPEN NEXT BOX</button>':remaining.length?
+        '<button class="bx-btn" data-a="lootbuy">BUY ANOTHER · '+fmt(BOX_PRICE)+'</button>':'')+
+      '<button class="bx-btn" data-a="lootbrowse">VIEW COLLECTION</button>'+
+      '<button class="bx-btn bx-close" data-a="close">BACK TO WORLD</button></div>';
+    return '<div class="bx-shell">'+head+section+buttons+'</div>';
   }
-  const heroIds=['x_sun','x_void','x_dragon'].filter(id=>pool.includes(id));
-  const top='<section class="bx-hero"><div class="bx-art"><span class="bx-ring"></span>'+
-    '<i class="bx-particle p1"></i><i class="bx-particle p2"></i><i class="bx-particle p3"></i>'+
-    '<div class="bx-chestpic">'+lootImg(245)+'</div></div>'+
-    '<div class="bx-detail"><span class="bx-eyebrow">SEASON 01  /  EXCLUSIVE DROPS</span>'+
-    '<h2 class="bx-title">LOOT <em>BOX</em></h2>'+
-    '<div class="bx-tiers"><span class="bx-tier bx-legendary">LEGENDARY</span><span class="bx-tier bx-mythical">MYTHICAL</span></div>'+
-    '<div class="bx-hero-line">FULL-BODY COSTUMES ONLY</div>'+
-    '<div class="bx-featured-skins">'+heroIds.map(id=>'<button class="bx-featured-skin bx-'+bxTier(id)+'" data-a="lootselect" data-v="'+id+'" aria-label="Preview '+esc(ITEMS[id][1])+'">'+pimg(id,100,col)+'</button>').join('')+'</div>'+
-    '</div></section>';
-  return '<div class="bx-shell">'+head+seasonRibbon()+top+wheelHTML(st,col)+
-    '<div class="bx-actions bx-base-actions">'+action+(busy?'':'<button class="bx-btn bx-browse" data-a="lootbrowse">VIEW ALL '+total+' DROPS</button>')+'</div></div>';
+  const hero='<section class="bx-hero"><div class="bx-art"><span class="bx-ring"></span>'+
+    '<div class="bx-chestpic">'+lootImg(240)+'</div></div>'+
+    '<div class="bx-detail"><span class="bx-eyebrow">SEASON 1</span>'+
+    '<h2 class="bx-title">MYSTERY <em>BOX</em></h2>'+
+    '<div class="bx-hero-line">RARE OUTFITS</div>'+
+    '<div class="bx-current-progress">'+owned+' / '+total+' COLLECTED</div></div></section>';
+  const button=busy?'<button class="bx-cta" disabled>OPENING...</button>':
+    n>0?'<button class="bx-cta" data-a="lootopen">OPEN BOX</button>':
+    remaining.length?'<button class="bx-cta" data-a="lootbuy">BUY</button>':
+    '<button class="bx-cta" disabled>SEASON COMPLETE</button>';
+  const price=n>0?'<span class="bx-cost">'+fmt(n)+' AVAILABLE</span>':
+    remaining.length?'<span class="bx-cost">'+fmt(BOX_PRICE)+' GOLD</span>':'';
+  return '<div class="bx-shell">'+head+hero+bxOdds()+wheelHTML(st,col)+
+    '<div class="bx-actions bx-base-actions">'+price+button+
+    (busy?'':'<button class="bx-btn bx-browse" data-a="lootbrowse">VIEW REWARDS</button>')+'</div></div>';
 }
 async function spinLoot() {
   const st=lootSt;
@@ -3070,6 +3085,7 @@ function profilePaint() {
 document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (modal && FORCED.indexOf(modal.kind) < 0 && !(lootSt && lootSt.phase === 'spin')) closeModal(); else if (PROF) profileClose(); else if (F.page && F.page !== 'world' && $('#app').dataset.screen === 'home') { F.page = 'world'; renderHome(true); } });
 /* ================= trading ================= */
 let Trade = null;
+let lootBuyBusy = false;
 function tradeBanner() {
   const b = $('#wtrade'), t = Trade; if (!t || t.phase === 'open') { b.hidden = true; return; }
   b.hidden = false; b.innerHTML = t.phase === 'ask' ? '<span><b>' + esc(t.n) + '</b> wants to trade</span><button class="btn ok sm" data-a="tradeyes">Accept</button><button class="btn sm" data-a="tradeno">Decline</button>' : '<span>Waiting for <b>' + esc(t.n) + '</b> to answer</span><button class="btn sm" data-a="tradeno">Cancel</button>';
@@ -3500,17 +3516,20 @@ document.addEventListener('click', async e => {
       break;
     case 'loot': lootModal(); if (el.dataset.v === 'go' && wallet.boxes > 0) await spinLoot(); break;
     case 'lootbuy': {
-      if (lootSt && (lootSt.phase === 'opening' || lootSt.phase === 'spin')) break;
-      if (wallet.coins < BOX_PRICE) { toast('You need ' + fmt(BOX_PRICE - wallet.coins) + ' more gold.'); break; }
-      el.disabled=true;
-      try {
-        await api('shop',{op:'box'});
-        Snd('buy');
-        if (!modal || modal.kind !== 'loot') lootModal();
-        else { lootSt.phase='idle'; lootSt.prize=null; lootSt.S=null; }
+      if(lootBuyBusy||lootSt&&['purchasing','opening','spin'].includes(lootSt.phase))break;
+      if(wallet.coins<BOX_PRICE){toast('Not enough gold. You need '+fmt(BOX_PRICE-wallet.coins)+' more.');break;}
+      if(!bxRemaining().length){toast('All Season 1 rewards collected.');break;}
+      lootBuyBusy=true;el.disabled=true;
+      if(lootSt&&modal&&modal.kind==='loot'){lootSt.phase='purchasing';refreshModal();}
+      try{
+        await api('shop',{op:'box'});Snd('buy');
+        if(!modal||modal.kind!=='loot')lootModal();
+        else{lootSt.phase='idle';lootSt.prize=null;lootSt.S=null;lootSt.view='';}
         await spinLoot();
-      } catch(er) { toast(er.message || 'Purchase failed.'); }
-      if(el.isConnected)el.disabled=false;
+      }catch(er){
+        toast(er.message||'Purchase failed. Try again.');
+        if(lootSt&&lootSt.phase==='purchasing'){lootSt.phase='idle';refreshModal();}
+      }finally{lootBuyBusy=false;if(el.isConnected)el.disabled=false;}
       break;
     }
     case 'lootopen': await spinLoot(); break;
