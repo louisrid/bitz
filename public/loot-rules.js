@@ -25,12 +25,15 @@
     return out;
   }
   function odds(ids,items){
-    const d=distribution(ids,items),values={},remaining=100;
-    order.forEach((t,i)=>{
-      if(i===order.length-1)values[t]=remaining;
-      else{values[t]=Math.round(d[t]*1000)/10;remaining-=values[t];}
-    });
-    return values;
+    const d=distribution(ids,items),out={epic:0,legendary:0,mythical:0,secret:0};
+    const present=order.filter(t=>d[t]>0);if(!present.length)return out;
+    let remaining=1000;
+    for(let i=0;i<present.length;i++){
+      const t=present[i];
+      const tenths=i===present.length-1?remaining:Math.round(d[t]*1000);
+      out[t]=tenths/10;remaining-=tenths;
+    }
+    return out;
   }
   function pick(ids,items,random){
     if(!ids||!ids.length)return null;
