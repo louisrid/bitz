@@ -42,6 +42,8 @@ jobs:
       - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
       - name: "Desktop and iPhone-sized Chrome: loading, world, packs, book, buyer, profiles, no overlaps"
         run: node tests/browser.mjs
+      - name: Real player photographs in actual card designs at desktop and mobile widths
+        run: node tests/portrait-visual.mjs
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
