@@ -59,12 +59,62 @@
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
   },
+  "brentford-mikkel-damsgaard": {
+    "local": "football/portraits/brentford-mikkel-damsgaard.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Mikkel_Damsgaard.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Mikkel_Damsgaard.jpg",
+    "file": "File:Mikkel_Damsgaard.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "Timmy96",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
   "brentford-sepp-van-den-berg": {
     "local": "football/portraits/brentford-sepp-van-den-berg.jpg",
     "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Sepp_van_den_Berg_and_Nathan_Collins_29112025_%282%29_%28Sepp_van_den_Berg%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "sourcePage": "https://commons.wikimedia.org/wiki/File:Sepp_van_den_Berg_and_Nathan_Collins_29112025_(2)_(Sepp_van_den_Berg).jpg",
     "file": "File:Sepp_van_den_Berg_and_Nathan_Collins_29112025_(2)_(Sepp_van_den_Berg).jpg",
     "license": "CC0",
+    "artist": "Timmy96",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "brighton-bart-verbruggen": {
+    "local": "football/portraits/brighton-bart-verbruggen.png",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Bart_Verbruggen.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Bart_Verbruggen.png",
+    "file": "File:Bart_Verbruggen.png",
+    "license": "CC BY 4.0",
+    "artist": "AFC Bournemouth",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "brighton-danny-welbeck": {
+    "local": "football/portraits/brighton-danny-welbeck.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/46/Danny_Welbeck_2018-06-13_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Danny_Welbeck_2018-06-13_1.jpg",
+    "file": "File:Danny_Welbeck_2018-06-13_1.jpg",
+    "license": "CC BY-SA 3.0",
+    "artist": "Кирилл Венедиктов",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "brighton-georginio-rutter": {
+    "local": "football/portraits/brighton-georginio-rutter.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/62/Georginio_Rutter_%28cropped%29.jpeg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Georginio_Rutter_(cropped).jpeg",
+    "file": "File:Georginio_Rutter_(cropped).jpeg",
+    "license": "CC BY-SA 4.0",
+    "artist": "Egghead06",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "brighton-kaoru-mitoma": {
+    "local": "football/portraits/brighton-kaoru-mitoma.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/65/Kaoru_Mitoma_2026.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Kaoru_Mitoma_2026.jpg",
+    "file": "File:Kaoru_Mitoma_2026.jpg",
+    "license": "CC BY-SA 4.0",
     "artist": "Timmy96",
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
@@ -96,6 +146,16 @@
     "file": "File:Jefferson_Lerma_2018.png",
     "license": "CC BY 3.0",
     "artist": "AFC Bournemouth",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "crystal-palace-tyrick-mitchell": {
+    "local": "football/portraits/crystal-palace-tyrick-mitchell.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/54/Tyrick_Mitchell%2C_Manchester_United_v_Crystal_Palace%2C_5_December_2021_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Tyrick_Mitchell,_Manchester_United_v_Crystal_Palace,_5_December_2021_(cropped).jpg",
+    "file": "File:Tyrick_Mitchell,_Manchester_United_v_Crystal_Palace,_5_December_2021_(cropped).jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "Ardfern",
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
   },
@@ -149,6 +209,26 @@
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
   },
+  "ipswich-conor-chaplin": {
+    "local": "football/portraits/ipswich-conor-chaplin.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/69/Conor_Chaplin_040524.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Conor_Chaplin_040524.jpg",
+    "file": "File:Conor_Chaplin_040524.jpg",
+    "license": "CC0",
+    "artist": "ITFC1234",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "ipswich-jaden-philogene": {
+    "local": "football/portraits/ipswich-jaden-philogene.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Jaden_Philogene.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Jaden_Philogene.jpg",
+    "file": "File:Jaden_Philogene.jpg",
+    "license": "CC BY 4.0",
+    "artist": "COYB123",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
   "ipswich-wes-burns": {
     "local": "football/portraits/ipswich-wes-burns.jpg",
     "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Wes_Burns_2_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -156,6 +236,46 @@
     "file": "File:Wes_Burns_2_(cropped).jpg",
     "license": "CC BY-SA 4.0",
     "artist": "Xaneph",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "liverpool-virgil-van-dijk": {
+    "local": "football/portraits/liverpool-virgil-van-dijk.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/5d/20160604_AUT_NED_8876_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:20160604_AUT_NED_8876_(cropped).jpg",
+    "file": "File:20160604_AUT_NED_8876_(cropped).jpg",
+    "license": "CC BY-SA 3.0 at",
+    "artist": "Ailura",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "man-city-savinho": {
+    "local": "football/portraits/man-city-savinho.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/a/a0/Manchester_City_2025_06_26_Juventus_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Manchester_City_2025_06_26_Juventus_(cropped).jpg",
+    "file": "File:Manchester_City_2025_06_26_Juventus_(cropped).jpg",
+    "license": "CC BY 4.0",
+    "artist": "Equipos de fútbol",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "man-city-tijjani-reijnders": {
+    "local": "football/portraits/man-city-tijjani-reijnders.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/c6/Manchester_City_2025_06_26_Juventus_%28cropped_to_Reijniders%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Manchester_City_2025_06_26_Juventus_(cropped_to_Reijniders).jpg",
+    "file": "File:Manchester_City_2025_06_26_Juventus_(cropped_to_Reijniders).jpg",
+    "license": "CC BY 4.0",
+    "artist": "Equipos de fútbol",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "man-united-matthijs-de-ligt": {
+    "local": "football/portraits/man-united-matthijs-de-ligt.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/c9/2022-07-30_Fu%C3%9Fball%2C_M%C3%A4nner%2C_DFL-Supercup%2C_RB_Leipzig_-_FC_Bayern_M%C3%BCnchen_Matthijs_de_Ligt_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:2022-07-30_Fu%C3%9Fball,_M%C3%A4nner,_DFL-Supercup,_RB_Leipzig_-_FC_Bayern_M%C3%BCnchen_Matthijs_de_Ligt_(cropped).jpg",
+    "file": "File:2022-07-30_Fußball,_Männer,_DFL-Supercup,_RB_Leipzig_-_FC_Bayern_München_Matthijs_de_Ligt_(cropped).jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "Derivative work: MajorPrince",
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
   },
@@ -209,6 +329,16 @@
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
   },
+  "real-madrid-arda-guler": {
+    "local": "football/portraits/real-madrid-arda-guler.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/9/9f/Arda_G%C3%BCler_2025.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Arda_G%C3%BCler_2025.jpg",
+    "file": "File:Arda_Güler_2025.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "LawEnthusiast",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
   "real-madrid-federico-valverde": {
     "local": "football/portraits/real-madrid-federico-valverde.jpg",
     "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/73/Federico_Valverde_2021_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -219,6 +349,26 @@
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
   },
+  "real-madrid-trent-alexander-arnold": {
+    "local": "football/portraits/real-madrid-trent-alexander-arnold.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Trent_Alexander-Arnold_2018_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Trent_Alexander-Arnold_2018_(cropped).jpg",
+    "file": "File:Trent_Alexander-Arnold_2018_(cropped).jpg",
+    "license": "CC BY-SA 3.0",
+    "artist": "Антон Зайцев",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "sunderland-wilson-isidor": {
+    "local": "football/portraits/sunderland-wilson-isidor.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/3/38/Wilson_Isidor_2022.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Wilson_Isidor_2022.jpg",
+    "file": "File:Wilson_Isidor_2022.jpg",
+    "license": "CC BY-SA 3.0",
+    "artist": "Антон Зайцев",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
   "tottenham-guglielmo-vicario": {
     "local": "football/portraits/tottenham-guglielmo-vicario.png",
     "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Guglielmo_Vicario.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -226,6 +376,16 @@
     "file": "File:Guglielmo_Vicario.png",
     "license": "CC BY 4.0",
     "artist": "AFC Bournemouth",
+    "provider": "Wikimedia Commons",
+    "retrievedAt": "2026-11-12"
+  },
+  "tottenham-joao-palhinha": {
+    "local": "football/portraits/tottenham-joao-palhinha.jpg",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/47/Joaopalhinha.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Joaopalhinha.jpg",
+    "file": "File:Joaopalhinha.jpg",
+    "license": "CC BY 3.0",
+    "artist": "Agência Lusa",
     "provider": "Wikimedia Commons",
     "retrievedAt": "2026-11-12"
   },
