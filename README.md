@@ -20,6 +20,7 @@ Environment:
 | `PORT` | HTTP port (default 3000). |
 | `STAKKZ_DATABASE_URL` | Postgres connection string. Accounts, cards and the world are saved as one versioned snapshot. |
 | `STAKKZ_SECRET` | HMAC secret for the sealed wallet copies browsers hold. Keep it stable. |
+| `NODE_VERSION` | Fixed Render production runtime (Node 22.16.0). |
 | `DATA_FILE` | JSON file used when no database is configured (local play). |
 | `BITZ_FILE_ACCOUNTS=1` | Allow sign-up with file persistence (local play and tests only; never on an ephemeral host). |
 | `STAKKZ_MOVED_TO` | Old address only: forward every visitor and their sign-in to the new address. |
@@ -56,7 +57,7 @@ Environment:
 | `public/index.html`, `bitz.css`, `app.js` | The page, the design system, boot/HUD/menu/socket. |
 | `public/world.js`, `avatar.js`, `avatar-data.js`, `world-layout.js` | The 3D world, characters, pets, stands, circles. |
 | `public/cards-art.js`, `cards-ui.js` | Card, pack and box art; every card screen. |
-| `public/portraits/` | `placeholder.png` plus any real `<player-id>.png` you add later. Missing files redirect to the placeholder. |
+| `public/portraits/` | 252 cached, credited footballer images; 13 unresolved players use the shared placeholder. |
 
 ## Tests and tools
 
@@ -89,6 +90,8 @@ Player photo licences are not necessarily endorsements or releases of publicity 
 Game autograph artwork is fictional, not an authentic player signature.
 
 ## Deploying
+
+Use the [single-site v1 launch checklist](docs/LAUNCH.md). The public release smoke test is `node tools/launch-smoke.mjs`; it requires the actual site, real build and persistent storage to be ready.
 
 `render.yaml` runs `npm start`. Set `STAKKZ_DATABASE_URL` and `STAKKZ_SECRET` in the service. The first time an
 account is touched after deploying, its old balance, cards and packs are archived on the account record
