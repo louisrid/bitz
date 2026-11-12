@@ -151,6 +151,8 @@ function authSucceeded(key) { authAttempts.delete(key); }
 function allowed(ip) { const now = Date.now(), b = buckets.get(ip) || { n: 80, t: now }; b.n = Math.min(80, b.n + (now - b.t) / 1000 * 20); b.t = now; buckets.set(ip, b); if (buckets.size > 5000) buckets.clear(); if (b.n < 1) return false; b.n--; return true; }
 /* which release this server is running; open pages reload themselves when it changes */
 const handoffs = new Map();
+process.on('uncaughtException', e => { console.error('uncaught', e && e.stack || e); });
+process.on('unhandledRejection', e => { console.error('unhandled', e && e.stack || e); });
 const BUILD = String(process.env.RENDER_GIT_COMMIT || 'dev').slice(0, 12);   // only a new release changes this, never a restart
 const send = (res, code, o) => { const buf = Buffer.from(JSON.stringify(o)); res.writeHead(code, { 'Content-Type': 'application/json', 'Content-Length': buf.length, 'Cache-Control': 'no-store' }); res.end(buf); };
 const read = req => new Promise((ok, no) => { let n = 0; const parts = []; req.on('data', c => { n += c.length; if (n > 20000) { no(new Error('big')); req.destroy(); } else parts.push(c); }); req.on('end', () => { try { ok(JSON.parse(Buffer.concat(parts).toString('utf8') || '{}')); } catch (e) { no(e); } }); req.on('error', no); });
@@ -505,7 +507,8 @@ function plazaJoin(ws, raw) {
     if (typeof msg.hello !== 'string') return;
     const who = plazaWho(msg.hello); if (!who) { plazaSend(ws, { error: 'Sign in again to enter the plaza.' }); return ws.close(); }
     if (plaza.size > 80) { plazaSend(ws, { error: 'The plaza is full right now.' }); return ws.close(); }
-    Object.assign(q, who, { i: 'w' + (++plazaSeq), p: spawnAt(), moved: false, hp: 100, w: 0, dead: 0, safe: Date.now() + 2500, sw: core.swag(account(who.id)), nw: core.worth(account(who.id)) });
+    const back = Array.isArray(msg.at) && msg.at.length >= 3 && msg.at.slice(0, 3).every(Number.isFinite) ? [Math.max(-145, Math.min(145, msg.at[0])), 0, Math.max(-145, Math.min(145, msg.at[1])), msg.at[2] % 7, 0] : null;   // a reconnect puts you back where you stood
+    Object.assign(q, who, { i: 'w' + (++plazaSeq), p: back || spawnAt(), moved: false, hp: 100, w: 0, dead: 0, safe: Date.now() + 2500, sw: core.swag(account(who.id)), nw: core.worth(account(who.id)) });
     plazaSend(ws, { you: q.i, admin: isAdmin(q), world: world, all: [...plaza.values()].filter(o => o.i && o !== q).map(plazaCard), ents: [...ents.values()].map(entCard), zmode: { on: zMode, n: zBy, wave: zWave } });
     plazaAll({ join: plazaCard(q) }, ws);
     return;
@@ -552,7 +555,7 @@ server.on('upgrade', (req, socket, head) => {
       ws.on('message', d => {
         const m = String(d); if (m === 'ping') return plazaSend(ws, 'pong');
         const now = Date.now(); if (now - since > 1000) { since = now; count = 0; } if (++count > 40) return;   // flood guard
-        plazaJoin(ws, m);
+        try { plazaJoin(ws, m); } catch (e) { console.error('plaza', e && e.stack || e); }
       });
       ws.on('close', () => { const q = plaza.get(ws); if (q && q.trade && trades.get(q.trade)) tradeEnd(trades.get(q.trade), 'left'); plaza.delete(ws); if (q && q.i) plazaAll({ leave: q.i }); });
       ws.on('error', () => {});

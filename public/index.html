@@ -3011,7 +3011,7 @@ function tradeHTML() {
 /* ================= the plaza connection =================
    Everyone outside a match is in one shared world. The page joins it on arrival and in lobbies, leaves it when a
    match starts (so players in a game disappear from the plaza) and rejoins when they come home. */
-const Plaza = { ws: null, you: null, tries: 0, timer: 0, sent: null, sentAt: 0, sig: '', restyleT: 0 };
+const Plaza = { ws: null, you: null, tries: 0, timer: 0, sent: null, sentAt: 0, sig: '', restyleT: 0, clearT: 0, came: {} };
 const plazaCol = n => PC[[...String(n || '')].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) % PC.length];
 const PLAZA_ON = true;    // the shared world ships switched off until it is tested live
 function plazaWanted() { return PLAZA_ON && !!(Net.ready && Net.db && B3.ok) && $('#app').dataset.screen !== 'game'; }
@@ -3034,12 +3034,12 @@ function plazaOpen() {
   clearTimeout(Plaza.timer);
   let ws; try { ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + location.pathname.replace(/[^/]*$/, '') + 'api/plaza/ws'); } catch (e) { Plaza.timer = setTimeout(plazaSync, 4000); return; }
   Plaza.ws = ws; Plaza.sent = null;
-  ws.onopen = () => { Plaza.tries = 0; try { ws.send(JSON.stringify({ hello: activeKey || KEY })); } catch (e) {} };
+  ws.onopen = () => { Plaza.tries = 0; try { const me = B3.world && B3.world.me; ws.send(JSON.stringify(me ? { hello: activeKey || KEY, at: [Math.round(me.x * 100) / 100, Math.round(me.z * 100) / 100, Math.round(me.ry * 100) / 100] } : { hello: activeKey || KEY })); } catch (e) {} };
   ws.onmessage = e => { if (e.data === 'pong') return; let d; try { d = JSON.parse(e.data); } catch (x) { return; } plazaGot(d); };
-  ws.onclose = () => { if (Plaza.ws !== ws) return; Plaza.ws = null; Plaza.you = null; if (Trade) tradeDrop('The trade was cancelled.'); B3.world.clear(); plazaCount(); if (plazaWanted()) Plaza.timer = setTimeout(plazaSync, Math.min(10000, 800 * Math.pow(1.7, Plaza.tries++))); };
+  ws.onclose = () => { if (Plaza.ws !== ws) return; Plaza.ws = null; Plaza.you = null; if (Trade) tradeDrop('The trade was cancelled.'); clearTimeout(Plaza.clearT); Plaza.clearT = setTimeout(() => { if (!Plaza.you) { B3.world.clear(); plazaCount(); } }, 12000); if (plazaWanted()) Plaza.timer = setTimeout(plazaSync, Math.min(10000, 800 * Math.pow(1.7, Plaza.tries++))); };
   ws.onerror = () => { try { ws.close(); } catch (x) {} };
 }
-function plazaClose() { const ws = Plaza.ws; Plaza.ws = null; Plaza.you = null; clearTimeout(Plaza.timer); try { ws && ws.close(); } catch (e) {} B3.world.clear(); plazaCount(); }
+function plazaClose() { const ws = Plaza.ws; Plaza.ws = null; Plaza.you = null; clearTimeout(Plaza.timer); clearTimeout(Plaza.clearT); try { ws && ws.close(); } catch (e) {} B3.world.clear(); plazaCount(); }
 function plazaCount() { const c = $('#wcount'); if (c) c.textContent = Plaza.you ? B3.world.others.size + 1 : '…'; }
 function plazaFeed(text) {
   const f = $('#wfeed'); if (!f) return; const d = document.createElement('div'); d.textContent = text; f.appendChild(d);
@@ -3074,8 +3074,8 @@ function plazaGot(d) {
   if (d.pads) W.pads(d.pads);
   if (d.took && d.took[0] !== Plaza.you) { const o = W.others.get(d.took[0]); if (o) plazaFeed(o.n + ' grabbed a x' + d.took[1] + ' gold boost'); }
   if (d.you) { Zom.admin = !!d.admin; if (d.world) Zom.world = d.world; if (d.zmode) { Zom.on = !!d.zmode.on; Zom.wave = d.zmode.wave || 0; } zomButton(); if (d.ents) { W.entClear(); d.ents.forEach(W.entAdd); } Plaza.you = d.you; W.you = d.you; W.dead = false; W.hp = 100; if (W.me) W.me.g.rotation.x = 0; worldHud(); if (W.weapon) plazaSend({ wpn: W.weapon }); W.clear(); (d.all || []).forEach(o => W.add(o, plazaCol(o.n))); plazaCount(); if (d.all && d.all.length) plazaFeed(d.all.length === 1 ? d.all[0].n + ' is here' : d.all.length + ' people are here'); return; }
-  if (d.join) { W.add(d.join, plazaCol(d.join.n)); plazaFeed(d.join.n + ' joined'); plazaCount(); Snd('hop', 9); }
-  if (d.leave) { const o = W.others.get(d.leave); if (o) plazaFeed(o.n + ' left'); W.drop(d.leave); plazaCount(); }
+  if (d.join) { W.add(d.join, plazaCol(d.join.n)); const nk = d.join.f || d.join.n, seenAt = Plaza.came[nk] || 0; Plaza.came[nk] = Date.now(); if (Date.now() - seenAt > 90000) { plazaFeed(d.join.n + ' joined'); Snd('hop', 9); } plazaCount(); }   // tabbing out and in is not news
+  if (d.leave) { const o = W.others.get(d.leave); if (o) Plaza.came[o.f || o.n] = Date.now(); W.drop(d.leave); plazaCount(); }
   if (d.s) W.snap(d.s.filter(r => r[0] !== Plaza.you));
   if (d.look && d.look.i !== Plaza.you) { const o = W.others.get(d.look.i), keep = o ? { p: [o.x, o.y, o.z, o.ry, 0] } : {}; W.add(Object.assign({}, d.look, keep), plazaCol(d.look.n)); }
   if (d.emote && d.emote.i !== Plaza.you) W.emote(d.emote.i, d.emote.e);
@@ -3091,6 +3091,8 @@ setInterval(() => {
   Plaza.sent = p; Plaza.sentAt = now; plazaSend({ p: p.map(v => Math.round(v * 100) / 100) });
 }, 100);
 setInterval(() => { const ws = Plaza.ws; if (ws && ws.readyState === 1) { try { ws.send('ping'); } catch (e) {} } }, 25000);
+const plazaBack = () => { if (document.hidden) return; Plaza.tries = 0; if (!Plaza.ws || Plaza.ws.readyState > 1) { clearTimeout(Plaza.timer); plazaSync(); } try { loadFriends(); } catch (e) {} };
+document.addEventListener('visibilitychange', plazaBack); addEventListener('online', plazaBack); addEventListener('pageshow', plazaBack);
 const Zom = { on: false, admin: false, world: { zom: false, wild: true, gift: true, forage: true }, wave: 0 };
 function banner(big, small, cls) { const b = $('#wbanner'); if (!b) return; b.className = cls || ''; b.innerHTML = '<b>' + esc(big) + '</b>' + (small ? '<small>' + esc(small) + '</small>' : ''); b.hidden = false; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; clearTimeout(banner.t); banner.t = setTimeout(() => { b.hidden = true; }, 3200); }
 function adminHTML() { const W = Zom.world, row = (k, name, note) => '<div class="admrow"><span><b>' + name + '</b><small>' + note + '</small></span><button class="btn sm' + (W[k] ? ' ok' : '') + '" data-a="adminset" data-k="' + k + '" data-v="' + (W[k] ? '0' : '1') + '">' + (W[k] ? 'On' : 'Off') + '</button></div>'; return '<div class="mhead"><h2>Admin</h2>' + xBtn() + '</div><p class="fine">Switches for everyone in the world. Only you can see this.</p>'  + row('forage', 'Foraging', 'Mushrooms, gold nuggets, gems and chests'); }
