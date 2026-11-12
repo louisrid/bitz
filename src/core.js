@@ -3,11 +3,12 @@
    Pure functions: the worker loads and saves the data around them. */
 import '../public/engine.js';
 import { ITEMS, HAIRS } from './shop.js';
+import '../public/loot-rules.js';
 import { BOT_NAMES, BOT_LOOKS, isBot } from './bots.js';
 
 const E = globalThis.Engine;
 export const BOX_PRICE = 2000000, GOLD_RATE = 1000000 / 60, AWAY_MS = 45000;
-const MYTHIC_ODDS = 0.15;   // every box holds an exclusive: Legendary usually, Mythical about one box in seven
+// Four rarity tiers and their real odds are shared with the client through loot-rules.js.
 const rarity = p => (p <= 40000 ? 0 : p <= 100000 ? 1 : p <= 300000 ? 2 : p <= 3000000 ? 3 : 4);
 const exclusive = id => !!(ITEMS[id] && ITEMS[id][3] === 1);   // [3] 1 = loot boxes only, 2 = caught in the wild only
 export { ITEMS };
@@ -49,12 +50,12 @@ export function setProfile(w, b) {
   w.pet = pet && owns(w, pet) && ITEMS[pet][0] === 'pet' ? pet : '';
 }
 /* loot boxes hold only exclusives, and never one you already own */
-const missing = w => Object.keys(ITEMS).filter(id => exclusive(id) && ITEMS[id][0] === 'outfit' && !owns(w, id));
+const missing = w => BITZ_LOOT_RULES.eligible(ITEMS, w.own);
 function rollLoot(w) {
-  const pool = missing(w); if (!pool.length) return { coins: BOX_PRICE };   // nothing left to win: the box is refunded
-  const myth = pool.filter(id => rarity(ITEMS[id][2]) === 4), leg = pool.filter(id => rarity(ITEMS[id][2]) !== 4);
-  const from = myth.length && (!leg.length || rnd() < MYTHIC_ODDS) ? myth : leg;
-  return { item: from[Math.floor(rnd() * from.length)] };
+  const pool = missing(w);
+  if (!pool.length) return { coins: BOX_PRICE }; // all exclusives collected; refund the box
+  const id = BITZ_LOOT_RULES.pick(pool, ITEMS, rnd);
+  return { item: id };
 }
 export function shop(w, what, item) {
   if (what === 'buy') {
