@@ -2515,9 +2515,9 @@ function bxTierTag(id) {
   return '<span class="bx-tier bx-' + t + '">' + (t === 'mythical' ? '&#10022; MYTHICAL' : '&#9670; LEGENDARY') + '</span>';
 }
 function bxCard(id, col) {
-  if (!id || !ITEMS[id]) return '<div class="bx-card bx-legendary"><span class="bx-card-tier">BONUS</span><i class="coin"></i><span class="bx-card-name">Gold reward</span></div>';
-  const t = bxTier(id), it = ITEMS[id];
-  return '<div class="bx-card bx-' + t + '" aria-label="' + esc(it[1]) + ', ' + t + '"><span class="bx-card-tier">' + (t === 'mythical' ? '&#10022; MYTHICAL' : '&#9670; LEGENDARY') + '</span>' + pimg(id, 84, col) + '<span class="bx-card-name">' + esc(it[1]) + '</span></div>';
+  if (!id || !ITEMS[id]) return '<div class="bx-card bx-legendary"><i class="coin"></i></div>';
+  const t=bxTier(id), it=ITEMS[id];
+  return '<div class="bx-card bx-'+t+'" aria-label="'+esc(it[1])+', '+t+'"><span class="bx-card-tier">'+(t==='mythical'?'MYTHICAL':'LEGENDARY')+'</span>'+pimg(id,84,col)+'</div>';
 }
 function wheelSlices(pz) {
   const pool = Object.keys(ITEMS).filter(exclusive), S = [];
@@ -2527,12 +2527,9 @@ function wheelSlices(pz) {
   return { S, k };
 }
 function wheelHTML(st, col) {
-  const pool = Object.keys(ITEMS).filter(exclusive);
-  const cards = st.S || Array.from({length:10},(_,i)=>({ item: pool[(i * 3 + 2) % Math.max(1,pool.length)] }));
-  return '<section class="bx-roulette" aria-label="Legendary and Mythical exclusive reward reel">' +
-    '<div class="bx-reel-top"><strong>EXCLUSIVE REWARD REEL</strong><span>' + (st.phase === 'spin' ? 'Your reward is being revealed' : 'Only Legendary and Mythical drops') + '</span></div>' +
-    '<span class="bx-pointer" aria-hidden="true"></span><div id="bx-reel-viewport" class="bx-reel-viewport' + (st.phase === 'spin' ? ' bx-moving' : '') + '"><div id="bx-reel-track" class="bx-reel-track">' +
-    cards.map(x=>bxCard(x.item,col)).join('') + '</div></div></section>';
+  const pool=Object.keys(ITEMS).filter(exclusive);
+  const cards=st.S || Array.from({length:10},(_,i)=>({item:pool[(i*3+2)%Math.max(1,pool.length)]}));
+  return '<section class="bx-roulette" aria-label="Loot-box prize reel"><span class="bx-pointer" aria-hidden="true"></span><div id="bx-reel-viewport" class="bx-reel-viewport'+(st.phase==='spin'?' bx-moving':'')+'"><div id="bx-reel-track" class="bx-reel-track">'+cards.map(x=>bxCard(x.item,col)).join('')+'</div></div></section>';
 }
 function bxPrizeArt(id,col) {
   if(!id || !ITEMS[id])return '<i class="coin big"></i>';
@@ -2541,7 +2538,7 @@ function bxPrizeArt(id,col) {
 }
 function bxConfetti() {
   return '<div class="bx-confetti" aria-hidden="true">' +
-    Array.from({length:32},(_,i)=>'<i style="--bx-x:'+(3+i*31%96)+'%;--bx-col:'+(i%4===0?'#f69bfc':i%4===1?'#ffdc45':i%4===2?'#a4eeff':'#fff0b2')+';--bx-dur:'+(1.2+(i%6)*.17)+'s;--bx-delay:'+(i%7)*.06+'s"></i>').join('')+'</div>';
+    Array.from({length:14},(_,i)=>'<i style="--bx-x:'+(3+i*31%96)+'%;--bx-col:'+(i%4===0?'#f69bfc':i%4===1?'#ffdc45':i%4===2?'#a4eeff':'#fff0b2')+';--bx-dur:'+(1.2+(i%6)*.17)+'s;--bx-delay:'+(i%7)*.06+'s"></i>').join('')+'</div>';
 }
 function lootModal() {
   lootSt = {phase:'idle', prize:null};
@@ -2552,37 +2549,29 @@ function lootModal() {
   }});
 }
 function lootHTML() {
-  const st=lootSt || {phase:'idle'}, n=wallet.boxes, col=PC[Math.max(0,mine0())];
-  const pool=Object.keys(ITEMS).filter(exclusive);
-  const featured=pool.find(id=>id==='x_sun') || pool.find(id=>bxTier(id)==='mythical') || pool[0];
-  const busy=st.phase==='spin' || st.phase==='opening', won=st.phase==='prize' && st.prize;
-  const head='<header class="bx-head"><div class="bx-brand">'+logo('sm')+'</div><span class="bx-divider"></span><span class="bx-subbrand">Exclusive drops</span><span class="bx-spacer"></span><span class="bx-stock">'+lootImg(19)+' '+fmt(n)+' '+(n===1?'box':'boxes')+'</span>'+(busy?'':xBtn())+'</header>';
-  if(won) {
-    const id=st.prize.item, it=id && ITEMS[id], tier=bxTier(id), desc=it ? DESC[id] || 'A rare collectible, only found in loot boxes.' : 'Added to your gold balance.';
-    const view='<section class="bx-reward bx-'+tier+'" role="status" aria-live="polite">'+bxConfetti()+
-      '<div class="bx-reward-image">'+(it ? bxPrizeArt(id,col) : '<i class="coin big"></i>')+'</div>'+
-      '<div class="bx-reward-text"><span class="bx-eyebrow">YOU UNLOCKED</span>'+(it?bxTierTag(id):'<span class="bx-tier bx-legendary">BONUS</span>')+
-      '<strong>'+(it?esc(it[1]):'+'+fmt(st.prize.coins||0)+' gold')+'</strong><p>'+esc(desc)+'</p></div></section>';
-    const equip=it && !wearing(id) ? '<button class="bx-cta" data-a="lootwear">WEAR IT NOW <span aria-hidden="true">&#10095;</span></button>' : '';
-    const repeat=n>0?'<button class="bx-btn" data-a="lootopen">Spin again ('+fmt(n)+' left)</button>':'<button class="bx-btn" data-a="lootbuy">Buy another &#9679; '+fmt(BOX_PRICE)+'</button>';
-    return '<div class="bx-shell">'+head+view+'<div class="bx-actions">'+equip+'<div class="bx-secondary">'+repeat+'<button class="bx-btn bx-close" data-a="close">Done</button></div><span class="bx-status">Exclusive rewards are saved to your inventory.</span></div></div>';
+  const st=lootSt||{phase:'idle'}, n=wallet.boxes, col=PC[Math.max(0,mine0())];
+  const busy=st.phase==='spin'||st.phase==='opening', won=st.phase==='prize'&&st.prize;
+  const head='<header class="bx-head"><div class="bx-brand">'+logo('sm')+'</div><span class="bx-spacer"></span><span class="bx-stock">'+lootImg(19)+' '+fmt(n)+'</span>'+(busy?'':xBtn())+'</header>';
+  if(won){
+    const id=st.prize.item,it=id&&ITEMS[id],tier=bxTier(id);
+    const image=it?bxPrizeArt(id,col):'<i class="coin big"></i>';
+    const name=it?esc(it[1]):'+'+fmt(st.prize.coins||0)+' GOLD';
+    const prize='<section class="bx-reward bx-'+tier+'" role="status" aria-live="polite">'+bxConfetti()+
+      '<div class="bx-reward-image">'+image+'</div><div class="bx-reward-text">'+(it?bxTierTag(id):'')+
+      '<h2 class="bx-prize-name">'+name+'</h2></div></section>';
+    const equip=it&&!wearing(id)?'<button class="bx-btn bx-wear" data-a="lootwear">WEAR</button>':'';
+    const primary=n>0?'<button class="bx-cta" data-a="lootopen">OPEN AGAIN</button>':
+      '<button class="bx-cta" data-a="lootbuy">BUY &amp; OPEN <span class="bx-price">'+fmt(BOX_PRICE)+'</span></button>';
+    return '<div class="bx-shell">'+head+prize+'<div class="bx-actions">'+primary+equip+
+      '<button class="bx-btn bx-close" data-a="close">DONE</button></div></div>';
   }
-  const feature=featured && ITEMS[featured] ?
-      '<div class="bx-feature bx-'+bxTier(featured)+'"><div class="bx-feature-img">'+pimg(featured,106,col)+'</div><div class="bx-feature-copy">'+
-      '<span class="bx-feature-note">POSSIBLE DROP</span>'+bxTierTag(featured)+'<strong class="bx-feature-name">'+esc(ITEMS[featured][1])+'</strong></div></div>' : '';
-  const hero='<section class="bx-hero"><div class="bx-art"><span class="bx-ring"></span><i class="bx-particle p1"></i><i class="bx-particle p2"></i><i class="bx-particle p3"></i><i class="bx-particle p4"></i>'+
-    '<div class="bx-chestpic">'+lootImg(258)+'</div></div><div class="bx-detail">'+
-    '<span class="bx-eyebrow">LEGENDARY / MYTHICAL</span><h2 class="bx-title">'+(busy?'Your drop is <em>on its way.</em>':'Exclusive <em>Rewards.</em>')+'</h2>'+
-    '<p class="bx-copy">Each box contains a Legendary or Mythical exclusive outfit. New discoveries are prioritised. Every drop goes straight into your collection.</p>'+feature+'</div></section>';
-  const button=busy
-    ?'<button class="bx-cta" disabled aria-disabled="true">'+(st.phase==='opening'?'UNSEALING YOUR BOX...':'REVEALING YOUR REWARD...')+'</button>'
-    :n>0?'<button class="bx-cta" data-a="lootopen">'+ico('gift',29)+' OPEN &amp; SPIN <span aria-hidden="true">&#10095;&#10095;</span></button>'
-    :'<button class="bx-cta" data-a="lootbuy">'+ico('gift',28)+' BUY A LOOT BOX</button>';
-  const actions='<div class="bx-actions">'+button+
-    '<div class="bx-secondary">'+(busy?'':n>0?'<button class="bx-btn" data-a="lootbuy">Buy 1 &#9679; '+fmt(BOX_PRICE)+'</button>':'')+
-    (busy?'':'<button class="bx-btn bx-close" data-a="close">Close</button>')+'</div>'+
-    '<span class="bx-status" aria-live="polite">'+(busy?'Spinning for your server-confirmed reward.':n>0?'1 box = 1 exclusive Legendary or Mythical outfit':'Earn gold in the world to purchase more boxes.')+'</span></div>';
-  return '<div class="bx-shell">'+head+hero+wheelHTML(st,col)+actions+'</div>';
+  const hero='<section class="bx-hero"><div class="bx-art"><span class="bx-ring"></span><div class="bx-chestpic">'+lootImg(245)+'</div></div>'+
+    '<div class="bx-detail"><h2 class="bx-title">LOOT BOX</h2><div class="bx-tiers"><span class="bx-tier bx-legendary">LEGENDARY</span><span class="bx-tier bx-mythical">MYTHICAL</span></div></div></section>';
+  const main=busy?'<button class="bx-cta" disabled aria-disabled="true">OPENING...</button>':n>0?
+    '<button class="bx-cta" data-a="lootopen">OPEN BOX</button>':
+    '<button class="bx-cta" data-a="lootbuy">BUY &amp; OPEN <span class="bx-price">'+fmt(BOX_PRICE)+'</span></button>';
+  const secondary=!busy&&n>0?'<button class="bx-btn" data-a="lootbuy">BUY &amp; OPEN <span class="bx-price">'+fmt(BOX_PRICE)+'</span></button>':'';
+  return '<div class="bx-shell">'+head+hero+wheelHTML(st,col)+'<div class="bx-actions">'+main+secondary+'</div></div>';
 }
 async function spinLoot() {
   const st=lootSt;
@@ -3335,8 +3324,19 @@ document.addEventListener('click', async e => {
     case 'wardrobe': wardrobeModal(); break;
     case 'loot': lootModal(); if (el.dataset.v === 'go' && wallet.boxes > 0) await spinLoot(); break;
     case 'lootbuy': {
-      if (wallet.coins < BOX_PRICE) { toast('You need ' + fmt(BOX_PRICE - wallet.coins) + ' more coins for a loot box.'); break; }
-      el.disabled = true; try { await api('shop', { op: 'box' }); Snd('buy'); } catch (er) { toast(er.message); } rerender(); break; }
+      if (lootSt && (lootSt.phase === 'opening' || lootSt.phase === 'spin')) break;
+      if (wallet.coins < BOX_PRICE) { toast('You need ' + fmt(BOX_PRICE - wallet.coins) + ' more gold.'); break; }
+      el.disabled=true;
+      try {
+        await api('shop',{op:'box'});
+        Snd('buy');
+        if (!modal || modal.kind !== 'loot') lootModal();
+        else { lootSt.phase='idle'; lootSt.prize=null; lootSt.S=null; }
+        await spinLoot();
+      } catch(er) { toast(er.message || 'Purchase failed.'); }
+      if(el.isConnected)el.disabled=false;
+      break;
+    }
     case 'lootopen': await spinLoot(); break;
     case 'lootwear': { const id = lootSt && lootSt.prize && lootSt.prize.item; if (!id) break; const dye = ITEMS[id][0] === 'dye'; wearItem(id); if (dye) { closeModal(); if (G) { wardrobeModal(); F.cat = 'body'; refreshModal(); } } styleChanged(); break; }
     case 'gift': { const n = +el.dataset.n; if (!G || mode !== 'online' || me !== E.cur(G) || busy) { toast('You can send coins when it is your turn.'); break; } if (wallet.coins < n) { toast('You only have ' + fmt(wallet.coins) + ' coins.'); break; } if (await act({ t: 'gift', to: i, n: n })) { closeModal(); refreshAcct(); } break; }
