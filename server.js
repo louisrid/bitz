@@ -246,6 +246,45 @@ async function api(req, res, parts) {
   const mine = extra => { const fresh = !!w.fresh, out = Object.assign({}, w); delete out.fresh; const bo = core.boostOf(w, now); return Object.assign({ wallet: out, seal: seal(id, out), fresh: fresh, id: id, now: now, worth: core.worth(w), rate: core.GOLD_RATE * (bo ? bo.x : 1), boost: bo ? { x: bo.x, left: bo.until - now } : null, swag: core.swag(w) }, extra); };
   const touch = () => { w.t = now; delete w.fresh; dirty = true; };
   try {
+    /* Clans: persistent account-linked memberships and founder-owned names/codes. */
+    if(parts[0]==='clan'&&(req.method==='GET'||req.method==='POST')){
+      const founder=code=>[...accounts.entries()].find(([_,a])=>a.clanOwned?.code===code);
+      const view=()=>{
+        const code=w.clanCode,found=code&&founder(code);
+        if(!found)return {clan:null};
+        const members=[...accounts.entries()].filter(([_,a])=>a.clanCode===code)
+          .map(([aid,a])=>({name:(a.name||auth.username(aid)||'Player').slice(0,20),leader:aid===found[0]}))
+          .sort((a,b)=>Number(b.leader)-Number(a.leader)||a.name.localeCompare(b.name));
+        return {clan:{code,name:found[1].clanOwned.name,leader:found[0]===id,members}};
+      };
+      if(req.method==='GET')return send(res,200,view());
+      if(!auth.username(id))return send(res,403,{message:'Sign in to create or join a clan.'});
+      const op=String(b.op||'');
+      if(op==='create'){
+        if(w.clanCode)return send(res,400,{message:'Leave your current clan first.'});
+        const name=String(b.name||'').trim().replace(/\s+/g,' ');
+        if(!/^[a-zA-Z0-9 ]{3,24}$/.test(name))return send(res,400,{message:'Clan names need 3–24 letters, numbers or spaces.'});
+        let code;do{code=Array.from(crypto.randomBytes(6),n=>AB[n%AB.length]).join('');}while(founder(code));
+        w.clanOwned={code,name,created:now};w.clanCode=code;touch();
+      }else if(op==='join'){
+        if(w.clanCode)return send(res,400,{message:'Leave your current clan first.'});
+        const code=String(b.code||'').trim().toUpperCase();
+        if(!/^[A-Z]{6}$/.test(code))return send(res,400,{message:'Enter a six-letter clan code.'});
+        if(!founder(code))return send(res,404,{message:'Clan not found.'});
+        if([...accounts.values()].filter(a=>a.clanCode===code).length>=30)return send(res,400,{message:'Clan full (30 members).'});
+        w.clanCode=code;touch();
+      }else if(op==='leave'){
+        if(!w.clanCode)return send(res,400,{message:'You are not in a clan.'});
+        if(w.clanOwned)return send(res,400,{message:'The founder must disband the clan.'});
+        delete w.clanCode;touch();
+      }else if(op==='disband'){
+        if(!w.clanOwned)return send(res,403,{message:'Only the founder can disband.'});
+        const code=w.clanOwned.code;
+        accounts.forEach(a=>{if(a.clanCode===code){delete a.clanCode;dirty=true;}});
+        delete w.clanOwned;touch();
+      }else return send(res,400,{message:'Unknown clan action.'});
+      return send(res,200,view());
+    }
     if(parts[0]==='friends'&&req.method==='POST'){
       const target=String(b.friend||'');
       if(!/^[a-f0-9]{10}$/.test(target))return send(res,400,{message:'Invalid friend account.'});
