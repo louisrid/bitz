@@ -1,7 +1,7 @@
 /* BITZ card art. Every card, pack, box, crest, flag and signature is drawn here, from one catalogue, so the shop,
    the opening stage, the book, the buyer, trades, profiles and inspection all show exactly the same thing.
-   Portraits come from portraits/<player id>.png and fall back to portraits/placeholder.png, so a real photo
-   dropped into that folder later appears everywhere without touching this file. */
+   Portraits resolve through the licensed, identity-checked manifest (portraits/manifest.js),
+   with a stable shared placeholder for unmatched players. See portraits/credits.json. */
 (function () {
   'use strict';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -17,7 +17,7 @@
   const ed = id => CAT.editions[id] || { name: 'Common', rank: 0, set: 'red-hot' };
   const SET_CLASS = { 'red-hot': 's-rh', 'golden-star': 's-gs', 'european-nights': 's-en' };
   const TIER = ['Common', 'Uncommon', 'Rare', 'Epic', 'Holo', 'Premium', 'Elite', 'Signature', 'Numbered', 'One of One'];
-  const INK = { 'red-hot': '#3a0b06', 'golden-star': '#8a5a00', 'european-nights': '#0b1a4a' };
+  const INK = { 'red-hot': '#692529', 'golden-star': '#164ba3', 'european-nights': '#164ba3' };
 
   /* ---------------- flags (30 x 20) ---------------- */
   const star = (cx, cy, r, f) => { let d = ''; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.42 : r; d += (i ? 'L' : 'M') + (cx + Math.cos(a) * rr).toFixed(2) + ' ' + (cy + Math.sin(a) * rr).toFixed(2); } return '<path d="' + d + 'Z" fill="' + f + '"/>'; };
@@ -88,26 +88,39 @@
 
   /* ---------------- virtual signatures (never a real autograph) ---------------- */
   function signature(name, ink, seedExtra) {
-    const r = rng(hash('sig:' + name + (seedExtra || ''))), parts = String(name || 'Player').split(' '), letters = Math.min(12, (parts[0].length + (parts[parts.length - 1] || '').length) >> 1) + 4;
-    let x = 10, y = 34, d = 'M' + x + ' ' + (y + 8);
-    d += ' C ' + (x + 2) + ' ' + (y - 30) + ', ' + (x + 26) + ' ' + (y - 26) + ', ' + (x + 16) + ' ' + (y + 6); x += 18;
-    for (let i = 0; i < letters; i++) { const w = 7 + r() * 9, up = 8 + r() * 18, loop = r() < 0.3; d += ' C ' + (x + w * 0.2).toFixed(1) + ' ' + (y - up).toFixed(1) + ', ' + (x + w * (loop ? 1.3 : 0.7)).toFixed(1) + ' ' + (y - up * 0.6).toFixed(1) + ', ' + (x + w).toFixed(1) + ' ' + (y + 2 + r() * 5).toFixed(1); x += w; if (i === 2) { x += 7; d += ' M ' + x + ' ' + (y - 9); } }
-    d += ' M 8 ' + (y + 14) + ' C ' + (x * 0.4) + ' ' + (y + 26) + ', ' + (x * 0.8) + ' ' + (y + 4) + ', ' + Math.min(200, x + 20) + ' ' + (y + 9);
-    return '<svg viewBox="0 0 ' + Math.max(170, x + 26) + ' 64" preserveAspectRatio="xMidYMid meet" aria-label="Virtual signature"><path d="' + d + '" fill="none" stroke="' + (ink || '#1b2a8f') + '" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    // Original, fictional ink artwork, NOT the footballer's authentic signature.
+    // Caveat is loaded specifically for signed card editions, separately from the BITZ UI fonts.
+    const parts = String(name || 'Player').trim().split(/\s+/);
+    const label = parts.length > 1 ? parts[0][0] + '. ' + parts.slice(1).join(' ') : parts[0];
+    const r = rng(hash('bitz-ink:' + name + ':' + (seedExtra || '')));
+    const y = 54 + Math.round(r() * 3), tilt = (-5 + Math.round(r() * 5));
+    const stroke = ink || '#174da4';
+    const sweep = 'M 18 ' + (y + 2) + ' C 58 ' + (y + 11) + ', 118 ' + (y - 4) + ', 204 ' + (y + 1);
+    return '<svg class="autograph" viewBox="0 0 220 80" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Fictional signature for ' + esc(name) + '">' +
+      '<text x="110" y="48" text-anchor="middle" font-family="Caveat,Brush Script MT,Segoe Script,cursive" font-size="46" font-weight="700" letter-spacing="-.7" fill="' + stroke + '" textLength="' + Math.min(195,Math.max(120, label.length * 16)) + '" lengthAdjust="spacingAndGlyphs" transform="rotate(' + tilt + ' 110 36)">' + esc(label) + '</text>' +
+      '<path class="ink-sweep" d="' + sweep + '" fill="none" stroke="' + stroke + '" stroke-width="2.1" stroke-linecap="round" opacity=".85"/>' +
+      '</svg>';
   }
 
   /* ---------------- portraits ---------------- */
-  const portraitSrc = pid => 'portraits/' + encodeURIComponent(pid) + '.png';
-  const portrait = (pid, alt) => '<img src="' + portraitSrc(pid) + '" alt="' + esc(alt || '') + '" loading="lazy" decoding="async" draggable="false" onerror="this.onerror=null;this.src=\'portraits/placeholder.png\'">';
+  const portraitSrc = pid => {
+    const record = (globalThis.BITZ_PORTRAITS || {})[pid];
+    const file = record && record.file;
+    return /^[a-z0-9-]+\.(?:jpg|png|webp)$/.test(file || '') ? 'portraits/' + file : 'portraits/placeholder.png';
+  };
+  const portrait = (pid, alt) => {
+    const src = portraitSrc(pid), photo = !src.endsWith('placeholder.png');
+    return '<img class="' + (photo ? 'photo' : 'fallback') + '" src="' + src + '" alt="' + esc(alt || '') + '" loading="lazy" decoding="async" draggable="false" onerror="this.onerror=null;this.className=\'fallback\';this.src=\'portraits/placeholder.png\'">';
+  };
 
   /* ---------------- the card ---------------- */
   function card(c, opt) {
     opt = opt || {};
     const ids = c.players || [c.player], P = ids.map(player).filter(Boolean), p = P[0] || { name: 'Unknown', pos: '', nation: '', club: '' }, cl = club(p.club), e = ed(c.ed), dual = P.length > 1 && e.dual;
-    const cls = ['bc', SET_CLASS[c.set] || 's-rh', 'r' + e.rank, opt.cls || '', opt.lock ? 'lockd' : '', opt.top ? 'topd' : '', opt.sel ? 'sel' : '', opt.dim ? 'dim' : '', opt.anim ? 'anim' : ''].filter(Boolean).join(' ');
+    const cls = ['bc', SET_CLASS[c.set] || 's-rh', 'r' + e.rank, P.some(q => portraitSrc(q.id) !== 'portraits/placeholder.png') ? 'photo-card' : '', opt.cls || '', opt.lock ? 'lockd' : '', opt.top ? 'topd' : '', opt.sel ? 'sel' : '', opt.dim ? 'dim' : '', e.auto ? 'has-auto' : '', dual ? 'dual' : '', opt.anim ? 'anim' : ''].filter(Boolean).join(' ');
     const art = dual ? '<div class="pair">' + portrait(P[0].id, P[0].name) + portrait(P[1].id, P[1].name) + '</div>' : '<div class="port">' + portrait(p.id, p.name) + '</div>';
     const name = dual ? P.map(q => q.name.split(' ').slice(-1)[0]).join(' & ') : (p.name.length > 15 ? p.name.split(' ').slice(-1)[0] : p.name);
-    const sig = e.auto ? '<div class="sig">' + signature(p.name, INK[c.set] || '#1b2a8f', c.uid) + (dual ? signature(P[1].name, INK[c.set] || '#1b2a8f', c.uid + 'b') : '') + '</div>' : '';
+    const sig = e.auto ? '<div class="sig' + (dual ? ' dual' : '') + '">' + '<div class="sign-one">' + signature(p.name, INK[c.set], c.uid) + '</div>' + (dual ? '<div class="sign-one">' + signature(P[1].name, INK[c.set], c.uid + 'b') + '</div>' : '') + '<span class="sig-cert">BITZ DIGITAL AUTOGRAPH</span></div>' : '';
     const foot = '<div class="foot"><span>' + esc(e.name) + '</span>' + (c.serial ? '<span class="serial">' + c.serial + '/' + c.serialMax + '</span>' : '<span>26/27</span>') + '</div>';
     return '<div class="' + cls + '"' + (c.uid ? ' data-uid="' + esc(c.uid) + '"' : '') + (opt.attrs || '') + '>' +
       '<div class="art"></div><i class="cracks"></i><i class="lights"></i>' + art +

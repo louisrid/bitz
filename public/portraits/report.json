@@ -1,0 +1,75 @@
+{
+  "total": 265,
+  "imported": 252,
+  "downloadedNow": 2,
+  "missing": 13,
+  "missingPlayers": [
+    {
+      "id": "antonin-kinsky",
+      "name": "Antonin Kinsky",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "carl-rushworth",
+      "name": "Carl Rushworth",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "djordje-petrovic",
+      "name": "Djordje Petrovic",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "eliot-matazo",
+      "name": "Eliot Matazo",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "ephron-mason-clark",
+      "name": "Ephron Mason-Clark",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "geovany-quenda",
+      "name": "Geovany Quenda",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "gonzalo-garcia",
+      "name": "Gonzalo Garcia",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "james-hill",
+      "name": "James Hill",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "milan-van-ewijk",
+      "name": "Milan van Ewijk",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "mohamed-belloumi",
+      "name": "Mohamed Belloumi",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "oliver-mcburnie",
+      "name": "Oliver McBurnie",
+      "reason": "No unambiguous footballer identity on Wikidata"
+    },
+    {
+      "id": "thierno-barry",
+      "name": "Thierno Barry",
+      "reason": "No verified footballer P18 photograph"
+    },
+    {
+      "id": "tyler-dibling",
+      "name": "Tyler Dibling",
+      "reason": "No verified footballer P18 photograph"
+    }
+  ],
+  "source": "Wikidata P18 / Wikimedia Commons",
+  "generatedAt": "2026-11-12T20:01:01.663Z"
+}

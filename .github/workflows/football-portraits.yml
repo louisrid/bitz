@@ -1,0 +1,61 @@
+name: Import licensed footballer portraits
+on:
+  push:
+    branches:
+      - feature/licensed-player-portraits-20261112
+    paths:
+      - tools/sync-portraits.mjs
+      - .github/workflows/football-portraits.yml
+  workflow_dispatch:
+  schedule:
+    - cron: '16 6 * * 1'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: football-portraits-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  import-portraits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate importer without network access
+        run: node tools/sync-portraits.mjs --test
+      - name: Import images with verified Wikidata identities and reusable Wikimedia licences
+        run: node tools/sync-portraits.mjs
+      - name: Validate local asset paths and portrait coverage
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {PLAYERS} from './src/catalogue.js';
+          const data = JSON.parse(fs.readFileSync('public/portraits/credits.json','utf8'));
+          const report = JSON.parse(fs.readFileSync('public/portraits/report.json','utf8'));
+          if (PLAYERS.length !== 265) throw Error('unexpected catalogue count');
+          for (const [id, x] of Object.entries(data)) {
+            if (!PLAYERS.some(p => p.id === id)) throw Error('unknown player ' + id);
+            if (!/^[a-z0-9-]+\.(jpg|png|webp)$/.test(x.file)) throw Error('unsafe image filename ' + id);
+            if (!fs.existsSync('public/portraits/' + x.file)) throw Error('missing image ' + id);
+            if (!x.source || !x.licence) throw Error('missing attribution ' + id);
+          }
+          console.log('Portrait coverage', Object.keys(data).length, '/', report.total);
+          NODE
+      - name: Commit cached photographs and per-image attribution
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/portraits/
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(portraits): cache reusable player images with licence credits'
+            git pull --rebase origin "$GITHUB_REF_NAME"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi

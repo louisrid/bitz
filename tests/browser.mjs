@@ -58,7 +58,7 @@ try {
   const n = await d.$$eval('#stage .sum .cell', e => e.length); assert.equal(n, 50, 'a box opens 50 cards'); const owned = await d.evaluate(() => BZ.state.cards.length); assert.equal(owned, 55); log('desktop: box of ten opened, skip bulk, 50 cards all saved');
   await d.click('#stage .sum [data-a="close"]'); await sleep(200);
   await d.click('[data-buy="golden-star"][data-kind="pack"]'); await d.waitForSelector('[data-open="golden-star"]'); await d.click('[data-open="golden-star"]'); await d.waitForSelector('#stage .sealed'); await d.click('#stage .sealed', { force: true }); await d.waitForSelector('#stage .oc.flipped', { timeout: 8000 });
-  for (let i = 0; i < 5; i++) { await d.keyboard.press('ArrowRight'); await sleep(1300); } await d.waitForSelector('#stage .sum', { timeout: 10000 }); await shot(d, 'desktop-11-golden-star');
+  for (let i = 0; i < 5; i++) { await d.waitForFunction(k => !!document.querySelector('#stage .oc[data-k="' + k + '"].flipped'), i, { timeout: 16000 }); await sleep(1450); await d.keyboard.press('ArrowRight'); } await d.waitForSelector('#stage .sum', { timeout: 20000 }); await shot(d, 'desktop-11-golden-star');
   const autos = await d.evaluate(() => BZ.state.cards.filter(c => c.set === 'golden-star' && BZ.cat.editions[c.ed].auto).length); assert(autos >= 1, 'Golden Star guaranteed an autograph'); log('desktop: Golden Star pack guaranteed an autograph');
   await d.click('#stage .sum [data-a="close"]'); await sleep(200); await d.click('.shead [data-a="close"]'); await sleep(200);
   /* buyer */

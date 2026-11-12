@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Football portrait credits | BITZ</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#101015;background:#fff}body{max-width:850px;margin:40px auto;padding:0 22px}h1{font-size:30px}p{line-height:1.5;color:#444}a{color:#5632c7}summary{cursor:pointer}li{padding:14px 0;border-bottom:1px solid #ddd;line-height:1.6}li b{display:block}small{display:block;color:#444}.count{font-weight:700}
+</style></head><body>
+<h1>BITZ football photograph credits</h1>
+<p>Images used in BITZ are cached from individually identified footballer records on Wikimedia Commons. They are not official club or player endorsements. Card autographs are fictional game artwork. The club shown on a BITZ card may differ from the kit in a historic photograph.</p>
+<p class="count" id="count">Loading credited photographs...</p>
+<ul id="credits"></ul>
+<p>Photographs without a verified source and reuse licence use the in-game placeholder. Contact the creator to request corrections to any image or attribution.</p>
+<script>
+fetch('credits.json').then(r=>{if(!r.ok)throw Error('Credits unavailable');return r.json()}).then(data=>{
+  const items=Object.entries(data).sort((a,b)=>String(a[1].player).localeCompare(String(b[1].player)));
+  document.getElementById('count').textContent=items.length+' credited footballer photographs';
+  const ul=document.getElementById('credits');
+  for(const [id,x] of items){
+    const li=document.createElement('li'),name=document.createElement('b'),detail=document.createElement('small');
+    name.textContent=x.player||id;
+    detail.textContent=[x.artist||'Creator details on source page',x.licence||'Licence on source page'].join(' | ');
+    li.append(name,detail);
+    if(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/.test(x.source||'')){
+      const a=document.createElement('a');a.href=x.source;a.rel='noopener noreferrer';a.target='_blank';a.textContent='Original image and attribution';li.append(a);
+    }
+    ul.append(li);
+  }
+}).catch(()=>{document.getElementById('count').textContent='Photograph credits are currently unavailable.'});
+</script></body></html>
