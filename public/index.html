@@ -652,7 +652,7 @@ html.fopen #ftab{display:none}
     <button id="ticker" data-a="log"></button>
     <section id="actions"></section>
   </aside>
-  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><button class="wbtn wzom" data-a="zombies" id="wzom" hidden>Zombies: off</button><button class="wbtn wadm" data-a="adminpanel" id="wadm" hidden>Admin</button><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button><button class="ww" data-a="wpn" data-v="1"><kbd>2</kbd>Pulse</button><button class="ww" data-a="wpn" data-v="2"><kbd>3</kbd>Cannon</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
+  <div id="stage" aria-label="Game board. Drag to turn it, tap a space for details."><span id="chaosTag" class="chaos-tag" hidden>FINAL CHAOS · 2× RENT</span><div id="dock" hidden></div><nav id="wbar"><button class="wbtn active" data-a="page" data-v="world">World</button><button class="wbtn" data-a="page" data-v="me">Customise / Profile</button><button class="wbtn" data-a="loot">Loot boxes</button><button class="wbtn wzom" data-a="zombies" id="wzom" hidden>Zombies: off</button><button class="wbtn wadm" data-a="adminpanel" id="wadm" hidden>Admin</button><span class="wstat">Swag <em id="wswag">-100</em></span></nav><div id="fprofov" hidden></div><div id="wtrade" hidden></div><div id="wbanner" hidden></div><div id="wui" hidden><div class="wtop"><span class="wcount"><i></i><b id="wcount">1</b> online</span><span class="whelp">WASD · ↑↓←→ · Space</span></div><div id="wfeed"></div><div class="wemo"><button class="we" data-a="emote" data-v="wave">Wave</button><button class="we" data-a="emote" data-v="dance">Dance</button><button class="we" data-a="emote" data-v="cheer">Cheer</button></div><div id="whud"><div id="wboost" hidden></div><div id="wsprint" hidden><i></i><b>Sprint</b></div><div id="whp" role="progressbar" aria-label="Player health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i></i><b>100 / 100 HP</b></div><div class="wweap" id="wweap" role="group" aria-label="Owned weapons"><button class="ww on" data-a="wpn" data-v="0"><kbd>1</kbd>Blaster</button></div></div><div id="wdead" hidden><b>Eliminated</b><small>Back in a moment</small></div><div id="wstick"><i></i></div><button id="wfire" aria-label="Fire">Fire</button><button id="wgun" data-a="wpnnext" aria-label="Switch gun">Blaster</button><button id="wjump" aria-label="Jump">Jump</button><div id="wzoom"><button data-a="zoomin" aria-label="Zoom in">+</button><button data-a="zoomout" aria-label="Zoom out">&minus;</button></div></div><div id="corner" hidden></div><button id="view" class="btn sm" data-a="view" hidden></button><div id="aucbar" hidden></div></div>
 </div>
 <div id="title" class="bg-paper" hidden></div><div id="goldtop" aria-label="Your gold"><i class="gc"></i><span><em id="wgold">...</em><small id="wrate">+1,000,000/min</small></span></div><button id="shopbig" data-a="page" data-v="shop"><span class="sbi"></span><b>Shop</b><i class="sale">Sale</i></button><div id="bload" aria-label="Loading BITZ"><canvas id="blc"></canvas><div class="bl-vig"></div><div class="bl-scan"></div><div class="bl-hud"><i></i><i></i><i></i><i></i><span>BITZ</span><span>Loading</span></div><p class="bl-sr">Loading BITZ</p></div><script>(function(){
 var host=document.getElementById('bload'),cv=document.getElementById('blc');if(!host||!cv||!cv.getContext)return;
@@ -799,6 +799,7 @@ const DESC = { overalls: 'Built for hard graft.', track: 'Go-faster stripes for 
   dye: 'Three loud colours for your hair: pink, blue and white.', glasses: 'For reading the small print.', scarf: 'A dash of red for cold streets.', cape: 'Sweep onto every square.', wings: 'Float above the competition.',
   sunset: 'Warm pink skies behind your character.', neon: 'A grid that glows behind you.', space: 'Stars as far as you can see.', goldbg: 'Pure shimmer. You earned it.',
   bird: 'Flaps beside you wherever you go.', pig: 'Tiny, pink and always following.', penguin: 'Waddles after you in a suit of its own.', dragon: 'A pocket-sized legend that flies.' };
+Object.assign(DESC,Object.fromEntries(BITZ_WEAPONS.slice(5).map(w=>[w.id,w.ability])));
 const BOX_PRICE = 2000000;
 const fmt = n => Math.round(n).toLocaleString('en-GB');
 const rarity = p => p <= 40000 ? [0, 'Common'] : p <= 100000 ? [1, 'Rare'] : p <= 300000 ? [2, 'Epic'] : p <= 3000000 ? [3, 'Legendary'] : [4, 'Mythical'];
@@ -1759,6 +1760,18 @@ const B3 = (function () {
     else if (w === 1) { put(0.18, 0.3, 0.18, L(0x3a1f66), -0.1); put(0.23, 0.06, 0.23, glow(), -0.18); put(0.23, 0.06, 0.23, glow(), -0.04); put(0.14, 0.12, 0.14, dark, -0.3); put(0.11, 0.05, 0.11, glow(), -0.38); }
     else if (w === 2) { put(0.24, 0.42, 0.24, L(0x4a3522), -0.12); put(0.3, 0.1, 0.3, L(0x8a6a3a), -0.3); put(0.3, 0.1, 0.3, L(0x8a6a3a), 0.02); put(0.17, 0.12, 0.17, dark, -0.44); put(0.14, 0.06, 0.14, glow(), -0.52); }
     else if (w === 3) { put(0.14, 0.2, 0.16, L(0x6b4a2f), -0.04); put(0.08, 0.34, 0.08, dark, -0.3, 0.04); put(0.08, 0.34, 0.08, dark, -0.3, -0.04); put(0.2, 0.05, 0.12, glow(), -0.18); put(0.06, 0.12, 0.1, dark, 0.04, -0.1); }
+    else if(w>=5){
+      const gun=GUNS[w],t=w-5,heavy=!!gun.splash,split=!!gun.chain;
+      put(heavy?.3:.22,heavy?.43:.31,heavy?.26:.22,L(t%3===0?0x2e293a:0x23303c),-.12);
+      put(.13,.075,.18,glow(),-.31);
+      put(.12,.28,.11,dark,-.44,.06);
+      put(.17,.08,.23,L(0x0d101d),.02,.03);
+      for(let k=0;k<(heavy?3:2);k++)put(.13,.075,.15,glow(),-.26-k*.12,-.06);
+      if(heavy){put(.31,.12,.28,L(0x7b6c57),-.08,.12);put(.24,.09,.25,glow(),-.43,.02);}
+      if(split){put(.11,.07,.19,glow(),-.15,.16);put(.11,.07,.19,glow(),-.15,-.16);}
+      if(gun.slowMs){put(.28,.09,.24,L(0x8edfff),.05,0);}
+      if(gun.burnMs){put(.15,.11,.24,L(0xb85729),-.05,0);}
+    }
     else { put(0.08, 0.3, 0.1, L(0x2e3b2a), -0.1); put(0.04, 0.5, 0.04, dark, -0.48); put(0.1, 0.16, 0.1, L(0x111111), -0.06, 0.1); put(0.06, 0.06, 0.06, glow(), -0.74); put(0.03, 0.12, 0.03, dark, -0.2, -0.08); }
     g.position.set(0, -0.44, 0.07); return g;
   }
@@ -1777,7 +1790,17 @@ const B3 = (function () {
   WD.shot = d => {
     const sh = who(d[0]), w = Math.max(0,Math.min(GUNS.length-1,d[1]|0)), col = GUNS[w].col, now = performance.now(); if (sh) sh.aimT = now + 500;
     const from = new THREE.Vector3(d[2], 3.8, d[3]), to = new THREE.Vector3(d[4], 3.8, d[5]), len = Math.max(0.5, from.distanceTo(to));
-    if (w === 0 || w === 3) { const sz = w === 3 ? 0.18 : 0.24, b = mesh(BX(sz, sz, w === 3 ? 0.7 : 1.5), voxMat(col, 'g'), from.x, from.y, from.z); b.lookAt(to); b.castShadow = false; worldG.add(b); WD.fx.push({ m: b, from: from, to: to, t0: now, dur: Math.max(60, len / (w === 3 ? 70 : 85) * 1000), kind: 'bolt', col: col }); }
+    if(w>=5){
+      const gun=GUNS[w],width=gun.splash?1.1:gun.all?.4:gun.pellets?.18:.3;
+      const beam=mesh(BX(1,1,1),voxMat(col,gun.all||gun.splash?'t':'g'),0,0,0);
+      beam.position.copy(from).lerp(to,.5);beam.lookAt(to);
+      beam.scale.set(width,gun.splash?1:.24,len);
+      beam.castShadow=false;worldG.add(beam);
+      WD.fx.push({m:beam,t0:now,dur:gun.splash?420:gun.all?300:210,kind:'beam'});
+      burst(from.x,2.2,from.z,col,now,gun.splash?13:6);
+      burst(to.x,2.4,to.z,col,now,gun.chain?18:gun.splash?22:9);
+    }
+    else if (w === 0 || w === 3) { const sz = w === 3 ? 0.18 : 0.24, b = mesh(BX(sz, sz, w === 3 ? 0.7 : 1.5), voxMat(col, 'g'), from.x, from.y, from.z); b.lookAt(to); b.castShadow = false; worldG.add(b); WD.fx.push({ m: b, from: from, to: to, t0: now, dur: Math.max(60, len / (w === 3 ? 70 : 85) * 1000), kind: 'bolt', col: col }); }
     else if (w === 4) { const b = mesh(BX(1, 1, 1), voxMat(col, 'g'), 0, 0, 0); b.position.copy(from).lerp(to, 0.5); b.lookAt(to); b.scale.set(0.18, 0.18, len); b.castShadow = false; worldG.add(b); WD.fx.push({ m: b, t0: now, dur: 220, kind: 'beam' }); burst(to.x, 2.1, to.z, col, now, 6); }
     else { const wide = w === 2 ? 7 : 4.6, b = mesh(BX(1, 1, 1), voxMat(col, 't'), 0, 0, 0); b.position.copy(from).lerp(to, 0.5); b.lookAt(to); b.scale.set(wide, w === 2 ? 2.4 : 1.5, len); b.castShadow = false; worldG.add(b); WD.fx.push({ m: b, t0: now, dur: w === 2 ? 420 : 300, kind: 'beam' }); burst(from.x, 2.1, from.z, col, now, w === 2 ? 12 : 6); if (w === 2) burst(to.x, 2.1, to.z, col, now, 14); }
     d.slice(6).forEach(i => { const o = who(i) || entM.get(i); if (o) { o.hitT = now + 240; burst(o.x, 2.4, o.z, 0xffffff, now, 7); } });
@@ -2593,7 +2616,9 @@ function styleHTML(col) {
 }
 function productHTML(id, col) {
   const it = ITEMS[id], ra = rarity(it[2]), own = owns(id), short = it[2] - wallet.coins, slot = it[0], t = tryLook();
-  const cta = own ? (slot === 'dye' ? '<button class="btn ok" data-a="equip">Choose a colour</button>' : slot === 'bg' ? (wearing(id) ? '<span class="pill">In use</span>' : '<button class="btn ok" data-a="equip">Use it</button>') : wearing(id) ? '<button class="btn" data-a="wear" data-k="' + slot + '" data-v="">Take off</button>' : '<button class="btn ok" data-a="equip">Wear it</button>')
+  const cta=slot==='gun' ? (own?(wearing(id)?'<span class="pill">Equipped</span>':'<button class="btn ok" data-a="equip">EQUIP GUN</button>'):
+    short>0?'<span class="need">'+coin(it[2])+'<small>'+fmt(short)+' more gold needed</small></span>':
+    '<button class="btn go" data-a="buy">BUY '+coin(it[2])+'</button>') : own ? (slot === 'dye' ? '<button class="btn ok" data-a="equip">Choose a colour</button>' : slot === 'bg' ? (wearing(id) ? '<span class="pill">In use</span>' : '<button class="btn ok" data-a="equip">Use it</button>') : wearing(id) ? '<button class="btn" data-a="wear" data-k="' + slot + '" data-v="">Take off</button>' : '<button class="btn ok" data-a="equip">Wear it</button>')
     : it[3] ? '<span class="pill hot">Only found in loot boxes</span>' : short > 0 ? '<span class="need">' + coin(it[2]) + '<small>' + fmt(short) + ' more to go</small></span>' : '<button class="btn go" data-a="buy">Buy ' + coin(it[2]) + '</button>';
   return '<div class="prod"><div class="shophead"><button class="btn sm" data-a="item" data-v="">' + ico('back', 14) + 'Shop</button>' + coin(wallet.coins) + '</div>' +
     (slot === 'bg' ? '<div class="pstage solo bg-' + id + '"><span class="pwrap">' + fig(F.look, col, 150) + '</span></div>' : '<div class="pstage r' + ra[0] + (slot === 'pet' ? ' solo' : '') + '"><span class="pwrap">' + pimg(id, 136, col) + '</span>' + (slot === 'pet' ? '' : '<span class="onyou">' + fig(t.look, col, 88) + '<small>On you</small></span>') + '</div>') +
@@ -3259,7 +3284,17 @@ function worldHud(kind) {
   const W = B3.world, hp = Math.max(0, Math.round(W.hp)), bar = $('#whp'); if (!bar) return;
   bar.firstChild.style.width = hp + '%'; bar.firstChild.style.background = hp > 50 ? '#3ddc84' : hp > 25 ? '#ffd60a' : '#ff4b3e'; bar.lastChild.textContent = hp + ' / 100 HP'; bar.setAttribute('aria-valuenow', hp);
   const gb = $('#wgun'); if (gb && W.GUNS) gb.textContent = W.GUNS[W.weapon].n;
-  document.querySelectorAll('.ww').forEach(b => b.classList.toggle('on', +b.dataset.v === W.weapon));
+  const tray=$('#wweap');
+  if(tray){
+    const list=GUNIDS.map((id,n)=>({id,n})).filter(w=>gunOwned(w.n));
+    const sig=list.map(w=>w.n).join(',');
+    if(tray.dataset.sig!==sig){
+      tray.dataset.sig=sig;
+      tray.innerHTML=list.map(w=>'<button class="ww" data-a="wpn" data-v="'+w.n+'" title="'+esc(W.GUNS[w.n].ability||W.GUNS[w.n].n)+'">'+
+        '<kbd>'+(w.n<9?w.n+1:'')+'</kbd>'+esc(W.GUNS[w.n].n)+'</button>').join('');
+    }
+    tray.querySelectorAll('.ww').forEach(b=>b.classList.toggle('on',+b.dataset.v===W.weapon));
+  }
   $('#wdead').hidden = !W.dead;
   if (kind === 'hit' || kind === 'ko') { const st = $('#stage'); st.classList.remove('hurt'); void st.offsetWidth; st.classList.add('hurt'); setTimeout(() => st.classList.remove('hurt'), 320); }
 }
