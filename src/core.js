@@ -47,7 +47,7 @@ export function setProfile(w, b) {
   w.pet = pet && owns(w, pet) && ITEMS[pet][0] === 'pet' ? pet : '';
 }
 /* loot boxes hold only exclusives, and never one you already own */
-const missing = w => Object.keys(ITEMS).filter(id => exclusive(id) && !owns(w, id));
+const missing = w => Object.keys(ITEMS).filter(id => exclusive(id) && ITEMS[id][0] === 'outfit' && !owns(w, id));
 function rollLoot(w) {
   const pool = missing(w); if (!pool.length) return { coins: BOX_PRICE };   // nothing left to win: the box is refunded
   const myth = pool.filter(id => rarity(ITEMS[id][2]) === 4), leg = pool.filter(id => rarity(ITEMS[id][2]) !== 4);
