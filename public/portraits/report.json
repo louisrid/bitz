@@ -1,7 +1,7 @@
 {
   "total": 265,
   "imported": 252,
-  "downloadedNow": 2,
+  "downloadedNow": 0,
   "missing": 13,
   "missingPlayers": [
     {
@@ -71,5 +71,5 @@
     }
   ],
   "source": "Wikidata P18 / Wikimedia Commons",
-  "generatedAt": "2026-11-12T20:01:01.663Z"
+  "generatedAt": "2026-11-16T15:36:31.389Z"
 }
